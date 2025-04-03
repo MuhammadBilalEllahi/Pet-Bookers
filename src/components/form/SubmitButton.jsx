@@ -1,0 +1,32 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import {StyleSheet} from 'react-native';
+import {BtnIndicator} from './BtnIndicator';
+import {Button} from '@ui-kitten/components';
+
+export const SubmitButton = ({btnText, disabled, onPress}) => (
+  <Button
+    style={styles.actionBtn}
+    onPress={onPress}
+    disabled={disabled}
+    accessoryRight={disabled && BtnIndicator}>
+    {btnText}
+  </Button>
+);
+
+SubmitButton.propTypes = {
+  btnText: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
+  onPress: PropTypes.func.isRequired,
+};
+
+const styles = StyleSheet.create({
+  indicator: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionBtn: {
+    marginTop: 30,
+    borderRadius: 50,
+  },
+});

@@ -1,0 +1,1 @@
+export {HorizontalItemsList} from './HorizontalItemsList';

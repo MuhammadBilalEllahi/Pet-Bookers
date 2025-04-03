@@ -1,0 +1,57 @@
+{
+  "components": {
+    "Layout": {
+      "meta": {
+        "variantGroups": {
+          "level": {
+            "0": {
+              "default": true
+            }
+          }
+        }
+      },
+      "appearances": {
+        "default": {
+          "variantGroups": {
+            "level": {
+              "0": {
+                "backgroundColor": "transparent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Card": {
+      "appearances": {
+        "outline": {
+          "mapping": {
+            "bodyPaddingHorizontal": 0,
+            "bodyPaddingVertical": 0
+          }
+        }
+      }
+    },
+    "Button": {
+      "appearances": {
+        "outline": {
+          "variantGroups": {
+            "status": {
+              "primary": {
+                "backgroundColor": "transparent",
+                "state": {
+                  "active": {
+                    "backgroundColor": "color-primary-500",
+                    "borderColor": "color-primary-500",
+                    "textColor": "#fff",
+                    "iconTintColor": "#fff"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

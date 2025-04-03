@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/NotoNaskhArabic-Bold.ttf",
+      "sha1": "fdc782e8c8531682ae657f8e6196cbcb188d85f6"
+    },
+    {
+      "path": "assets/fonts/NotoNaskhArabic-Medium.ttf",
+      "sha1": "bb56f643f1bd786306db9aeee7ffd6fbc9dac5a7"
+    },
+    {
+      "path": "assets/fonts/NotoNaskhArabic-Regular.ttf",
+      "sha1": "77828913d2808cb37d1cac243255dbdbe516092e"
+    },
+    {
+      "path": "assets/fonts/NotoNaskhArabic-SemiBold.ttf",
+      "sha1": "89c56d68dacf236982e60b9248aac86c7aaf554b"
+    }
+  ]
+}
