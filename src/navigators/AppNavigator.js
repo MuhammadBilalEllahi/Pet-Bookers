@@ -6,6 +6,7 @@ import {loadAppConfigs} from '../store/configs';
 
 // Navigators
 import {AuthLoaderScreen} from '../screens/AuthLoaderScreen';
+import {SplashScreen} from '../screens/SplashScreen';
 import {AuthNavigator} from './AuthNavigator';
 import {BuyerMainNavigator} from './buyer/BuyerMainNavigator';
 import {SellerMainNavigator} from './seller/SellerMainNavigator';
@@ -23,7 +24,8 @@ export const AppNavigator = () => {
     <NavigationContainer>
       <Navigator
         screenOptions={{headerShown: false, gestureEnabled: false}}
-        initialRouteName="AuthLoader">
+        initialRouteName="Splash">
+        <Screen name="Splash" component={SplashScreen} />
         <Screen name="AuthLoader" component={AuthLoaderScreen} />
         <Screen name="Auth" component={AuthNavigator} />
         <Screen name="SellerHomeMain" component={SellerMainNavigator} />
