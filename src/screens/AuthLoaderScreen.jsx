@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Layout, Spinner} from '@ui-kitten/components';
 import {flexeStyles} from '../utils/globalStyles';
 import {setAuthToken, setUserType} from '../store/user';
+import { SplashScreen } from './SplashScreen';
 
 export const AuthLoaderScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -41,6 +42,7 @@ export const AuthLoaderScreen = ({navigation}) => {
         flexeStyles.contentCenter,
       ]}>
       <Spinner size="giant" />
+      {/* <SplashScreen/> */}
     </Layout>
   );
 };

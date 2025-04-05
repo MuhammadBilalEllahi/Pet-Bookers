@@ -21,7 +21,7 @@ export const SplashScreen = ({ navigation }) => {
         await dispatch(loadAppConfigs());
         setTimeout(() => {
           navigation.replace('AuthLoader');
-        }, 200); // ✅ 2 seconds instead of 55 hours
+        }, 200);
       } catch (error) {
         navigation.replace('AuthLoader');
       }

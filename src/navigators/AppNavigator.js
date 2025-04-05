@@ -10,6 +10,7 @@ import {SplashScreen} from '../screens/SplashScreen';
 import {AuthNavigator} from './AuthNavigator';
 import {BuyerMainNavigator} from './buyer/BuyerMainNavigator';
 import {SellerMainNavigator} from './seller/SellerMainNavigator';
+import { LoginScreen } from '../screens/auth/Login';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -24,8 +25,9 @@ export const AppNavigator = () => {
     <NavigationContainer>
       <Navigator
         screenOptions={{headerShown: false, gestureEnabled: false}}
-        initialRouteName="Splash">
+        initialRouteName="Login">
         <Screen name="Splash" component={SplashScreen} />
+        <Screen name="Login" component={LoginScreen} />
         <Screen name="AuthLoader" component={AuthLoaderScreen} />
         <Screen name="Auth" component={AuthNavigator} />
         <Screen name="SellerHomeMain" component={SellerMainNavigator} />

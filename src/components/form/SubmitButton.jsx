@@ -25,8 +25,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  
   actionBtn: {
+    backgroundColor: '#27AE60',
+    borderRadius: 12,
+    borderColor: '#27AE60',
     marginTop: 30,
-    borderRadius: 50,
+    
   },
 });

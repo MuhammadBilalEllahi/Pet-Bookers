@@ -42,9 +42,13 @@ export const AuthContainer = ({title, subTitle, children}) => {
               paddingVertical: 8,
             },
           ]}>
-          {companyLogo && (
-            <Image source={{uri: companyLogo}} style={styles.image} />
-          )}
+          
+            
+            {/* <Image
+              source={require('../../../assets/latest/petbooker_icon.png')}
+              style={styles.image}
+            />
+           */}
           <Text category="h4" style={styles.title}>
             {t(title)}
           </Text>
@@ -54,12 +58,17 @@ export const AuthContainer = ({title, subTitle, children}) => {
             </Text>
           )}
           {children}
-          <Layout
+            <Layout style={{ justifyContent: 'center', alignItems: 'center'}}>
+            <Text style={{fontSize: 16, fontWeight: 'bold'}}>
+              Language
+            </Text>
+
+            <Layout
             style={[
               flexeStyles.row,
               flexeStyles.contentCenter,
               {
-                marginTop: 16,
+                marginBottom: 40,
               },
             ]}>
             <Text
@@ -77,7 +86,9 @@ export const AuthContainer = ({title, subTitle, children}) => {
               اردو
             </Text>
           </Layout>
-          <Layout style={{alignItems: 'flex-end'}}>
+          </Layout>
+          
+          {/* <Layout style={{alignItems: 'flex-end'}}>
             <Button
               appearance="ghost"
               accessoryRight={
@@ -93,7 +104,7 @@ export const AuthContainer = ({title, subTitle, children}) => {
               onPress={onNavigateToHome}>
               {t('buttons.skip')}
             </Button>
-          </Layout>
+          </Layout> */}
         </Layout>
       </ScrollView>
     </Layout>
@@ -107,7 +118,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     marginBottom: 20,
-    height: 60,
+    height: 100,
   },
   title: {
     fontWeight: '700',
@@ -116,8 +127,9 @@ const styles = StyleSheet.create({
   },
   subTitle: {marginVertical: 8, textAlign: 'center'},
   languageChanger: {
-    marginHorizontal: 5,
-    textDecorationLine: 'underline',
+    marginHorizontal: 10,
+    
+    textDecorationLine: 'none',
     lineHeight: 20,
   },
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text} from '@ui-kitten/components';
+import {Text} from 'react-native';
 
 export const InputError = ({errorText}) =>
   errorText ? (
