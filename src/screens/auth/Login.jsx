@@ -31,13 +31,17 @@ export const LoginScreen = ({ navigation }) => {
   return (
     <AuthContainer >
 
+<Image
+          source={require('../../../assets/latest/splash_above_icon.png')}
+          style={styles.aboveLogo }
+          resizeMode="cover"
+        />
 
 
 
       <View style={styles.topSection}>
 
-
-
+      
         <Image
           source={require('../../../assets/latest/petbooker_icon.png')}
           style={styles.logo}
@@ -84,7 +88,7 @@ export const LoginScreen = ({ navigation }) => {
 
               {selectedTab === 'email' ? (
                 <Input
-                  placeholder="Enter your email"
+                  placeholder={t('email')}
                   textContentType="emailAddress"
                   keyboardType="email-address"
                   style={styles.input}
@@ -98,7 +102,7 @@ export const LoginScreen = ({ navigation }) => {
                 />
               ) : (
                 <Input
-                  placeholder="03XXXXXXXXX"
+                  placeholder={t('phone')}
                   keyboardType="phone-pad"
 
                   value={values.phone}
@@ -123,7 +127,7 @@ export const LoginScreen = ({ navigation }) => {
 
               <Input
 
-                placeholder="Password"
+                placeholder={t('password')}
                 label={(evaProps) => (
                   <Text {...evaProps} style={styles.label}>
                     {t('password')}
@@ -145,7 +149,7 @@ export const LoginScreen = ({ navigation }) => {
               <View style={styles.forgotRememberContainer}>
                 <View style={styles.rememberMeContainer}>
                   <CheckBox style={styles.remembercheckBox} />
-                  <Text style={styles.rememberMeText}>Remember me</Text>
+                  <Text style={styles.rememberMeText}>{t('Remember me')}</Text>
                 </View>
                 <Text
                   category="p2"
@@ -160,7 +164,7 @@ export const LoginScreen = ({ navigation }) => {
                 disabled={isBtnDisable}
                 onPress={handleSubmit}
               />
-              <Text style={styles.noAccountText}> No Account? Sign Up Now</Text>
+              <Text style={styles.noAccountText}> {t('No Account? Sign Up Now')}</Text>
             </Layout>
           )}
         </Formik>
@@ -177,6 +181,18 @@ export const LoginScreen = ({ navigation }) => {
 
       </View>
 
+      <Image
+          source={require('../../../assets/latest/auth_left_icon.png')}
+          style={styles.leftBottomLogo }
+          resizeMode="cover"
+        />
+
+<Image
+          source={require('../../../assets/latest/auth_right_icon.png')}
+          style={styles.rightBottomLogo }
+          resizeMode="cover"
+        />
+
     </AuthContainer>
   );
 };
@@ -186,9 +202,22 @@ const styles = StyleSheet.create({
   aboveLogo:{
     position: 'absolute',
     top: 0,
-    width: '100%',
-    height: '100%',
+    // width: '100%',
+    // height: '100%',
   },
+  leftBottomLogo:{
+    position: 'absolute',
+    bottom: -10,
+    left: -20,
+    
+  },
+  rightBottomLogo:{
+    position: 'absolute',
+    bottom: -10,
+    right: 0,
+  },
+
+
   topSection: {
     alignItems: 'center',
     justifyContent: 'center',
