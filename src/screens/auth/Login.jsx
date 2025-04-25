@@ -9,6 +9,8 @@ import { flexeStyles } from '../../utils/globalStyles';
 const { width } = Dimensions.get('window');
 import { TouchableOpacity } from 'react-native';
 import TextButton from '../../components/form/TextButton';
+import FormInputField from '../../components/form/FormFieldInput';
+
 
 export const LoginScreen = ({ navigation }) => {
   const { t } = useTranslation();
@@ -30,12 +32,6 @@ export const LoginScreen = ({ navigation }) => {
 
   return (
     <AuthContainer >
-
-<Image
-          source={require('../../../assets/latest/splash_above_icon.png')}
-          style={styles.aboveLogo }
-          resizeMode="cover"
-        />
 
 
 
@@ -122,9 +118,6 @@ export const LoginScreen = ({ navigation }) => {
                 />
               )}
 
-
-
-
               <Input
 
                 placeholder={t('password')}
@@ -168,6 +161,7 @@ export const LoginScreen = ({ navigation }) => {
             </Layout>
           )}
         </Formik>
+        
 
 
         <TextButton
@@ -181,17 +175,7 @@ export const LoginScreen = ({ navigation }) => {
 
       </View>
 
-      <Image
-          source={require('../../../assets/latest/auth_left_icon.png')}
-          style={styles.leftBottomLogo }
-          resizeMode="cover"
-        />
-
-<Image
-          source={require('../../../assets/latest/auth_right_icon.png')}
-          style={styles.rightBottomLogo }
-          resizeMode="cover"
-        />
+      
 
     </AuthContainer>
   );
@@ -199,23 +183,7 @@ export const LoginScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
 
-  aboveLogo:{
-    position: 'absolute',
-    top: 0,
-    // width: '100%',
-    // height: '100%',
-  },
-  leftBottomLogo:{
-    position: 'absolute',
-    bottom: -10,
-    left: -20,
-    
-  },
-  rightBottomLogo:{
-    position: 'absolute',
-    bottom: -10,
-    right: 0,
-  },
+ 
 
 
   topSection: {
@@ -261,8 +229,7 @@ const styles = StyleSheet.create({
 
 
   toggleContainer: {
-    flexDirection: 'row',
-    
+    flexDirection: 'row',    
 
   },
   toggleButton: {

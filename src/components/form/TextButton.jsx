@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { Text, Icon } from '@ui-kitten/components';
 
-const TextButton = ({ title, onPress, style, textStyle, iconName }) => {
+const TextButton = ({ title, onPress, style, textStyle, iconName , iconNameRight}) => {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.container, style]}>
       {iconName && (
@@ -13,6 +13,13 @@ const TextButton = ({ title, onPress, style, textStyle, iconName }) => {
         />
       )}
       <Text style={[styles.text, textStyle]}>{title}</Text>
+      {iconNameRight && (
+        <Icon
+          name={iconNameRight}
+          style={styles.icon}
+          fill='#27AE60'
+        />
+      )}
     </TouchableOpacity>
   );
 };

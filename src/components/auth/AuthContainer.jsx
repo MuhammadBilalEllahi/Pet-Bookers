@@ -8,6 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ThemedIcon} from '../Icon';
 import {selectCompanyLogo} from '../../store/configs';
 import {flexeStyles} from '../../utils/globalStyles';
+import { I18nManager } from 'react-native';
+
 
 export const AuthContainer = ({title, subTitle, children}) => {
   const {t, i18n} = useTranslation();
@@ -28,6 +30,14 @@ export const AuthContainer = ({title, subTitle, children}) => {
 
   return (
     <Layout style={{height: '100%'}} level="1">
+
+      
+<Image
+          source={require('../../../assets/latest/splash_above_icon.png')}
+          style={styles.aboveLogo }
+          resizeMode="cover"
+        />
+
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -106,12 +116,50 @@ export const AuthContainer = ({title, subTitle, children}) => {
             </Button>
           </Layout> */}
         </Layout>
+        <Image
+          source={require('../../../assets/latest/auth_left_icon.png')}
+          style={styles.leftBottomLogo }
+          resizeMode="cover"
+        />
+
+<Image
+          source={require('../../../assets/latest/auth_right_icon.png')}
+          style={styles.rightBottomLogo }
+          resizeMode="cover"
+        />
       </ScrollView>
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
+
+
+  aboveLogo:{
+    position: 'absolute',
+    top: 0,
+    // width: '100%',
+    // height: '100%',
+  },
+  leftBottomLogo:{
+    position: 'absolute',
+    bottom: -10,
+    left: -20,
+    zIndex: -1,
+  transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
+    
+  },
+  rightBottomLogo:{
+    position: 'absolute',
+    bottom: -10,
+    right: 0,
+    zIndex: -1,
+    
+  transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
+  },
+
+
+
   image: {
     width: '100%',
     resizeMode: 'contain',

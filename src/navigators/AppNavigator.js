@@ -11,7 +11,7 @@ import {AuthNavigator} from './AuthNavigator';
 import {BuyerMainNavigator} from './buyer/BuyerMainNavigator';
 import {SellerMainNavigator} from './seller/SellerMainNavigator';
 import { LoginScreen } from '../screens/auth/Login';
-
+import { RegisterScreen } from '../screens/auth/Register';
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const AppNavigator = () => {
@@ -25,9 +25,10 @@ export const AppNavigator = () => {
     <NavigationContainer>
       <Navigator
         screenOptions={{headerShown: false, gestureEnabled: false}}
-        initialRouteName="Login">
+        initialRouteName="Splash">
         <Screen name="Splash" component={SplashScreen} />
         <Screen name="Login" component={LoginScreen} />
+        <Screen name="Register" component={RegisterScreen} />
         <Screen name="AuthLoader" component={AuthLoaderScreen} />
         <Screen name="Auth" component={AuthNavigator} />
         <Screen name="SellerHomeMain" component={SellerMainNavigator} />
@@ -36,3 +37,4 @@ export const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+ 

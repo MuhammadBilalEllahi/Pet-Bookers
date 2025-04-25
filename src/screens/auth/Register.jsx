@@ -1,14 +1,30 @@
-import React, {useState} from 'react';
-import {StyleSheet} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {Layout, Text, Input, Radio, RadioGroup} from '@ui-kitten/components';
-import {Formik} from 'formik';
-import {InputError, SubmitButton, ImagePicker} from '../../components/form';
-import {AuthContainer} from '../../components/auth/AuthContainer';
-import {flexeStyles} from '../../utils/globalStyles';
+import React, { useState } from 'react';
+import { StyleSheet, View, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Layout, Text, Input, Radio, RadioGroup } from '@ui-kitten/components';
+import { Formik } from 'formik';
+import { InputError, SubmitButton, ImagePicker } from '../../components/form';
+import { AuthContainer } from '../../components/auth/AuthContainer';
+import { flexeStyles } from '../../utils/globalStyles';
+import { Select, SelectItem, IndexPath } from '@ui-kitten/components';
+import TextButton from '../../components/form/TextButton';
+import i18next from 'i18next';
 
-export const RegisterScreen = ({navigation}) => {
-  const {t} = useTranslation();
+
+export const RegisterScreen = ({ navigation }) => {
+
+
+  const states = ['Punjab', 'Sindh', 'KPK', 'Balochistan'];
+  const citiesByState = {
+    Punjab: ['Lahore', 'Rawalpindi', 'Faisalabad'],
+    Sindh: ['Karachi', 'Hyderabad'],
+    KPK: ['Peshawar', 'Abbottabad'],
+    Balochistan: ['Quetta', 'Gwadar'],
+  };
+
+
+
+  const { t } = useTranslation();
   const [isBtnDisable, setIsBtnDisable] = useState(false);
 
   const navigateToPage = pageName => {
@@ -25,11 +41,26 @@ export const RegisterScreen = ({navigation}) => {
   };
 
   return (
-    <AuthContainer title="createaccount" subTitle="createaccountsubtitle">
+    <AuthContainer>
+
+
+
+      <Image source={require('../../../assets/latest/petbooker_icon.png')} style={styles.topLeftLogo} />
+
+      <Text style={styles.title}>{t('createaccount')}</Text>
+      <Text style={styles.subtitle}>{t('Fill up the form to create an account')}</Text>
+
+
       <Formik
         initialValues={{
+          firstName: '',
+          lastName: '',
           email: '',
+          phone: '',
           password: '',
+          confirmPassword: '',
+          state: '',
+          city: '',
         }}
         onSubmit={submitForm}>
         {({
@@ -42,9 +73,15 @@ export const RegisterScreen = ({navigation}) => {
         }) => (
           <Layout style={styles.inputContainer}>
             <Input
-              label={t('firstname')}
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('firstname')}
+                </Text>
+              )}
+              placeholderTextColor={styles.placeholderTextColor}
               placeholder="John"
               style={styles.input}
+              textStyle={styles.textStyle}
               onChangeText={handleChange('firstName')}
               onBlur={handleBlur('firstName')}
               value={values.firstName}
@@ -56,9 +93,15 @@ export const RegisterScreen = ({navigation}) => {
               }
             />
             <Input
-              label={t('lastname')}
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('lastname')}
+                </Text>
+              )}
+              placeholderTextColor={styles.placeholderTextColor}
               placeholder="Doe"
               style={styles.input}
+              textStyle={styles.textStyle}
               onChangeText={handleChange('lastName')}
               onBlur={handleBlur('lastName')}
               value={values.lastName}
@@ -68,11 +111,17 @@ export const RegisterScreen = ({navigation}) => {
               status={errors.lastName && touched.lastName ? 'danger' : 'basic'}
             />
             <Input
-              label={t('email')}
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('email')}
+                </Text>
+              )}
+              placeholderTextColor={styles.placeholderTextColor}
               placeholder="abc@gmail.com"
               textContentType="emailAddress"
               keyboardType="email-address"
               style={styles.input}
+              textStyle={styles.textStyle}
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}
               value={values.email}
@@ -80,9 +129,121 @@ export const RegisterScreen = ({navigation}) => {
               status={errors.email && touched.email ? 'danger' : 'basic'}
             />
             <Input
-              label={t('password')}
-              secureTextEntry={true}
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('phone')}
+                  <Text style={{ color: 'red', fontSize: 12 }}> * Country Code must like for BD 880</Text>
+                </Text>
+              )}
+              placeholderTextColor={styles.placeholderTextColor}
+              placeholder="07060000000"
               style={styles.input}
+              textStyle={styles.textStyle}
+              onChangeText={handleChange('phone')}
+              onBlur={handleBlur('phone')}
+              value={values.phone}
+              caption={touched.phone && <InputError errorText={errors.phone} />}
+              status={errors.phone && touched.phone ? 'danger' : 'basic'}
+            />
+
+
+
+
+
+
+
+            {/* State Dropdown Select */}
+            <Select
+              placeholderTextColor={styles.placeholderTextColor}
+              textStyle={styles.textStyle}
+              style={styles.select}
+              selectedIndex={
+                values.state ? new IndexPath(states.indexOf(values.state)) : null
+              }
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('state')}
+                </Text>
+              )}
+              value={values.state}
+              onSelect={(index) => {
+                const selectedState = states[index.row];
+                handleChange('state')(selectedState);
+                handleChange('city')(''); // Reset city when state changes
+              }}
+            >
+              {states.map((state, i) => (
+                <SelectItem title={state} key={i}
+                  placeholderTextColor={styles.placeholderTextColor}
+                  textStyle={styles.selectItem}
+                />
+              ))}
+            </Select>
+            {touched.state && <InputError errorText={errors.state} />}
+
+
+
+
+
+
+            {/* City Dropdown Select */}
+            
+            <Select
+              disabled={!values.state}
+              placeholderTextColor={styles.placeholderTextColor}
+              textStyle={styles.textStyle}
+              style={styles.select}
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('city')}
+                </Text>
+              )}
+
+              value={values.city}
+
+              selectedIndex={
+                values.city
+                  ? new IndexPath(citiesByState[values.state]?.indexOf(values.city))
+                  : null
+              }
+
+              onSelect={(index) => {
+                const selectedCity = citiesByState[values.state][index.row];
+                handleChange('city')(selectedCity);
+              }}
+
+            >
+              {(citiesByState[values.state] || []).map((city, i) => (
+                <SelectItem title={city} key={i}
+                  placeholderTextColor={styles.placeholderTextColor}
+                  textStyle={styles.selectItem}
+                />
+              ))}
+            </Select>
+            {touched.city && <InputError errorText={errors.city} />}
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <Input
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('password')}
+                </Text>
+              )}
+              secureTextEntry={true}
+              placeholderTextColor={styles.placeholderTextColor}
+              style={styles.input}
+              textStyle={styles.textStyle}
               onChangeText={handleChange('password')}
               onBlur={handleBlur('password')}
               value={values.password}
@@ -92,9 +253,15 @@ export const RegisterScreen = ({navigation}) => {
               status={errors.password && touched.password ? 'danger' : 'basic'}
             />
             <Input
-              label={t('confirmpassword')}
+              label={(evaProps) => (
+                <Text {...evaProps} style={styles.label}>
+                  {t('confirmpassword')}
+                </Text>
+              )}
               secureTextEntry={true}
+              placeholderTextColor={styles.placeholderTextColor}
               style={styles.input}
+              textStyle={styles.textStyle}
               onChangeText={handleChange('confirmPassword')}
               onBlur={handleBlur('confirmPassword')}
               value={values.confirmPassword}
@@ -109,52 +276,20 @@ export const RegisterScreen = ({navigation}) => {
                   : 'basic'
               }
             />
-            <RadioGroup
-              selectedIndex={0}
-              style={[
-                flexeStyles.row,
-                {
-                  marginTop: 10,
-                  flexWrap: 'wrap',
-                },
-              ]}>
-              <Radio>{t('seller')}</Radio>
-              <Radio>{t('buyer')}</Radio>
-            </RadioGroup>
-            <ImagePicker title={t('uploadProfileLabel')} />
-            <Input
-              label={t('shopName')}
-              style={styles.input}
-              onChangeText={handleChange('shopName')}
-              onBlur={handleBlur('shopName')}
-              value={values.shopName}
-              caption={
-                touched.shopName && <InputError errorText={errors.shopName} />
-              }
-              status={errors.shopName && touched.shopName ? 'danger' : 'basic'}
-            />
-            <Input
-              label={t('shopAddress')}
-              style={styles.input}
-              onChangeText={handleChange('shopAddress')}
-              onBlur={handleBlur('shopAddress')}
-              value={values.shopAddress}
-              caption={
-                touched.shopAddress && (
-                  <InputError errorText={errors.shopAddress} />
-                )
-              }
-              status={
-                errors.shopAddress && touched.shopAddress ? 'danger' : 'basic'
-              }
-            />
-            <ImagePicker title={t('uploadShopLogoLabel')} />
-            <ImagePicker title={t('uploadShopCoverLabel')} />
-            <SubmitButton
-              btnText={t('signup')}
-              disabled={isBtnDisable}
-              onPress={handleSubmit}
-            />
+            <View style={styles.buttonContainer}>
+              <SubmitButton
+                btnText={t('signup')}
+                disabled={isBtnDisable}
+                onPress={handleSubmit}
+              />
+              <TextButton
+                iconName={"arrow-right"}
+                title={t('Already Have An Account')}
+                style={styles.alreadyHaveAnAccount}
+                onPress={() => navigateToPage('Login')}
+              />
+            </View>
+
           </Layout>
         )}
       </Formik>
@@ -180,11 +315,66 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'column',
     paddingVertical: 16,
+
   },
   input: {
-    marginVertical: 8,
+    marginVertical: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+    borderColor: 'rgb(170, 170, 170)',
+    borderWidth: 1,
+  },
+
+  selectItem: {
+    color: 'black',
+    backgroundColor: 'rgba(41, 255, 3, 0) !important',
+    borderColor: 'rgba(24, 29, 180, 0)',
+    borderWidth: 1,
+  },
+  select: {
+    marginVertical: 10,
+    backgroundColor: 'rgba(130, 130, 130, 0) !important',
+    borderColor: 'rgba(24, 29, 180, 0)',
+    borderWidth: 1,
+  },  
+  textStyle: { fontSize: 14, paddingVertical: 4 },
+
+  label: {
+    color: 'black',
+    fontSize: 16,
   },
   externalLink: {
     marginLeft: 5,
+  },
+  placeholderTextColor: 'rgb(136, 136, 136)',
+
+  alreadyHaveAnAccount: {
+    borderColor: '#27AE60',
+    borderWidth: 1.5,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 9,
+    marginTop: 16,
+    alignSelf: i18next.isRTL ? 'flex-end' : 'flex-start',
+  },
+  buttonContainer: {
+    flexDirection: 'column',
+    alignItems: i18next.isRTL ? 'flex-end' : 'flex-start',
+  },
+  topLeftLogo: {
+    width: 40,
+    height: 40,
+    position: 'absolute',
+    top: 5,
+    left: 5,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  subtitle: { 
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
