@@ -21,7 +21,7 @@ export const SplashScreen = ({ navigation }) => {
         await dispatch(loadAppConfigs());
         setTimeout(() => {
           navigation.replace('AuthLoader');
-        }, 200);
+        }, 20000000);
       } catch (error) {
         navigation.replace('AuthLoader');
       }
@@ -32,19 +32,14 @@ export const SplashScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Section (Abstract Background) */}
-      <View style={styles.topSection}>
+      <Image
+        source={require('../../assets/new/welcome_screen_bg.png')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
+      <View style={styles.contentContainer}>
         <Image
-          source={require('../../assets/latest/splash_above_icon.png')}
-          style={styles.topImage}
-          resizeMode="cover"
-        />
-      </View>
-
-      {/* Middle Section (Logo & Text) */}
-      <View style={styles.middleSection}>
-        <Image
-          source={require('../../assets/latest/petbooker_icon.png')}
+          source={require('../../assets/new/main_logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -55,15 +50,6 @@ export const SplashScreen = ({ navigation }) => {
           </Text>
         </View>
       </View>
-
-      {/* Bottom Section (Abstract Background) */}
-      <View style={styles.bottomSection}>
-        <Image
-          source={require('../../assets/latest/splash_bottom_icon.png')}
-          style={styles.bottomImage}
-          resizeMode='contain'
-        />
-      </View>
     </SafeAreaView>
   );
 };
@@ -73,38 +59,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFF',
   },
-  topSection: {
-    flex: 1, // ✅ More dynamic
-    width: '100%',
-    height: height * 0.5,
-    top: 0,
-    position: 'absolute'
-  },
-  middleSection: {
-    flex: 4, // ✅ Ensures spacing
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bottomSection: {
-    flex: 1, // ✅ Dynamic bottom spacing
-    width: '100%',
-  },
-  topImage: {
+  backgroundImage: {
+    position: 'absolute',
     width: '100%',
     height: '100%',
   },
+  contentContainer: {
+    flex: 1,
+    alignItems: 'center',
+    // justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: height * 0.25,
+  },
   logo: {
-    width: width * 0.5, // ✅ Slightly smaller for better balance
+    width: width * 0.5,
     height: width * 0.5,
-    marginBottom: 10, // ✅ Adjusted spacing
+    marginBottom: 10,
   },
   textContainer: {
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 1,
   },
   titleText: {
     color: '#000',
-    fontSize: 24, // ✅ Slightly smaller for balance
+    fontSize: 24,
     fontWeight: '900',
     textAlign: 'center',
   },
@@ -116,11 +94,4 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: 'center',
   },
-  bottomImage: {
-    width: '100%',
-    height: '130%',
-    left: -10,
-    bottom: -10,
-  },
 });
-

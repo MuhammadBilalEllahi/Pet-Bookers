@@ -90,7 +90,8 @@ export default () => {
           ]}>
           <ActivityIndicator size="large" color="#E44C26" />
         </View>
-      }>
+      }
+      >
       <App />
     </Suspense>
   );
