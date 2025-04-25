@@ -10,6 +10,7 @@ const { width } = Dimensions.get('window');
 import { TouchableOpacity } from 'react-native';
 import TextButton from '../../components/form/TextButton';
 import FormInputField from '../../components/form/FormFieldInput';
+import { axiosCustomerClient } from '../../utils/axiosClient';
 
 
 export const LoginScreen = ({ navigation }) => {
@@ -25,19 +26,18 @@ export const LoginScreen = ({ navigation }) => {
   const submitForm = async values => {
     try {
       setIsBtnDisable(true);
+      axiosCustomerClient.post('')
+
     } catch (error) {
+      
+    }finally{
       setIsBtnDisable(false);
     }
   };
 
   return (
     <AuthContainer >
-
-
-
       <View style={styles.topSection}>
-
-      
         <Image
           source={require('../../../assets/new/main_logo.png')}
           style={styles.logo}
@@ -161,7 +161,7 @@ export const LoginScreen = ({ navigation }) => {
             </Layout>
           )}
         </Formik>
-        
+
 
 
         <TextButton
@@ -175,17 +175,13 @@ export const LoginScreen = ({ navigation }) => {
 
       </View>
 
-      
+
 
     </AuthContainer>
   );
 };
 
 const styles = StyleSheet.create({
-
- 
-
-
   topSection: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -214,22 +210,12 @@ const styles = StyleSheet.create({
 
     textAlign: 'center',
   },
-
-
-
-
-
-
   middleSection: {
     marginTop: 20,
     flex: 1
   },
-
-
-
-
   toggleContainer: {
-    flexDirection: 'row',    
+    flexDirection: 'row',
 
   },
   toggleButton: {
@@ -257,29 +243,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 11,
   },
-
-
-
-
-
-
   input: {
     marginVertical: 10,
     backgroundColor: 'white',
     borderRadius: 10,
     borderColor: '#C1C1C1',
     borderWidth: 1,
-
   },
   label: {
     color: '#121212',
     fontSize: 16,
     marginBottom: 7,
   },
-
-
-
-
   forgotRememberContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -287,11 +262,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // marginVertical: 10,
   },
-
   rememberMeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-
   },
   remembercheckBox: {
     fontSize: 5,
@@ -303,22 +276,6 @@ const styles = StyleSheet.create({
   forgotPasswordLinkText: {
     color: '#121212'
   },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   noAccountText: {
     color: '#121212',
     fontWeight: '600',
@@ -326,8 +283,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
-
-
   languageContainer: {
     marginTop: 24,
     flexDirection: 'row',
@@ -354,6 +309,4 @@ const styles = StyleSheet.create({
     color: '#27AE60',
     fontWeight: '600',
   },
-
-
 });

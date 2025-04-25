@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 4,
     padding: 10,
-    maxWidth: 150,
+    maxWidth: 130,
   },
   image: {
     width: 100,

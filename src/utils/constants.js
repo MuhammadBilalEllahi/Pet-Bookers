@@ -1,3 +1,5 @@
-export const BASE_URL = 'https://petbookie.com/';
+export const BASE_URL = 'https://petbookers.com.pk/';
 export const SELLER_API = 'api/v3/seller/';
 export const BUYER_API = 'api/v1/';
+export const CUSTOMER_API = 'customer/';
+

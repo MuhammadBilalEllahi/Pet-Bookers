@@ -1,6 +1,7 @@
 import axios from 'axios';
-import {BASE_URL, BUYER_API, SELLER_API} from './constants';
+import {BASE_URL, BUYER_API, CUSTOMER_API, SELLER_API} from './constants';
 import {getAuthToken} from './localstorage';
+// https://petbookers.com.pk/customer/auth/login
 
 export const axiosBuyerClient = axios.create({
   baseURL: `${BASE_URL}${BUYER_API}`,
@@ -8,6 +9,12 @@ export const axiosBuyerClient = axios.create({
 export const axiosSellerClient = axios.create({
   baseURL: `${BASE_URL}${SELLER_API}`,
 });
+
+export const axiosCustomerClient = axios.create({
+  baseURL: `${BASE_URL}${CUSTOMER_API}`,
+});
+
+
 
 axiosBuyerClient.interceptors.request.use(
   async config => {

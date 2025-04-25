@@ -6,7 +6,7 @@ import {selectBaseUrls} from '../../store/configs';
 import {flexeStyles} from '../../utils/globalStyles';
 
 const {width: windowWidth} = Dimensions.get('window');
-const height = (windowWidth - 16) / 2.35;
+const height = (windowWidth - 16) / 1.9;
 
 let slideChangRef = null;
 
@@ -92,7 +92,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
           onScroll={onScroll}
         />
       )}
-      <View
+      {/* <View
         style={[
           styles.sliderDotContainer,
           flexeStyles.row,
@@ -109,7 +109,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
             ]}
           />
         ))}
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -125,13 +125,16 @@ const Slide = ({data, imageBaseUrl}) => {
       }}>
       <Image
         source={{uri: `${imageBaseUrl}/${data.photo}`}}
-        style={{width: windowWidth - 16, height: height}}
+        style={[{width: windowWidth - 16, height: height}, styles.containerBorder]}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  containerBorder:{
+    borderRadius:10
+  },
   sliderDotContainer: {
     position: 'absolute',
     width: '100%',

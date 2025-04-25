@@ -155,7 +155,7 @@ export const HomeMainScreen = ({navigation}) => {
           loading={featuredProductsLoading}
           loadingError={featuredProductsError}
           listTitle={t('featured')}
-          containerStyle={{marginVertical: 16}}
+          containerStyle={{marginVertical: 0,paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
         />
         <ProductsList

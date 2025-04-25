@@ -54,7 +54,7 @@ export const ProductCard = ({
           </View>
         )}
       </Layout>
-      <View style={spacingStyles.p16}>
+      <View style={spacingStyles.p8}>
         <Text status="primary" style={styles.title}>
           {name}
         </Text>
@@ -62,7 +62,7 @@ export const ProductCard = ({
           <Price amount={price} />
           {oldPrice > 0 && <Price amount={oldPrice} cross={true} />}
         </View>
-        <AirbnbRating
+        {/* <AirbnbRating
           count={5}
           defaultRating={rating}
           showRating={false}
@@ -70,7 +70,7 @@ export const ProductCard = ({
           isDisabled={true}
           starContainerStyle={{marginTop: 8}}
           selectedColor={theme['color-primary-default']}
-        />
+        /> */}
       </View>
     </Card>
   );
@@ -102,12 +102,14 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
+    // height: '100%',
     resizeMode: 'cover',
-    aspectRatio: 4 / 3,
+    aspectRatio: 1/1,
   },
   title: {
-    fontWeight: '500',
-    fontSize: 18,
-    marginBottom: 10,
+    fontWeight: '700',
+    color:'#121212',
+    fontSize: 15,
+    marginBottom: 1,
   },
 });

@@ -29,7 +29,7 @@ export const CategoriesListScreen = ({navigation}) => {
         flexeStyles.contentBetween,
         {
           flex: 1,
-          marginHorizontal: 16,
+          marginHorizontal: 10,
         },
       ]}>
       <Layout style={{width: windowWidth / 4}}>
