@@ -1,9 +1,14 @@
-import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {FlatList, StyleSheet, TouchableOpacity, View, Dimensions} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Layout, Spinner, Text, useTheme} from '@ui-kitten/components';
 import {ThemedIcon} from '../Icon';
 import {ProductCard} from '../product/ProductCard';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+
+const {width: windowWidth} = Dimensions.get('screen');
+
+// Define a smaller card width for the ProductCard
+const SMALL_CARD_WIDTH = windowWidth * 0.48; // Decrease card width for smaller image
 
 export const ProductsList = ({
   list,
@@ -67,7 +72,7 @@ export const ProductsList = ({
           data={list}
           keyExtractor={item => item.id.toString()}
           renderItem={({item}) => (
-            <ProductCard {...item} onProductDetail={onProductDetail} />
+            <ProductCard {...item} onProductDetail={onProductDetail} cardWidth={SMALL_CARD_WIDTH} />
           )}
         />
       )}
@@ -87,11 +92,11 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 4,
     padding: 10,
-    maxWidth: 130,
+    maxWidth: 140, // Decreased maxWidth for smaller card
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 90, // Decreased image width
+    height: 90, // Decreased image height
     alignSelf: 'center',
     borderRadius: 4,
     marginBottom: 8,

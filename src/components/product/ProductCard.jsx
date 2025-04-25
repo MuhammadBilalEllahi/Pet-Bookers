@@ -60,7 +60,7 @@ export const ProductCard = ({
         </Text>
         <View>
           <Price amount={price} />
-          {oldPrice > 0 && <Price amount={oldPrice} cross={true} />}
+          {oldPrice > 0 && <Price style={styles.price} amount={oldPrice} cross={true} />}
         </View>
         {/* <AirbnbRating
           count={5}
@@ -110,6 +110,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color:'#121212',
     fontSize: 15,
-    marginBottom: 1,
+    // marginBottom: 1,
   },
+  price:{
+    fontSize:12
+  }
 });
