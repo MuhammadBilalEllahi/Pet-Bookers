@@ -29,12 +29,12 @@ export const AuthContainer = ({title, subTitle, children}) => {
   };
 
   return (
-    <Layout style={{height: '100%'}} level="1">
+    <Layout style={styles.container} level="1">
 
       
 <Image
-          source={require('../../../assets/latest/splash_above_icon.png')}
-          style={styles.aboveLogo }
+          source={require('../../../assets/new/login_page_bg.png')}
+          style={styles.backgroundImage }
           resizeMode="cover"
         />
 
@@ -54,11 +54,7 @@ export const AuthContainer = ({title, subTitle, children}) => {
           ]}>
           
             
-            {/* <Image
-              source={require('../../../assets/latest/petbooker_icon.png')}
-              style={styles.image}
-            />
-           */}
+            
           <Text category="h4" style={styles.title}>
             {t(title)}
           </Text>
@@ -97,66 +93,25 @@ export const AuthContainer = ({title, subTitle, children}) => {
             </Text>
           </Layout>
           </Layout>
-          
-          {/* <Layout style={{alignItems: 'flex-end'}}>
-            <Button
-              appearance="ghost"
-              accessoryRight={
-                <ThemedIcon
-                  name={
-                    i18n.language === 'ur'
-                      ? 'arrow-back-outline'
-                      : 'arrow-forward-outline'
-                  }
-                  status="primary"
-                />
-              }
-              onPress={onNavigateToHome}>
-              {t('buttons.skip')}
-            </Button>
-          </Layout> */}
-        </Layout>
-        <Image
-          source={require('../../../assets/latest/auth_left_icon.png')}
-          style={styles.leftBottomLogo }
-          resizeMode="cover"
-        />
 
-<Image
-          source={require('../../../assets/latest/auth_right_icon.png')}
-          style={styles.rightBottomLogo }
-          resizeMode="cover"
-        />
+        </Layout>
       </ScrollView>
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
-
-
-  aboveLogo:{
-    position: 'absolute',
-    top: 0,
-    // width: '100%',
-    // height: '100%',
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF',
   },
-  leftBottomLogo:{
+  backgroundImage: {
     position: 'absolute',
-    bottom: -10,
-    left: -20,
-    zIndex: -1,
-  transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
     
+    width: '100%',
+    height: '100%',
   },
-  rightBottomLogo:{
-    position: 'absolute',
-    bottom: -10,
-    right: 0,
-    zIndex: -1,
-    
-  transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
-  },
+  
 
 
 

@@ -13,22 +13,24 @@ import { loadAppConfigs } from '../store/configs';
 const { width, height } = Dimensions.get('window');
 
 export const SplashScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
+  
+  // const navigation= useNavigation();
+  // const dispatch = useDispatch();
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await dispatch(loadAppConfigs());
-        setTimeout(() => {
-          navigation.replace('AuthLoader');
-        }, 20000000);
-      } catch (error) {
-        navigation.replace('AuthLoader');
-      }
-    };
+  // useEffect(() => {
+  //   const initializeApp = async () => {
+  //     try {
+  //       await dispatch(loadAppConfigs());
+  //       setTimeout(() => {
+  //         navigation.replace('AuthLoader');
+  //       }, 200);
+  //     } catch (error) {
+  //       navigation.replace('AuthLoader');
+  //     }
+  //   };
 
-    initializeApp();
-  }, []);
+  //   initializeApp();
+  // }, []);
 
   return (
     <SafeAreaView style={styles.container}>

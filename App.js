@@ -18,6 +18,7 @@ import 'dayjs/locale/ur';
 
 import './src/locale';
 import {flexeStyles} from './src/utils/globalStyles';
+import { SplashScreen } from './src/screens/SplashScreen';
 
 dayjs.extend(calendar);
 dayjs.extend(localizedFormat);
@@ -42,7 +43,7 @@ dayjs.updateLocale('ur', {
   },
 });
 
-const App = () => {
+const MainApp = () => {
   const {i18n} = useTranslation();
 
   const extendTheme = useMemo(() => {
@@ -64,7 +65,7 @@ const App = () => {
 
   return (
     <SafeAreaView style={{flex: 1, direction: i18n.dir()}}>
-      <StoreProvider store={store}>
+      
         <IconRegistry icons={EvaIconsPack} />
         <ApplicationProvider
           {...eva}
@@ -72,27 +73,19 @@ const App = () => {
           customMapping={mapping}>
           <AppNavigator />
         </ApplicationProvider>
-      </StoreProvider>
+        
     </SafeAreaView>
   );
 };
 
-export default () => {
+export default function Root() {
   return (
-    <Suspense
-      fallback={
-        <View
-          style={[
-            flexeStyles.grow1,
-            flexeStyles.itemsCenter,
-            flexeStyles.contentCenter,
-            {backgroundColor: '#EDF1F7'},
-          ]}>
-          <ActivityIndicator size="large" color="#E44C26" />
-        </View>
-      }
-      >
-      <App />
+    <StoreProvider store={store}>
+    <Suspense fallback={<SplashScreen/>}>
+      <MainApp />
+      
     </Suspense>
+    
+    </StoreProvider>
   );
 };

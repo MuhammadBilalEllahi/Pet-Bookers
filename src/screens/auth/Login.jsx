@@ -39,7 +39,7 @@ export const LoginScreen = ({ navigation }) => {
 
       
         <Image
-          source={require('../../../assets/latest/petbooker_icon.png')}
+          source={require('../../../assets/new/main_logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />

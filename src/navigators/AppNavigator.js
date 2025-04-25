@@ -25,7 +25,7 @@ export const AppNavigator = () => {
     <NavigationContainer>
       <Navigator
         screenOptions={{headerShown: false, gestureEnabled: false}}
-        initialRouteName="Splash">
+        initialRouteName="AuthLoader">
         <Screen name="Splash" component={SplashScreen} />
         <Screen name="Login" component={LoginScreen} />
         <Screen name="Register" component={RegisterScreen} />
