@@ -67,7 +67,7 @@ export const AuthContainer = ({ title, subTitle, children }) => {
           {children}
           <Layout style={{ justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
-              Language
+               {t('language')}
             </Text>
 
             <Layout

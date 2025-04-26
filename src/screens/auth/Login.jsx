@@ -44,10 +44,11 @@ export const LoginScreen = ({ navigation }) => {
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.titleText}>Your Pet, Our Security!</Text>
+          <Text style={styles.titleText}>{t('yourPetOurSecurity')}</Text>
           <Text style={styles.subtitleText}>
-            The best marketplace for {'\n'} exotic pets
-          </Text>
+          {t('theBestMarketplaceFor')}
+          {'\n'}
+          {t('exoticPets')}          </Text>
         </View>
       </View>
 
@@ -142,7 +143,7 @@ export const LoginScreen = ({ navigation }) => {
               <View style={styles.forgotRememberContainer}>
                 <View style={styles.rememberMeContainer}>
                   <CheckBox style={styles.remembercheckBox} />
-                  <Text style={styles.rememberMeText}>{t('Remember me')}</Text>
+                  <Text style={styles.rememberMeText}>{t('rememberMe')}</Text>
                 </View>
                 <Text
                   category="p2"
@@ -157,7 +158,7 @@ export const LoginScreen = ({ navigation }) => {
                 disabled={isBtnDisable}
                 onPress={handleSubmit}
               />
-              <Text style={styles.noAccountText}> {t('No Account? Sign Up Now')}</Text>
+              <Text style={styles.noAccountText}> {t('noAccountSignUpNow')}</Text>
             </Layout>
           )}
         </Formik>

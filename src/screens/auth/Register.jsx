@@ -10,19 +10,22 @@ import { Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import TextButton from '../../components/form/TextButton';
 import i18next from 'i18next';
 
-
 export const RegisterScreen = ({ navigation }) => {
+  // Use translation keys for states and cities
+  const stateKeys = [
+    'Punjab', 'Sindh', 'KPK', 'Balochistan', 'GilgitBaltistan', 'AzadKashmir'
+  ];
 
-
-  const states = ['Punjab', 'Sindh', 'KPK', 'Balochistan'];
+  // For translation, use keys for states and cities, and display t(key) in UI
   const citiesByState = {
-    Punjab: ['Lahore', 'Rawalpindi', 'Faisalabad'],
-    Sindh: ['Karachi', 'Hyderabad'],
-    KPK: ['Peshawar', 'Abbottabad'],
-    Balochistan: ['Quetta', 'Gwadar'],
+    Punjab: ['Lahore', 'Rawalpindi', 'Faisalabad', 'Multan', 'Sialkot', 'Bahawalpur'],
+    Sindh: ['Karachi', 'Hyderabad', 'Sukkur', 'Larkana'],
+    KPK: ['Peshawar', 'Abbottabad', 'Mardan', 'Swat'],
+    Balochistan: ['Quetta', 'Gwadar', 'Turbat', 'Khuzdar'],
+    GilgitBaltistan: ['Gilgit', 'Skardu', 'Hunza'],
+    AzadKashmir: ['Muzaffarabad', 'Mirpur', 'Bagh'],
+    Islamabad: ['Islamabad']
   };
-
-
 
   const { t } = useTranslation();
   const [isBtnDisable, setIsBtnDisable] = useState(false);
@@ -42,14 +45,10 @@ export const RegisterScreen = ({ navigation }) => {
 
   return (
     <AuthContainer>
-
-
-
       <Image source={require('../../../assets/latest/petbooker_icon.png')} style={styles.topLeftLogo} />
 
       <Text style={styles.title}>{t('createaccount')}</Text>
-      <Text style={styles.subtitle}>{t('Fill up the form to create an account')}</Text>
-
+      <Text style={styles.subtitle}>{t('fillUpTheFormToCreateAnAccount')}</Text>
 
       <Formik
         initialValues={{
@@ -132,7 +131,7 @@ export const RegisterScreen = ({ navigation }) => {
               label={(evaProps) => (
                 <Text {...evaProps} style={styles.label}>
                   {t('phone')}
-                  <Text style={{ color: 'red', fontSize: 12 }}> * Country Code must like for BD 880</Text>
+                  <Text style={{ color: 'red', fontSize: 12 }}> {t('countryCodeNote')}</Text>
                 </Text>
               )}
               placeholderTextColor={styles.placeholderTextColor}
@@ -146,34 +145,33 @@ export const RegisterScreen = ({ navigation }) => {
               status={errors.phone && touched.phone ? 'danger' : 'basic'}
             />
 
-
-
-
-
-
-
             {/* State Dropdown Select */}
             <Select
+              placeholder={t('selectOption')}
               placeholderTextColor={styles.placeholderTextColor}
               textStyle={styles.textStyle}
               style={styles.select}
               selectedIndex={
-                values.state ? new IndexPath(states.indexOf(values.state)) : null
+                values.state
+                  ? new IndexPath(stateKeys.findIndex(key => key === values.state))
+                  : null
               }
               label={(evaProps) => (
                 <Text {...evaProps} style={styles.label}>
                   {t('state')}
                 </Text>
               )}
-              value={values.state}
+              value={values.state ? t(values.state) : ''}
               onSelect={(index) => {
-                const selectedState = states[index.row];
-                handleChange('state')(selectedState);
+                const selectedStateKey = stateKeys[index.row];
+                handleChange('state')(selectedStateKey);
                 handleChange('city')(''); // Reset city when state changes
               }}
             >
-              {states.map((state, i) => (
-                <SelectItem title={state} key={i}
+              {stateKeys.map((stateKey, i) => (
+                <SelectItem
+                  title={t(stateKey)}
+                  key={i}
                   placeholderTextColor={styles.placeholderTextColor}
                   textStyle={styles.selectItem}
                 />
@@ -181,15 +179,10 @@ export const RegisterScreen = ({ navigation }) => {
             </Select>
             {touched.state && <InputError errorText={errors.state} />}
 
-
-
-
-
-
             {/* City Dropdown Select */}
-            
             <Select
               disabled={!values.state}
+              placeholder={t('selectOption')}
               placeholderTextColor={styles.placeholderTextColor}
               textStyle={styles.textStyle}
               style={styles.select}
@@ -198,41 +191,29 @@ export const RegisterScreen = ({ navigation }) => {
                   {t('city')}
                 </Text>
               )}
-
-              value={values.city}
-
+              value={values.city ? t(values.city) : ''}
               selectedIndex={
-                values.city
-                  ? new IndexPath(citiesByState[values.state]?.indexOf(values.city))
+                values.city && values.state
+                  ? new IndexPath(
+                      (citiesByState[values.state] || []).findIndex(cityKey => cityKey === values.city)
+                    )
                   : null
               }
-
               onSelect={(index) => {
-                const selectedCity = citiesByState[values.state][index.row];
-                handleChange('city')(selectedCity);
+                const selectedCityKey = citiesByState[values.state][index.row];
+                handleChange('city')(selectedCityKey);
               }}
-
             >
-              {(citiesByState[values.state] || []).map((city, i) => (
-                <SelectItem title={city} key={i}
+              {(citiesByState[values.state] || []).map((cityKey, i) => (
+                <SelectItem
+                  title={t(cityKey)}
+                  key={i}
                   placeholderTextColor={styles.placeholderTextColor}
                   textStyle={styles.selectItem}
                 />
               ))}
             </Select>
             {touched.city && <InputError errorText={errors.city} />}
-
-
-
-
-
-
-
-
-
-
-
-
 
             <Input
               label={(evaProps) => (
@@ -284,12 +265,11 @@ export const RegisterScreen = ({ navigation }) => {
               />
               <TextButton
                 iconName={"arrow-right"}
-                title={t('Already Have An Account')}
+                title={t('alreadyHaveAnAccount')}
                 style={styles.alreadyHaveAnAccount}
                 onPress={() => navigateToPage('Login')}
               />
             </View>
-
           </Layout>
         )}
       </Formik>
@@ -315,7 +295,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'column',
     paddingVertical: 16,
-
   },
   input: {
     marginVertical: 10,
@@ -323,7 +302,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgb(170, 170, 170)',
     borderWidth: 1,
   },
-
   selectItem: {
     color: 'black',
     backgroundColor: 'rgba(41, 255, 3, 0) !important',
@@ -337,7 +315,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },  
   textStyle: { fontSize: 14, paddingVertical: 4 },
-
   label: {
     color: 'black',
     fontSize: 16,
@@ -346,7 +323,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   placeholderTextColor: 'rgb(136, 136, 136)',
-
   alreadyHaveAnAccount: {
     borderColor: '#27AE60',
     borderWidth: 1.5,

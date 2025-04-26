@@ -154,7 +154,7 @@ export const HomeMainScreen = ({navigation}) => {
           list={parsedProducts(featuredProducts)}
           loading={featuredProductsLoading}
           loadingError={featuredProductsError}
-          listTitle={t('featured')}
+          listTitle={t('featuredProducts')}
           containerStyle={{marginVertical: 0,paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
         />
@@ -163,7 +163,7 @@ export const HomeMainScreen = ({navigation}) => {
           loading={latestProductsLoading}
           loadingError={latestProductsError}
           listTitle={t('latest')}
-          containerStyle={{marginVertical: 16}}
+          containerStyle={{marginVertical: 16,paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
         />
         <ProductsList
@@ -171,11 +171,11 @@ export const HomeMainScreen = ({navigation}) => {
           loading={popularProductsLoading}
           loadingError={popularProductsError}
           listTitle={t('popular')}
-          containerStyle={{marginVertical: 16}}
+          containerStyle={{marginVertical: 16, paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
         />
         <HorizontalItemsList
-          containerStyle={{marginVertical: 10}}
+          containerStyle={{marginVertical: 10, paddingHorizontal: 14}}
           list={sellersList}
           listTitle={t('sellers')}
           roundedImage={true}
