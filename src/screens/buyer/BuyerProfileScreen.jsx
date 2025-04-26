@@ -9,8 +9,12 @@ import {
 import {ScrollView} from 'react-native';
 import {ProfileActionButton} from '../../components/profile';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import { useDispatch } from 'react-redux';
+import { setAuthToken, setUserType, UserType } from '../../store/user';
 
 export const BuyerProfileScreen = ({navigation}) => {
+
+  const dispatch = useDispatch();
   const EditIcon = props => <Icon {...props} name="edit-2-outline" />;
   const LockIcon = props => <Icon {...props} name="lock-outline" />;
 
@@ -108,7 +112,10 @@ export const BuyerProfileScreen = ({navigation}) => {
           <ProfileActionButton
             title="Logout"
             iconName="power-outline"
-            onPress={() => {}}
+            onPress={() => {
+              dispatch(setUserType(UserType.ANONYMOUS))
+              dispatch(setAuthToken(null))
+            }}
           />
         </Layout>
       </ScrollView>

@@ -11,10 +11,13 @@ import {Image, ScrollView} from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
 import {ProfileActionButton} from '../../components/profile';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import { useDispatch } from 'react-redux';
+import { setAuthToken, setUserType, UserType } from '../../store/user';
 
 export const SellerProfileScreen = ({navigation}) => {
   const theme = useTheme();
 
+  const dispatch = useDispatch();
   const navigateToProfileUpdate = () => {
     navigation.navigate('UpdateProfile');
   };
@@ -176,7 +179,10 @@ export const SellerProfileScreen = ({navigation}) => {
           <ProfileActionButton
             title="Logout"
             iconName="power-outline"
-            onPress={() => {}}
+            onPress={() => {
+              dispatch(setUserType(UserType.ANONYMOUS))
+              dispatch(setAuthToken(null))
+            }}
           />
         </Layout>
       </ScrollView>

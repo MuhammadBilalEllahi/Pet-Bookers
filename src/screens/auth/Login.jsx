@@ -1,42 +1,87 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
-import { Layout, Text, Input, RadioGroup, Radio, CheckBox, Icon } from '@ui-kitten/components';
+import { Layout, Text, Input, CheckBox, Icon } from '@ui-kitten/components';
 import { Formik } from 'formik';
 import { InputError, SubmitButton } from '../../components/form';
 import { AuthContainer } from '../../components/auth/AuthContainer';
-import { flexeStyles } from '../../utils/globalStyles';
 const { width } = Dimensions.get('window');
 import { TouchableOpacity } from 'react-native';
 import TextButton from '../../components/form/TextButton';
-import FormInputField from '../../components/form/FormFieldInput';
-import { axiosCustomerClient } from '../../utils/axiosClient';
+import { axiosBuyerClient, axiosSellerClient, } from '../../utils/axiosClient';
+import { setAuthToken, setUserType, UserType } from '../../store/user';
+import { getAuthToken } from '../../utils/localstorage';
+import { useDispatch } from 'react-redux';
+// import axios from 'axios';
 
+// const SELLER_LOGIN_URL = 'https://petbookers.com.pk/api/v3/seller/auth/login';
 
-export const LoginScreen = ({ navigation }) => {
+export const LoginScreen = ({ navigation, isItSeller = false }) => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
-  const [isBtnDisable, setIsBtnDisable] = useState(false);
+  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [selectedTab, setSelectedTab] = useState('email');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isSeller, setIsSeller] = useState(isItSeller || false);
 
   const navigateToPage = pageName => {
     navigation.navigate(pageName);
   };
 
-  const submitForm = async values => {
+  const submitForm = async (values, { setSubmitting }) => {
     try {
-      setIsBtnDisable(true);
-      axiosCustomerClient.post('')
+      setIsBtnDisabled(true);
+
+      const formData = new FormData();
+      if (selectedTab === 'email' && values.email.trim() !== '') {
+        formData.append('email', values.email.trim());
+      } else if (selectedTab === 'phone' && values.phone.trim() !== '') {
+        formData.append('phone', values.phone.trim());
+      }
+
+      formData.append('password', values.password);
+
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+      }
+      let response;
+      isSeller ?
+        response = await axiosSellerClient.post('auth/login', formData, {
+          headers: headers,
+        })
+        : response = await axiosBuyerClient.post('auth/login', formData, {
+          headers: headers,
+        });
+
+
+      // TODO: handle login success (e.g., navigation, token storage, etc.)
+      console.debug("Login Success Response", response.data);
+
+      if (response?.data?.token) {
+        console.log("IN TOKEN")
+        dispatch(setUserType(isSeller ? UserType.SELLER : UserType.BUYER))
+        dispatch(setAuthToken(response.data.token))
+      }
+
+      const v = await getAuthToken();
+      console.log("MEOW", v)
 
     } catch (error) {
-      
-    }finally{
-      setIsBtnDisable(false);
+      // TODO: handle error (e.g., show error message)
+      if (error.response) {
+        console.error("Login Error Response", error.response.data);
+      } else {
+        console.error("Login Error", error);
+      }
+    } finally {
+      setIsBtnDisabled(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <AuthContainer >
+    <AuthContainer>
       <View style={styles.topSection}>
         <Image
           source={require('../../../assets/new/main_logo.png')}
@@ -46,9 +91,10 @@ export const LoginScreen = ({ navigation }) => {
         <View style={styles.textContainer}>
           <Text style={styles.titleText}>{t('yourPetOurSecurity')}</Text>
           <Text style={styles.subtitleText}>
-          {t('theBestMarketplaceFor')}
-          {'\n'}
-          {t('exoticPets')}          </Text>
+            {t('theBestMarketplaceFor')}
+            {'\n'}
+            {t('exoticPets')}
+          </Text>
         </View>
       </View>
 
@@ -72,7 +118,8 @@ export const LoginScreen = ({ navigation }) => {
             password: '',
             phone: '',
           }}
-          onSubmit={submitForm}>
+          onSubmit={submitForm}
+        >
           {({
             handleChange,
             handleBlur,
@@ -80,9 +127,9 @@ export const LoginScreen = ({ navigation }) => {
             values,
             errors,
             touched,
+            isSubmitting,
           }) => (
-            <Layout >
-
+            <Layout>
               {selectedTab === 'email' ? (
                 <Input
                   placeholder={t('email')}
@@ -101,28 +148,23 @@ export const LoginScreen = ({ navigation }) => {
                 <Input
                   placeholder={t('phone')}
                   keyboardType="phone-pad"
-
                   value={values.phone}
                   onChangeText={handleChange('phone')}
-
-
-                  textContentType="emailAddress"
+                  textContentType="telephoneNumber"
                   textStyle={{ fontSize: 14, paddingVertical: 4 }}
                   style={styles.input}
-
                   onBlur={handleBlur('phone')}
-
                   caption={touched.phone && <InputError errorText={errors.phone} />}
                   status={errors.phone && touched.phone ? 'danger' : 'basic'}
                   accessoryLeft={<Icon name="phone" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
-
+                  // Note: phone login is not supported by the seller endpoint, but UI is kept for consistency
+                  editable={false}
                 />
               )}
 
               <Input
-
                 placeholder={t('password')}
-                label={(evaProps) => (
+                label={evaProps => (
                   <Text {...evaProps} style={styles.label}>
                     {t('password')}
                   </Text>
@@ -138,11 +180,15 @@ export const LoginScreen = ({ navigation }) => {
                 }
                 status={errors.password && touched.password ? 'danger' : 'basic'}
                 accessoryLeft={<Icon name="lock" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
-
               />
+
               <View style={styles.forgotRememberContainer}>
                 <View style={styles.rememberMeContainer}>
-                  <CheckBox style={styles.remembercheckBox} />
+                  <CheckBox
+                    style={styles.remembercheckBox}
+                    checked={rememberMe}
+                    onChange={setRememberMe}
+                  />
                   <Text style={styles.rememberMeText}>{t('rememberMe')}</Text>
                 </View>
                 <Text
@@ -155,7 +201,7 @@ export const LoginScreen = ({ navigation }) => {
               </View>
               <SubmitButton
                 btnText={t('signin')}
-                disabled={isBtnDisable}
+                disabled={isBtnDisabled || isSubmitting}
                 onPress={handleSubmit}
               />
               <Text style={styles.noAccountText}> {t('noAccountSignUpNow')}</Text>
@@ -163,21 +209,13 @@ export const LoginScreen = ({ navigation }) => {
           )}
         </Formik>
 
-
-
         <TextButton
           iconName={"person"}
           title={t('signup')}
           style={styles.signupButton}
-          onPress={() => navigateToPage('Register')}>
-
-        </TextButton>
-
-
+          onPress={() => navigateToPage('Register')}
+        />
       </View>
-
-
-
     </AuthContainer>
   );
 };
@@ -191,11 +229,9 @@ const styles = StyleSheet.create({
   logo: {
     width: width * 0.25,
     height: width * 0.25,
-
   },
   textContainer: {
     alignItems: 'center',
-
   },
   titleText: {
     color: '#000',
@@ -208,16 +244,14 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontSize: 13,
     letterSpacing: 0.5,
-
     textAlign: 'center',
   },
   middleSection: {
     marginTop: 20,
-    flex: 1
+    flex: 1,
   },
   toggleContainer: {
     flexDirection: 'row',
-
   },
   toggleButton: {
     paddingVertical: 6,
@@ -229,7 +263,6 @@ const styles = StyleSheet.create({
     borderColor: '#27AE60',
     borderWidth: 0.7,
     marginRight: 10,
-
   },
   toggleActive: {
     backgroundColor: '#27AE60',
@@ -272,10 +305,10 @@ const styles = StyleSheet.create({
   },
   rememberMeText: {
     color: 'gray',
-    marginLeft: 5
+    marginLeft: 5,
   },
   forgotPasswordLinkText: {
-    color: '#121212'
+    color: '#121212',
   },
   noAccountText: {
     color: '#121212',
