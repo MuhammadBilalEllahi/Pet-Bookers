@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Layout, Text, Input, Radio, RadioGroup } from '@ui-kitten/components';
+import { Layout, Text, Input } from '@ui-kitten/components';
 import { Formik } from 'formik';
 import { InputError, SubmitButton, ImagePicker } from '../../components/form';
 import { AuthContainer } from '../../components/auth/AuthContainer';
@@ -9,8 +9,23 @@ import { flexeStyles } from '../../utils/globalStyles';
 import { Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import TextButton from '../../components/form/TextButton';
 import i18next from 'i18next';
+import { useRoute } from '@react-navigation/native';
+import { axiosBuyerClient, axiosSellerClient } from '../../utils/axiosClient';
+import { useDispatch } from 'react-redux';
+import { setAuthToken, setUserType, UserType } from '../../store/user';
+import { AppScreens } from '../../navigators/AppNavigator';
+
+// Country code options for phone field
+const COUNTRY_CODES = [
+  { code: '+92', label: '🇵🇰 +92' },
+  { code: '+1', label: '🇺🇸 +1' },
+  { code: '+44', label: '🇬🇧 +44' },
+  // Add more as needed
+];
 
 export const RegisterScreen = ({ navigation }) => {
+  const route = useRoute();
+  const { isItSeller = false } = route.params || {};
   // Use translation keys for states and cities
   const stateKeys = [
     'Punjab', 'Sindh', 'KPK', 'Balochistan', 'GilgitBaltistan', 'AzadKashmir'
@@ -29,6 +44,10 @@ export const RegisterScreen = ({ navigation }) => {
 
   const { t } = useTranslation();
   const [isBtnDisable, setIsBtnDisable] = useState(false);
+  const dispatch= useDispatch();
+
+  // For improved phone UI
+  const [countryModalVisible, setCountryModalVisible] = useState(false);
 
   const navigateToPage = pageName => {
     navigation.navigate(pageName);
@@ -37,8 +56,52 @@ export const RegisterScreen = ({ navigation }) => {
   const submitForm = async values => {
     try {
       setIsBtnDisable(true);
+      // Prepare form data for registration
+      const formData = new FormData();
+      formData.append('f_name', values.firstName.trim());
+      formData.append('l_name', values.lastName.trim());
+      formData.append('email', values.email.trim());
+      formData.append('countryCode', values.countryCode || '+92');
+      formData.append('phone', values.phone.trim());
+      formData.append('state', values.state);
+      formData.append('city', values.city);
+      formData.append('password', values.password);
+      formData.append('con_password', values.confirmPassword);
+      formData.append('remember', 'on');
+
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+      };
+      console.log("DATA", formData)
+      let response;
+      if (isItSeller) {
+        console.log("IN seller")
+        response = await axiosSellerClient.post('auth/register', formData, { headers });
+      } else {
+        console.log("IN buyer")
+        response = await axiosBuyerClient.post('auth/register', formData, { headers });
+      }
+      // TODO: handle registration success (e.g., navigation, token storage, etc.)
+      console.debug('Register Success Response', response.data);
+
+      if(response.data.token){
+        console.log("IN TOKEN")
+        dispatch(setUserType(isItSeller ? UserType.SELLER : UserType.BUYER))
+        dispatch(setAuthToken(response.data.token))
+        navigateToPage( isItSeller ?  AppScreens.SELLER_HOME_MAIN: AppScreens.BUYER_HOME_MAIN)
+      
+      }
+      // Optionally navigate to login or home after registration
+      // navigation.navigate('Login');
     } catch (error) {
-      console.log('SUBMISSION ERR:::', error);
+      console.error('True Error ', error);
+      if (error.response) {
+        console.error('Register Error Response', error.response.data);
+      } else {
+        console.error('Register Error', error);
+      }
+      setIsBtnDisable(false);
+    } finally {
       setIsBtnDisable(false);
     }
   };
@@ -55,6 +118,7 @@ export const RegisterScreen = ({ navigation }) => {
           firstName: '',
           lastName: '',
           email: '',
+          countryCode: COUNTRY_CODES[0].code,
           phone: '',
           password: '',
           confirmPassword: '',
@@ -66,6 +130,7 @@ export const RegisterScreen = ({ navigation }) => {
           handleChange,
           handleBlur,
           handleSubmit,
+          setFieldValue,
           values,
           errors,
           touched,
@@ -127,23 +192,75 @@ export const RegisterScreen = ({ navigation }) => {
               caption={touched.email && <InputError errorText={errors.email} />}
               status={errors.email && touched.email ? 'danger' : 'basic'}
             />
-            <Input
-              label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
-                  {t('phone')}
-                  <Text style={{ color: 'red', fontSize: 12 }}> {t('countryCodeNote')}</Text>
+
+
+            {/* Improved Phone Field with Country Code */}
+            <Text  style={styles.label}>
+                    {t('phone')}
+                  </Text>
+                  <Text style={styles.countryCodeNote}>
+              {t('countryCodeNote')}
+            </Text>
+            <View style={styles.phoneRowImproved}>
+              
+              <TouchableOpacity
+                style={styles.countryCodeTouchable}
+                onPress={() => setCountryModalVisible(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.countryCodeText}>
+                  {COUNTRY_CODES.find(c => c.code === values.countryCode)?.label || COUNTRY_CODES[0].label}
                 </Text>
-              )}
-              placeholderTextColor={styles.placeholderTextColor}
-              placeholder="07060000000"
-              style={styles.input}
-              textStyle={styles.textStyle}
-              onChangeText={handleChange('phone')}
-              onBlur={handleBlur('phone')}
-              value={values.phone}
-              caption={touched.phone && <InputError errorText={errors.phone} />}
-              status={errors.phone && touched.phone ? 'danger' : 'basic'}
-            />
+                <Text style={styles.countryCodeDropdownIcon}>▼</Text>
+              </TouchableOpacity>
+              <Input
+                
+                placeholderTextColor={styles.placeholderTextColor}
+                placeholder="300 123 4567"
+                style={styles.phoneInputImproved}
+                textStyle={styles.textStyle}
+                keyboardType="phone-pad"
+                onChangeText={handleChange('phone')}
+                onBlur={handleBlur('phone')}
+                value={values.phone}
+                caption={touched.phone && <InputError errorText={errors.phone} />}
+                status={errors.phone && touched.phone ? 'danger' : 'basic'}
+                maxLength={15}
+                // Remove border on left to blend with country code
+                // UnderlayColor handled by style
+              />
+            </View>
+            <Modal
+              visible={countryModalVisible}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setCountryModalVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPressOut={() => setCountryModalVisible(false)}
+              >
+                <View style={styles.countryModal}>
+                  <FlatList
+                    data={COUNTRY_CODES}
+                    keyExtractor={item => item.code}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={styles.countryModalItem}
+                        onPress={() => {
+                          setFieldValue('countryCode', item.code);
+                          setCountryModalVisible(false);
+                        }}
+                      >
+                        <Text style={styles.countryModalItemText}>{item.label}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Modal>
+            
 
             {/* State Dropdown Select */}
             <Select
@@ -313,7 +430,91 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(130, 130, 130, 0) !important',
     borderColor: 'rgba(24, 29, 180, 0)',
     borderWidth: 1,
-  },  
+  },
+  // Improved phone row styles
+  phoneRowImproved: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgb(170, 170, 170)',
+    backgroundColor: 'rgba(255,255,255,0.42)',
+    overflow: 'hidden',
+  },
+  countryCodeTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(245,245,245,0.95)',
+    borderRightWidth: 1,
+    borderRightColor: 'rgb(170, 170, 170)',
+    minWidth: 90,
+    justifyContent: 'center',
+  },
+  countryCodeText: {
+    fontSize: 16,
+    color: '#222',
+    marginRight: 4,
+  },
+  countryCodeDropdownIcon: {
+    fontSize: 12,
+    color: '#888',
+    marginLeft: 2,
+  },
+  phoneInputImproved: {
+    flex: 1,
+    marginVertical: 0,
+    marginLeft: 0,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    paddingLeft: 10,
+    // Remove border to blend with container
+  },
+  // Modal styles for country code picker
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countryModal: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    width: 280,
+    maxHeight: 350,
+    paddingVertical: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  countryModalItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  countryModalItemText: {
+    fontSize: 16,
+    color: '#222',
+  },
+  phoneRow: {
+    // Deprecated, kept for backward compatibility
+    display: 'none',
+  },
+  countryCodeSelect: {
+    // Deprecated, kept for backward compatibility
+    display: 'none',
+  },
+  countryCodeNote: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 4,
+    marginLeft: 2,
+  },
   textStyle: { fontSize: 14, paddingVertical: 4 },
   label: {
     color: 'black',
@@ -349,7 +550,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
-  subtitle: { 
+  subtitle: {
     fontSize: 16,
     textAlign: 'center',
   },

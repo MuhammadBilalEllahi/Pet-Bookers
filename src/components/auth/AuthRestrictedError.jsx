@@ -1,17 +1,21 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {Button, Layout, Text} from '@ui-kitten/components';
 import {ThemedIcon} from '../Icon';
 import {flexeStyles} from '../../utils/globalStyles';
+import { AppScreens } from '../../navigators/AppNavigator';
 
-export const AuthRestrictedError = ({subTitle}) => {
+export const AuthRestrictedError = ({subTitle, isItSeller=false}) => {
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
+  const route = useRoute()
+  
 
   const onNavigateToAuth = () => {
-    navigation.navigate('Auth');
+    // const { isItSeller= false} = route.params || {};
+    navigation.navigate(AppScreens.AUTH, {isItSeller: isItSeller});
   };
 
   return (

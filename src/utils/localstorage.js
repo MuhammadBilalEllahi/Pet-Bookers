@@ -15,3 +15,14 @@ export const getAsyncUserType = async () => {
 export const setAsyncUserType = async (data) => {
   return await AsyncStorage.setItem('user-type',data);
 };
+
+
+export const delAsyncAuthToken = async () => {
+  return await AsyncStorage.removeItem('auth-token');
+};
+
+export const delAsyncUserType = async () => {
+  return await AsyncStorage.removeItem('user-type');
+};
+
+

@@ -1,5 +1,5 @@
 import {createSelector, createSlice} from '@reduxjs/toolkit';
-import { setAsyncAuthToken } from '../utils/localstorage';
+import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../utils/localstorage';
 
 
 // Use a plain JS object to represent the enum
@@ -23,17 +23,25 @@ const slice = createSlice({
   reducers: {
     setAuthToken: (state, {payload}) => {
       state.authToken = payload;
-      setAsyncAuthToken = payload;
+      if(payload) {setAsyncAuthToken(payload);}
     },
     setUserType: (state, {payload}) => {
       state.userType = payload;
+      if(payload){setAsyncUserType(payload)}
+    },
+    logout: (state) => {
+      state.authToken = null;
+      state.currentUser = null;
+      state.userType = UserType.ANONYMOUS;
+              delAsyncAuthToken()
+              delAsyncUserType()
     },
   },
 });
 
 
 // ACTIONS
-export const {setAuthToken, setUserType} = slice.actions;
+export const {setAuthToken, setUserType, logout} = slice.actions;
 
 
 // SELECTORS

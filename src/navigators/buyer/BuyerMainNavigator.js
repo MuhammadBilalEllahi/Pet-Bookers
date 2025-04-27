@@ -1,26 +1,26 @@
 import React from 'react';
-import {StyleSheet, View, Image} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {useSelector} from 'react-redux';
+import { StyleSheet, View, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSelector } from 'react-redux';
 import {
   BottomNavigation,
   BottomNavigationTab,
   Text,
   useTheme,
 } from '@ui-kitten/components';
-import {ThemedIcon} from '../../components/Icon';
-import {selectShowBottomTabBar} from '../../store/configs';
-import {MainScreensHeader} from '../../components/buyer';
-import {selectIfAnonymous} from '../../store/user';
+import { ThemedIcon } from '../../components/Icon';
+import { selectShowBottomTabBar } from '../../store/configs';
+import { MainScreensHeader } from '../../components/buyer';
+import { selectIfAnonymous } from '../../store/user';
 
 // Screens and Navigation Stacks
-import {BuyerHomeStack} from './BuyerHomeStack';
-import {ChatNavigator} from '../ChatNavigator';
-import {MyWishlistScreen} from '../../screens/buyer/MyWishlistScreen';
-import {BuyerProfileStack} from './BuyerProfileStack';
-import {MyCartScreen} from '../../screens/buyer/MyCartScreen';
-import {AuthRestrictedError} from '../../components/auth/AuthRestrictedError';
+import { BuyerHomeStack } from './BuyerHomeStack';
+import { ChatNavigator } from '../ChatNavigator';
+import { MyWishlistScreen } from '../../screens/buyer/MyWishlistScreen';
+import { BuyerProfileStack } from './BuyerProfileStack';
+import { MyCartScreen } from '../../screens/buyer/MyCartScreen';
+import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -31,15 +31,24 @@ const profileUserIcon = require('../../../assets/new/bottom_nav/profile_user.png
 
 const activeUnderIcon = require('../../../assets/new/bottom_nav/active.png');
 
-const {Navigator, Screen} = createBottomTabNavigator();
+const { Navigator, Screen } = createBottomTabNavigator();
 
-// Use a fixed dark grey for icon and black for text
+// Navigation route enum for buyer main navigator
+export const BuyerMainRoutes = Object.freeze({
+  BUYER_HOME: 'BuyerHome',
+  BUYER_CHAT: 'BuyerChat',
+  BUYER_CART: 'BuyerCart',
+  SELLER_POST_AD: 'SellerPostAd',
+  BUYER_WISHLIST: 'BuyerWishlist',
+  BUYER_PROFILE: 'BuyerProfile',
+});
+
 const ICON_DARK_GREY = '#444444';
 const TEXT_BLACK = '#000000';
 
 // Ensure text does not wrap by setting flexShrink: 0, flexGrow: 0, minWidth: 0, and allowFontScaling: false
 const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => (
-  <View style={styles.iconWithActiveContainer}>
+  <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
     <Image
       source={iconSource}
       style={{
@@ -49,6 +58,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
         tintColor: ICON_DARK_GREY,
         ...customIconStyle,
       }}
+      key={`icon-image-${label}`}
     />
     <Text
       style={{
@@ -63,6 +73,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
       numberOfLines={1}
       ellipsizeMode="clip"
       allowFontScaling={false}
+      key={`icon-label-${label}`}
     >
       {label}
     </Text>
@@ -75,6 +86,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
           resizeMode: 'contain',
           marginTop: 2,
         }}
+        key={`icon-active-underline-${label}`}
       />
     )}
   </View>
@@ -82,14 +94,16 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
 
 // Do not change color of plus icon (no tintColor)
 const renderAddTabIconWithActive = (isActive, label) => (
-  <View style={styles.addButtonContainer}>
+  <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
     <View
       style={[
         styles.addButton,
         {
           borderColor: 'transparent',
         },
-      ]}>
+      ]}
+      key={`addButton-${label}`}
+    >
       <Image
         source={sellPlusIcon}
         style={{
@@ -98,6 +112,7 @@ const renderAddTabIconWithActive = (isActive, label) => (
           resizeMode: 'cover',
           // No tintColor here, so the plus icon keeps its original color
         }}
+        key={`addButton-image-${label}`}
       />
     </View>
     <Text
@@ -113,6 +128,7 @@ const renderAddTabIconWithActive = (isActive, label) => (
       numberOfLines={1}
       ellipsizeMode="clip"
       allowFontScaling={false}
+      key={`addButton-label-${label}`}
     >
       {label}
     </Text>
@@ -125,18 +141,19 @@ const renderAddTabIconWithActive = (isActive, label) => (
           resizeMode: 'contain',
           marginTop: 2,
         }}
+        key={`addButton-active-underline-${label}`}
       />
     )}
   </View>
 );
 
-const BottomTabBar = ({navigation, state, isAnonymous}) => {
+const BottomTabBar = ({ navigation, state, isAnonymous }) => {
   const theme = useTheme();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
 
   return (
-    <View style={styles.bottomTabBarContainer}>
+    <View style={styles.bottomTabBarContainer} key="bottomTabBarContainer">
       <BottomNavigation
         selectedIndex={state.index}
         appearance="noIndicator"
@@ -148,8 +165,11 @@ const BottomTabBar = ({navigation, state, isAnonymous}) => {
             overflow: showBottomTabBar ? 'visible' : 'hidden',
           },
         ]}
-        onSelect={index => navigation.navigate(state.routeNames[index])}>
+        onSelect={index => navigation.navigate(state.routeNames[index])}
+        key="bottomNavigation"
+      >
         <BottomNavigationTab
+          key="tab-home"
           icon={() =>
             renderTabIconWithActive(
               homeIcon,
@@ -159,6 +179,7 @@ const BottomTabBar = ({navigation, state, isAnonymous}) => {
           }
         />
         <BottomNavigationTab
+          key="tab-chat"
           icon={() =>
             renderTabIconWithActive(
               chatIcon,
@@ -168,6 +189,7 @@ const BottomTabBar = ({navigation, state, isAnonymous}) => {
           }
         />
         <BottomNavigationTab
+          key="tab-add"
           icon={() =>
             renderAddTabIconWithActive(
               state.index === 2,
@@ -176,6 +198,7 @@ const BottomTabBar = ({navigation, state, isAnonymous}) => {
           }
         />
         <BottomNavigationTab
+          key="tab-luckydraw"
           icon={() =>
             renderTabIconWithActive(
               luckyDrawIcon,
@@ -186,6 +209,7 @@ const BottomTabBar = ({navigation, state, isAnonymous}) => {
           }
         />
         <BottomNavigationTab
+          key="tab-profile"
           icon={() =>
             renderTabIconWithActive(
               profileUserIcon,
@@ -203,14 +227,19 @@ export const BuyerMainNavigator = () => {
   const isAnonymous = useSelector(selectIfAnonymous);
   return (
     <Navigator
-      tabBar={props => <BottomTabBar {...props} isAnonymous={isAnonymous} />}
-      screenOptions={{headerShown: false}}>
-      <Screen name="BuyerHome" component={BuyerHomeStack} />
+      tabBar={props => <BottomTabBar {...props} isAnonymous={isAnonymous} key="bottomTabBar" />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Screen
+        name={BuyerMainRoutes.BUYER_HOME}
+        component={BuyerHomeStack}
+        key="screen-BuyerHome"
+      />
       {isAnonymous
         ? [
             <Screen
-              key="BuyerChat"
-              name="BuyerChat"
+              key="screen-BuyerChat-anon"
+              name={BuyerMainRoutes.BUYER_CHAT}
               options={{
                 headerShown: true,
                 header: props => (
@@ -220,17 +249,19 @@ export const BuyerMainNavigator = () => {
                     title="Chat"
                   />
                 ),
-              }}>
+              }}
+            >
               {props => (
                 <AuthRestrictedError
                   {...props}
                   subTitle="messages.loginRequired"
+                  key="authError-BuyerChat-anon"
                 />
               )}
             </Screen>,
             <Screen
-              key="SellerPostAd"
-              name="SellerPostAd"
+              key="screen-SellerPostAd-anon"
+              name={BuyerMainRoutes.SELLER_POST_AD}
               options={{
                 headerShown: true,
                 header: props => (
@@ -240,17 +271,20 @@ export const BuyerMainNavigator = () => {
                     title="AddProduct"
                   />
                 ),
-              }}>
+              }}
+            >
               {props => (
                 <AuthRestrictedError
                   {...props}
+                  isItSeller= {true}
                   subTitle="messages.sellerLoginRequired"
+                  key="authError-SellerPostAd-anon"
                 />
               )}
             </Screen>,
             <Screen
-              key="BuyerWishlist"
-              name="BuyerWishlist"
+              key="screen-BuyerWishlist-anon"
+              name={BuyerMainRoutes.BUYER_WISHLIST}
               options={{
                 headerShown: true,
                 header: props => (
@@ -260,17 +294,19 @@ export const BuyerMainNavigator = () => {
                     title="BuyerWishlist"
                   />
                 ),
-              }}>
+              }}
+            >
               {props => (
                 <AuthRestrictedError
                   {...props}
                   subTitle="messages.buyerLoginRequired"
+                  key="authError-BuyerWishlist-anon"
                 />
               )}
             </Screen>,
             <Screen
-              key="BuyerProfile"
-              name="BuyerProfile"
+              key="screen-BuyerProfile-anon"
+              name={BuyerMainRoutes.BUYER_PROFILE}
               options={{
                 headerShown: true,
                 header: props => (
@@ -280,43 +316,46 @@ export const BuyerMainNavigator = () => {
                     title="Profile"
                   />
                 ),
-              }}>
+              }}
+            >
               {props => (
                 <AuthRestrictedError
                   {...props}
                   subTitle="messages.loginRequired"
+                  key="authError-BuyerProfile-anon"
                 />
               )}
             </Screen>,
           ]
         : [
             <Screen
-              key="BuyerChat"
-              name="BuyerChat"
+              key="screen-BuyerChat"
+              name={BuyerMainRoutes.BUYER_CHAT}
               component={ChatNavigator}
             />,
             <Screen
-              name="BuyerCart"
+              key="screen-BuyerCart"
+              name={BuyerMainRoutes.BUYER_CART}
               component={MyCartScreen}
               options={{
                 headerShown: true,
                 header: props => (
-                  <MainScreensHeader {...props} hideSearch={true} />
+                  <MainScreensHeader {...props} hideSearch={true} key="header-BuyerCart" />
                 ),
               }}
             />,
             <Screen
-              key="BuyerWishlist"
-              name="BuyerWishlist"
+              key="screen-BuyerWishlist"
+              name={BuyerMainRoutes.BUYER_WISHLIST}
               component={MyWishlistScreen}
               options={{
                 headerShown: true,
-                header: props => <MainScreensHeader {...props} />,
+                header: props => <MainScreensHeader {...props} key="header-BuyerWishlist" />,
               }}
             />,
             <Screen
-              key="BuyerProfile"
-              name="BuyerProfile"
+              key="screen-BuyerProfile"
+              name={BuyerMainRoutes.BUYER_PROFILE}
               component={BuyerProfileStack}
             />,
           ]}

@@ -12,7 +12,9 @@ import {AirbnbRating} from 'react-native-ratings';
 import {ProfileActionButton} from '../../components/profile';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
 import { useDispatch } from 'react-redux';
-import { setAuthToken, setUserType, UserType } from '../../store/user';
+import { logout, setAuthToken, setUserType, UserType } from '../../store/user';
+import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../../utils/localstorage';
+
 
 export const SellerProfileScreen = ({navigation}) => {
   const theme = useTheme();
@@ -36,6 +38,11 @@ export const SellerProfileScreen = ({navigation}) => {
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
   };
+
+  const navigateToPage = (page) => {
+    navigation.navigate(page);
+  };
+  
 
   return (
     <Layout
@@ -180,8 +187,7 @@ export const SellerProfileScreen = ({navigation}) => {
             title="Logout"
             iconName="power-outline"
             onPress={() => {
-              dispatch(setUserType(UserType.ANONYMOUS))
-              dispatch(setAuthToken(null))
+              dispatch(logout())
             }}
           />
         </Layout>

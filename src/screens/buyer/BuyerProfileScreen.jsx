@@ -10,7 +10,9 @@ import {ScrollView} from 'react-native';
 import {ProfileActionButton} from '../../components/profile';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
 import { useDispatch } from 'react-redux';
-import { setAuthToken, setUserType, UserType } from '../../store/user';
+import { logout, setAuthToken, setUserType, UserType } from '../../store/user';
+import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../../utils/localstorage';
+
 
 export const BuyerProfileScreen = ({navigation}) => {
 
@@ -31,6 +33,9 @@ export const BuyerProfileScreen = ({navigation}) => {
   };
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
+  };
+  const navigateToPage = (page) => {
+    navigation.navigate(page);
   };
 
   return (
@@ -111,10 +116,9 @@ export const BuyerProfileScreen = ({navigation}) => {
           <Divider />
           <ProfileActionButton
             title="Logout"
-            iconName="power-outline"
+            iconName="power"
             onPress={() => {
-              dispatch(setUserType(UserType.ANONYMOUS))
-              dispatch(setAuthToken(null))
+              dispatch(logout())
             }}
           />
         </Layout>

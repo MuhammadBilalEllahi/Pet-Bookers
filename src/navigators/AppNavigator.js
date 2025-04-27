@@ -1,40 +1,55 @@
-import React, {useEffect} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {loadAppConfigs} from '../store/configs';
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { loadAppConfigs } from '../store/configs';
 
 // Navigators
-import {AuthLoaderScreen} from '../screens/AuthLoaderScreen';
-import {SplashScreen} from '../screens/SplashScreen';
-import {AuthNavigator} from './AuthNavigator';
-import {BuyerMainNavigator} from './buyer/BuyerMainNavigator';
-import {SellerMainNavigator} from './seller/SellerMainNavigator';
+import { AuthLoaderScreen } from '../screens/AuthLoaderScreen';
+import { SplashScreen } from '../screens/SplashScreen';
+import { AuthNavigator } from './AuthNavigator';
+import { BuyerMainNavigator } from './buyer/BuyerMainNavigator';
+import { SellerMainNavigator } from './seller/SellerMainNavigator';
 import { LoginScreen } from '../screens/auth/Login';
 import { RegisterScreen } from '../screens/auth/Register';
-const {Navigator, Screen} = createNativeStackNavigator();
+
+const { Navigator, Screen } = createNativeStackNavigator();
+
+// Enum for App Screens
+export const AppScreens = Object.freeze({
+  SPLASH: 'Splash',
+  LOGIN: 'Login',
+  REGISTER: 'Register',
+  AUTH_LOADER: 'AuthLoader',
+  AUTH: 'Auth',
+  SELLER_HOME_MAIN: 'SellerHomeMain',
+  BUYER_HOME_MAIN: 'BuyerHomeMain',
+});
 
 export const AppNavigator = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(loadAppConfigs());
-  }, []);
+  }, [dispatch]);
 
   return (
     <NavigationContainer>
       <Navigator
-        screenOptions={{headerShown: false, gestureEnabled: false}}
-        initialRouteName="AuthLoader">
-        <Screen name="Splash" component={SplashScreen} />
-        <Screen name="Login" component={LoginScreen} />
-        <Screen name="Register" component={RegisterScreen} />
-        <Screen name="AuthLoader" component={AuthLoaderScreen} />
-        <Screen name="Auth" component={AuthNavigator} />
-        <Screen name="SellerHomeMain" component={SellerMainNavigator} />
-        <Screen name="BuyerHomeMain" component={BuyerMainNavigator} />
+      
+        screenOptions={{ headerShown: false, gestureEnabled: false }}
+        initialRouteName={AppScreens.AUTH_LOADER}
+      >
+        <Screen name={AppScreens.SPLASH} component={SplashScreen} />
+        <Screen name={AppScreens.LOGIN} component={LoginScreen} />
+        <Screen name={AppScreens.REGISTER} component={RegisterScreen} />
+        <Screen name={AppScreens.AUTH_LOADER} component={AuthLoaderScreen} />
+        <Screen name={AppScreens.AUTH} component={AuthNavigator} />
+        <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
+        <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
+
       </Navigator>
+      
     </NavigationContainer>
   );
 };
- 

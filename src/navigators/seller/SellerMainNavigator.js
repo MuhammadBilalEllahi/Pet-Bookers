@@ -1,8 +1,8 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {useSelector} from 'react-redux';
+import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSelector } from 'react-redux';
 import {
   BottomNavigation,
   BottomNavigationTab,
@@ -10,21 +10,30 @@ import {
   Text,
   useTheme,
 } from '@ui-kitten/components';
-import {ThemedIcon} from '../../components/Icon';
-import {selectShowBottomTabBar} from '../../store/configs';
+import { ThemedIcon } from '../../components/Icon';
+import { selectShowBottomTabBar } from '../../store/configs';
 
 // Screens and Navigation Stacks
-import {SellerHomeStack} from './SellerHomeStack';
-import {ChatNavigator} from '../ChatNavigator';
-import {SellerNewProductStack} from './SellerNewProductStack';
-import {SellerProfileStack} from './SellerProfileStack';
-import {SellerPostedProductsStack} from './SellerPostedProductsStack';
+import { SellerHomeStack } from './SellerHomeStack';
+import { ChatNavigator } from '../ChatNavigator';
+import { SellerNewProductStack } from './SellerNewProductStack';
+import { SellerProfileStack } from './SellerProfileStack';
+import { SellerPostedProductsStack } from './SellerPostedProductsStack';
 
-const {Navigator, Screen} = createBottomTabNavigator();
+const { Navigator, Screen } = createBottomTabNavigator();
 
-const BottomTabBar = ({navigation, state}) => {
+// Enum for Seller Tab Navigation
+export const SellerTabRoutes = Object.freeze({
+  HOME: 'SellerHome',
+  CHAT: 'SellerChat',
+  POST_AD: 'SellerPostAd',
+  MY_POSTED_ADS: 'MyPostedAds',
+  PROFILE: 'SellerProfile',
+});
+
+const BottomTabBar = ({ navigation, state }) => {
   const theme = useTheme();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
 
   return (
@@ -36,7 +45,8 @@ const BottomTabBar = ({navigation, state}) => {
         bottom: showBottomTabBar ? 0 : -1000,
         overflow: showBottomTabBar ? 'visible' : 'hidden',
       }}
-      onSelect={index => navigation.navigate(state.routeNames[index])}>
+      onSelect={index => navigation.navigate(state.routeNames[index])}
+    >
       <BottomNavigationTab
         icon={props => <Icon {...props} name="home-outline" />}
         title={t('tabs.home')}
@@ -54,12 +64,13 @@ const BottomTabBar = ({navigation, state}) => {
                 {
                   borderColor: theme['color-primary-default'],
                 },
-              ]}>
+              ]}
+            >
               <ThemedIcon
                 {...props}
                 name="plus-outline"
                 fill={state.index === 2 && theme['color-primary-default']}
-                iconStyle={{width: 30, height: 30}}
+                iconStyle={{ width: 30, height: 30 }}
               />
             </View>
             <Text
@@ -70,7 +81,8 @@ const BottomTabBar = ({navigation, state}) => {
                   state.index === 2
                     ? theme['color-primary-default']
                     : theme['color-basic-600'],
-              }}>
+              }}
+            >
               {t('tabs.add')}
             </Text>
           </View>
@@ -92,18 +104,19 @@ export const SellerMainNavigator = () => {
   return (
     <Navigator
       tabBar={props => <BottomTabBar {...props} />}
-      screenOptions={{headerShown: false}}>
-      <Screen name="SellerHome" component={SellerHomeStack} />
-      <Screen name="SellerChat" component={ChatNavigator} />
+      screenOptions={{ headerShown: false }}
+    >
+      <Screen name={SellerTabRoutes.HOME} component={SellerHomeStack} />
+      <Screen name={SellerTabRoutes.CHAT} component={ChatNavigator} />
       <Screen
-        name="SellerPostAd"
+        name={SellerTabRoutes.POST_AD}
         component={SellerNewProductStack}
         options={{
           unmountOnBlur: true,
         }}
       />
-      <Screen name="MyPostedAds" component={SellerPostedProductsStack} />
-      <Screen name="SellerProfile" component={SellerProfileStack} />
+      <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} />
+      <Screen name={SellerTabRoutes.PROFILE} component={SellerProfileStack} />
     </Navigator>
   );
 };

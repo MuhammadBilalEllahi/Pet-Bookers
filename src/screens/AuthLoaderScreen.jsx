@@ -3,8 +3,9 @@ import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Layout, Spinner} from '@ui-kitten/components';
 import {flexeStyles} from '../utils/globalStyles';
-import {setAuthToken, setUserType} from '../store/user';
+import {setAuthToken, setUserType, UserType} from '../store/user';
 import { StyleSheet,Image, Dimensions } from 'react-native';
+import { AppScreens } from '../navigators/AppNavigator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,13 +23,13 @@ export const AuthLoaderScreen = ({navigation}) => {
 
       dispatch(setAuthToken(token));
       dispatch(setUserType(userType));
-      if (userType === 'buyer') {
-        navigation.navigate('BuyerHomeMain');
+      if (userType === UserType.BUYER) {
+        navigation.navigate(AppScreens.BUYER_HOME_MAIN);
       } else {
-        navigation.navigate('SellerHomeMain');
+        navigation.navigate(AppScreens.SELLER_HOME_MAIN);
       }
     } catch (error) {
-      navigation.navigate('BuyerHomeMain');
+      navigation.navigate(AppScreens.BUYER_HOME_MAIN);
     }
   };
 

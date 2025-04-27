@@ -12,11 +12,16 @@ import { axiosBuyerClient, axiosSellerClient, } from '../../utils/axiosClient';
 import { setAuthToken, setUserType, UserType } from '../../store/user';
 import { getAuthToken } from '../../utils/localstorage';
 import { useDispatch } from 'react-redux';
+import { AppScreens } from '../../navigators/AppNavigator';
+import { useRoute } from '@react-navigation/native';
 // import axios from 'axios';
 
 // const SELLER_LOGIN_URL = 'https://petbookers.com.pk/api/v3/seller/auth/login';
 
-export const LoginScreen = ({ navigation, isItSeller = false }) => {
+export const LoginScreen = ({ navigation  }) => {
+  const route = useRoute()
+  const { isItSeller= false} = route.params || {};
+  console.debug("THIS IS ", isItSeller)
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -62,10 +67,11 @@ export const LoginScreen = ({ navigation, isItSeller = false }) => {
         console.log("IN TOKEN")
         dispatch(setUserType(isSeller ? UserType.SELLER : UserType.BUYER))
         dispatch(setAuthToken(response.data.token))
+        navigateToPage( isSeller ?  AppScreens.SELLER_HOME_MAIN: AppScreens.BUYER_HOME_MAIN)
       }
 
-      const v = await getAuthToken();
-      console.log("MEOW", v)
+      // const v = await getAuthToken();
+      // console.log("MEOW", v)
 
     } catch (error) {
       // TODO: handle error (e.g., show error message)
