@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
-import {StyleSheet, ScrollView} from 'react-native';
-import {Button, Layout, Text, Input} from '@ui-kitten/components';
-import {Formik} from 'formik';
-import {InputError, BtnIndicator} from '../../components/form';
-import {spacingStyles} from '../../utils/globalStyles';
+import React, { useState } from 'react';
+import { StyleSheet, ScrollView, View } from 'react-native';
+import { Button, Layout, Text, Input, Icon } from '@ui-kitten/components';
+import { Formik } from 'formik';
+import { InputError, BtnIndicator } from '../../components/form';
+import { spacingStyles } from '../../utils/globalStyles';
 
-export const UpdateProfileScreen = ({navigation}) => {
+export const UpdateProfileScreen = ({ navigation }) => {
   const [isBtnDisable, setIsBtnDisable] = useState(false);
 
   const submitForm = async values => {
@@ -20,8 +20,18 @@ export const UpdateProfileScreen = ({navigation}) => {
     }
   };
 
+  const navigateToPasswordUpdate = () => {
+    navigation.navigate('UpdatePassword');
+  };
+
+  // Senior: Memoize icon for performance and consistency
+  const LockIcon = React.useCallback(
+    (props) => <Icon {...props} name="lock-outline" />,
+    []
+  );
+
   return (
-    <Layout level="3" style={{flex: 1}}>
+    <Layout level="3" style={{ flex: 1 }}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -31,7 +41,8 @@ export const UpdateProfileScreen = ({navigation}) => {
             flexGrow: 1,
             paddingTop: 16,
           },
-        ]}>
+        ]}
+      >
         <Layout style={spacingStyles.p16} level="1">
           <Text>Fill up all the fields to update your profile</Text>
           <Formik
@@ -41,7 +52,8 @@ export const UpdateProfileScreen = ({navigation}) => {
               email: 'johndoe@gamil.com',
               phone: '+92 340 1234567',
             }}
-            onSubmit={submitForm}>
+            onSubmit={submitForm}
+          >
             {({
               handleChange,
               handleBlur,
@@ -107,12 +119,24 @@ export const UpdateProfileScreen = ({navigation}) => {
                   status={errors.phone && touched.phone ? 'danger' : 'basic'}
                 />
                 <Button
-                  style={{marginTop: 16, borderRadius: 100}}
+                  style={{ marginTop: 16, borderRadius: 100 }}
                   disabled={isBtnDisable}
                   accessoryRight={isBtnDisable && BtnIndicator}
-                  onPress={handleSubmit}>
+                  onPress={handleSubmit}
+                >
                   Update Profile
                 </Button>
+                <View style={styles.changePasswordContainer}>
+                  <Button
+                    appearance="outline"
+                    status="primary"
+                    accessoryLeft={LockIcon}
+                    style={styles.changePasswordBtn}
+                    onPress={navigateToPasswordUpdate}
+                  >
+                    Change Password
+                  </Button>
+                </View>
               </Layout>
             )}
           </Formik>
@@ -125,5 +149,13 @@ export const UpdateProfileScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   input: {
     marginVertical: 8,
+  },
+  changePasswordContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  changePasswordBtn: {
+    borderRadius: 100,
+    minWidth: 180,
   },
 });
