@@ -58,5 +58,10 @@
 		<string>NotoNaskhArabic-Regular.ttf</string>
 		<string>NotoNaskhArabic-SemiBold.ttf</string>
 	</array>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To upload profile Image or Farm Image we want to access PhotoLibrary</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To upload Pets Images we want to access PhotoLibrary</string>
 </dict>
 </plist>

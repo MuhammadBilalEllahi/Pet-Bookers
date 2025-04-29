@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Modal, FlatList, PermissionsAndroid, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Layout, Text, Input } from '@ui-kitten/components';
 import { Formik } from 'formik';
@@ -14,6 +14,24 @@ import { axiosBuyerClient, axiosSellerClient } from '../../utils/axiosClient';
 import { useDispatch } from 'react-redux';
 import { setAuthToken, setUserType, UserType } from '../../store/user';
 import { AppScreens } from '../../navigators/AppNavigator';
+import {launchImageLibrary} from 'react-native-image-picker';
+import axios from 'axios';
+
+// Permission request helper for gallery access
+const requestGalleryPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  } else if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  }
+  return true; // iOS handles it via Info.plist
+};
 
 // Country code options for phone field
 const COUNTRY_CODES = [
@@ -49,8 +67,28 @@ export const RegisterScreen = ({ navigation }) => {
   // For improved phone UI
   const [countryModalVisible, setCountryModalVisible] = useState(false);
 
-  const navigateToPage = pageName => {
-    navigation.navigate(pageName);
+  const navigateToPage = (pageName, params={}) => {
+    navigation.navigate(pageName, params);
+  };
+
+  // Helper to pick image and set in Formik, with permission check
+  const handleImagePick = async (field, setFieldValue) => {
+    console.log("IMAGE PICKING", field)
+    const hasPermission = await requestGalleryPermission();
+    if (!hasPermission) {
+      // Optionally show a message to the user
+      return;
+    }
+    const result = await launchImageLibrary({mediaType: 'photo'});
+    if (result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      // asset.uri, asset.fileName, asset.type
+      setFieldValue(field, {
+        uri: asset.uri,
+        name: asset.fileName || 'image.jpg',
+        type: asset.type || 'image/jpeg',
+      });
+    }
   };
 
   const submitForm = async values => {
@@ -68,6 +106,14 @@ export const RegisterScreen = ({ navigation }) => {
       formData.append('password', values.password);
       formData.append('con_password', values.confirmPassword);
       formData.append('remember', 'on');
+      // Seller-specific fields
+      if (isItSeller) {
+        if (values.image && values.image.uri) formData.append('image', { uri: values.image.uri, name: values.image.name, type: values.image.type });
+        formData.append('shop_name', values.shop_name);
+        formData.append('shop_address', values.shop_address);
+        if (values.logo && values.logo.uri) formData.append('logo', { uri: values.logo.uri, name: values.logo.name, type: values.logo.type });
+        if (values.banner && values.banner.uri) formData.append('banner', { uri: values.banner.uri, name: values.banner.name, type: values.banner.type });
+      }
 
       const headers = {
         'Content-Type': 'multipart/form-data',
@@ -76,13 +122,38 @@ export const RegisterScreen = ({ navigation }) => {
       let response;
       if (isItSeller) {
         console.log("IN seller")
-        response = await axiosSellerClient.post('auth/register', formData, { headers });
+        response = await axiosSellerClient.post('registration', formData, { headers });
+        if (response.status >= 200 && response.status < 300) {
+          console.log("IN FORM")
+          // const formData = new FormData();
+          // formData.append('email', values.email.trim());
+          // formData.append('password', values.password);
+          // console.log("FORM NEW DATA ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", formData)
+          // try {
+          //   const responseToLogin = await axiosSellerClient.post('auth/login', formData, {headers});
+          //   console.debug("RESPONSE", responseToLogin)
+          //   if(responseToLogin.status >= 200 && responseToLogin.status < 300){
+          //     if (response?.data?.token) {
+          //       console.log("IN TOKEN")
+          //       dispatch(setUserType(UserType.SELLER))
+          //       dispatch(setAuthToken(response.data.token))
+          //       navigateToPage(AppScreens.SELLER_HOME_MAIN)
+          //     }
+          //     else{
+                // navigateToPage(AppScreens.LOGIN, {isItSeller: true, email: values.email.trim(), password: values.password})
+          //     }
+          //   }
+          // } catch (error) {
+          //   console.error("THE ERROR", error)
+          // }
+        }
       } else {
         console.log("IN buyer")
         response = await axiosBuyerClient.post('auth/register', formData, { headers });
       }
       // TODO: handle registration success (e.g., navigation, token storage, etc.)
-      console.debug('Register Success Response', response.data);
+      console.debug('Register Success Response->', response);
+      console.debug('\nRegister Success Response', response.data);
 
       if(response.data.token){
         console.log("IN TOKEN")
@@ -90,13 +161,15 @@ export const RegisterScreen = ({ navigation }) => {
         dispatch(setAuthToken(response.data.token))
         navigateToPage( isItSeller ?  AppScreens.SELLER_HOME_MAIN: AppScreens.BUYER_HOME_MAIN)
       
+      }else{
+        navigateToPage(AppScreens.LOGIN, {isItSeller: isItSeller, email: values.email.trim(), password: values.password})
       }
       // Optionally navigate to login or home after registration
       // navigation.navigate('Login');
     } catch (error) {
       console.error('True Error ', error);
       if (error.response) {
-        console.error('Register Error Response', error.response.data);
+        console.error('Register Error Response', error.response);
       } else {
         console.error('Register Error', error);
       }
@@ -124,6 +197,12 @@ export const RegisterScreen = ({ navigation }) => {
           confirmPassword: '',
           state: '',
           city: '',
+          // Seller-specific fields
+          image: null,
+          shop_name: '',
+          shop_address: '',
+          logo: null,
+          banner: null,
         }}
         onSubmit={submitForm}>
         {({
@@ -136,6 +215,83 @@ export const RegisterScreen = ({ navigation }) => {
           touched,
         }) => (
           <Layout style={styles.inputContainer}>
+            {/* Seller Personal Image Picker */}
+            {isItSeller && (
+              <View style={{ marginBottom: 10 }}>
+                <Text style={styles.label}>{t('profileImage') || 'Profile Image'}</Text>
+                <ImagePicker
+                  title={t('chooseProfileImage') || 'Choose Image'}
+                  onPress={() => handleImagePick('image', setFieldValue)}
+                />
+                {values.image && values.image.uri && (
+                  <Text style={{ color: 'green', fontSize: 12 }}>{t('imageSelected') || 'Image selected'}</Text>
+                )}
+              </View>
+            )}
+            {/* Shop Name */}
+            {isItSeller && (
+              <Input
+                label={(evaProps) => (
+                  <Text {...evaProps} style={styles.label}>
+                    {t('shopName') || 'Shop Name'}
+                  </Text>
+                )}
+                placeholderTextColor={styles.placeholderTextColor}
+                placeholder={t('enterShopName') || 'Enter shop name'}
+                style={styles.input}
+                textStyle={styles.textStyle}
+                onChangeText={handleChange('shop_name')}
+                onBlur={handleBlur('shop_name')}
+                value={values.shop_name}
+                caption={touched.shop_name && <InputError errorText={errors.shop_name} />}
+                status={errors.shop_name && touched.shop_name ? 'danger' : 'basic'}
+              />
+            )}
+            {/* Shop Address */}
+            {isItSeller && (
+              <Input
+                label={(evaProps) => (
+                  <Text {...evaProps} style={styles.label}>
+                    {t('shopAddress') || 'Shop Address'}
+                  </Text>
+                )}
+                placeholderTextColor={styles.placeholderTextColor}
+                placeholder={t('enterShopAddress') || 'Enter shop address'}
+                style={styles.input}
+                textStyle={styles.textStyle}
+                onChangeText={handleChange('shop_address')}
+                onBlur={handleBlur('shop_address')}
+                value={values.shop_address}
+                caption={touched.shop_address && <InputError errorText={errors.shop_address} />}
+                status={errors.shop_address && touched.shop_address ? 'danger' : 'basic'}
+              />
+            )}
+            {/* Shop Logo Picker */}
+            {isItSeller && (
+              <View style={{ marginBottom: 10 }}>
+                <Text style={styles.label}>{t('shopLogo') || 'Shop Logo'}</Text>
+                <ImagePicker
+                  title={t('chooseShopLogo') || 'Choose Logo'}
+                  onPress={() => handleImagePick('logo', setFieldValue)}
+                />
+                {values.logo && values.logo.uri && (
+                  <Text style={{ color: 'green', fontSize: 12 }}>{t('logoSelected') || 'Logo selected'}</Text>
+                )}
+              </View>
+            )}
+            {/* Shop Banner Picker */}
+            {isItSeller && (
+              <View style={{ marginBottom: 10 }}>
+                <Text style={styles.label}>{t('shopBanner') || 'Shop Banner'}</Text>
+                <ImagePicker
+                  title={t('chooseShopBanner') || 'Choose Banner'}
+                  onPress={() => handleImagePick('banner', setFieldValue)}
+                />
+                {values.banner && values.banner.uri && (
+                  <Text style={{ color: 'green', fontSize: 12 }}>{t('bannerSelected') || 'Banner selected'}</Text>
+                )}
+              </View>
+            )}
             <Input
               label={(evaProps) => (
                 <Text {...evaProps} style={styles.label}>
@@ -403,6 +559,7 @@ export const RegisterScreen = ({ navigation }) => {
     </AuthContainer>
   );
 };
+
 
 const styles = StyleSheet.create({
   subTitle: {

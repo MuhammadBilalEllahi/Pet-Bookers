@@ -20,8 +20,8 @@ import { useRoute } from '@react-navigation/native';
 
 export const LoginScreen = ({ navigation  }) => {
   const route = useRoute()
-  const { isItSeller= false} = route.params || {};
-  console.debug("THIS IS ", isItSeller)
+  const { isItSeller= false, email='', password= ''} = route.params || {};
+  console.debug("THIS IS ", isItSeller, email, password)
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -120,10 +120,11 @@ export const LoginScreen = ({ navigation  }) => {
 
         <Formik
           initialValues={{
-            email: '',
-            password: '',
+            email: route.params?.email || '',
+            password: route.params?.password || '',
             phone: '',
           }}
+          enableReinitialize={true}
           onSubmit={submitForm}
         >
           {({

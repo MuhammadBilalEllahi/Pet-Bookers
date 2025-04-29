@@ -2,8 +2,8 @@ import React from 'react';
 import {Layout, Text, Icon} from '@ui-kitten/components';
 import {TouchableOpacity, StyleSheet} from 'react-native';
 
-export const ImagePicker = ({title}) => (
-  <TouchableOpacity style={styles.pickerContainer}>
+export const ImagePicker = ({title, onPress}) => (
+  <TouchableOpacity style={styles.pickerContainer} onPress={onPress}>
     <Layout level="3" style={styles.pickerInner}>
       <Icon name="cloud-upload-outline" style={styles.icon} />
       <Text style={styles.pickerTitle} category="label">
