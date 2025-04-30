@@ -48,6 +48,9 @@ export const BuyerHomeStack = () => {
         component={CategoriesListScreen}
         options={{
           title: 'CategoriesList',
+          header: props=>(<MainScreensHeader {...props }  
+            activateGoBack={true}
+            />)
         }}
       />
       <Screen

@@ -15,8 +15,15 @@ export const ChatNavigator = () => {
         gestureEnabled: false,
       }}
       initialRouteName="RoomsList">
-      <Screen name="RoomsList" component={ChatScreen} />
-      <Screen name="Messages" component={MessagesScreen} />
+      <Screen name="RoomsList" component={ChatScreen}
+      options={{
+        header: props=><MainScreensHeader {...props}/>
+      }} />
+      <Screen name="Messages" component={MessagesScreen} 
+      options={{
+        header: props=><MainScreensHeader {...props}/>
+      }}
+      />
     </Navigator>
   );
 };

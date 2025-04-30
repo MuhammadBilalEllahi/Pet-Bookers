@@ -21,6 +21,7 @@ export const CategoriesListScreen = ({navigation}) => {
     navigation.navigate('VandorDetail');
   };
 
+
   return (
     <Layout
       level="3"

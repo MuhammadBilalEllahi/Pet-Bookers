@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { ThemedIcon } from '../Icon';
+import { BackButton } from '../BackButton';
 
-export const MainScreensHeader = ({ navigation, title, hideSearch }) => {
+export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack=false }) => {
   const { t, i18n } = useTranslation();
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
@@ -26,6 +27,12 @@ export const MainScreensHeader = ({ navigation, title, hideSearch }) => {
     navigation.navigate('AppSettings');
   };
 
+  
+  const onGoBack = () => {
+    navigation.goBack();
+  };
+
+
   return (
     <Layout style={[styles.container, spacingStyles.px16, spacingStyles.py8]}>
       <Layout
@@ -35,11 +42,13 @@ export const MainScreensHeader = ({ navigation, title, hideSearch }) => {
           flexeStyles.contentBetween,
         ]}
       >
+        {
+          activateGoBack?<BackButton fill='#121212' onPress={onGoBack} />:
         <Image
           source={require('../../../assets/new/main_logo.png')}
           style={styles.logo}
           resizeMode="contain"
-        />
+        />}
         <Layout
           style={[
             flexeStyles.row,
