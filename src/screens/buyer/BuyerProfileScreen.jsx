@@ -6,12 +6,14 @@ import {
   Layout,
   Text,
 } from '@ui-kitten/components';
-import {ScrollView} from 'react-native';
-import {ProfileActionButton} from '../../components/profile';
+import {Dimensions, Image, ScrollView, StyleSheet, View} from 'react-native';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
 import { useDispatch } from 'react-redux';
 import { logout, setAuthToken, setUserType, UserType } from '../../store/user';
 import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../../utils/localstorage';
+import { ProfileActionButton } from '../../components/profile';
+
+const { width, height} = Dimensions.get('window')
 
 
 export const BuyerProfileScreen = ({navigation}) => {
@@ -42,7 +44,7 @@ export const BuyerProfileScreen = ({navigation}) => {
     <Layout
       level="3"
       style={[
-        spacingStyles.px16,
+        // spacingStyles.px16,
         {
           flex: 1,
           overflow: 'scroll',
@@ -53,76 +55,108 @@ export const BuyerProfileScreen = ({navigation}) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           flexGrow: 1,
-          paddingTop: 10,
+          paddingTop: 40,
           paddingBottom: 90,
         }}>
-        <Layout level="1" style={[spacingStyles.p16, {marginVertical: 4}]}>
-          <Layout style={[flexeStyles.row, {marginBottom: 10}]}>
-            <Avatar
-              source={{uri: 'https://randomuser.me/api/portraits/men/1.jpg'}}
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 10,
-                marginRight: 10,
-              }}
-            />
-            <Layout>
-              <Text category="h6">John Doe</Text>
-              <Text category="p1" style={{marginVertical: 4}}>
-                johndoe@gmail.com
-              </Text>
-              <Text category="p1">+92 340 1234567</Text>
-            </Layout>
-            <Layout style={{marginLeft: 'auto'}}>
-              <Button
-                appearance="ghost"
-                accessoryLeft={EditIcon}
-                onPress={navigateToProfileUpdate}
+         <Image
+        source={require('../../../assets/new/login_page_bg.png')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
+        
+        <Layout level="1" style={[spacingStyles.p16, { marginVertical: 0, backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 12 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Avatar
+                source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+                style={{ width: 48, height: 48, borderRadius: 24, marginRight: 14 }}
               />
-            </Layout>
+              <View>
+                <Text style={{ fontWeight: 'bold', fontSize: 20, color: '#222' }}>Osama Tabassum</Text>
+                <Text
+                  style={{ color: '#121212', fontSize: 14, textDecorationLine: 'underline', marginTop: 2 }}
+                  onPress={navigateToProfileUpdate}
+                >
+                  View and edit profile
+                </Text>
+              </View>
+            </View>
           </Layout>
+
           <Divider />
-          <Layout
-            style={[
-              flexeStyles.row,
-              {
-                marginTop: 4,
-                justifyContent: 'flex-end',
-              },
-            ]}>
-            <Button
-              appearance="ghost"
-              size="small"
-              style={{marginLeft: 8}}
-              accessoryLeft={LockIcon}
-              onPress={navigateToPasswordUpdate}>
-              Change Password
-            </Button>
-          </Layout>
-        </Layout>
-        <Layout level="1" style={[spacingStyles.p16, {marginVertical: 4}]}>
+        
+        <Layout level="1" style={[
+          // spacingStyles.p16,
+          //  {marginVertical: 4}
+           ]}>
           <ProfileActionButton
             title="My Orders"
+            subtitle="Orders are here"
             iconName="cube-outline"
             onPress={navigateToOrdersList}
           />
           <Divider />
           <ProfileActionButton
             title="Settings"
+            subtitle="Settings are here now"
             iconName="settings-2-outline"
             onPress={navigateToAppSettings}
           />
           <Divider />
           <ProfileActionButton
+            title="Cart"
+            subtitle="Settings are here now"
+            iconName="shopping-cart-outline"
+            onPress={navigateToAppSettings}
+          />
+          <Divider />
+          <ProfileActionButton
             title="Logout"
+            subtitle="You can log out here"
             iconName="power"
             onPress={() => {
               dispatch(logout())
             }}
           />
         </Layout>
+        <View style={styles.bottomBar}>
+        <View style={styles.pillButton}><Text style={styles.pillButtonText}>Our Services</Text></View>
+        <View style={styles.pillButton}><Text style={styles.pillButtonText}>Term & Conditions</Text></View>
+        <View style={styles.pillButton}><Text style={styles.pillButtonText}>Contact us</Text></View>
+      </View>
       </ScrollView>
     </Layout>
   );
 };
+
+
+const styles = StyleSheet.create({
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    width:width ,
+    height:height *0.9,
+    zIndex: 0,
+  },
+  
+  bottomBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    marginTop: 18,
+    marginBottom: 18,
+    paddingHorizontal: 2,
+  },
+  pillButton: {
+    borderWidth: 1,
+    borderColor:'#636363',
+    borderRadius: 22,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginHorizontal: -30,
+    backgroundColor: '#fff',
+  },
+  pillButtonText: {
+    fontSize: 9,
+    color: '#646464',
+    fontWeight: '500',
+  },
+})

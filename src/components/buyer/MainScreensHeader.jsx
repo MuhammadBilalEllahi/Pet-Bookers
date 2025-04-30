@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Input, Layout } from '@ui-kitten/components';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { ThemedIcon } from '../Icon';
 
@@ -47,6 +47,39 @@ export const MainScreensHeader = ({ navigation, title, hideSearch }) => {
             flexeStyles.contentBetween,
           ]}
         >
+          {/* Language Dropdown */}
+          <View style={{ marginRight: 8 }}>
+            <Button
+              appearance="ghost"
+              accessoryLeft={() => (
+                <Image
+                  source={
+                    i18n.language === 'ur'
+                      ? require('../../../assets/pakistan-flag.png')
+                      : require('../../../assets/us-flag.png')
+                  }
+                  style={{ width: 24, height: 16, marginRight: 4 }}
+                  resizeMode="contain"
+                />
+              )}
+              accessoryRight={() => (
+                <View style={{ marginLeft: 4 }}>
+                  <Text style={{ fontSize: 14, color: '#121212' }}>
+                    {i18n.language === 'ur' ? 'Urdu' : 'English'}
+                  </Text>
+                </View>
+              )}
+              onPress={() => {
+                // Toggle between English and Urdu
+                const newLang = i18n.language === 'ur' ? 'en' : 'ur';
+                i18n.changeLanguage(newLang);
+              }}
+              size="small"
+              style={{ paddingHorizontal: 0, minWidth: 36 }}
+            />
+          </View>
+
+          
           <Button
             style={{ width: 20, height: 20 }}
             appearance="ghost"

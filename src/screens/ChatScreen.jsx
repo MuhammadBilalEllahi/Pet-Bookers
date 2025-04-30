@@ -1,11 +1,13 @@
 import {Icon, Input, Layout, Text, useTheme} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {FlatList, StyleSheet} from 'react-native';
+import {FlatList, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {ConversationItem} from '../components/chat';
 import {setActiveRoom} from '../store/chat';
 import {setBottomTabBarVisibility} from '../store/configs';
 import {spacingStyles} from '../utils/globalStyles';
+import {useState} from 'react';
+import { MainScreensHeader } from '../components/buyer';
 
 const chatList = [
   {
@@ -19,12 +21,12 @@ const chatList = [
   },
   {
     id: 1,
-    title: 'Jane Smith',
-    imgUrl: 'https://randomuser.me/api/portraits/women/2.jpg',
-    msgText: 'Consectetur adipiscing elit.',
-    attachmentType: 'video',
-    lastUpdated: '2023-05-23T08:30:00Z',
-    unreadMessages: 2,
+    name: 'Hamza Chohan',
+    pet: 'Small Cute dark grey rabbit',
+    status: 'available',
+    lastMessage: 'Yes sir still available',
+    avatar: require('../../assets/easypaisa-logo.png'),
+    adStatus: 'active',
   },
   {
     id: 2,
@@ -95,6 +97,8 @@ export const ChatScreen = ({navigation}) => {
   const {t, i18n} = useTranslation();
   const theme = useTheme();
   const dispatch = useDispatch();
+  const [selectedTab, setSelectedTab] = useState('All');
+  const tabs = ['All', 'Buying', 'Selling'];
 
   const renderIcon = props => <Icon {...props} name="search-outline" />;
 
@@ -113,8 +117,9 @@ export const ChatScreen = ({navigation}) => {
   };
 
   return (
-    <Layout level="3" style={{flex: 1}}>
-      <Layout
+    <Layout level="3" style={{flex: 1, backgroundColor: 'white'}}>
+      <MainScreensHeader navigation={navigation} hideSearch={true}/>
+      {/* <Layout
         style={[
           styles.header,
           spacingStyles.px16,
@@ -135,7 +140,26 @@ export const ChatScreen = ({navigation}) => {
           style={{direction: i18n.dir()}}
           accessoryLeft={renderIcon}
         />
-      </Layout>
+      </Layout> */}
+      <View style={styles.tabBar}>
+        {tabs.map(tab => (
+          <TouchableOpacity
+            key={tab}
+            onPress={() => setSelectedTab(tab)}
+            style={[styles.tab, selectedTab === tab && styles.tabActive]}
+          >
+            <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+              {tab}
+            </Text>
+            {selectedTab === tab && <View style={styles.tabUnderline} />}
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.chipRow}>
+        <View style={styles.chipActive}><Text style={styles.chipTextActive}>All</Text></View>
+        <View style={styles.chip}><Text style={styles.chipText}>Unread Chats</Text></View>
+        <View style={styles.chip}><Text style={styles.chipText}>Important</Text></View>
+      </View>
       <FlatList
         data={chatList}
         style={{marginTop: 10, marginHorizontal: 10}}
@@ -155,5 +179,58 @@ const styles = StyleSheet.create({
     shadowOffset: {width: -2, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  tabActive: {},
+  tabText: {
+    fontWeight: 'bold',
+    color: '#888',
+    fontSize: 16,
+  },
+  tabTextActive: {
+    color: '#000',
+  },
+  tabUnderline: {
+    height: 3,
+    backgroundColor: '#000',
+    width: '100%',
+    marginTop: 4,
+    borderRadius: 2,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    marginLeft: 5,
+  },
+  chip: {
+    backgroundColor: '#eee',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginRight: 8,
+  },
+  chipActive: {
+    backgroundColor: '#000',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginRight: 8,
+  },
+  chipText: {
+    color: '#888',
+    fontWeight: 'bold',
+  },
+  chipTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
