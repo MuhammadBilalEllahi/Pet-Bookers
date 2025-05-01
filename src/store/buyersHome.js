@@ -14,6 +14,10 @@ const initialState = {
   popularProducts: [],
   popularProductsLoading: true,
   popularProductsError: null,
+  // Lucky Draw State
+  luckyDraws: [],
+  luckyDrawsLoading: false,
+  luckyDrawsError: null,
 };
 
 export const loadHomeBanners = createAsyncThunk(
@@ -54,6 +58,15 @@ export const loadPopularProducts = createAsyncThunk(
     );
     return result.products;
   },
+);
+
+export const loadLuckyDraws = createAsyncThunk(
+  'buyersHome/loadLuckyDraws',
+  async () => {
+    const {data} = await axiosBuyerClient.get('lucky_draw');
+    // Adjust if API shape is different
+    return data.lucky_draws || data;
+  }
 );
 
 const slice = createSlice({
@@ -125,6 +138,20 @@ const slice = createSlice({
       state.popularProductsError =
         action.payload || 'Failed to load the banners data';
     });
+    builder.addCase(loadLuckyDraws.pending, (state) => {
+      state.luckyDrawsLoading = true;
+      state.luckyDrawsError = null;
+    });
+    builder.addCase(loadLuckyDraws.fulfilled, (state, {payload}) => {
+      state.luckyDraws = payload;
+      state.luckyDrawsLoading = false;
+      state.luckyDrawsError = null;
+    });
+    builder.addCase(loadLuckyDraws.rejected, (state, action) => {
+      state.luckyDraws = [];
+      state.luckyDrawsLoading = false;
+      state.luckyDrawsError = action.error?.message || 'Failed to load lucky draws';
+    });
   },
 });
 
@@ -174,6 +201,15 @@ export const selectPopularProducts = createSelector(
       popularProductsError: data.popularProductsError,
     };
   },
+);
+
+export const selectLuckyDraws = createSelector(
+  state => state.buyersHome,
+  data => ({
+    luckyDraws: data.luckyDraws,
+    luckyDrawsLoading: data.luckyDrawsLoading,
+    luckyDrawsError: data.luckyDrawsError,
+  })
 );
 
 export default slice.reducer;

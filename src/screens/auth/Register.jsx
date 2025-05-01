@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Modal, FlatList, PermissionsAndroid, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Layout, Text, Input } from '@ui-kitten/components';
+import { Layout, Text, Input, Icon } from '@ui-kitten/components';
 import { Formik } from 'formik';
 import { InputError, SubmitButton, ImagePicker } from '../../components/form';
 import { AuthContainer } from '../../components/auth/AuthContainer';
@@ -488,48 +488,76 @@ export const RegisterScreen = ({ navigation }) => {
             </Select>
             {touched.city && <InputError errorText={errors.city} />}
 
-            <Input
-              label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
-                  {t('password')}
-                </Text>
-              )}
-              secureTextEntry={true}
-              placeholderTextColor={styles.placeholderTextColor}
-              style={styles.input}
-              textStyle={styles.textStyle}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              value={values.password}
-              caption={
-                touched.password && <InputError errorText={errors.password} />
-              }
-              status={errors.password && touched.password ? 'danger' : 'basic'}
-            />
-            <Input
-              label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
-                  {t('confirmpassword')}
-                </Text>
-              )}
-              secureTextEntry={true}
-              placeholderTextColor={styles.placeholderTextColor}
-              style={styles.input}
-              textStyle={styles.textStyle}
-              onChangeText={handleChange('confirmPassword')}
-              onBlur={handleBlur('confirmPassword')}
-              value={values.confirmPassword}
-              caption={
-                touched.confirmPassword && (
-                  <InputError errorText={errors.confirmPassword} />
-                )
-              }
-              status={
-                errors.confirmPassword && touched.confirmPassword
-                  ? 'danger'
-                  : 'basic'
-              }
-            />
+            {(() => {
+              const [showPassword, setShowPassword] = React.useState(false);
+              return (
+                <Input
+                  label={(evaProps) => (
+                    <Text {...evaProps} style={styles.label}>
+                      {t('password')}
+                    </Text>
+                  )}
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor={styles.placeholderTextColor}
+                  style={styles.input}
+                  textStyle={styles.textStyle}
+                  onChangeText={handleChange('password')}
+                  onBlur={handleBlur('password')}
+                  value={values.password}
+                  caption={
+                    touched.password && <InputError errorText={errors.password} />
+                  }
+                  status={errors.password && touched.password ? 'danger' : 'basic'}
+                  accessoryRight={props => (
+                    <Icon
+                      {...props}
+                      name={showPassword ? "eye-off" : "eye"}
+                      fill="#8F9BB3"
+                      style={{ width: 26, height: 26 , marginRight: 5}}
+                      onPress={() => setShowPassword(v => !v)}
+                    />
+                  )}
+                />
+              );
+            })()}
+            {(() => {
+              const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+              return (
+                <Input
+                  label={(evaProps) => (
+                    <Text {...evaProps} style={styles.label}>
+                      {t('confirmpassword')}
+                    </Text>
+                  )}
+                  secureTextEntry={!showConfirmPassword}
+                  placeholderTextColor={styles.placeholderTextColor}
+                  style={styles.input}
+                  textStyle={styles.textStyle}
+                  onChangeText={handleChange('confirmPassword')}
+                  onBlur={handleBlur('confirmPassword')}
+                  value={values.confirmPassword}
+                  caption={
+                    touched.confirmPassword && (
+                      <InputError errorText={errors.confirmPassword} />
+                    )
+                  }
+                  status={
+                    errors.confirmPassword && touched.confirmPassword
+                      ? 'danger'
+                      : 'basic'
+                  }
+                  accessoryRight={props => (
+                    <Icon
+                      {...props}
+                      name={showConfirmPassword ? "eye-off" : "eye"}
+                      fill="#8F9BB3"
+                      style={{ width: 26, height: 26 , marginRight: 5}}
+                      onPress={() => setShowConfirmPassword(v => !v)}
+                    />
+                  )}
+                />
+              );
+            })()}
             <View style={styles.buttonContainer}>
               <SubmitButton
                 btnText={t('signup')}

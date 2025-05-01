@@ -169,25 +169,43 @@ export const LoginScreen = ({ navigation  }) => {
                 />
               )}
 
-              <Input
-                placeholder={t('password')}
-                label={evaProps => (
-                  <Text {...evaProps} style={styles.label}>
-                    {t('password')}
-                  </Text>
-                )}
-                textStyle={{ fontSize: 14, paddingVertical: 4 }}
-                secureTextEntry={true}
-                style={styles.input}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-                caption={
-                  touched.password && <InputError errorText={errors.password} />
-                }
-                status={errors.password && touched.password ? 'danger' : 'basic'}
-                accessoryLeft={<Icon name="lock" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
-              />
+              {/*
+                Add show/hide password feature.
+                We'll use a local state for showPassword.
+              */}
+              {(() => {
+                const [showPassword, setShowPassword] = React.useState(false);
+                return (
+                  <Input
+                    placeholder={t('password')}
+                    label={evaProps => (
+                      <Text {...evaProps} style={styles.label}>
+                        {t('password')}
+                      </Text>
+                    )}
+                    textStyle={{ fontSize: 14, paddingVertical: 4 }}
+                    secureTextEntry={!showPassword}
+                    style={styles.input}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}
+                    caption={
+                      touched.password && <InputError errorText={errors.password} />
+                    }
+                    status={errors.password && touched.password ? 'danger' : 'basic'}
+                    accessoryLeft={<Icon name="lock" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
+                    accessoryRight={props => (
+                      <Icon
+                        {...props}
+                        name={showPassword ? "eye-off" : "eye"}
+                        fill="#8F9BB3"
+                        style={{ width: 26, height: 26 , marginRight: 5}}
+                        onPress={() => setShowPassword(v => !v)}
+                      />
+                    )}
+                  />
+                );
+              })()}
 
               <View style={styles.forgotRememberContainer}>
                 <View style={styles.rememberMeContainer}>

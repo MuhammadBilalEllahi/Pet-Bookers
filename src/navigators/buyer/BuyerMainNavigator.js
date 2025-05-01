@@ -21,6 +21,7 @@ import { MyWishlistScreen } from '../../screens/buyer/MyWishlistScreen';
 import { BuyerProfileStack } from './BuyerProfileStack';
 import { MyCartScreen } from '../../screens/buyer/MyCartScreen';
 import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
+import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -37,10 +38,12 @@ const { Navigator, Screen } = createBottomTabNavigator();
 export const BuyerMainRoutes = Object.freeze({
   BUYER_HOME: 'BuyerHome',
   BUYER_CHAT: 'BuyerChat',
-  BUYER_CART: 'BuyerCart',
+  
+  BUYER_LUCKYDRAW: 'BuyerLuckyDraw',
   SELLER_POST_AD: 'SellerPostAd',
   BUYER_WISHLIST: 'BuyerWishlist',
   BUYER_PROFILE: 'BuyerProfile',
+  BUYER_CART: 'BuyerCart',
 });
 
 const ICON_DARK_GREY = '#444444';
@@ -337,6 +340,7 @@ export const BuyerMainNavigator = () => {
               key="screen-BuyerCart"
               name={BuyerMainRoutes.BUYER_CART}
               component={MyCartScreen}
+
               options={{
                 headerShown: true,
                 header: props => (
@@ -344,15 +348,36 @@ export const BuyerMainNavigator = () => {
                 ),
               }}
             />,
+
+            
+
+
+            // <Screen
+            //   key="screen-BuyerWishlist"
+            //   name={BuyerMainRoutes.BUYER_WISHLIST}
+            //   component={MyWishlistScreen}
+            //   options={{
+            //     headerShown: true,
+            //     header: props => <MainScreensHeader {...props} key="header-BuyerWishlist" />,
+            //   }}
+            // />,
+
+
             <Screen
-              key="screen-BuyerWishlist"
-              name={BuyerMainRoutes.BUYER_WISHLIST}
-              component={MyWishlistScreen}
-              options={{
-                headerShown: true,
-                header: props => <MainScreensHeader {...props} key="header-BuyerWishlist" />,
-              }}
-            />,
+            key="screen-BuyerLuckyDraw"
+            name={BuyerMainRoutes.BUYER_LUCKYDRAW}
+            component={LuckyDrawListScreen}
+            
+
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader {...props} hideSearch={true} key="header-BuyerLuckyDraw" />
+              ),
+            }}
+          />,
+
+          
             <Screen
               key="screen-BuyerProfile"
               name={BuyerMainRoutes.BUYER_PROFILE}

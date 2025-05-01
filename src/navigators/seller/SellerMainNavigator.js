@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
@@ -31,72 +31,186 @@ export const SellerTabRoutes = Object.freeze({
   PROFILE: 'SellerProfile',
 });
 
+const homeIcon = require('../../../assets/new/bottom_nav/home.png');
+const chatIcon = require('../../../assets/new/bottom_nav/chat.png');
+const sellPlusIcon = require('../../../assets/new/bottom_nav/sell_plus.png');
+const myAdsIcon = require('../../../assets/new/bottom_nav/my_adds.png'); // You need to provide this icon
+const profileUserIcon = require('../../../assets/new/bottom_nav/profile_user.png');
+const activeUnderIcon = require('../../../assets/new/bottom_nav/active.png');
+
+const ICON_DARK_GREY = '#444444';
+const TEXT_BLACK = '#000000';
+
+const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => (
+  <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
+    <Image
+      source={iconSource}
+      style={{
+        width: 36,
+        height: 36,
+        resizeMode: 'contain',
+        tintColor: ICON_DARK_GREY,
+        ...customIconStyle,
+      }}
+      key={`icon-image-${label}`}
+    />
+    <Text
+      style={{
+        fontWeight: '700',
+        fontSize: 12,
+        color: TEXT_BLACK,
+        marginTop: 2,
+        flexShrink: 0,
+        flexGrow: 0,
+        minWidth: 0,
+      }}
+      numberOfLines={1}
+      ellipsizeMode="clip"
+      allowFontScaling={false}
+      key={`icon-label-${label}`}
+    >
+      {label}
+    </Text>
+    {isActive && (
+      <Image
+        source={activeUnderIcon}
+        style={{
+          width: 36,
+          height: 6,
+          resizeMode: 'contain',
+          marginTop: 2,
+        }}
+        key={`icon-active-underline-${label}`}
+      />
+    )}
+  </View>
+);
+
+const renderAddTabIconWithActive = (isActive, label) => (
+  <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
+    <View
+      style={[
+        styles.addButton,
+        {
+          borderColor: 'transparent',
+        },
+      ]}
+      key={`addButton-${label}`}
+    >
+      <Image
+        source={sellPlusIcon}
+        style={{
+          width: 70,
+          height: 70,
+          resizeMode: 'cover',
+        }}
+        key={`addButton-image-${label}`}
+      />
+    </View>
+    <Text
+      style={{
+        fontWeight: '700',
+        fontSize: 12,
+        color: TEXT_BLACK,
+        marginTop: 2,
+        flexShrink: 0,
+        flexGrow: 0,
+        minWidth: 0,
+      }}
+      numberOfLines={1}
+      ellipsizeMode="clip"
+      allowFontScaling={false}
+      key={`addButton-label-${label}`}
+    >
+      {label}
+    </Text>
+    {isActive && (
+      <Image
+        source={activeUnderIcon}
+        style={{
+          width: 36,
+          height: 6,
+          resizeMode: 'contain',
+          marginTop: 2,
+        }}
+        key={`addButton-active-underline-${label}`}
+      />
+    )}
+  </View>
+);
+
 const BottomTabBar = ({ navigation, state }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
 
   return (
-    <BottomNavigation
-      selectedIndex={state.index}
-      appearance="noIndicator"
-      style={{
-        position: 'absolute',
-        bottom: showBottomTabBar ? 0 : -1000,
-        overflow: showBottomTabBar ? 'visible' : 'hidden',
-      }}
-      onSelect={index => navigation.navigate(state.routeNames[index])}
-    >
-      <BottomNavigationTab
-        icon={props => <Icon {...props} name="home-outline" />}
-        title={t('tabs.home')}
-      />
-      <BottomNavigationTab
-        icon={props => <Icon {...props} name="message-circle-outline" />}
-        title={t('tabs.chat')}
-      />
-      <BottomNavigationTab
-        icon={props => (
-          <View style={styles.addButtonContainer}>
-            <View
-              style={[
-                styles.addButton,
-                {
-                  borderColor: theme['color-primary-default'],
-                },
-              ]}
-            >
-              <ThemedIcon
-                {...props}
-                name="plus-outline"
-                fill={state.index === 2 && theme['color-primary-default']}
-                iconStyle={{ width: 30, height: 30 }}
-              />
-            </View>
-            <Text
-              style={{
-                fontWeight: '700',
-                fontSize: 12,
-                color:
-                  state.index === 2
-                    ? theme['color-primary-default']
-                    : theme['color-basic-600'],
-              }}
-            >
-              {t('tabs.add')}
-            </Text>
-          </View>
-        )}
-      />
-      <BottomNavigationTab
-        icon={props => <Icon {...props} name="plus-square-outline" />}
-        title={t('tabs.myads')}
-      />
-      <BottomNavigationTab
-        icon={props => <Icon {...props} name="person-outline" />}
-        title={t('tabs.account')}
-      />
-    </BottomNavigation>
+    <View style={styles.bottomTabBarContainer} key="bottomTabBarContainer">
+      <BottomNavigation
+        selectedIndex={state.index}
+        appearance="noIndicator"
+        style={[
+          styles.bottomNavigation,
+          {
+            position: 'absolute',
+            bottom: showBottomTabBar ? 0 : -1000,
+            overflow: showBottomTabBar ? 'visible' : 'hidden',
+          },
+        ]}
+        onSelect={index => navigation.navigate(state.routeNames[index])}
+        key="bottomNavigation"
+      >
+        <BottomNavigationTab
+          key="tab-home"
+          icon={() =>
+            renderTabIconWithActive(
+              homeIcon,
+              state.index === 0,
+              t('tabs.home')
+            )
+          }
+        />
+        <BottomNavigationTab
+          key="tab-chat"
+          icon={() =>
+            renderTabIconWithActive(
+              chatIcon,
+              state.index === 1,
+              t('tabs.chat')
+            )
+          }
+        />
+        <BottomNavigationTab
+          key="tab-add"
+          icon={() =>
+            renderAddTabIconWithActive(
+              state.index === 2,
+              t('tabs.add')
+            )
+          }
+        />
+        <BottomNavigationTab
+          key="tab-myads"
+          icon={() =>
+            renderTabIconWithActive(
+              myAdsIcon,
+              state.index === 3,
+              t('tabs.myads')
+            )
+          }
+        />
+        <BottomNavigationTab
+          key="tab-profile"
+          icon={() =>
+            renderTabIconWithActive(
+              profileUserIcon,
+              state.index === 4,
+              t('tabs.account')
+            )
+          }
+        />
+      </BottomNavigation>
+    </View>
   );
 };
 
@@ -122,6 +236,10 @@ export const SellerMainNavigator = () => {
 };
 
 const styles = StyleSheet.create({
+  iconWithActiveContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   addButtonContainer: {
     display: 'flex',
     justifyContent: 'center',
@@ -140,5 +258,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     marginBottom: 20,
+  },
+  bottomTabBarContainer: {
+    backgroundColor: 'transparent',
+  },
+  bottomNavigation: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 12,
+    overflow: 'hidden',
   },
 });

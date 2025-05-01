@@ -9,7 +9,7 @@ import {VandorsListScreen} from '../../screens/buyer/VandorsListScreen';
 import {VandorDetailScreen} from '../../screens/buyer/VandorDetailScreen';
 import {NotificationsScreen} from '../../screens/NotificationsScreen';
 import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
-import {CategoriesListScreen} from '../../screens/buyer/CategoriesListScreen';
+import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
