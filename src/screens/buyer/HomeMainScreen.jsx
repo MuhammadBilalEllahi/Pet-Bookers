@@ -94,6 +94,7 @@ export const HomeMainScreen = ({navigation}) => {
 
   const parsedProducts = useCallback(
     list => {
+      if (!Array.isArray(list)) return [];
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
@@ -115,6 +116,48 @@ export const HomeMainScreen = ({navigation}) => {
     },
     [baseUrls],
   );
+
+  const handleLoadMoreFeatured = () => {
+    if (
+      featuredProducts.products.length < featuredProducts.total_size &&
+      !featuredProductsLoading
+    ) {
+      dispatch(
+        loadFeaturedProducts({
+          limit: featuredProducts.limit,
+          offset: featuredProducts.products.length,
+        }),
+      );
+    }
+  };
+
+  const handleLoadMoreLatest = () => {
+    if (
+      latestProducts.products.length < latestProducts.total_size &&
+      !latestProductsLoading
+    ) {
+      dispatch(
+        loadLatestProducts({
+          limit: latestProducts.limit,
+          offset: latestProducts.products.length,
+        }),
+      );
+    }
+  };
+
+  const handleLoadMorePopular = () => {
+    if (
+      popularProducts.products.length < popularProducts.total_size &&
+      !popularProductsLoading
+    ) {
+      dispatch(
+        loadPopularProducts({
+          limit: popularProducts.limit,
+          offset: popularProducts.products.length,
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     dispatch(loadHomeBanners({bannerType: 'all'}));
@@ -151,28 +194,34 @@ export const HomeMainScreen = ({navigation}) => {
           onViewAll={navigateToAllCategoriesScreen}
         />
         <ProductsList
-          list={parsedProducts(featuredProducts)}
+          list={parsedProducts(featuredProducts.products)}
           loading={featuredProductsLoading}
           loadingError={featuredProductsError}
           listTitle={t('featuredProducts')}
           containerStyle={{marginVertical: 0,paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
+          onLoadMore={handleLoadMoreFeatured}
+          hasMore={featuredProducts.products.length < featuredProducts.total_size}
         />
         <ProductsList
-          list={parsedProducts(latestProducts)}
+          list={parsedProducts(latestProducts.products)}
           loading={latestProductsLoading}
           loadingError={latestProductsError}
           listTitle={t('latest')}
           containerStyle={{marginVertical: 16,paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
+          onLoadMore={handleLoadMoreLatest}
+          hasMore={latestProducts.products.length < latestProducts.total_size}
         />
         <ProductsList
-          list={parsedProducts(popularProducts)}
+          list={parsedProducts(popularProducts.products)}
           loading={popularProductsLoading}
           loadingError={popularProductsError}
           listTitle={t('popular')}
           containerStyle={{marginVertical: 16, paddingHorizontal: 14}}
           onProductDetail={navigateToProductDetail}
+          onLoadMore={handleLoadMorePopular}
+          hasMore={popularProducts.products.length < popularProducts.total_size}
         />
         <HorizontalItemsList
           containerStyle={{marginVertical: 10, paddingHorizontal: 14}}

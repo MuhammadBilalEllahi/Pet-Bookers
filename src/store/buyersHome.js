@@ -5,13 +5,13 @@ const initialState = {
   homeBanners: [],
   homeBannersLoading: true,
   homeBannersError: null,
-  featuredProducts: [],
+  featuredProducts: { products: [], total_size: 0, offset: 0, limit: 10 },
   featuredProductsLoading: true,
   featuredProductsError: null,
-  latestProducts: [],
+  latestProducts: { products: [], total_size: 0, offset: 0, limit: 10 },
   latestProductsLoading: true,
   latestProductsError: null,
-  popularProducts: [],
+  popularProducts: { products: [], total_size: 0, offset: 0, limit: 10 },
   popularProductsLoading: true,
   popularProductsError: null,
   // Lucky Draw State
@@ -23,40 +23,41 @@ const initialState = {
 export const loadHomeBanners = createAsyncThunk(
   'buyersHome/loadBanners',
   async ({bannerType}) => {
-    const {data: result} = await axiosBuyerClient.get(
+    const {data} = await axiosBuyerClient.get(
       `banners/?banner_type=${bannerType}`,
     );
-    return result;
+    console.log("[buyersHome/loadBanners]", data);
+    return data;
   },
 );
 
 export const loadFeaturedProducts = createAsyncThunk(
   'buyersHome/loadFeaturedProducts',
-  async ({limit}) => {
-    const {data: result} = await axiosBuyerClient.get(
-      `products/featured/?limit=${limit}`,
+  async ({limit, offset = 0}) => {
+    const {data} = await axiosBuyerClient.get(
+      `products/featured/?limit=${limit}&offset=${offset}`,
     );
-    return result.products;
+    return data;
   },
 );
 
 export const loadLatestProducts = createAsyncThunk(
   'buyersHome/loadLatestProducts',
-  async ({limit}) => {
-    const {data: result} = await axiosBuyerClient.get(
-      `products/latest/?limit=${limit}`,
+  async ({limit, offset = 0}) => {
+    const {data} = await axiosBuyerClient.get(
+      `products/latest/?limit=${limit}&offset=${offset}`,
     );
-    return result.products;
+    return data;
   },
 );
 
 export const loadPopularProducts = createAsyncThunk(
   'buyersHome/loadPopularProducts',
-  async ({limit}) => {
-    const {data: result} = await axiosBuyerClient.get(
-      `products/top-rated/?limit=${limit}`,
+  async ({limit, offset = 0}) => {
+    const {data} = await axiosBuyerClient.get(
+      `products/top-rated/?limit=${limit}&offset=${offset}`,
     );
-    return result.products;
+    return data;
   },
 );
 
@@ -64,7 +65,7 @@ export const loadLuckyDraws = createAsyncThunk(
   'buyersHome/loadLuckyDraws',
   async () => {
     const {data} = await axiosBuyerClient.get('lucky_draw');
-    // Adjust if API shape is different
+    console.log("[buyersHome/loadLuckyDraws]", data);
     return data.lucky_draws || data;
   }
 );
@@ -91,49 +92,81 @@ const slice = createSlice({
         action.payload || 'Failed to load the banners data';
     });
     builder.addCase(loadFeaturedProducts.pending, (state, action) => {
-      state.featuredProducts = [];
+      state.featuredProducts = { products: [], total_size: 0, offset: 0, limit: 10 };
       state.featuredProductsLoading = true;
       state.featuredProductsError = null;
     });
-    builder.addCase(loadFeaturedProducts.fulfilled, (state, {payload}) => {
-      state.featuredProducts = payload;
+    builder.addCase(loadFeaturedProducts.fulfilled, (state, {payload, meta}) => {
+      if (meta.arg.offset > 0) {
+        // Append for pagination
+        state.featuredProducts.products = [
+          ...state.featuredProducts.products,
+          ...(payload.products || []),
+        ];
+      } else {
+        // First page or refresh
+        state.featuredProducts.products = payload.products || [];
+      }
+      state.featuredProducts.total_size = payload.total_size || 0;
+      state.featuredProducts.offset = meta.arg.offset || 0;
+      state.featuredProducts.limit = meta.arg.limit || 10;
       state.featuredProductsLoading = false;
       state.featuredProductsError = null;
     });
     builder.addCase(loadFeaturedProducts.rejected, (state, action) => {
-      state.featuredProducts = [];
+      state.featuredProducts = { products: [], total_size: 0, offset: 0, limit: 10 };
       state.featuredProductsLoading = false;
       state.featuredProductsError =
         action.payload || 'Failed to load the banners data';
     });
     builder.addCase(loadLatestProducts.pending, (state, action) => {
-      state.latestProducts = [];
+      state.latestProducts = { products: [], total_size: 0, offset: 0, limit: 10 };
       state.latestProductsLoading = true;
       state.latestProductsError = null;
     });
-    builder.addCase(loadLatestProducts.fulfilled, (state, {payload}) => {
-      state.latestProducts = payload;
+    builder.addCase(loadLatestProducts.fulfilled, (state, {payload, meta}) => {
+      if (meta.arg.offset > 0) {
+        state.latestProducts.products = [
+          ...state.latestProducts.products,
+          ...(payload.products || []),
+        ];
+      } else {
+        state.latestProducts.products = payload.products || [];
+      }
+      state.latestProducts.total_size = payload.total_size || 0;
+      state.latestProducts.offset = meta.arg.offset || 0;
+      state.latestProducts.limit = meta.arg.limit || 10;
       state.latestProductsLoading = false;
       state.latestProductsError = null;
     });
     builder.addCase(loadLatestProducts.rejected, (state, action) => {
-      state.latestProducts = [];
+      state.latestProducts = { products: [], total_size: 0, offset: 0, limit: 10 };
       state.latestProductsLoading = false;
       state.latestProductsError =
         action.payload || 'Failed to load the banners data';
     });
     builder.addCase(loadPopularProducts.pending, (state, action) => {
-      state.popularProducts = [];
+      state.popularProducts = { products: [], total_size: 0, offset: 0, limit: 10 };
       state.popularProductsLoading = true;
       state.popularProductsError = null;
     });
-    builder.addCase(loadPopularProducts.fulfilled, (state, {payload}) => {
-      state.popularProducts = payload;
+    builder.addCase(loadPopularProducts.fulfilled, (state, {payload, meta}) => {
+      if (meta.arg.offset > 0) {
+        state.popularProducts.products = [
+          ...state.popularProducts.products,
+          ...(payload.products || []),
+        ];
+      } else {
+        state.popularProducts.products = payload.products || [];
+      }
+      state.popularProducts.total_size = payload.total_size || 0;
+      state.popularProducts.offset = meta.arg.offset || 0;
+      state.popularProducts.limit = meta.arg.limit || 10;
       state.popularProductsLoading = false;
       state.popularProductsError = null;
     });
     builder.addCase(loadPopularProducts.rejected, (state, action) => {
-      state.popularProducts = [];
+      state.popularProducts = { products: [], total_size: 0, offset: 0, limit: 10 };
       state.popularProductsLoading = false;
       state.popularProductsError =
         action.payload || 'Failed to load the banners data';
@@ -172,13 +205,11 @@ export const selectHomeBanners = createSelector(selectBuyersHomeData, data => {
 
 export const selectFeaturedProducts = createSelector(
   selectBuyersHomeData,
-  data => {
-    return {
-      featuredProducts: data.featuredProducts,
-      featuredProductsLoading: data.featuredProductsLoading,
-      featuredProductsError: data.featuredProductsError,
-    };
-  },
+  data => ({
+    featuredProducts: data.featuredProducts,
+    featuredProductsLoading: data.featuredProductsLoading,
+    featuredProductsError: data.featuredProductsError,
+  }),
 );
 
 export const selectLatestProducts = createSelector(

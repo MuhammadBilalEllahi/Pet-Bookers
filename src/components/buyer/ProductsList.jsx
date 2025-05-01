@@ -18,6 +18,8 @@ export const ProductsList = ({
   hideViewAllBtn,
   containerStyle,
   onProductDetail,
+  onLoadMore,
+  hasMore,
 }) => {
   const theme = useTheme();
   const {t, i18n} = useTranslation();
@@ -75,6 +77,11 @@ export const ProductsList = ({
             <ProductCard {...item} onProductDetail={onProductDetail} cardWidth={SMALL_CARD_WIDTH} />
           )}
         />
+      )}
+      {hasMore && (
+        <TouchableOpacity onPress={onLoadMore} style={{padding: 10}}>
+          <Text>Load More</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
