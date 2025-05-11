@@ -10,7 +10,7 @@ import {PaymentMethodScreen} from '../../screens/seller/PaymentMethodScreen';
 import {ProductFeatureCheckoutScreen} from '../../screens/seller/ProductFeatureCheckoutScreen';
 import {ProductFeatureSuccessScreen} from '../../screens/seller/ProductFeatureSuccessScreen';
 import { ScreenHeaderAd } from '../../components/ScreenHeaderAd';
-
+import AddProductSuccessAndShowFeaturedButton from '../../screens/seller/AddProductSuccessAndShowFeaturedButton';
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const SellerNewProductStack = () => {
@@ -28,6 +28,13 @@ export const SellerNewProductStack = () => {
         component={AddProductSuccessScreen}
         options={{
           title: 'MakeFeatured',
+        }}
+      />
+      <Screen
+        name="AddProductSuccessAndShowFeaturedButton"
+        component={AddProductSuccessAndShowFeaturedButton}
+        options={{
+          title: 'Success',
         }}
       />
       <Screen

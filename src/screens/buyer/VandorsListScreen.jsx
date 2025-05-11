@@ -1,108 +1,105 @@
-import {Card, Input, Layout, Text, useTheme} from '@ui-kitten/components';
-import {useTranslation} from 'react-i18next';
-import {Dimensions, Image, ScrollView} from 'react-native';
-import {ThemedIcon} from '../../components/Icon';
-import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import {Layout, Text} from '@ui-kitten/components';
+import {Dimensions, Image, ScrollView, View, StyleSheet, TouchableOpacity} from 'react-native';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
 const sellersList = [
   {
     id: 1,
-    name: 'new shop',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-04-01-6427fce278064.png',
+    name: 'Model Pets Farm',
+    image: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
   },
   {
     id: 2,
-    name: 'new shop 2',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-04-17-643d40afb34e7.png',
+    name: 'Ali Dastageer',
+    image: 'https://randomuser.me/api/portraits/men/44.jpg',
   },
   {
     id: 3,
-    name: 'model pets farm',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-04-30-644e3d653810e.png',
+    name: 'Poultry Heaven',
+    image: 'https://images.pexels.com/photos/162240/chicken-poultry-animals-bird-162240.jpeg',
   },
   {
     id: 4,
-    name: 'us pets farm',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-05-01-644fc3645f5ad.png',
+    name: 'Fish Pond .com',
+    image: 'https://images.pexels.com/photos/128756/pexels-photo-128756.jpeg',
+  },
+  {
+    id: 5,
+    name: 'Dr. Khalid',
+    image: 'https://randomuser.me/api/portraits/men/45.jpg',
+  },
+  {
+    id: 6,
+    name: 'Pet Groomers',
+    image: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
   },
 ];
 
 export const VandorsListScreen = ({navigation}) => {
-  const {t} = useTranslation();
-
   const navigateToVandorDetail = vandorId => {
     navigation.navigate('VandorDetail');
   };
 
   return (
-    <Layout level="3" style={{flex: 1}}>
+    <Layout level="3" style={{flex: 1, backgroundColor: '#fff'}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: 'flex-start',
-          paddingTop: 10,
-          paddingBottom: 90,
-        }}>
-        <Layout
-          level="1"
-          style={[
-            spacingStyles.p16,
-            flexeStyles.row,
-            flexeStyles.itemsCenter,
-            {
-              marginHorizontal: 16,
-              marginBottom: 8,
-            },
-          ]}>
-          <Input
-            placeholder="Search Store"
-            style={{flexGrow: 1, marginRight: 4}}
-            accessoryRight={<ThemedIcon name="search-outline" />}
-          />
-        </Layout>
-        <Layout
-          style={[
-            flexeStyles.row,
-            {
-              flexWrap: 'wrap',
-              paddingHorizontal: 12,
-            },
-          ]}>
+        contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-start', paddingTop: 10, paddingBottom: 90}}>
+        <Text style={styles.header}>All Sellers</Text>
+        <View style={styles.grid}>
           {sellersList.map(item => (
-            <Card
+            <TouchableOpacity
               key={item.id}
-              style={{
-                width: (windowWidth - 40) / 2,
-                padding: 8,
-                margin: 4,
-              }}
+              style={styles.sellerItem}
               onPress={() => navigateToVandorDetail(item.id)}>
               <Image
-                source={{
-                  uri: item.image,
-                }}
-                style={{
-                  width: (windowWidth - 40) / 2 - 16,
-                  height: 'auto',
-                  aspectRatio: 4 / 3,
-                  resizeMode: 'cover',
-                }}
+                source={{uri: item.image}}
+                style={styles.sellerImage}
               />
-              <Text category="h6" style={{textAlign: 'center', marginTop: 8}}>
-                {item.name}
-              </Text>
-            </Card>
+              <Text style={styles.sellerName}>{item.name}</Text>
+            </TouchableOpacity>
           ))}
-        </Layout>
+        </View>
       </ScrollView>
     </Layout>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 18,
+    marginLeft: 12,
+    marginTop: 8,
+    color: '#222',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 8,
+  },
+  sellerItem: {
+    width: windowWidth * 0.46,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  sellerImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#eee',
+    marginBottom: 8,
+  },
+  sellerName: {
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#222',
+    fontWeight: '500',
+    marginTop: 2,
+    textTransform: 'capitalize',
+  },
+});

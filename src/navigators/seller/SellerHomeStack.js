@@ -48,6 +48,13 @@ export const SellerHomeStack = () => {
         component={VandorsListScreen}
         options={{
           title: 'VandorsList',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="VandorsList"
+            />
+          ),
         }}
       />
       <Screen
@@ -55,6 +62,13 @@ export const SellerHomeStack = () => {
         component={VandorDetailScreen}
         options={{
           title: 'VandorDetail',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="VandorDetail"
+            />
+          ),
         }}
       />
       <Screen

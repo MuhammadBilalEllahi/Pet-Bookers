@@ -35,12 +35,29 @@ export const BuyerHomeStack = () => {
           header: props => <MainScreensHeader {...props} />,
         }}
       />
-      <Screen name="ProductDetail" component={ProductDetailScreen} />
+      <Screen name="ProductDetail" component={ProductDetailScreen}
+        options={{
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="ProductDetail"
+            />
+          ),
+        }}
+      />
       <Screen
         name="ProductsSearch"
         component={ProductsSearchScreen}
         options={{
           title: 'ProductsSearch',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="ProductsSearch"
+            />
+          ),
         }}
       />
       <Screen
@@ -58,6 +75,13 @@ export const BuyerHomeStack = () => {
         component={VandorsListScreen}
         options={{
           title: 'VandorsList',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="VandorsList"
+            />
+          ),
         }}
       />
       <Screen
@@ -65,6 +89,13 @@ export const BuyerHomeStack = () => {
         component={VandorDetailScreen}
         options={{
           title: 'VandorDetail',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="VandorDetail"
+            />
+          ),
         }}
       />
       {isAnonymous ? (

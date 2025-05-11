@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, StyleSheet, TouchableOpacity, View, Platform, Image} from 'react-native';
+import {ScrollView, StyleSheet, TouchableOpacity, View, Platform, Image, PermissionsAndroid} from 'react-native';
 import {
   Layout,
   Text,
@@ -11,9 +11,26 @@ import {
 import {useTranslation} from 'react-i18next';
 import {Formik} from 'formik';
 import {spacingStyles} from '../../utils/globalStyles';
-import {InputError, SubmitButton, ImagePicker} from '../../components/form';
+import {InputError, SubmitButton, } from '../../components/form';
 import { useSelector, useDispatch } from 'react-redux';
 import { loadProductCategories, selectProductCategories } from '../../store/productCategories';
+import { axiosSellerClient } from '../../utils/axiosClient';
+import { launchImageLibrary } from 'react-native-image-picker';
+
+const requestGalleryPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  } else if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  }
+  return true; // iOS handles it via Info.plist
+};
 
 export const AddProductScreen = ({navigation}) => {
   const {t} = useTranslation();
@@ -26,13 +43,15 @@ export const AddProductScreen = ({navigation}) => {
   const [isLivingIndex, setIsLivingIndex] = useState(0);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
+  const [image, setImage] = useState(null);
+  
 
   const units = [t('addProduct.units'), t('addProduct.kg'), t('addProduct.ltr'), t('addProduct.pc')];
   const livingOptions = [t('addProduct.living'), t('addProduct.nonLiving')];
 
   const dispatch = useDispatch();
   const { categories, categoriesLoading } = useSelector(selectProductCategories);
-  console.log("categories", JSON.stringify(categories, null, 2));
+  // console.log("categories", JSON.stringify(categories, null, 2));
 
   useEffect(() => {
     dispatch(loadProductCategories());
@@ -45,14 +64,79 @@ export const AddProductScreen = ({navigation}) => {
   const onProductPostedSuccess = () => {
     navigation.reset({
       index: 0,
-      routes: [{name: 'AddProductSuccess'}],
+      routes: [{name: 'AddProductSuccessAndShowFeaturedButton'}],
     });
+  };
+
+  const handleImagePick = async (field, setFieldValue) => {
+    console.log("IMAGE PICKING", field)
+    const hasPermission = await requestGalleryPermission();
+    if (!hasPermission) {
+      // Optionally show a message to the user
+      return;
+    }
+    const result = await launchImageLibrary({mediaType: 'photo'});
+    if (result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      // asset.uri, asset.fileName, asset.type
+      setFieldValue(field, {
+        uri: asset.uri,
+        name: asset.fileName || 'image.jpg',
+        type: asset.type || 'image/jpeg',
+      });
+    }
   };
 
   const handleSubmit = values => {
     // Add tags to form values
     values.tags = tags;
-    onProductPostedSuccess();
+    
+    // Create FormData object for multipart/form-data
+    const formData = new FormData();
+    
+    // Add all form fields
+    // formData.append('_token', '6n1vA3eDukR2VsPBJJfHjTQBOjxevVqJGZkbOBjM');
+    formData.append('category_id', values.category_id);
+    formData.append('sub_category_id', values.sub_category_id);
+    formData.append('unit', values.unit);
+    formData.append('is_living', values.is_living === 'Living' ? '1' : '0');
+    formData.append('name[]', values.name_en);
+    formData.append('name[]', values.name_ur);
+    formData.append('description[]', values.description_en);
+    formData.append('description[]', values.description_ur);
+    formData.append('unit_price', values.unit_price);
+    formData.append('current_stock', values.current_stock);
+    formData.append('minimum_order_qty', values.min_order_qty);
+    formData.append('tags', values.tags);
+
+    // Add image if exists
+    if (image) {
+      formData.append('images[]', {
+        uri: image.uri,
+        type: image.type,
+        name: image.name
+      });
+    }
+
+    try {
+      axiosSellerClient.post('product/add-new', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then(response => {
+        if (response.data.success) {
+          onProductPostedSuccess();
+        }
+      })
+      .catch(error => {
+        console.log("error", error);
+      });
+    } catch (error) {
+      console.log("error", error);
+    }finally{
+      onProductPostedSuccess();
+    }
   };
 
   const handleTagInput = (text) => {
@@ -102,17 +186,17 @@ export const AddProductScreen = ({navigation}) => {
           </Text>
           <Formik
             initialValues={{
-              category: '',
-              subcategory: '',
-              units: '',
-              isLiving: 'Living',
+              category_id: '',
+              sub_category_id: '',
+              unit: '',
+              is_living: 'Living',
               name_en: '',
-              description_en: '',
               name_ur: '',
+              description_en: '',
               description_ur: '',
-              price: '',
-              totalQuantity: '1',
-              minOrderQuantity: '1',
+              unit_price: '',
+              current_stock: '1',
+              min_order_qty: '1',
               tags: '',
             }}
             onSubmit={handleSubmit}>
@@ -137,7 +221,7 @@ export const AddProductScreen = ({navigation}) => {
                     onSelect={index => {
                       setCategoryIndex(index);
                       setSubcategoryIndex(null);
-                      setFieldValue('category', categoryOptions[index.row]);
+                      setFieldValue('category_id', categories[index.row].id);
                     }}>
                     {categoryOptions.map((cat, i) => (
                       <SelectItem key={i} title={cat} />
@@ -154,7 +238,7 @@ export const AddProductScreen = ({navigation}) => {
                     value={subcategoryIndex !== null ? subcategoryOptions[subcategoryIndex.row] : t('addProduct.subCategoryPlaceholder')}
                     onSelect={index => {
                       setSubcategoryIndex(index);
-                      setFieldValue('subcategory', subcategoryOptions[index.row]);
+                      setFieldValue('sub_category_id', selectedCategory.childes[index.row].id);
                     }}
                     disabled={!selectedCategory}>
                     {subcategoryOptions.map((sub, i) => (
@@ -172,7 +256,7 @@ export const AddProductScreen = ({navigation}) => {
                     value={unitIndex !== null ? units[unitIndex.row] : t('addProduct.unitsPlaceholder')}
                     onSelect={index => {
                       setUnitIndex(index);
-                      setFieldValue('units', units[index.row]);
+                      setFieldValue('unit', units[index.row]);
                     }}>
                     {units.map((unit, i) => (
                       <SelectItem key={i} title={unit} />
@@ -189,7 +273,7 @@ export const AddProductScreen = ({navigation}) => {
                     value={livingOptions[isLivingIndex]}
                     onSelect={index => {
                       setIsLivingIndex(index.row);
-                      setFieldValue('isLiving', livingOptions[index.row]);
+                      setFieldValue('is_living', livingOptions[index.row]);
                     }}> 
                     {livingOptions.map((opt, i) => (
                       <SelectItem key={i} title={opt} />
@@ -276,9 +360,9 @@ export const AddProductScreen = ({navigation}) => {
                   <Input
                     style={styles.input}
                     textStyle={styles.inputText}
-                    onChangeText={handleChange('price')}
-                    onBlur={handleBlur('price')}
-                    value={values.price}
+                    onChangeText={handleChange('unit_price')}
+                    onBlur={handleBlur('unit_price')}
+                    value={values.unit_price}
                     placeholder={t('addProduct.pricePlaceholder')}
                     placeholderTextColor="#BDBDBD"
                     keyboardType="numeric"
@@ -289,9 +373,9 @@ export const AddProductScreen = ({navigation}) => {
                   <Input
                     style={styles.input}
                     textStyle={styles.inputText}
-                    onChangeText={handleChange('totalQuantity')}
-                    onBlur={handleBlur('totalQuantity')}
-                    value={values.totalQuantity}
+                    onChangeText={handleChange('current_stock')}
+                    onBlur={handleBlur('current_stock')}
+                    value={values.current_stock}
                     placeholder={t('addProduct.totalQuantityPlaceholder')}
                     placeholderTextColor="#BDBDBD"
                     keyboardType="numeric"
@@ -302,9 +386,9 @@ export const AddProductScreen = ({navigation}) => {
                   <Input
                     style={styles.input}
                     textStyle={styles.inputText}
-                    onChangeText={handleChange('minOrderQuantity')}
-                    onBlur={handleBlur('minOrderQuantity')}
-                    value={values.minOrderQuantity}
+                    onChangeText={handleChange('min_order_qty')}
+                    onBlur={handleBlur('min_order_qty')}
+                    value={values.min_order_qty}
                     placeholder={t('addProduct.minOrderQuantityPlaceholder')}
                     placeholderTextColor="#BDBDBD"
                     keyboardType="numeric"
@@ -338,7 +422,7 @@ export const AddProductScreen = ({navigation}) => {
                 </Layout>
                 {/* Media Upload */}
                 <View style={styles.uploadBox}>
-                  <TouchableOpacity style={styles.uploadTouchable} onPress={() => {/* trigger your image picker here */}}>
+                  <TouchableOpacity style={styles.uploadTouchable} onPress={() => { handleImagePick('image', setImage)}}>
                     <Image source={require('../../../assets/new/icons/upload-icon.png')} style={styles.uploadIcon} />
                     <View style={styles.uploadTextBox}>
                       <Text style={styles.uploadText}>{t('addProduct.uploadMedia')}</Text>

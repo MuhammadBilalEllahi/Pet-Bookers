@@ -39,7 +39,8 @@
     "PaymentMethodSelection": "Select Payment Method",
     "Checkout": "Checkout",
     "FeaturedSuccessfully": "Featured Successfully",
-    "Chat": "Chat"
+    "Chat": "Chat",
+    "Success": "Success"
   },
   "welcome": "Welcome",
   "createaccount": "Create Account",

@@ -1,5 +1,5 @@
-import {Dimensions, Image, StyleSheet, View} from 'react-native';
-import {Card, Layout, Text, useTheme} from '@ui-kitten/components';
+import {Dimensions, Image, StyleSheet, View, TouchableOpacity} from 'react-native';
+import {Text, useTheme} from '@ui-kitten/components';
 import {Price} from '../Price';
 import {AirbnbRating} from 'react-native-ratings';
 import {spacingStyles} from '../../utils/globalStyles';
@@ -21,98 +21,144 @@ export const ProductCard = ({
 }) => {
   const theme = useTheme();
   return (
-    <Card
-      style={[styles.container, {width: cardWidth || windowWidth * 0.6}]}
-      onPress={() => onProductDetail(id)}>
-      <Layout style={styles.imageContainer}>
+    <TouchableOpacity
+      activeOpacity={0.92}
+      style={[styles.card, {width: cardWidth || windowWidth * 0.6}]}
+      onPress={() => onProductDetail && onProductDetail(id)}
+    >
+      <View style={styles.imageContainer}>
         <Image
-          source={{
-            uri: image,
-          }}
+          source={{ uri: image }}
           style={styles.image}
         />
         {isSoldOut && (
           <View style={styles.soldOutContainer}>
-            <Text
-              status="primary"
-              category="h6"
-              style={{textTransform: 'uppercase'}}>
-              Out Of Stock
-            </Text>
+            <Text style={styles.soldOutText}>Out Of Stock</Text>
           </View>
         )}
         {discount > 0 && (
-          <View
-            style={[
-              styles.badgeContainer,
-              {backgroundColor: theme['color-primary-default']},
-            ]}>
-            <Text style={{color: '#fff', fontWeight: '500'}}>
+          <View style={styles.badgeContainer}>
+            <Text style={styles.badgeText}>
               -{discount}
               {discountType === 'percent' && '%'}
             </Text>
           </View>
         )}
-      </Layout>
-      <View style={spacingStyles.p8}>
-        <Text status="primary" style={styles.title}>
-          {name}
-        </Text>
-        <View>
-          <Price amount={price} />
-          {oldPrice > 0 && <Price style={styles.price} amount={oldPrice} cross={true} />}
-        </View>
-        {/* <AirbnbRating
-          count={5}
-          defaultRating={rating}
-          showRating={false}
-          size={20}
-          isDisabled={true}
-          starContainerStyle={{marginTop: 8}}
-          selectedColor={theme['color-primary-default']}
-        /> */}
       </View>
-    </Card>
+      <View style={styles.content}>
+        <Text style={styles.title} numberOfLines={2}>{name}</Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.price}>Rs {price}</Text>
+          {oldPrice > 0 && (
+            <Text style={styles.oldPrice}>Rs {oldPrice}</Text>
+          )}
+        </View>
+        {/* Optionally show rating */}
+        {/* <View style={styles.ratingRow}>
+          <AirbnbRating
+            count={5}
+            defaultRating={rating}
+            showRating={false}
+            size={14}
+            isDisabled={true}
+            selectedColor={theme['color-primary-default']}
+            starContainerStyle={{marginTop: 2}}
+          />
+        </View> */}
+      </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
     marginHorizontal: 4,
-    borderRadius: 10,
+    marginVertical: 4,
+    overflow: 'hidden',
   },
   imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: '#f5f5f5',
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    overflow: 'hidden',
     position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
   },
   soldOutContainer: {
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: '#ffffffc7',
-    display: 'flex',
+    backgroundColor: '#ffffffcc',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
+  soldOutText: {
+    color: '#FF512F',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textTransform: 'uppercase',
+  },
   badgeContainer: {
     position: 'absolute',
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    borderBottomRightRadius: 10,
+    top: 10,
+    left: 10,
+    backgroundColor: '#FF512F',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    zIndex: 11,
   },
-  image: {
-    width: '100%',
-    // height: '100%',
-    resizeMode: 'cover',
-    aspectRatio: 1/1,
+  badgeText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  content: {
+    padding: 12,
   },
   title: {
     fontWeight: '700',
-    color:'#121212',
-    fontSize: 15,
-    // marginBottom: 1,
+    color: '#121212',
+    fontSize: 16,
+    marginBottom: 6,
   },
-  price:{
-    fontSize:12
-  }
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  price: {
+    fontWeight: 'bold',
+    color: '#222',
+    fontSize: 16,
+    marginRight: 8,
+  },
+  oldPrice: {
+    color: '#888',
+    fontSize: 13,
+    textDecorationLine: 'line-through',
+    fontWeight: '500',
+  },
+  /*
+  ratingRow: {
+    marginTop: 2,
+    alignItems: 'flex-start',
+  },
+  */
 });
