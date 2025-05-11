@@ -1,12 +1,107 @@
 import React, { useState } from "react";
 import { Input, Button, Text, Layout, Icon } from "@ui-kitten/components";
-import { View, Image } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from 'react-native-linear-gradient';
+
+// Dummy data for testing
+const dummyLuckyDraw = {
+  id: 1,
+  title: "Shahzaib New Farm Lucky Draw",
+  date: "15 April"
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 0
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    marginBottom: 0
+  },
+  headerText: {
+    fontWeight: "bold",
+    color: "#444",
+    fontSize: 18
+  },
+  closeIcon: {
+    width: 28,
+    height: 28,
+    marginRight: 8
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 12
+  },
+  iconImage: {
+    width: 60,
+    height: 60,
+    marginBottom: 8
+  },
+  welcomeText: {
+    fontWeight: "bold",
+    fontSize: 18,
+    textAlign: "center",
+    color: "#222",
+    marginBottom: 18
+  },
+  infoBox: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    padding: 14,
+    marginHorizontal: 24,
+    marginBottom: 24
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 2
+  },
+  infoLabel: {
+    fontWeight: 'bold',
+    color: '#222',
+    fontSize: 15
+  },
+  infoValue: {
+    color: '#222',
+    fontSize: 15
+  },
+  form: {
+    marginHorizontal: 24
+  },
+  input: {
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    fontSize: 15
+  },
+  gradientButton: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginTop: 8
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+    paddingVertical: 12
+  }
+});
 
 export default function LuckyDrawInstance() {
-  const route = useRoute();
   const navigation = useNavigation();
-  const { luckyDraw } = route.params || {};
+  const luckyDraw = dummyLuckyDraw;
 
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
@@ -15,87 +110,92 @@ export default function LuckyDrawInstance() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    // TODO: Replace with your API call
-    // await axiosBuyerClient.post('lucky_draw/apply', { name, city, phone, lucky_draw_id: luckyDraw.id });
+    await new Promise(resolve => setTimeout(resolve, 1000));
     setSubmitting(false);
-    // Optionally show a success message or navigate back
     navigation.goBack();
   };
 
   return (
-    <Layout style={{ flex: 1, backgroundColor: "#fff", padding: 16 }}>
+    <Layout style={styles.container}>
       {/* Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+      <View style={styles.header}>
         <Icon
           name="close-outline"
           fill="#888"
-          style={{ width: 28, height: 28, marginRight: 8 }}
+          style={styles.closeIcon}
           onPress={() => navigation.goBack()}
         />
-        <Text category="h6" style={{ fontWeight: "bold" }}>
-          Lucky Draw
-        </Text>
+        <Text style={styles.headerText}>Lucky Draw</Text>
       </View>
 
-      {/* Icon */}
-      <View style={{ alignItems: "center", marginBottom: 12 }}>
+      {/* Icon and Welcome */}
+      <View style={styles.iconContainer}>
         <Image
-          source={require("../../../assets/luckydraw.png")} // Use your own icon
-          style={{ width: 60, height: 60, marginBottom: 8 }}
+          source={require("../../../../assets/new/bottom_nav/lucky_draw.png")}
+          style={styles.iconImage}
           resizeMode="contain"
         />
-        <Text style={{ fontWeight: "bold", fontSize: 16, textAlign: "center" }}>
+        <Text style={styles.welcomeText}>
           Enter your details to be a{"\n"}part of our lucky draw
         </Text>
       </View>
 
-      {/* Info */}
-      <View style={{ backgroundColor: "#F5F5F5", borderRadius: 8, padding: 12, marginBottom: 16 }}>
-        <Text>
-          <Text style={{ fontWeight: "bold" }}>Title: </Text>
-          {luckyDraw?.title}
-        </Text>
-        <Text>
-          <Text style={{ fontWeight: "bold" }}>Date: </Text>
-          {luckyDraw?.date}
-        </Text>
+      {/* Info Box */}
+      <View style={styles.infoBox}>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Title: </Text>
+          <Text style={styles.infoValue}>{luckyDraw.title}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Date: </Text>
+          <Text style={styles.infoValue}>{luckyDraw.date}</Text>
+        </View>
       </View>
 
       {/* Form */}
-      <Input
-        label="Name"
-        placeholder="Write your name here"
-        value={name}
-        onChangeText={setName}
-        style={{ marginBottom: 12 }}
-      />
-      <Input
-        label="City"
-        placeholder="What is your city?"
-        value={city}
-        onChangeText={setCity}
-        style={{ marginBottom: 12 }}
-      />
-      <Input
-        label="Phone Number"
-        placeholder="What is the best number to contact you?"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        style={{ marginBottom: 20 }}
-      />
-
-      <Button
-        onPress={handleSubmit}
-        disabled={submitting}
-        style={{
-          borderRadius: 8,
-          backgroundColor: "linear-gradient(90deg, #FF512F 0%, #F09819 100%)",
-        }}
-        appearance="filled"
-      >
-        Submit
-      </Button>
+      <View style={styles.form}>
+        <Input
+          label="Name"
+          placeholder="Write your name here"
+          value={name}
+          onChangeText={setName}
+          style={styles.input}
+          size="large"
+        />
+        <Input
+          label="City"
+          placeholder="What is your city?"
+          value={city}
+          onChangeText={setCity}
+          style={styles.input}
+          size="large"
+        />
+        <Input
+          label="Phone Number"
+          placeholder="What is the best number to contact you?"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+          style={styles.input}
+          size="large"
+        />
+        <TouchableOpacity
+          style={styles.gradientButton}
+          onPress={handleSubmit}
+          disabled={submitting}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={["#FF512F", "#F09819"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Text style={styles.buttonText}>
+              {submitting ? "Submitting..." : "Submit"}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
     </Layout>
   );
 }

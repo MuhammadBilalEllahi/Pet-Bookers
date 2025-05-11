@@ -19,9 +19,10 @@ import { BuyerHomeStack } from './BuyerHomeStack';
 import { ChatNavigator } from '../ChatNavigator';
 import { MyWishlistScreen } from '../../screens/buyer/MyWishlistScreen';
 import { BuyerProfileStack } from './BuyerProfileStack';
-import { MyCartScreen } from '../../screens/buyer/MyCartScreen';
+  
 import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
+import { MyCartScreen } from '../../screens/buyer/checkout/MyCartScreen';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -349,8 +350,6 @@ export const BuyerMainNavigator = () => {
               }}
             />,
 
-            
-
 
             // <Screen
             //   key="screen-BuyerWishlist"
@@ -376,6 +375,7 @@ export const BuyerMainNavigator = () => {
               ),
             }}
           />,
+
 
           
             <Screen

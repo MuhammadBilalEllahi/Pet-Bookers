@@ -12,6 +12,9 @@ import { BuyerMainNavigator } from './buyer/BuyerMainNavigator';
 import { SellerMainNavigator } from './seller/SellerMainNavigator';
 import { LoginScreen } from '../screens/auth/Login';
 import { RegisterScreen } from '../screens/auth/Register';
+import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
+import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
+import PaymentPage from '../screens/buyer/checkout/PaymentPage';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -24,6 +27,11 @@ export const AppScreens = Object.freeze({
   AUTH: 'Auth',
   SELLER_HOME_MAIN: 'SellerHomeMain',
   BUYER_HOME_MAIN: 'BuyerHomeMain',
+  
+  LUCKYDRAW_INSTANCE: 'LuckyDrawInstance',
+  SHIPING_DETAILS: 'ShipingDetails',
+  PAYMENT_PAGE: 'PaymentPage',
+  
 });
 
 export const AppNavigator = () => {
@@ -47,6 +55,29 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.AUTH} component={AuthNavigator} />
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
+
+        
+        <Screen
+              key="screen-ShipingDetails"
+              name={AppScreens.SHIPING_DETAILS}
+              component={ShipingDetails}
+            />
+            <Screen
+            key="screen-LuckyDrawInstance"
+            name={AppScreens.LUCKYDRAW_INSTANCE}
+            component={LuckyDrawInstance}
+            // options={{
+            //   headerShown: true,
+            //   header: props => (
+            //     <MainScreensHeader {...props} hideSearch={true} key="header-LuckyDrawInstance" />
+            //   ),
+            // }}
+          />
+          <Screen
+            key="screen-PaymentPage"
+            name={AppScreens.PAYMENT_PAGE}
+            component={PaymentPage}
+          />
 
       </Navigator>
       
