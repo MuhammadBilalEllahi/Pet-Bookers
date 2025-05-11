@@ -2,14 +2,23 @@ import React, { useState } from "react";
 import { View, StyleSheet, TextInput, ScrollView } from "react-native";
 import { Layout, Text, Button, Icon } from "@ui-kitten/components";
 
+
+
 export default function PaymentPage({ navigation }) {
   const [account, setAccount] = useState("");
   const [coupon, setCoupon] = useState("");
   const subtotal = 2;
   const tax = 0;
-  const shipping = 500;
+  const shippingPrice = 500;
   const discount = 0;
-  const total = subtotal + tax + shipping - discount;
+  const total = subtotal + tax + shippingPrice - discount;
+
+
+
+  const handleConfirmPayment = () => {
+    // Navigate to confirmation or home
+    // navigation.navigate(AppScreens.ORDER_CONFIRMATION);
+  };
 
   return (
     <ScrollView>
@@ -40,7 +49,9 @@ export default function PaymentPage({ navigation }) {
           onChangeText={setAccount}
           keyboardType="number-pad"
         />
-        <Button style={styles.confirmBtn}>Confirm Payment</Button>
+        <Button style={styles.confirmBtn} onPress={handleConfirmPayment}>
+          Confirm Payment
+        </Button>
 
         {/* Summary Box */}
         <View style={styles.summaryBox}>
@@ -54,7 +65,7 @@ export default function PaymentPage({ navigation }) {
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Shipping</Text>
-            <Text style={styles.summaryValue}>Rs {shipping}</Text>
+            <Text style={styles.summaryValue}>Rs {shippingPrice}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Discount/Promo</Text>

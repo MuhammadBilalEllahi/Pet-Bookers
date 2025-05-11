@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollV
 import { Layout, Text, Button, Select, SelectItem, IndexPath, Icon } from "@ui-kitten/components";
 import { AppScreens } from "../../../navigators/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
-  
+
 const cartData = [
   {
     id: 1,
@@ -30,11 +30,18 @@ export const MyCartScreen = () => {
 
   const subtotal = cartData.reduce((sum, item) => sum + item.price, 0);
   const tax = 0;
-  const shipping = 500;
+  const shippingPrice = 500;
   const discount = 0;
-  const total = subtotal + tax + shipping - discount;
+  const total = subtotal + tax + shippingPrice - discount;
 
   const navigation = useNavigation();
+
+
+  const handleCheckout = () => {
+    dispatch(setCart(cartData));
+    dispatch(setStep(CheckoutSteps.SHIPPING));
+    navigation.navigate(AppScreens.SHIPING_DETAILS);
+  };
 
   return (
     <Layout style={styles.container}>
@@ -55,26 +62,22 @@ export const MyCartScreen = () => {
             <Text style={styles.srHeader}>Sr#</Text>
             <Text style={styles.productHeader}>Product Details</Text>
           </View>
-          <FlatList
-            data={cartData}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({ item, index }) => (
-              <View style={styles.cartRow}>
-                <Text style={styles.srCell}>{index + 1}</Text>
-                <View style={styles.productCell}>
-                  <Image source={item.image} style={styles.productImage} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.productName}>{item.name}</Text>
-                    <Text style={styles.productDesc}>{item.product}</Text>
-                    <Text style={styles.productPrice}>Rs {item.price.toLocaleString()}</Text>
-                  </View>
-                  <TouchableOpacity>
-                    <Icon name="close-circle-outline" fill="#d32f2f" style={{ width: 24, height: 24 }} />
-                  </TouchableOpacity>
+          {cartData.map((item, index) => (
+            <View key={item.id} style={styles.cartRow}>
+              <Text style={styles.srCell}>{index + 1}</Text>
+              <View style={styles.productCell}>
+                <Image source={item.image} style={styles.productImage} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.productName}>{item.name}</Text>
+                  <Text style={styles.productDesc}>{item.product}</Text>
+                  <Text style={styles.productPrice}>Rs {item.price.toLocaleString()}</Text>
                 </View>
+                <TouchableOpacity>
+                  <Icon name="close-circle-outline" fill="#d32f2f" style={{ width: 24, height: 24 }} />
+                </TouchableOpacity>
               </View>
-            )}
-          />
+            </View>
+          ))}
         </View>
 
         {/* Payment Method & Note */}
@@ -109,7 +112,7 @@ export const MyCartScreen = () => {
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Shipping</Text>
-            <Text style={styles.summaryValue}>Rs {shipping}</Text>
+            <Text style={styles.summaryValue}>Rs {shippingPrice}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Discount/Promo</Text>
@@ -159,7 +162,7 @@ export const MyCartScreen = () => {
             «Continue Shopping
           </Text>
         </Button>
-        <Button onPress={() => navigation.navigate(AppScreens.SHIPING_DETAILS)} style={styles.checkoutBtn}>
+        <Button onPress={handleCheckout} style={styles.checkoutBtn}>
           Checkout »
         </Button>
       </View>

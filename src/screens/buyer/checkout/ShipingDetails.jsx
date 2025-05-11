@@ -14,7 +14,7 @@ const defaultShipping = {
 
 export default function ShipingDetails({  }) {
     const navigation = useNavigation();
-  const [shipping, setShipping] = useState(defaultShipping);
+  const [shippings, setShipping] = useState(defaultShipping);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [billing, setBilling] = useState({
@@ -29,6 +29,7 @@ export default function ShipingDetails({  }) {
   const discount = 0;
   const total = subtotal + tax + shippingPrice - discount;
 
+ 
   // Handler for adding a new address (could be a modal or navigation)
   const handleAddAddress = () => {
     setShowAddAddress(true);
@@ -40,9 +41,9 @@ export default function ShipingDetails({  }) {
     setSameAsShipping(checked);
     if (checked) {
       setBilling({
-        contactName: shipping.contactName,
-        phone: shipping.phone,
-        address: shipping.address,
+        contactName: shippings.contactName,
+        phone: shippings.phone,
+        address: shippings.address,
       });
     } else {
       setBilling({
@@ -51,6 +52,10 @@ export default function ShipingDetails({  }) {
         address: "",
       });
     }
+  };
+
+  const handleContinue = () => {
+    navigation.navigate(AppScreens.PAYMENT_PAGE);
   };
 
   return (
@@ -71,25 +76,25 @@ export default function ShipingDetails({  }) {
         </View>
       </View>
 
-      {/* Shipping Address */}
+      {/* shippings Address */}
       <View style={styles.sectionBox}>
-        <Text style={styles.sectionTitle}>Choose Shipping Address</Text>
+        <Text style={styles.sectionTitle}>Choose shippings Address</Text>
         <View style={styles.addressRow}>
           <View style={styles.verifiedBadge}>
             <Icon name="checkmark-circle-2-outline" fill="#43a047" style={{ width: 18, height: 18, marginRight: 4 }} />
             <Text style={styles.verifiedText}>Verified</Text>
           </View>
           <Icon name="phone-outline" fill="#222" style={{ width: 18, height: 18, marginRight: 4 }} />
-          <Text style={styles.phoneText}>{shipping.phone}</Text>
+          <Text style={styles.phoneText}>{shippings.phone}</Text>
         </View>
         <View style={styles.addressDetails}>
           <Text>
             <Text style={{ fontWeight: "bold" }}>Contact Person Name: </Text>
-            {shipping.contactName}
+            {shippings.contactName}
           </Text>
           <Text>
             <Text style={{ fontWeight: "bold" }}>Address: </Text>
-            {shipping.address}
+            {shippings.address}
           </Text>
         </View>
         <TouchableOpacity style={styles.addAddressBtn} onPress={handleAddAddress}>
@@ -107,7 +112,7 @@ export default function ShipingDetails({  }) {
         >
           {evaProps => (
             <Text {...evaProps} style={styles.checkboxText}>
-              Same as shipping address
+              Same as shippings address
             </Text>
           )}
         </CheckBox>
@@ -147,7 +152,7 @@ export default function ShipingDetails({  }) {
           <Text style={styles.summaryValue}>Rs {tax}</Text>
         </View>
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Shipping</Text>
+          <Text style={styles.summaryLabel}>shippings</Text>
           <Text style={styles.summaryValue}>Rs {shippingPrice}</Text>
         </View>
         <View style={styles.summaryRow}>
@@ -200,7 +205,7 @@ export default function ShipingDetails({  }) {
         </Button>
         <Button
           style={styles.checkoutBtn}
-          onPress={() => navigation.navigate(AppScreens.PAYMENT_PAGE)}
+          onPress={handleContinue}
         >
           Checkout »
         </Button>
