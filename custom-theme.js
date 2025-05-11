@@ -48,6 +48,7 @@ export const getCustomThem = lang => {
     'color-danger-700': '#AF1B29',
     'color-danger-800': '#8D1127',
     'color-danger-900': '#750A26',
+    'background-basic-color-1': '#F5F5F5',
   };
   customizedTheme.strict['text-font-family'] =
     lang === 'ur' ? 'NotoNaskhArabic-Regular' : 'System';
