@@ -12,6 +12,8 @@ import { useDispatch } from 'react-redux';
 import { logout, setAuthToken, setUserType, UserType } from '../../store/user';
 import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../../utils/localstorage';
 import { ProfileActionButton } from '../../components/profile';
+import { axiosBuyerClient } from '../../utils/axiosClient';
+import { useEffect } from 'react';
 
 const { width, height} = Dimensions.get('window')
 
@@ -21,6 +23,19 @@ export const BuyerProfileScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const EditIcon = props => <Icon {...props} name="edit-2-outline" />;
   const LockIcon = props => <Icon {...props} name="lock-outline" />;
+
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axiosBuyerClient.get('customer/info');
+        console.log(response);
+      } catch (error) {
+        console.error('Error fetching profile:', error || error?.message || error?.response?.data?.message);
+      }
+    }
+    fetchUserProfile();
+  }, []);
 
   const navigateToProfileUpdate = () => {
     navigation.navigate('UpdateProfile');
@@ -33,6 +48,11 @@ export const BuyerProfileScreen = ({navigation}) => {
   const navigateToOrdersList = () => {
     navigation.navigate('MyOrders');
   };
+
+  const navigateToWishlist = () => {
+    navigation.navigate('MyWishlist');
+  };
+
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
   };
@@ -89,10 +109,10 @@ export const BuyerProfileScreen = ({navigation}) => {
           //  {marginVertical: 4}
            ]}>
           <ProfileActionButton
-            title="My Orders"
-            subtitle="Orders are here"
+            title="My Wishlist"
+            subtitle="Wishlist are here"
             iconName="cube-outline"
-            onPress={navigateToOrdersList}
+            onPress={navigateToWishlist}
           />
           <Divider />
           <ProfileActionButton
@@ -106,7 +126,7 @@ export const BuyerProfileScreen = ({navigation}) => {
             title="Cart"
             subtitle="Settings are here now"
             iconName="shopping-cart-outline"
-            onPress={navigateToAppSettings}
+            onPress={navigateToOrdersList}
           />
           <Divider />
           <ProfileActionButton

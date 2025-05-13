@@ -14,6 +14,10 @@ const initialState = {
   popularProducts: { products: [], total_size: 0, offset: 0, limit: 10 },
   popularProductsLoading: true,
   popularProductsError: null,
+  // Sellers State
+  sellers: [],
+  sellersLoading: true,
+  sellersError: null,
   // Lucky Draw State
   luckyDraws: [],
   luckyDrawsLoading: false,
@@ -68,6 +72,15 @@ export const loadLuckyDraws = createAsyncThunk(
     console.log("[buyersHome/loadLuckyDraws]", data);
     return data.lucky_draws || data;
   }
+);
+
+export const loadSellers = createAsyncThunk(
+  'buyersHome/loadSellers',
+  async () => {
+    const {data} = await axiosBuyerClient.get('seller/all');
+    console.log("[buyersHome/loadSellers]", data);
+    return data;
+  },
 );
 
 const slice = createSlice({
@@ -185,6 +198,21 @@ const slice = createSlice({
       state.luckyDrawsLoading = false;
       state.luckyDrawsError = action.error?.message || 'Failed to load lucky draws';
     });
+    builder.addCase(loadSellers.pending, (state) => {
+      state.sellers = [];
+      state.sellersLoading = true;
+      state.sellersError = null;
+    });
+    builder.addCase(loadSellers.fulfilled, (state, {payload}) => {
+      state.sellers = payload;
+      state.sellersLoading = false;
+      state.sellersError = null;
+    });
+    builder.addCase(loadSellers.rejected, (state, action) => {
+      state.sellers = [];
+      state.sellersLoading = false;
+      state.sellersError = action.error?.message || 'Failed to load sellers';
+    });
   },
 });
 
@@ -241,6 +269,15 @@ export const selectLuckyDraws = createSelector(
     luckyDrawsLoading: data.luckyDrawsLoading,
     luckyDrawsError: data.luckyDrawsError,
   })
+);
+
+export const selectSellers = createSelector(
+  selectBuyersHomeData,
+  data => ({
+    sellers: data.sellers,
+    sellersLoading: data.sellersLoading,
+    sellersError: data.sellersError,
+  }),
 );
 
 export default slice.reducer;

@@ -1,45 +1,40 @@
-import {Layout, Text} from '@ui-kitten/components';
+import {Layout, Text, Spinner} from '@ui-kitten/components';
 import {Dimensions, Image, ScrollView, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {loadSellers, selectSellers} from '../../store/buyersHome';
+import {selectBaseUrls} from '../../store/configs';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
-const sellersList = [
-  {
-    id: 1,
-    name: 'Model Pets Farm',
-    image: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-  },
-  {
-    id: 2,
-    name: 'Ali Dastageer',
-    image: 'https://randomuser.me/api/portraits/men/44.jpg',
-  },
-  {
-    id: 3,
-    name: 'Poultry Heaven',
-    image: 'https://images.pexels.com/photos/162240/chicken-poultry-animals-bird-162240.jpeg',
-  },
-  {
-    id: 4,
-    name: 'Fish Pond .com',
-    image: 'https://images.pexels.com/photos/128756/pexels-photo-128756.jpeg',
-  },
-  {
-    id: 5,
-    name: 'Dr. Khalid',
-    image: 'https://randomuser.me/api/portraits/men/45.jpg',
-  },
-  {
-    id: 6,
-    name: 'Pet Groomers',
-    image: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-  },
-];
-
 export const VandorsListScreen = ({navigation}) => {
+  const dispatch = useDispatch();
+  const baseUrls = useSelector(selectBaseUrls);
+  const {sellers, sellersLoading, sellersError} = useSelector(selectSellers);
+
+  useEffect(() => {
+    dispatch(loadSellers());
+  }, []);
+
   const navigateToVandorDetail = vandorId => {
-    navigation.navigate('VandorDetail');
+    navigation.navigate('VandorDetail', {sellerId: vandorId});
   };
+
+  if (sellersLoading) {
+    return (
+      <Layout level="3" style={styles.loadingContainer}>
+        <Spinner size="large" />
+      </Layout>
+    );
+  }
+
+  if (sellersError) {
+    return (
+      <Layout level="3" style={styles.errorContainer}>
+        <Text status="danger">{sellersError}</Text>
+      </Layout>
+    );
+  }
 
   return (
     <Layout level="3" style={{flex: 1, backgroundColor: '#fff'}}>
@@ -49,13 +44,13 @@ export const VandorsListScreen = ({navigation}) => {
         contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-start', paddingTop: 10, paddingBottom: 90}}>
         <Text style={styles.header}>All Sellers</Text>
         <View style={styles.grid}>
-          {sellersList.map(item => (
+          {sellers.map(item => (
             <TouchableOpacity
               key={item.id}
               style={styles.sellerItem}
               onPress={() => navigateToVandorDetail(item.id)}>
               <Image
-                source={{uri: item.image}}
+                source={{uri: `${baseUrls['shop_image_url']}/${item.image}`}}
                 style={styles.sellerImage}
               />
               <Text style={styles.sellerName}>{item.name}</Text>
@@ -101,5 +96,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 2,
     textTransform: 'capitalize',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
 });

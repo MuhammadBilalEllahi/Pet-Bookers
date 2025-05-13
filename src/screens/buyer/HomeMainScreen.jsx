@@ -11,10 +11,12 @@ import {
   loadHomeBanners,
   loadLatestProducts,
   loadPopularProducts,
+  loadSellers,
   selectFeaturedProducts,
   selectHomeBanners,
   selectLatestProducts,
   selectPopularProducts,
+  selectSellers,
 } from '../../store/buyersHome';
 import {
   loadProductCategories,
@@ -23,32 +25,6 @@ import {
 import {selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
 
-const sellersList = [
-  {
-    id: 1,
-    name: 'new shop',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-04-01-6427fce278064.png',
-  },
-  {
-    id: 2,
-    name: 'new shop 2',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-04-17-643d40afb34e7.png',
-  },
-  {
-    id: 3,
-    name: 'model pets farm',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-04-30-644e3d653810e.png',
-  },
-  {
-    id: 4,
-    name: 'us pets farm',
-    image:
-      'https://petbookie.com/storage/app/public/shop/2023-05-01-644fc3645f5ad.png',
-  },
-];
 
 export const HomeMainScreen = ({navigation}) => {
   const {t} = useTranslation();
@@ -57,6 +33,7 @@ export const HomeMainScreen = ({navigation}) => {
   const baseUrls = useSelector(selectBaseUrls);
   const {homeBanners, homeBannersLoading, homeBannersError} =
     useSelector(selectHomeBanners);
+  const {sellers, sellersLoading, sellersError} = useSelector(selectSellers);
 
   const {categories, categoriesLoading, categoriesError} = useSelector(
     selectProductCategories,
@@ -68,12 +45,14 @@ export const HomeMainScreen = ({navigation}) => {
   const {popularProducts, popularProductsLoading, popularProductsError} =
     useSelector(selectPopularProducts);
 
-  const navigateToProductDetail = productId => {
-    navigation.navigate('ProductDetail');
+  const navigateToProductDetail = (productId, slug) => {
+    console.log("[navigateToProductDetail]", productId, slug);
+    navigation.navigate('ProductDetail', {productId: productId, slug: slug});
   };
 
   const navigateToVandorDetail = vandorId => {
-    navigation.navigate('VandorDetail');
+    console.log("[navigateToVandorDetail]", vandorId);
+    navigation.navigate('VandorDetail', {sellerId: vandorId});
   };
 
   const navigateToProductsSearch = () => {
@@ -112,6 +91,7 @@ export const HomeMainScreen = ({navigation}) => {
         discountType: productItem.discount_type,
         discount: productItem.discount,
         rating: 0,
+        slug: productItem.slug,
       }));
     },
     [baseUrls],
@@ -165,7 +145,17 @@ export const HomeMainScreen = ({navigation}) => {
     dispatch(loadFeaturedProducts({limit: 10}));
     dispatch(loadLatestProducts({limit: 10}));
     dispatch(loadPopularProducts({limit: 10}));
+    dispatch(loadSellers());
   }, []);
+
+  const parsedSellers = useMemo(() => {
+    if (!Array.isArray(sellers)) return [];
+    return sellers.map(seller => ({
+      id: seller.id,
+      name: seller.name,
+      image: `${baseUrls['shop_image_url']}/${seller.image}`,
+    }));
+  }, [baseUrls, sellers]);
 
   return (
     <Layout level="3" style={{flex: 1}}>
@@ -199,7 +189,7 @@ export const HomeMainScreen = ({navigation}) => {
           loadingError={featuredProductsError}
           listTitle={t('featuredProducts')}
           containerStyle={{marginVertical: 0,paddingHorizontal: 14}}
-          onProductDetail={navigateToProductDetail}
+          onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMoreFeatured}
           hasMore={featuredProducts.products.length < featuredProducts.total_size}
         />
@@ -209,7 +199,7 @@ export const HomeMainScreen = ({navigation}) => {
           loadingError={latestProductsError}
           listTitle={t('latest')}
           containerStyle={{marginVertical: 16,paddingHorizontal: 14}}
-          onProductDetail={navigateToProductDetail}
+          onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMoreLatest}
           hasMore={latestProducts.products.length < latestProducts.total_size}
         />
@@ -219,16 +209,18 @@ export const HomeMainScreen = ({navigation}) => {
           loadingError={popularProductsError}
           listTitle={t('popular')}
           containerStyle={{marginVertical: 16, paddingHorizontal: 14}}
-          onProductDetail={navigateToProductDetail}
+          onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)    }
           onLoadMore={handleLoadMorePopular}
           hasMore={popularProducts.products.length < popularProducts.total_size}
         />
         <HorizontalItemsList
           containerStyle={{marginVertical: 10, paddingHorizontal: 14}}
-          list={sellersList}
+          list={parsedSellers}
           listTitle={t('sellers')}
           roundedImage={true}
-          onItemPress={navigateToVandorDetail}
+          loading={sellersLoading}
+          loadingError={sellersError}
+          onItemPress={item => navigateToVandorDetail(item)}
           onViewAll={navigateToAllVandorsScreen}
         />
       </ScrollView>

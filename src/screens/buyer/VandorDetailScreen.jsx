@@ -1,30 +1,114 @@
-import {Button, Input, Layout, Text, useTheme} from '@ui-kitten/components';
+import {Button, Input, Layout, Text, useTheme, Spinner} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {Dimensions, Image, ScrollView, View, StyleSheet} from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
 import {ProductCard} from '../../components/product/ProductCard';
 import {ThemedIcon} from '../../components/Icon';
-import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  loadSellerInfo,
+  loadSellerProducts,
+  selectSellerInfo,
+  selectSellerProducts,
+  clearSellerDetails,
+  loadSellerAllProducts,
+} from '../../store/sellerDetails';
+import {selectBaseUrls} from '../../store/configs';
+import {calculateDiscountedPrice} from '../../utils/products';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
-const products = Array.from({length: 7}).map((_, i) => {
-  return {
-    id: i,
-    title: 'Lorem ipsum dolor sit amet',
-    rating: Math.random() * 5,
-    discountPercentage: Math.floor(Math.random() * 25),
-    isSoldOut: Math.floor(Math.random() * 250) % 3 === 0,
-    price: Math.floor(Math.random() * 250 + 75),
-    oldPrice: Math.floor(Math.random() * 250) * 1.25,
-    image:
-      'https://petbookie.com/storage/app/public/product/thumbnail/2023-05-07-645829a70c659.png',
-  };
-});
-
-export const VandorDetailScreen = () => {
+export const VandorDetailScreen = ({route, navigation}) => {
   const {t} = useTranslation();
   const theme = useTheme();
+  const dispatch = useDispatch();
+  const baseUrls = useSelector(selectBaseUrls);
+  const {sellerInfo, sellerInfoLoading, sellerInfoError} = useSelector(selectSellerInfo) || {};
+  const {sellerProducts, sellerProductsLoading, sellerProductsError} = useSelector(selectSellerProducts) || {};
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const sellerId = route.params?.sellerId || 12;
+  console.log("[VandorDetailScreen]", sellerId);
+
+  useEffect(() => {
+    if (!sellerId) {
+      console.warn('No seller ID provided');
+      return;
+    }
+
+    try {
+      dispatch(loadSellerInfo(sellerId));
+      dispatch(loadSellerProducts({sellerId, limit: 10}));
+    } catch (error) {
+      console.error('Error loading seller data:', error);
+    }
+
+    return () => {
+      dispatch(clearSellerDetails());
+    };
+  }, [sellerId]);
+
+  const handleLoadMore = () => {
+    if (
+      sellerProducts?.products?.length < sellerProducts?.total_size &&
+      !sellerProductsLoading
+    ) {
+      dispatch(
+        loadSellerProducts({
+          sellerId,
+          limit: sellerProducts?.limit || 10,
+          offset: sellerProducts?.products?.length || 0,
+        }),
+      );
+    }
+  };
+
+  const handleSearch = () => {
+    if (!sellerId) return;
+    
+    dispatch(
+      loadSellerAllProducts({
+        sellerId,
+        limit: 10,
+        offset: 0,
+        search: searchQuery,
+      }),
+    );
+  };
+
+  if (sellerInfoLoading) {
+    return (
+      <Layout level="3" style={styles.loadingContainer}>
+        <Spinner size="large" />
+      </Layout>
+    );
+  }
+
+  if (sellerInfoError || !sellerInfo) {
+    return (
+      <Layout level="3" style={styles.errorContainer}>
+        <Text status="danger">{sellerInfoError || 'Failed to load seller information'}</Text>
+      </Layout>
+    );
+  }
+
+  const parsedProducts = (sellerProducts?.products || []).map(product => ({
+    id: product.id,
+    title: product.name,
+    rating: product.rating?.[0]?.average || 0,
+    discountPercentage: product.discount,
+    isSoldOut: product.current_stock === 0,
+    price: product.discount > 0
+      ? calculateDiscountedPrice(
+          product.unit_price,
+          product.discount,
+          product.discount_type,
+        )
+      : product.unit_price,
+    oldPrice: product.discount > 0 ? product.unit_price : 0,
+    image: `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`,
+  }));
 
   return (
     <Layout level="3" style={{flex: 1, backgroundColor: '#f9f9f9'}}>
@@ -41,9 +125,13 @@ export const VandorDetailScreen = () => {
         <View style={styles.bannerShadow}>
           <Image
             source={{
-              uri: 'https://petbookie.com/storage/app/public/shop/banner/2023-04-30-644e3d653844b.png',
+              
+              uri: sellerInfo?.seller?.shop?.banner
+                ? `https://petbookers.com.pk/storage/app/public/shop/banner/${sellerInfo.seller.shop.banner}`
+                : undefined,
             }}
             style={styles.banner}
+            defaultSource={require('../../../assets/new/lion.png')}
           />
         </View>
         {/* Store Info Card */}
@@ -51,26 +139,31 @@ export const VandorDetailScreen = () => {
           <View style={styles.storeInfoRow}>
             <Image
               source={{
-                uri: 'https://randomuser.me/api/portraits/men/75.jpg',
+                uri: sellerInfo?.seller?.shop?.image
+                  ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
+                  : undefined,
               }}
               style={styles.avatar}
+              defaultSource={require('../../../assets/new/lion.png')}
             />
             <View style={{flex: 1}}>
-              <Text style={styles.storeName}>Store Full Name</Text>
+              <Text style={styles.storeName}>{sellerInfo?.seller?.shop?.name || 'Unknown Store'}</Text>
               <View style={styles.ratingRow}>
                 <AirbnbRating
                   count={5}
-                  defaultRating={3.4}
+                  defaultRating={sellerInfo?.avg_rating || 0}
                   showRating={false}
                   size={16}
                   isDisabled={true}
                   selectedColor={theme['color-primary-default']}
                   starContainerStyle={{marginRight: 4}}
                 />
-                <Text style={styles.ratingValue}>3.4</Text>
-                <Text style={styles.ratingCount}>(34)</Text>
+                <Text style={styles.ratingValue}>{sellerInfo?.avg_rating || 0}</Text>
+                <Text style={styles.ratingCount}>({sellerInfo?.total_review || 0})</Text>
               </View>
-              <Text style={styles.orderCount}>4 Orders</Text>
+              <Text style={styles.orderCount}>{sellerInfo?.total_order || 0} Orders</Text>
+              <Text style={styles.addressText}>{sellerInfo?.seller?.shop?.address || 'No address provided'}</Text>
+              <Text style={styles.contactText}>{sellerInfo?.seller?.shop?.contact || 'No contact provided'}</Text>
             </View>
             <Button
               appearance="ghost"
@@ -86,6 +179,9 @@ export const VandorDetailScreen = () => {
             <Input
               placeholder="Search in Store"
               style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={handleSearch}
               accessoryRight={<ThemedIcon name="search-outline" />}
             />
             <Button
@@ -98,12 +194,17 @@ export const VandorDetailScreen = () => {
         </View>
         {/* Product Grid */}
         <View style={styles.productGrid}>
-          {products.map(item => (
+          {parsedProducts.map(item => (
             <View key={item.id} style={styles.productCardWrapper}>
               <ProductCard {...item} cardWidth={(windowWidth - 56) / 2} />
             </View>
           ))}
         </View>
+        {sellerProductsLoading && (
+          <View style={styles.loadingMoreContainer}>
+            <Spinner size="small" />
+          </View>
+        )}
       </ScrollView>
     </Layout>
   );
@@ -111,11 +212,11 @@ export const VandorDetailScreen = () => {
 
 const styles = StyleSheet.create({
   bannerShadow: {
-    borderRadius: 18,
+    borderRadius: 10,
     overflow: 'hidden',
     marginHorizontal: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    // shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: {width: 0, height: 2},
@@ -219,9 +320,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    paddingHorizontal: 8,
+    paddingHorizontal: 2,
   },
   productCardWrapper: {
     margin: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingMoreContainer: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  addressText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  contactText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
   },
 });

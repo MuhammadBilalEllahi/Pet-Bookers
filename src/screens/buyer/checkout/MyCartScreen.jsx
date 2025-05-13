@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Image, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from "react-native";
 import { Layout, Text, Button, Select, SelectItem, IndexPath, Icon } from "@ui-kitten/components";
 import { AppScreens } from "../../../navigators/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
+import { axiosBuyerClient } from "../../../utils/axiosClient";
 
 const cartData = [
   {
@@ -38,10 +39,24 @@ export const MyCartScreen = () => {
 
 
   const handleCheckout = () => {
-    dispatch(setCart(cartData));
-    dispatch(setStep(CheckoutSteps.SHIPPING));
     navigation.navigate(AppScreens.SHIPING_DETAILS);
   };
+
+  useEffect(() => {
+    const fetchCartData = async () => {
+      try {
+        const response = await axiosBuyerClient.get('cart/');
+        console.log('Cart Response:', response.data);
+      } catch (error) {
+        console.log('Cart Error:', error.toString()|| error.response?.data || error.message );
+        if (error.response?.status === 401) {
+          // Handle unauthorized error - maybe redirect to login
+          console.log('Authentication required');
+        }
+      }
+    }
+    fetchCartData();
+  },[])
 
   return (
     <Layout style={styles.container}>

@@ -18,13 +18,14 @@ export const ProductCard = ({
   image,
   cardWidth,
   onProductDetail,
+  slug,
 }) => {
   const theme = useTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.92}
       style={[styles.card, {width: cardWidth || windowWidth * 0.6}]}
-      onPress={() => onProductDetail && onProductDetail(id)}
+      onPress={() => onProductDetail && onProductDetail(id, slug)}
     >
       <View style={styles.imageContainer}>
         <Image
