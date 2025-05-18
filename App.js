@@ -19,6 +19,7 @@ import 'dayjs/locale/ur';
 import './src/locale';
 import {flexeStyles} from './src/utils/globalStyles';
 import { SplashScreen } from './src/screens/SplashScreen';
+import Toast from 'react-native-toast-message';
 
 dayjs.extend(calendar);
 dayjs.extend(localizedFormat);
@@ -74,6 +75,7 @@ const MainApp = () => {
           >
           <AppNavigator />
         </ApplicationProvider>
+        <Toast/>
         
     </SafeAreaView>
   );

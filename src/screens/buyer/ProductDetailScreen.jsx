@@ -53,7 +53,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       try {
         setLoadingRelated(true);
         const response = await axiosBuyerClient.get(`products/related-products/${product.id}`);
-        // console.log("[fetchRelatedProducts]", JSON.stringify(response, null, 10));
+        console.log("[fetchRelatedProducts]", JSON.stringify(response, null, 10));
         setRelatedProducts(response.data);
       } catch (error) {
         console.error('Error fetching related products [fetchRelatedProducts]:', error || error?.message || error?.response?.data?.message);
@@ -403,7 +403,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
 
 const ProductDetailShimmer = () => {
   return (
-    <Layout level="3" style={{ flex: 1 }}>
+    <Layout level="3" style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,

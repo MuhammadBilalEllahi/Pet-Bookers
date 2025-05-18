@@ -15,7 +15,36 @@ import { useDispatch } from 'react-redux';
 import { setAuthToken, setUserType, UserType } from '../../store/user';
 import { AppScreens } from '../../navigators/AppNavigator';
 import {launchImageLibrary} from 'react-native-image-picker';
-import axios from 'axios';
+import Toast from 'react-native-toast-message';
+
+import * as Yup from 'yup';
+
+// Shared validation schema
+const baseSchema = {
+  firstName: Yup.string().required('First name is required'),
+  lastName: Yup.string().required('Last name is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  countryCode: Yup.string().required('Country code is required'),
+  phone: Yup.string().required('Phone number is required'),
+  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password'), null], 'Passwords must match')
+    .required('Confirm password is required'),
+  state: Yup.string().required('State is required'),
+  city: Yup.string().required('City is required'),
+};
+
+// Additional fields for seller
+const sellerSchema = {
+  image: Yup.object().nullable().required('Profile image is required'),
+  shop_name: Yup.string().required('Shop name is required'),
+  shop_address: Yup.string().required('Shop address is required'),
+  logo: Yup.object().nullable().required('Shop logo is required'),
+  banner: Yup.object().nullable().required('Shop banner is required'),
+};
+
+
+
 
 // Permission request helper for gallery access
 const requestGalleryPermission = async () => {
@@ -44,6 +73,11 @@ const COUNTRY_CODES = [
 export const RegisterScreen = ({ navigation }) => {
   const route = useRoute();
   const { isItSeller = false } = route.params || {};
+
+  const validationSchema = Yup.object().shape(
+  isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
+);
+
   // Use translation keys for states and cities
   const stateKeys = [
     'Punjab', 'Sindh', 'KPK', 'Balochistan', 'GilgitBaltistan', 'AzadKashmir'
@@ -169,10 +203,27 @@ export const RegisterScreen = ({ navigation }) => {
     } catch (error) {
       console.error('True Error ', error);
       if (error.response) {
-        console.error('Register Error Response', error.response);
-      } else {
-        console.error('Register Error', error);
-      }
+        console.error('Register Error Response', error.response.data.message);
+      
+  const messages = error.response.data.message;
+
+  if (Array.isArray(messages)) {
+    messages.forEach((err, idx) => {
+      Toast.show({
+        type: 'error',
+        text1: err.message || 'Error',
+        text2: 'Registration Failed',
+        position: 'top',
+      });
+    });
+  } else {
+    Toast.show({
+      type: 'error',
+      text1: 'Something went wrong',
+      text2: 'Registration Failed',
+      position: 'top',
+    });
+  }}
       setIsBtnDisable(false);
     } finally {
       setIsBtnDisable(false);
@@ -204,6 +255,8 @@ export const RegisterScreen = ({ navigation }) => {
           logo: null,
           banner: null,
         }}
+          validationSchema={validationSchema}
+
         onSubmit={submitForm}>
         {({
           handleChange,
@@ -245,7 +298,7 @@ export const RegisterScreen = ({ navigation }) => {
                 onChangeText={handleChange('shop_name')}
                 onBlur={handleBlur('shop_name')}
                 value={values.shop_name}
-                caption={touched.shop_name && <InputError errorText={errors.shop_name} />}
+                caption={touched.shop_name && errors.shop_name ? errors.shop_name :''}
                 status={errors.shop_name && touched.shop_name ? 'danger' : 'basic'}
               />
             )}
@@ -264,16 +317,16 @@ export const RegisterScreen = ({ navigation }) => {
                 onChangeText={handleChange('shop_address')}
                 onBlur={handleBlur('shop_address')}
                 value={values.shop_address}
-                caption={touched.shop_address && <InputError errorText={errors.shop_address} />}
+                caption={touched.shop_address && errors.shop_address ? errors.shop_address : ''}
                 status={errors.shop_address && touched.shop_address ? 'danger' : 'basic'}
               />
             )}
             {/* Shop Logo Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
-                <Text style={styles.label}>{t('shopLogo') || 'Shop Logo'}</Text>
+                <Text style={styles.label}>{t('farmLogo') || 'Shop Logo'}</Text>
                 <ImagePicker
-                  title={t('chooseShopLogo') || 'Choose Logo'}
+                  title={t('choosefarmLogo') || 'Choose Logo'}
                   onPress={() => handleImagePick('logo', setFieldValue)}
                   imageUri={values.logo ? values.logo.uri : null}
                 />
@@ -285,9 +338,9 @@ export const RegisterScreen = ({ navigation }) => {
             {/* Shop Banner Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
-                <Text style={styles.label}>{t('shopBanner') || 'Shop Banner'}</Text>
+                <Text style={styles.label}>{t('farmBanner') || 'Shop Banner'}</Text>
                 <ImagePicker
-                  title={t('chooseShopBanner') || 'Choose Banner'}
+                  title={t('choosefarmBanner') || 'Choose Banner'}
                   onPress={() => handleImagePick('banner', setFieldValue)}
                   imageUri={values.banner ? values.banner.uri : null}
                 />
@@ -309,12 +362,8 @@ export const RegisterScreen = ({ navigation }) => {
               onChangeText={handleChange('firstName')}
               onBlur={handleBlur('firstName')}
               value={values.firstName}
-              caption={
-                touched.firstName && <InputError errorText={errors.firstName} />
-              }
-              status={
-                errors.firstName && touched.firstName ? 'danger' : 'basic'
-              }
+  status={touched.firstName && errors.firstName ? 'danger' : 'basic'}
+  caption={touched.firstName && errors.firstName ? errors.firstName : ''}
             />
             <Input
               label={(evaProps) => (
@@ -330,7 +379,7 @@ export const RegisterScreen = ({ navigation }) => {
               onBlur={handleBlur('lastName')}
               value={values.lastName}
               caption={
-                touched.lastName && <InputError errorText={errors.lastName} />
+                touched.lastName &&  errors.lastName  ? errors.lastName : ''
               }
               status={errors.lastName && touched.lastName ? 'danger' : 'basic'}
             />
@@ -349,18 +398,20 @@ export const RegisterScreen = ({ navigation }) => {
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}
               value={values.email}
-              caption={touched.email && <InputError errorText={errors.email} />}
+              caption={touched.email && errors.email ? errors.email : ''}
               status={errors.email && touched.email ? 'danger' : 'basic'}
             />
 
 
             {/* Improved Phone Field with Country Code */}
+            <View  style={{flexDirection: 'row'}}>
             <Text  style={styles.label}>
                     {t('phone')}
                   </Text>
                   <Text style={styles.countryCodeNote}>
               {t('countryCodeNote')}
             </Text>
+            </View>
             <View style={styles.phoneRowImproved}>
               
               <TouchableOpacity
@@ -383,8 +434,6 @@ export const RegisterScreen = ({ navigation }) => {
                 onChangeText={handleChange('phone')}
                 onBlur={handleBlur('phone')}
                 value={values.phone}
-                caption={touched.phone && <InputError errorText={errors.phone} />}
-                status={errors.phone && touched.phone ? 'danger' : 'basic'}
                 maxLength={15}
                 // Remove border on left to blend with country code
                 // UnderlayColor handled by style
@@ -420,7 +469,9 @@ export const RegisterScreen = ({ navigation }) => {
                 </View>
               </TouchableOpacity>
             </Modal>
-            
+            <Text style={{fontSize: 12}} status={errors.phone && touched.phone ? 'danger' : 'basic'}>
+                {touched.phone && errors.phone ? errors.phone : ''}
+                </Text>
 
             {/* State Dropdown Select */}
             <Select
@@ -454,7 +505,9 @@ export const RegisterScreen = ({ navigation }) => {
                 />
               ))}
             </Select>
-            {touched.state && <InputError errorText={errors.state} />}
+            <Text style={{fontSize: 12}}
+            status={touched.state && errors.state  ? 'danger' : 'basic'}
+            >{touched.state && errors.state ? errors.state : ''}</Text>
 
             {/* City Dropdown Select */}
             <Select
@@ -490,7 +543,10 @@ export const RegisterScreen = ({ navigation }) => {
                 />
               ))}
             </Select>
-            {touched.city && <InputError errorText={errors.city} />}
+            <Text
+            style={{fontSize: 12}}
+            status={ touched.city && errors.city? 'danger' : 'basic'}
+            >{touched.city && errors.city? errors.city : ''}</Text>
 
             {(() => {
               const [showPassword, setShowPassword] = React.useState(false);
@@ -509,7 +565,7 @@ export const RegisterScreen = ({ navigation }) => {
                   onBlur={handleBlur('password')}
                   value={values.password}
                   caption={
-                    touched.password && <InputError errorText={errors.password} />
+                    touched.password && errors.password ? errors.password: ''
                   }
                   status={errors.password && touched.password ? 'danger' : 'basic'}
                   accessoryRight={props => (
@@ -541,9 +597,7 @@ export const RegisterScreen = ({ navigation }) => {
                   onBlur={handleBlur('confirmPassword')}
                   value={values.confirmPassword}
                   caption={
-                    touched.confirmPassword && (
-                      <InputError errorText={errors.confirmPassword} />
-                    )
+                    touched.confirmPassword && errors.confirmPassword ? errors.confirmPassword : ''
                   }
                   status={
                     errors.confirmPassword && touched.confirmPassword
@@ -615,7 +669,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   select: {
-    marginVertical: 10,
+    marginTop: 10,
     backgroundColor: 'rgba(130, 130, 130, 0) !important',
     borderColor: 'rgba(24, 29, 180, 0)',
     borderWidth: 1,
@@ -624,7 +678,7 @@ const styles = StyleSheet.create({
   phoneRowImproved: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 10,
+    // marginTop: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgb(170, 170, 170)',

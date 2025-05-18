@@ -1,3 +1,4 @@
+import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
@@ -14,9 +15,31 @@ import { getAuthToken } from '../../utils/localstorage';
 import { useDispatch } from 'react-redux';
 import { AppScreens } from '../../navigators/AppNavigator';
 import { useRoute } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 // import axios from 'axios';
 
 // const SELLER_LOGIN_URL = 'https://petbookers.com.pk/api/v3/seller/auth/login';
+
+
+const LoginSchema = Yup.object().shape({
+  email: Yup.string()
+    .email('Invalid email address'),
+  phone: Yup.string()
+    .matches(/^\d+$/, 'Phone must be numeric')
+    .min(10, 'Phone must be at least 10 digits'),
+  password: Yup.string()
+    .required('Password is required')
+    .min(6, 'Password must be at least 6 characters'),
+}).test(
+  'emailOrPhoneRequired',
+  'Either email or phone is required',
+  function (value) {
+    const { email, phone } = value;
+    return !!(email || phone);
+  }
+);
+
+
 
 export const LoginScreen = ({ navigation  }) => {
   const route = useRoute()
@@ -77,8 +100,20 @@ export const LoginScreen = ({ navigation  }) => {
       // TODO: handle error (e.g., show error message)
       if (error.response) {
         console.error("Login Error Response", error.response.data);
+        Toast.show({
+        type: 'error',
+        text1: error.response.data.errors[0].message,
+        text2: 'Login Failed',
+        position: 'top',
+      });
       } else {
         console.error("Login Error", error);
+        Toast.show({
+        type: 'error',
+        text1: error,
+        text2: 'Login Failed',
+        position: 'top',
+      });
       }
     } finally {
       setIsBtnDisabled(false);
@@ -126,6 +161,8 @@ export const LoginScreen = ({ navigation  }) => {
           }}
           enableReinitialize={true}
           onSubmit={submitForm}
+            validationSchema={LoginSchema}
+
         >
           {({
             handleChange,
@@ -147,7 +184,7 @@ export const LoginScreen = ({ navigation  }) => {
                   onChangeText={handleChange('email')}
                   onBlur={handleBlur('email')}
                   value={values.email}
-                  caption={touched.email && <InputError errorText={errors.email} />}
+                  caption={touched.email && errors.email? errors.email: ''}
                   status={errors.email && touched.email ? 'danger' : 'basic'}
                   accessoryLeft={<Icon name="email" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
                 />
@@ -161,7 +198,7 @@ export const LoginScreen = ({ navigation  }) => {
                   textStyle={{ fontSize: 14, paddingVertical: 4 }}
                   style={styles.input}
                   onBlur={handleBlur('phone')}
-                  caption={touched.phone && <InputError errorText={errors.phone} />}
+                  caption={touched.phone && errors.phone ? errors.phone : ''}
                   status={errors.phone && touched.phone ? 'danger' : 'basic'}
                   accessoryLeft={<Icon name="phone" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
                   // Note: phone login is not supported by the seller endpoint, but UI is kept for consistency
