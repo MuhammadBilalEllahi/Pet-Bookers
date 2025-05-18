@@ -26,6 +26,7 @@ export const loadSellerProducts = createAsyncThunk(
     const {data} = await axiosBuyerClient.get(
       `seller/${sellerId}/products/?limit=${limit}&offset=${offset}`,
     );
+    console.log("[loadSellerProducts]", data)
     return data;
   },
 );

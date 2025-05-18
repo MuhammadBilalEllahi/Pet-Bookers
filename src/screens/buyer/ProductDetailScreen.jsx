@@ -7,12 +7,14 @@ import { ThemedIcon } from '../../components/Icon';
 import { Price } from '../../components/Price';
 import { ProductImagesSlider } from '../../components/product';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { axiosBuyerClient } from '../../utils/axiosClient';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectBaseUrls } from '../../store/configs';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
+import { loadSellerProducts, selectSellerProducts } from '../../store/sellerDetails';
+import { calculateDiscountedPrice } from '../../utils/products';
 
 
 export const ProductDetailScreen = ({ route, navigation }) => {
@@ -25,6 +27,57 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const [loadingRelated, setLoadingRelated] = useState(false);
   const baseUrls = useSelector(selectBaseUrls);
   const { productId, slug } = route.params || {};
+  // loadSellerAllProducts
+
+
+   const navigateToProductDetail = (productId, slug) => {
+    console.log("[navigateToProductDetail]", productId, slug);
+    navigation.navigate('ProductDetail', {productId: productId, slug: slug});
+  };
+
+  const navigateToVandorDetail = vandorId => {
+    console.log("[navigateToVandorDetail]", vandorId);
+    navigation.navigate('VandorDetail', {sellerId: vandorId});
+  };
+
+
+
+  const dispatch = useDispatch();
+  const { sellerProducts, sellerProductsLoading } = useSelector(selectSellerProducts);
+
+  const parsedProducts = useCallback(
+    list => {
+      if (!Array.isArray(list)) return [];
+      return list.map(productItem => ({
+        id: productItem.id,
+        name: productItem.name,
+        image: `${baseUrls['product_thumbnail_url']}/${productItem.thumbnail}`,
+        price:
+          productItem.discount > 0
+            ? calculateDiscountedPrice(
+              productItem.unit_price,
+              productItem.discount,
+              productItem.discount_type,
+            )
+            : productItem.unit_price,
+        oldPrice: productItem.discount > 0 ? productItem.unit_price : 0,
+        isSoldOut: productItem.current_stock === 0,
+        discountType: productItem.discount_type,
+        discount: productItem.discount,
+        rating: 0,
+        slug: productItem.slug,
+      }));
+    },
+    [baseUrls],
+  );
+
+  useEffect(() => {
+    console.debug("SELLER ID", product?.seller?.id)
+    if (product?.seller?.id) {
+      dispatch(loadSellerProducts({ sellerId: product.seller.id, limit: 10, offset: 0 }));
+    }
+  }, [product?.seller?.id]);
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -65,9 +118,10 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     fetchRelatedProducts();
   }, [product?.id]);
 
-  const navigateToProductDetail = (productId, slug) => {
-    navigation.navigate('ProductDetail', { productId, slug });
-  };
+  // const navigateToProductDetail = (productId, slug) => {
+  //   console.error("NAVIGATINF")
+  //   navigation.navigate('ProductDetail', { productId, slug });
+  // };
 
   const addToCart = (product) => {
     console.log("[addToCart]", product);
@@ -78,15 +132,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     console.log("[navigateToSellerProfile]", sellerId);
   };
 
-  // if (loading || !product) {
-  //   return (
-  //     <Layout level="3" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-  //       <Text>Loading...</Text>
-  //     </Layout>
-  //   );
-  // }
+
   if (loading || !product) {
-  return <ProductDetailShimmer />;
+    return <ProductDetailShimmer />;
   }
 
 
@@ -108,22 +156,26 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     slug: item.slug,
   }));
 
+  // const baseUrls = useSelector(selectBaseUrls);
+
+
+
   return (
-    <Layout level="3" style={{ flex: 1,backgroundColor: 'white', }}>
+    <Layout level="3" style={{ flex: 1, backgroundColor: 'white', }}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           backgroundColor: 'white',
-          
+
           flexGrow: 1,
           justifyContent: 'flex-start',
           paddingTop: 10,
-           
+
         }}>
 
         <ProductImagesSlider slideList={productImages} />
-        <Layout level="1" style={{backgroundColor: 'white'}}>
+        <Layout level="1" style={{ backgroundColor: 'white' }}>
           <Layout
             style={[
               spacingStyles.px8,
@@ -131,9 +183,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               flexeStyles.row,
               flexeStyles.itemsCenter,
               flexeStyles.contentBetween,
-              {backgroundColor: 'white'},
+              { backgroundColor: 'white' },
             ]}>
-            <Layout style={{backgroundColor: 'white',}}>
+            <Layout style={{ backgroundColor: 'white', }}>
               <Text style={[spacingStyles.px4,]} category="h6">
                 {product.name}
               </Text>
@@ -150,7 +202,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
             />
           </Layout>
 
-          <Layout style={{ marginHorizontal: 12, marginTop: 0,backgroundColor: 'white', }}>
+          <Layout style={{ marginHorizontal: 12, marginTop: 0, backgroundColor: 'white', }}>
             <Price fontSize={20} amount={product.unit_price} />
             {product.discount > 0 && (
               <Layout style={flexeStyles.row}>
@@ -189,8 +241,8 @@ export const ProductDetailScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </Layout>
           {activeTab === 'overview' ? (
-            <Layout style={[spacingStyles.p16,{backgroundColor: 'white'}]}
-             level="1">
+            <Layout style={[spacingStyles.p16, { backgroundColor: 'white' }]}
+              level="1">
               <Text
                 category="p1"
                 style={{
@@ -298,7 +350,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
                           showRating={false}
                           size={14}
                           isDisabled={true}
-                          // selectedColor={theme['color-primary-default']}
+                        // selectedColor={theme['color-primary-default']}
                         />
                       </Layout>
                       <Text>{review.comment}</Text>
@@ -345,56 +397,47 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ paddingVertical: 12, alignItems: 'center', borderRadius: 8 }}>
-              <Text onPress={() => { navigateToSellerProfile(product.seller.id) }} style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Visit Store</Text>
+              <Text onPress={() => { navigateToVandorDetail(product.seller.id) }} style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Visit Store</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
 
         <Layout level="1" style={[spacingStyles.px16, spacingStyles.py8]}>
-          <Text
-            style={{
-              fontSize: 16,
-              textTransform: 'uppercase',
-              marginBottom: 4,
-              fontWeight: '700',
-            }}>
-            From the same seller
-          </Text>
-          <FlatList
-            data={[1, 2, 3, 4]}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <Layout
-                level="1"
-                style={{ width: 130, marginHorizontal: 4, paddingBottom: 4 }}>
-                <Image
-                  source={{
-                    uri: 'https://petbookie.com/storage/app/public/product/thumbnail/2023-05-07-645829a70c659.png',
-                  }}
-                  style={{
-                    width: 130,
-                    height: 80,
-                    resizeMode: 'cover',
-                  }}
-                />
-                <Text category="p1" style={{ fontSize: 16, marginVertical: 8 }}>
-                  Lorem ipsum dolor sit amet consectetur.
-                </Text>
-                <Price amount={230} />
-              </Layout>
-            )}
-          />
+
+
+          <View style={{ marginTop: 20, marginBottom: 80 }}>
+
+            <ProductsList
+              listTitle="Related Products"
+              loading={sellerProductsLoading}
+              list={parsedProducts(relatedProducts.filter(p => p.id !== product.id))} // Exclude current product
+              // onProductPress={(item) => navigateToProductDetail(item.id, item.slug)}
+                        onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
+
+            />
+
+            <ProductsList
+              listTitle="From Seller"
+              loading={sellerProductsLoading}
+              list={parsedProducts(sellerProducts.products.filter(p => p.id !== product.id))} // Exclude current product
+              onProductPress={(item) => navigateToProductDetail(item.id, item.slug)}
+            />
+
+
+          </View>
+
+
+
         </Layout>
 
-        {loadingRelated && parsedRelatedProducts.length > 0 && <ProductsList
-          list={parsedRelatedProducts}
+        {/* {loadingRelated && parsedRelatedProducts.length > 0 && <ProductsList
+          list={parsedProducts(relatedProducts)}
           loading={loadingRelated}
           listTitle="Related Products"
           hideViewAllBtn={true}
           containerStyle={{ marginVertical: 16, paddingHorizontal: 14 }}
           onProductDetail={navigateToProductDetail}
-        />}
+        />} */}
       </ScrollView>
     </Layout>
   );
@@ -518,16 +561,16 @@ const ProductDetailShimmer = () => {
             LinearGradient={LinearGradient}
           />
         </View>
-         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginBottom:80}}>
-         <ShimmerPlaceholder
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginBottom: 80 }}>
+          <ShimmerPlaceholder
 
-          style={{ width: '90%', height: 30, borderRadius: 4, marginBottom: 10 }}
-          LinearGradient={LinearGradient}
-        />
-       </View>
+            style={{ width: '90%', height: 30, borderRadius: 4, marginBottom: 10 }}
+            LinearGradient={LinearGradient}
+          />
+        </View>
 
-      
-        
+
+
 
 
         {/* {[...Array(4)].map((_, i) => (
