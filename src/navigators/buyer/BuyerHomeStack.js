@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {useSelector} from 'react-redux';
 import {MainScreensHeader} from '../../components/buyer';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
-import {selectIfAnonymous} from '../../store/user';
+import {selectIfAnonymous, selectUserType} from '../../store/user';
 
 // Screens
 import {HomeMainScreen} from '../../screens/buyer/HomeMainScreen';
@@ -20,7 +20,7 @@ const {Navigator, Screen} = createNativeStackNavigator();
 
 export const BuyerHomeStack = () => {
   const isAnonymous = useSelector(selectIfAnonymous);
-
+const userType = useSelector(selectUserType)
   return (
     <Navigator
       screenOptions={{
@@ -36,7 +36,9 @@ export const BuyerHomeStack = () => {
         name="HomeMainScreen"
         component={HomeMainScreen}
         options={{
-          header: props => <MainScreensHeader {...props} />,
+          header: props => <MainScreensHeader 
+          title={userType}
+          {...props} />,
             contentStyle: {
           backgroundColor: 'white'
           

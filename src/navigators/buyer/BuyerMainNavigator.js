@@ -12,7 +12,7 @@ import {
 import { ThemedIcon } from '../../components/Icon';
 import { selectShowBottomTabBar } from '../../store/configs';
 import { MainScreensHeader } from '../../components/buyer';
-import { selectIfAnonymous } from '../../store/user';
+import { selectIfAnonymous, selectUserType } from '../../store/user';
 
 // Screens and Navigation Stacks
 import { BuyerHomeStack } from './BuyerHomeStack';
@@ -229,6 +229,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
 
 export const BuyerMainNavigator = () => {
   const isAnonymous = useSelector(selectIfAnonymous);
+  
   return (
     <Navigator
       tabBar={props => <BottomTabBar {...props} isAnonymous={isAnonymous} key="bottomTabBar" />}

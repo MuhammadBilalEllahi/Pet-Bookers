@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {MainScreensHeader} from '../../components/buyer';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
@@ -12,10 +12,23 @@ import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
 import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
 import { HomeMainScreen } from '../../screens/buyer/HomeMainScreen';
+import { ProductDetailScreen } from '../../screens/buyer/ProductDetailScreen';
+import { UserType } from '../../store/user';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const SellerHomeStack = () => {
+  const [userType, setUserType]= useState(false);
+   useEffect(() => {
+    const fetchUserType = async () => {
+      const type = await AsyncStorage.getItem('user-type');
+      console.log("USER TYPE", type)
+      setUserType(type);
+    };
+    fetchUserType();
+  }, []);
+  
   return (
     <Navigator
       screenOptions={{
@@ -31,7 +44,8 @@ export const SellerHomeStack = () => {
             <MainScreensHeader
               {...props}
               hideSearch={true}
-              title="HomeMainScreen"
+              // title="HomeMainScreen"
+              title={UserType.SELLER === userType ? 'Seller': UserType.BUYER === userType   ? 'Customer' : 'Guest'}
             />
           ),
         }}
@@ -45,6 +59,20 @@ export const SellerHomeStack = () => {
           
         }}
       />
+      <Screen name="ProductDetail" component={ProductDetailScreen}
+              options={{
+                header: props => (
+                  <MainScreensHeader
+                    {...props}
+                    hideSearch={false}
+                  />
+                ),
+                  contentStyle: {
+                backgroundColor: 'white'
+                
+              }
+              }}
+            />
       <Screen
         name="VandorsList"
         component={VandorsListScreen}

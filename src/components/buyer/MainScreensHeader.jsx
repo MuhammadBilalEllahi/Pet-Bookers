@@ -6,7 +6,8 @@ import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { ThemedIcon } from '../Icon';
 import { BackButton } from '../BackButton';
 
-export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack=false }) => {
+export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack=false, hideNotification=true,
+hideSettings=true }) => {
   const { t, i18n } = useTranslation();
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
@@ -42,13 +43,21 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
           flexeStyles.contentBetween,
         ]}
       >
-        {
-          activateGoBack?<BackButton fill='#121212' onPress={onGoBack} />:
-        <Image
-          source={require('../../../assets/new/main_logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />}
+        <View style={styles.logoTitleWrapper}>
+  {activateGoBack ? (
+    <BackButton fill="#121212" onPress={onGoBack} />
+  ) : (
+    <Image
+      source={require('../../../assets/new/main_logo.png')}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  )}
+  {title && (
+    <Text style={styles.titleText}>{title}</Text>
+  )}
+</View>
+
         <Layout
           style={[
             flexeStyles.row,
@@ -89,18 +98,18 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
           </View>
 
           
-          <Button
+          {!hideNotification && <Button
             style={{ width: 20, height: 20 }}
             appearance="ghost"
             accessoryLeft={NotifIcon}
             onPress={navigateToNotifications}
-          />
-          <Button
+          />}
+          {!hideSettings &&<Button
             style={{ width: 20, height: 20 }}
             appearance="ghost"
             accessoryLeft={renderSettingsIcon}
             onPress={navigateToAppSettings}
-          />
+          />}
         </Layout>
       </Layout>
       {!hideSearch && (
@@ -157,4 +166,16 @@ const styles = StyleSheet.create({
     color: '#222',
     paddingVertical: 1,
   },
+  logoTitleWrapper: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+titleText: {
+  fontSize: 20,
+  color: '#121212',
+  marginLeft: 8, // Space between logo and title
+  flexShrink: 1, // Prevents text overflow
+},
+
 });
