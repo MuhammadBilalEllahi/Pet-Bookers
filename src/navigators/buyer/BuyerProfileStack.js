@@ -26,6 +26,7 @@ export const BuyerProfileStack = () => {
           header: props => (
             <MainScreensHeader {...props} title="Profile" hideSearch={true} />
           ),
+          
         }}
       />
       <Screen
@@ -33,6 +34,13 @@ export const BuyerProfileStack = () => {
         component={MyOrders}
         options={{
           title: 'MyOrders',
+          header: props => (
+                      <MainScreensHeader
+                        {...props}
+                        hideSearch={false}
+                        title="MyOrders"
+                      />
+                    ),
         }}
       />
       <Screen
@@ -40,6 +48,13 @@ export const BuyerProfileStack = () => {
         component={UpdateProfileScreen}
         options={{
           title: 'UpdateProfile',
+          header: props => (
+                      <MainScreensHeader
+                        {...props}
+                        hideSearch={true}
+                        title="UpdateProfile"
+                      />
+                    ),
         }}
       />
       <Screen
@@ -47,6 +62,13 @@ export const BuyerProfileStack = () => {
         component={UpdatePasswordScreen}
         options={{
           title: 'UpdatePassword',
+          header: props => (
+                      <MainScreensHeader
+                        {...props}
+                        hideSearch={true}
+                        title="UpdatePassword"
+                      />
+                    ),
         }}
       />
     </Navigator>

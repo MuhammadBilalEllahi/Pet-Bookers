@@ -38,6 +38,8 @@ export const AuthNavigator = () => {
       screenOptions={{
         headerShown: false,
         gestureEnabled: false,
+                  // contentStyle: { backgroundColor: 'white' }
+
       }}
       initialRouteName={AuthRoutes.LOGIN.name}
     >

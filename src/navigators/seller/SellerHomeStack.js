@@ -11,6 +11,7 @@ import {NotificationsScreen} from '../../screens/NotificationsScreen';
 import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
 import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
+import { HomeMainScreen } from '../../screens/buyer/HomeMainScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -19,12 +20,12 @@ export const SellerHomeStack = () => {
     <Navigator
       screenOptions={{
         gestureEnabled: false,
-        header: props => <ScreenHeaderSecondary {...props} />,
+        header: props => <MainScreensHeader {...props} />,
       }}
       initialRouteName="SellerHomeMainScreen">
       <Screen
         name="SellerHomeMainScreen"
-        component={SellerHomeMainScreen}
+        component={HomeMainScreen}
         options={{
           header: props => (
             <MainScreensHeader
@@ -41,6 +42,7 @@ export const SellerHomeStack = () => {
         component={CategoriesListScreen}
         options={{
           title: 'CategoriesList',
+          
         }}
       />
       <Screen
@@ -76,6 +78,13 @@ export const SellerHomeStack = () => {
         component={NotificationsScreen}
         options={{
           title: 'Notifications',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="Notifications"
+            />
+          ),
         }}
       />
       <Screen
@@ -83,6 +92,13 @@ export const SellerHomeStack = () => {
         component={AppSettingsScreen}
         options={{
           title: 'Settings',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="Settings"
+            />
+          ),
         }}
       />
     </Navigator>

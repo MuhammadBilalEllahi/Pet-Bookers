@@ -4,6 +4,8 @@ import {useSelector} from 'react-redux';
 import {Layout, Spinner, Text, useTheme} from '@ui-kitten/components';
 import {selectBaseUrls} from '../../store/configs';
 import {flexeStyles} from '../../utils/globalStyles';
+import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
+import LinearGradient from 'react-native-linear-gradient';
 
 const {width: windowWidth} = Dimensions.get('window');
 const height = (windowWidth - 16) / 1.9;
@@ -71,7 +73,10 @@ export const FeaturedImages = ({slideList, loading, error}) => {
             flexeStyles.itemsCenter,
             {height: height},
           ]}>
-          {loading && <Spinner />}
+          {loading && <ShimmerPlaceholder
+          LinearGradient={LinearGradient}
+          style={{height: '100%', width: '95%', borderRadius: 15}}
+          />}
           {error && <Text>{error}</Text>}
           {!loading && !error && (
             <Text>No Data to display yet, please refresh later.</Text>

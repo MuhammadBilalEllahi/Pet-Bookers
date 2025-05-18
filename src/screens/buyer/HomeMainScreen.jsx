@@ -1,10 +1,10 @@
 import {Layout} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {ScrollView} from 'react-native';
+import {ScrollView, View} from 'react-native';
 import {FeaturedImages} from '../../components/buyer';
 import {ProductsList} from '../../components/buyer/ProductsList';
 import {HorizontalItemsList} from '../../components/listing';
-import {useCallback, useEffect, useMemo} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   loadFeaturedProducts,
@@ -20,6 +20,7 @@ import {
 } from '../../store/buyersHome';
 import {
   loadProductCategories,
+  loadProductsByCategory,
   selectProductCategories,
 } from '../../store/productCategories';
 import {selectBaseUrls} from '../../store/configs';
@@ -111,6 +112,34 @@ export const HomeMainScreen = ({navigation}) => {
     }
   };
 
+  const handleLoadMoreCategory = useCallback((categoryId) => {
+  const existing = categorizedProducts[categoryId];
+  if (
+    existing?.products?.length < existing?.total &&
+    !categoryLoaders[categoryId]
+  ) {
+    setCategoryLoaders(prev => ({...prev, [categoryId]: true}));
+    dispatch(
+      loadProductsByCategory({
+        categoryId,
+        limit: 10,
+        offset: existing.products.length,
+      }),
+    ).then((action) => {
+      const newData = action.payload;
+      setCategorizedProducts(prev => ({
+        ...prev,
+        [categoryId]: {
+          products: [...prev[categoryId].products, ...parsedProducts(newData.products)],
+          total: newData.total_size,
+        },
+      }));
+      setCategoryLoaders(prev => ({...prev, [categoryId]: false}));
+    });
+  }
+}, [categorizedProducts, dispatch, parsedProducts, categoryLoaders]);
+
+
   const handleLoadMoreLatest = () => {
     if (
       latestProducts.products.length < latestProducts.total_size &&
@@ -139,6 +168,33 @@ export const HomeMainScreen = ({navigation}) => {
     }
   };
 
+  
+const [categorizedProducts, setCategorizedProducts] = useState({});
+const [categoryLoaders, setCategoryLoaders] = useState({});
+const [categoryErrors, setCategoryErrors] = useState({});
+
+const loadCategoryProducts = useCallback((categoryId, categoryName) => {
+  setCategoryLoaders(prev => ({...prev, [categoryName]: true}));
+  dispatch(loadProductsByCategory({categoryId, limit: 10}))
+    .then(response => {
+      if (response?.payload?.products) {
+        setCategorizedProducts(prev => ({
+          ...prev,
+          [categoryName]: parsedProducts(response.payload.products),
+        }));
+        setCategoryErrors(prev => ({...prev, [categoryName]: null}));
+      }
+    })
+    .catch(err => {
+      setCategoryErrors(prev => ({...prev, [categoryName]: err.message}));
+    })
+    .finally(() => {
+      setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
+    });
+}, [dispatch, parsedProducts]);
+
+
+
   useEffect(() => {
     dispatch(loadHomeBanners({bannerType: 'all'}));
     dispatch(loadProductCategories());
@@ -147,6 +203,71 @@ export const HomeMainScreen = ({navigation}) => {
     dispatch(loadPopularProducts({limit: 10}));
     dispatch(loadSellers());
   }, []);
+
+//   useEffect(() => {
+//     console.debug("STARTING EFFECT ", categories)
+//   if (categories.length > 0) {
+//   const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
+
+//     sortedCategories.forEach(category => {
+//       console.log("-ID ", category.id, " -Name ", category.name)
+//       loadCategoryProducts(category.id, category.name);
+//     });
+//   }
+// }, [categories]);
+
+useEffect(() => {
+  if (categories.length > 0) {
+    const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
+
+    const loadAll = async () => {
+      setCategoryLoaders(prev => {
+        const loaders = {};
+        sortedCategories.forEach(cat => loaders[cat.name] = true);
+        return {...prev, ...loaders};
+      });
+
+      try {
+        const results = await Promise.all(
+          sortedCategories.map(cat =>
+            dispatch(loadProductsByCategory({ categoryId: cat.id, limit: 10 }))
+              .then(response => ({
+                name: cat.name,
+                products: parsedProducts(response?.payload?.products || []),
+              }))
+              .catch(error => ({
+                name: cat.name,
+                error: error?.message || 'Failed to load category',
+              }))
+          )
+        );
+
+        const newData = {};
+        const errors = {};
+        const loaders = {};
+
+        results.forEach(result => {
+          if (result.error) {
+            errors[result.name] = result.error;
+          } else {
+            newData[result.name] = result.products;
+          }
+          loaders[result.name] = false;
+        });
+
+        setCategorizedProducts(newData);
+        setCategoryErrors(errors);
+        setCategoryLoaders(loaders);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    };
+
+    loadAll();
+  }
+}, [categories]);
+
+
 
   const parsedSellers = useMemo(() => {
     if (!Array.isArray(sellers)) return [];
@@ -158,7 +279,7 @@ export const HomeMainScreen = ({navigation}) => {
   }, [baseUrls, sellers]);
 
   return (
-    <Layout level="3" style={{flex: 1}}>
+    <Layout level="3" style={{flex: 1, backgroundColor: 'white'}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -223,7 +344,70 @@ export const HomeMainScreen = ({navigation}) => {
           onItemPress={item => navigateToVandorDetail(item)}
           onViewAll={navigateToAllVandorsScreen}
         />
+        <CategoryWiseProductsList
+  categorizedProducts={categorizedProducts}
+  loadingMap={categoryLoaders}
+  errorMap={categoryErrors}
+  onProductDetail={(productId, slug) =>
+    navigateToProductDetail(productId, slug)
+  }
+  onLoadMore={handleLoadMoreCategory}
+  // onLoadMore={categoryName => {
+  //   const category = categories.find(c => c.name === categoryName);
+  //   if (category) {
+  //     loadCategoryProducts(category.id, category.name);
+  //   }
+  // }}
+/>
+
       </ScrollView>
     </Layout>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const CategoryWiseProductsList = ({
+  categorizedProducts = {},
+  loadingMap = {},
+  errorMap = {},
+  onProductDetail,
+  onLoadMore,
+}) => {
+  return (
+    <View>
+      {Object.entries(categorizedProducts).map(([categoryName, products]) => (
+        <ProductsList
+          key={categoryName}
+          list={products}
+          loading={loadingMap[categoryName]}
+          loadingError={errorMap[categoryName]}
+          listTitle={categoryName}
+          containerStyle={{marginVertical: 16, paddingHorizontal: 14}}
+          onProductDetail={onProductDetail}
+          onLoadMore={() => onLoadMore(categoryName)}
+          hasMore={products.length < (products.total_size || Infinity)}
+        />
+      ))}
+    </View>
   );
 };

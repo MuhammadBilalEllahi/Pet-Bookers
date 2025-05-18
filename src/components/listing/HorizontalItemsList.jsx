@@ -7,10 +7,12 @@ import {
   View,
   Dimensions,
 } from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {Spinner, Text, useTheme} from '@ui-kitten/components';
-import {ThemedIcon} from '../Icon';
-import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import { useTranslation } from 'react-i18next';
+import { Spinner, Text, useTheme } from '@ui-kitten/components';
+import { ThemedIcon } from '../Icon';
+import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
+import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
+import LinearGradient from 'react-native-linear-gradient';
 
 const ITEM_HORIZONTAL_MARGIN = 6;
 const ITEM_PADDING = 6;
@@ -32,7 +34,7 @@ export const HorizontalItemsList = ({
   onViewAll,
 }) => {
   const theme = useTheme();
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <View style={[styles.outerContainer, containerStyle]}>
@@ -62,7 +64,7 @@ export const HorizontalItemsList = ({
                   : 'arrow-ios-forward-outline'
               }
               fill={theme['color-primary-default']}
-              style={{marginLeft: 2, marginRight: 2}}
+              style={{ marginLeft: 2, marginRight: 2 }}
             />
           </TouchableOpacity>
         )}
@@ -75,7 +77,21 @@ export const HorizontalItemsList = ({
             flexeStyles.itemsCenter,
             spacingStyles.py8,
           ]}>
-          {loading && <Spinner />}
+          {loading && (
+             <>
+            { [...Array(5)].map((_, idx) => (
+          <View key={idx} style={{ flexDirection: 'column', marginHorizontal: 8 , alignItems: 'center'}}>
+            <ShimmerPlaceholder
+              LinearGradient={LinearGradient}
+              style={{ height: 60, width: 60, borderRadius: 100, marginBottom: 5 }}
+            />
+            <ShimmerPlaceholder
+              LinearGradient={LinearGradient}
+              style={{ height: 10, width: 40, borderRadius: 2 }}
+            />
+          </View>
+          ))}</>
+          )}
           {loadingError && <Text appearance="hint" style={styles.errorText}>{loadingError}</Text>}
           {!loading && !loadingError && (
             <Text appearance="hint" style={styles.errorText}>
@@ -91,7 +107,7 @@ export const HorizontalItemsList = ({
           contentContainerStyle={styles.flatListContent}
           data={list}
           keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.itemTouchable}
               onPress={() => onItemPress(item.id)}
@@ -101,9 +117,9 @@ export const HorizontalItemsList = ({
                 <Image
                   style={[
                     styles.image,
-                    roundedImage && {borderRadius: ITEM_WIDTH / 2},
+                    roundedImage && { borderRadius: ITEM_WIDTH / 2 },
                   ]}
-                  source={{uri: item.image}}
+                  source={{ uri: item.image }}
                   resizeMode="cover"
                 />
               </View>
@@ -169,7 +185,7 @@ const styles = StyleSheet.create({
     height: ITEM_WIDTH - 4,
     borderRadius: 40,
     overflow: 'hidden',
-    backgroundColor:'#d1d1d1',
+    backgroundColor: '#d1d1d1',
     marginBottom: 4,
     justifyContent: 'center',
     alignItems: 'center',

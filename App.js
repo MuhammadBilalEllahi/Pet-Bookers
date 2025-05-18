@@ -70,7 +70,8 @@ const MainApp = () => {
         <ApplicationProvider
           {...eva}
           theme={{...eva.light, ...extendTheme}}
-          customMapping={mapping}>
+          customMapping={mapping}
+          >
           <AppNavigator />
         </ApplicationProvider>
         

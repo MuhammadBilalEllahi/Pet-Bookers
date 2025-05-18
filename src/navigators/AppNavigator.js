@@ -45,7 +45,15 @@ export const AppNavigator = () => {
     <NavigationContainer>
       <Navigator
       
-        screenOptions={{ headerShown: false, gestureEnabled: false }}
+        screenOptions={{ headerShown: false, gestureEnabled: false,
+                      // cardStyle: { backgroundColor: '#fff' },
+
+        //   contentStyle: {
+        //   backgroundColor: 'white'
+          
+        // }
+       }}
+        
         initialRouteName={AppScreens.AUTH_LOADER}
       >
         <Screen name={AppScreens.SPLASH} component={SplashScreen} />

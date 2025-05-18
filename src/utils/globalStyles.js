@@ -134,4 +134,11 @@ export const flexeStyles = StyleSheet.create({
   itemsCenter: {alignItems: 'center'},
   contentBetween: {justifyContent: 'space-between'},
   contentCenter: {justifyContent: 'center'},
+  justifyStart: {justifyContent: 'flex-start'},
+  justifyEnd: {justifyContent: 'flex-end'},
+  justifyCenter: {justifyContent: 'center'},
+  justifySpaceBetween: {justifyContent: 'space-between'},
+  justifySpaceAround: {justifyContent: 'space-around'},
+  justifySpaceEvenly: {justifyContent: 'space-evenly'},
+  
 });

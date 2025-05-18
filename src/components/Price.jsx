@@ -2,14 +2,14 @@ import {Text} from '@ui-kitten/components';
 import {View, StyleSheet} from 'react-native';
 import {flexeStyles} from '../utils/globalStyles';
 
-export const Price = ({amount, cross, color}) => {
+export const Price = ({amount, cross, color, fontSize}) => {
   // Default colors
   const crossedColor = color || '#afafaf'; // Muted gray for crossed price
   const normalColor = color || '#888'; // Default color for normal price
 
   // Define font sizes for consistency
-  const PKR_FONT_SIZE = 15;
-  const AMOUNT_FONT_SIZE = 15;
+  const PKR_FONT_SIZE = fontSize || 15;
+  const AMOUNT_FONT_SIZE = fontSize || 15;
 
   // Margin between PKR and price
   const PKR_MARGIN_RIGHT = 4;

@@ -11,6 +11,7 @@ import {ProductFeatureCheckoutScreen} from '../../screens/seller/ProductFeatureC
 import {ProductFeatureSuccessScreen} from '../../screens/seller/ProductFeatureSuccessScreen';
 import { ScreenHeaderAd } from '../../components/ScreenHeaderAd';
 import AddProductSuccessAndShowFeaturedButton from '../../screens/seller/AddProductSuccessAndShowFeaturedButton';
+import { MainScreensHeader } from '../../components/buyer';
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const SellerNewProductStack = () => {
@@ -18,7 +19,7 @@ export const SellerNewProductStack = () => {
     <Navigator
       screenOptions={{
         gestureEnabled: false,
-        header: props => <ScreenHeaderAd {...props} />,
+        header: props => <MainScreensHeader {...props} />,
       }}
       initialRouteName="AddProduct">
       <Screen name="CreateYourAd" component={AddProductScreen}

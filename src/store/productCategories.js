@@ -15,6 +15,22 @@ export const loadProductCategories = createAsyncThunk(
   },
 );
 
+export const loadProductsByCategory = createAsyncThunk(
+  'products/loadByCategory',
+  async ({categoryId, limit = 10, offset = 0}) => {
+    try {
+      console.log("STARTING CALL ", categoryId)
+    const response = await axiosBuyerClient.get(
+      `products/category/${categoryId}?limit=${limit}&offset=${offset}`,
+    );
+    console.debug("RESPONSE product ", response.data,"\n\n")
+    return response.data;
+    } catch (error) {
+      console.error("ERROR IN loadByCategory", error?.response?.message, error, error?.message, error?.data)
+    }
+  }
+);
+
 const slice = createSlice({
   name: 'productCategories',
   initialState,
@@ -58,3 +74,4 @@ export const selectProductCategories = createSelector(
 );
 
 export default slice.reducer;
+ 

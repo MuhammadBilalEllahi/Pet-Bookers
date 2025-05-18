@@ -222,6 +222,8 @@ export const RegisterScreen = ({ navigation }) => {
                 <ImagePicker
                   title={t('chooseProfileImage') || 'Choose Image'}
                   onPress={() => handleImagePick('image', setFieldValue)}
+                  imageUri={values.image ? values.image.uri : null}
+
                 />
                 {values.image && values.image.uri && (
                   <Text style={{ color: 'green', fontSize: 12 }}>{t('imageSelected') || 'Image selected'}</Text>
@@ -273,6 +275,7 @@ export const RegisterScreen = ({ navigation }) => {
                 <ImagePicker
                   title={t('chooseShopLogo') || 'Choose Logo'}
                   onPress={() => handleImagePick('logo', setFieldValue)}
+                  imageUri={values.logo ? values.logo.uri : null}
                 />
                 {values.logo && values.logo.uri && (
                   <Text style={{ color: 'green', fontSize: 12 }}>{t('logoSelected') || 'Logo selected'}</Text>
@@ -286,6 +289,7 @@ export const RegisterScreen = ({ navigation }) => {
                 <ImagePicker
                   title={t('chooseShopBanner') || 'Choose Banner'}
                   onPress={() => handleImagePick('banner', setFieldValue)}
+                  imageUri={values.banner ? values.banner.uri : null}
                 />
                 {values.banner && values.banner.uri && (
                   <Text style={{ color: 'green', fontSize: 12 }}>{t('bannerSelected') || 'Banner selected'}</Text>

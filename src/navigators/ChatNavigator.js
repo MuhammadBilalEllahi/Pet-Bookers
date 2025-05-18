@@ -13,6 +13,8 @@ export const ChatNavigator = () => {
       screenOptions={{
         headerShown: false,
         gestureEnabled: false,
+                  contentStyle: { backgroundColor: 'white' }
+
       }}
       initialRouteName="RoomsList">
       <Screen name="RoomsList" component={ChatScreen}

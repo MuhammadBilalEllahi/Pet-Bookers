@@ -25,7 +25,11 @@ export const BuyerHomeStack = () => {
     <Navigator
       screenOptions={{
         gestureEnabled: false,
-        header: props => <ScreenHeaderSecondary {...props} />,
+        header: props => <MainScreensHeader {...props} />,
+          contentStyle: {
+          backgroundColor: 'white'
+          
+        }
       }}
       initialRouteName="HomeMainScreen">
       <Screen
@@ -33,6 +37,10 @@ export const BuyerHomeStack = () => {
         component={HomeMainScreen}
         options={{
           header: props => <MainScreensHeader {...props} />,
+            contentStyle: {
+          backgroundColor: 'white'
+          
+        }
         }}
       />
       <Screen name="ProductDetail" component={ProductDetailScreen}
@@ -44,6 +52,10 @@ export const BuyerHomeStack = () => {
               title="ProductDetail"
             />
           ),
+            contentStyle: {
+          backgroundColor: 'white'
+          
+        }
         }}
       />
       <Screen
@@ -58,6 +70,10 @@ export const BuyerHomeStack = () => {
               title="ProductsSearch"
             />
           ),
+            contentStyle: {
+          backgroundColor: 'white'
+          
+        }
         }}
       />
       <Screen
@@ -102,8 +118,20 @@ export const BuyerHomeStack = () => {
         <Screen
           key="Notifications"
           name="Notifications"
+          
           options={{
+            header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="Notifications"
+            />
+          ),
             title: 'Notifications',
+              contentStyle: {
+          backgroundColor: 'white'
+          
+        }
           }}>
           {props => (
             <AuthRestrictedError {...props} subTitle="messages.loginRequired" />
@@ -114,7 +142,18 @@ export const BuyerHomeStack = () => {
           name="Notifications"
           component={NotificationsScreen}
           options={{
+            header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="Notifications"
+            />
+          ),
             title: 'Notifications',
+              contentStyle: {
+          backgroundColor: 'white'
+          
+        }
           }}
         />
       )}
@@ -122,6 +161,13 @@ export const BuyerHomeStack = () => {
         name="AppSettings"
         component={AppSettingsScreen}
         options={{
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={false}
+              title="Settings"
+            />
+          ),
           title: 'Settings',
         }}
       />

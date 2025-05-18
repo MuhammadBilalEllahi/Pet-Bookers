@@ -24,7 +24,7 @@ export const ProductCard = ({
   return (
     <TouchableOpacity
       activeOpacity={0.92}
-      style={[styles.card, {width: cardWidth || windowWidth * 0.6}]}
+      style={[styles.card, {width: cardWidth || windowWidth * 0.45}]}
       onPress={() => onProductDetail && onProductDetail(id, slug)}
     >
       <View style={styles.imageContainer}>
@@ -73,16 +73,17 @@ export const ProductCard = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     borderRadius: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.06,
+    // shadowRadius: 8,
+    // shadowOffset: { width: 0, height: 2 },
+    // elevation: 2,
     marginHorizontal: 4,
     marginVertical: 4,
     overflow: 'hidden',
+    
   },
   imageContainer: {
     width: '100%',
@@ -97,12 +98,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
+    borderRadius: 10
   },
   soldOutContainer: {
     position: 'absolute',
-    width: '100%',
+    width: '90%',
     height: '100%',
     backgroundColor: '#ffffffcc',
     justifyContent: 'center',
@@ -131,13 +131,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   content: {
-    padding: 12,
+    padding: 8,
+    paddingLeft: 2
   },
   title: {
     fontWeight: '700',
     color: '#121212',
     fontSize: 16,
-    marginBottom: 6,
+    // marginBottom: 6,
   },
   priceRow: {
     flexDirection: 'row',
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontWeight: 'bold',
-    color: '#222',
+    color: 'grey',
     fontSize: 16,
     marginRight: 8,
   },
