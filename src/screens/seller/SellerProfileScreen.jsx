@@ -14,6 +14,8 @@ import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/user';
 import { getAsyncAuthToken } from '../../utils/localstorage';
+import { AppScreens } from '../../navigators/AppNavigator';
+
 
 const {width, height} = Dimensions.get('window');
 
@@ -198,6 +200,7 @@ export const SellerProfileScreen = ({ navigation }) => {
               subtitle="log out"
               onPress={() => {
                 dispatch(logout());
+                navigation.navigate(AppScreens.HOME);
               }}
               />
           </Layout>

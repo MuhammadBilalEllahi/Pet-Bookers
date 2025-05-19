@@ -68,9 +68,13 @@ export const loadPopularProducts = createAsyncThunk(
 export const loadLuckyDraws = createAsyncThunk(
   'buyersHome/loadLuckyDraws',
   async () => {
-    const {data} = await axiosBuyerClient.get('lucky_draw');
+    console.info("sending Request to Lucky Draws");
+    const {data} = await axiosBuyerClient.get('luckydraw').catch((error) => {
+      console.error("Error fetching lucky draws:", error, error?.response);
+      throw error;
+    });
     console.log("[buyersHome/loadLuckyDraws]", data);
-    return data.lucky_draws || data;
+    return data.events || data;
   }
 );
 

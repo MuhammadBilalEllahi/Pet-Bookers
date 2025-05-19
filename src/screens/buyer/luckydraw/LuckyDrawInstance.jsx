@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Input, Button, Text, Layout, Icon } from "@ui-kitten/components";
-import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Image, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { LinearGradient } from 'react-native-linear-gradient';
+import { axiosBuyerClient } from "../../../utils/axiosClient";
+import CustomAlert from "./CustomAlert";
 
 // Dummy data for testing
-const dummyLuckyDraw = {
-  id: 1,
-  title: "Shahzaib New Farm Lucky Draw",
-  date: "15 April"
-};
+// const dummyLuckyDraw = {
+//   id: 1,
+//   title: "Shahzaib New Farm Lucky Draw",
+//   date: "15 April"
+// };
 
 const styles = StyleSheet.create({
   container: {
@@ -101,22 +103,58 @@ const styles = StyleSheet.create({
 
 export default function LuckyDrawInstance() {
   const navigation = useNavigation();
-  const luckyDraw = dummyLuckyDraw;
+  const {luckyDraw} = useRoute()?.params;
+  console.log("Lucky Draw Data: ", luckyDraw);
+
+  
 
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [luckyNumber, setLuckyNumber] = useState(null);
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await axiosBuyerClient.post("luckydraw/submit", {
+      event_id: luckyDraw.id,  // <-- From route param
+      name,
+      city,
+      phone
+    });
+    const luckyNumber = response?.data?.lucky_no;
+    setLuckyNumber(luckyNumber);
+    setShowAlert(true);
+    //   Alert.alert(
+    //   "Lucky Draw Submitted",
+    //   `🎉 Your lucky draw number is: ${luckyNumber}`,
+    //   [{ text: "OK" }]
+    // );
+
+    CustomAlert({
+      visible: true,
+      luckyNumber: luckyNumber,
+      onClose: () => {
+        setSubmitting(false);
+        navigation.goBack();
+      }
+    })
+
+    console.log("Lucky Draw Submission Response: ", response);
+    } catch (error) {
+      console.error("Error submitting lucky draw: ", error, error?.response);
+    }
     setSubmitting(false);
-    navigation.goBack();
+    // navigation.goBack();
   };
 
   return (
     <Layout style={styles.container}>
+
+       
+    
       {/* Header */}
       <View style={styles.header}>
         <Icon
@@ -146,9 +184,13 @@ export default function LuckyDrawInstance() {
           <Text style={styles.infoLabel}>Title: </Text>
           <Text style={styles.infoValue}>{luckyDraw.title}</Text>
         </View>
+         <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Description: </Text>
+          <Text style={styles.infoValue}>{luckyDraw.description}</Text>
+        </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Date: </Text>
-          <Text style={styles.infoValue}>{luckyDraw.date}</Text>
+          <Text style={styles.infoValue}>{new Date(luckyDraw.updated_at).toDateString()}</Text>
         </View>
       </View>
 
@@ -196,6 +238,15 @@ export default function LuckyDrawInstance() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      {/* <Button title="Submit Lucky Draw" onPress={() => setShowAlert(true)} /> */}
+      <CustomAlert
+        visible={showAlert}
+        luckyNumber={luckyNumber}
+        onClose={() => setShowAlert(false)}
+      />
+    </View>
+
     </Layout>
   );
 }

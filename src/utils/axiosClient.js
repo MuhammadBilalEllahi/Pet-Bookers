@@ -3,6 +3,9 @@ import {BASE_URL, BUYER_API,  SELLER_API} from './constants';
 import {getAsyncAuthToken} from './localstorage';
 // https://petbookers.com.pk/customer/auth/login
 
+/**
+ * /api/v1/
+ */
 export const axiosBuyerClient = axios.create({
   baseURL: `${BASE_URL}${BUYER_API}`,
 });

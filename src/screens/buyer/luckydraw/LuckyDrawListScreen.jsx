@@ -6,31 +6,10 @@ import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { axiosBuyerClient } from "../../../utils/axiosClient";
 import { selectLuckyDraws, loadLuckyDraws } from "../../../store/buyersHome";
 import LinearGradient from "react-native-linear-gradient";
+import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 
 // Dummy data for testing
-const dummyLuckyDraws = [
-  {
-    id: 1,
-    title: "Summer Pet Fashion Show",
-    date: "2024-03-15",
-    description: "Win amazing prizes for your pet's style!",
-    prize: "Premium Pet Fashion Kit"
-  },
-  {
-    id: 2,
-    title: "Pet Talent Competition",
-    date: "2024-03-20",
-    description: "Showcase your pet's unique talents",
-    prize: "Professional Pet Training Package"
-  },
-  {
-    id: 3,
-    title: "Pet Photo Contest",
-    date: "2024-03-25",
-    description: "Share your best pet moments",
-    prize: "Professional Pet Photography Session"
-  }
-];
+
 
 const styles = StyleSheet.create({
   container: {
@@ -58,7 +37,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
   cardContent: {
-    padding: 16
+    padding: 15
   },
   title: {
     fontWeight: "bold",
@@ -129,12 +108,19 @@ export default function LuckyDrawListScreen() {
 
   useEffect(() => {
     // Comment out the actual API call for now
-    // dispatch(loadLuckyDraws());
+    dispatch(loadLuckyDraws());
   }, [dispatch]);
 
   // Use dummy data instead of loading state
-  const displayLuckyDraws = dummyLuckyDraws;
+const displayLuckyDraws = Array.isArray(luckyDraws) ? luckyDraws : luckyDraws?.event ? [luckyDraws.event] : [];
 
+if(luckyDrawsLoading){
+  return <View style={{padding: 15}}>
+  {[0,1,2].map((_, index) => (
+    <ShimmerCard key={index} />
+  ))}
+  </View>
+}
   return (
     <Layout style={styles.container}>
       <View style={styles.header}>
@@ -148,12 +134,8 @@ export default function LuckyDrawListScreen() {
           <Card style={styles.card}>
             <View style={styles.cardContent}>
               <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.date}>📅 {item.date}</Text>
+              <Text style={styles.date}> {new Date(item.updated_at).toDateString()}</Text>
               <Text style={styles.description}>{item.description}</Text>
-              <View style={styles.prizeContainer}>
-                <Text style={styles.prizeLabel}>PRIZE</Text>
-                <Text style={styles.prizeText}>{item.prize}</Text>
-              </View>
               <TouchableOpacity
                 style={styles.gradientButton}
                 onPress={() => navigation.navigate("LuckyDrawInstance", { luckyDraw: item })}
@@ -180,3 +162,27 @@ export default function LuckyDrawListScreen() {
     </Layout>
   );
 }
+
+
+const ShimmerCard = () => (
+  <Card style={styles.card}>
+    <View style={styles.cardContent}>
+      <ShimmerPlaceholder
+        style={{ height: 20, width: '60%', marginBottom: 12, borderRadius: 8 }}
+        LinearGradient={LinearGradient}
+      />
+      <ShimmerPlaceholder
+        style={{ height: 14, width: '40%', marginBottom: 8, borderRadius: 6 }}
+        LinearGradient={LinearGradient}
+      />
+      <ShimmerPlaceholder
+        style={{ height: 60, width: '100%', marginBottom: 12, borderRadius: 6 }}
+        LinearGradient={LinearGradient}
+      />
+      <ShimmerPlaceholder
+        style={{ height: 44, width: '100%', borderRadius: 12 }}
+        LinearGradient={LinearGradient}
+      />
+    </View>
+  </Card>
+);
