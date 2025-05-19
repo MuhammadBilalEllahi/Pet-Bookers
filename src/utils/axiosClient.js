@@ -6,6 +6,9 @@ import {getAsyncAuthToken} from './localstorage';
 export const axiosBuyerClient = axios.create({
   baseURL: `${BASE_URL}${BUYER_API}`,
 });
+/**
+ * /api/v3/seller/
+ */
 export const axiosSellerClient = axios.create({
   baseURL: `${BASE_URL}${SELLER_API}`,
 });

@@ -21,6 +21,24 @@ export const ProductCard = ({
   slug,
 }) => {
   const theme = useTheme();
+
+    // const imageSource = () => {
+    //   if (typeof thumbnail === 'string') {
+    //     // If it's a URL or path
+    //     if (thumbnail.startsWith('http') || thumbnail.startsWith('/')) {
+    //       return { uri: thumbnail };
+    //     }
+    //     // If it's base64 encoded
+    //     if (thumbnail.startsWith('data:image')) {
+    //       return { uri: thumbnail };
+    //     }
+    //   }
+    //   // Fallback to a placeholder if image data is invalid
+    //   return require('../../../assets/new/lion.png');
+    // };
+
+    console.error("\nIMAGES--",image)
+    
   return (
     <TouchableOpacity
       activeOpacity={0.92}

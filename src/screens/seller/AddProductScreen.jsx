@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, StyleSheet, TouchableOpacity, View, Platform, Image, PermissionsAndroid} from 'react-native';
+import {ScrollView, StyleSheet, TouchableOpacity, View, Platform, Image, PermissionsAndroid, ActivityIndicator} from 'react-native';
 import {
   Layout,
   Text,
@@ -7,6 +7,7 @@ import {
   useTheme,
   Select,
   SelectItem,
+  Spinner,
 } from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {Formik} from 'formik';
@@ -16,6 +17,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { loadProductCategories, selectProductCategories } from '../../store/productCategories';
 import { axiosSellerClient } from '../../utils/axiosClient';
 import { launchImageLibrary } from 'react-native-image-picker';
+import Toast from 'react-native-toast-message';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -43,7 +45,11 @@ export const AddProductScreen = ({navigation}) => {
   const [isLivingIndex, setIsLivingIndex] = useState(0);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
-  const [image, setImage] = useState(null);
+  // const [isLoading, setIsLoading] = useState(false);
+
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+    // const [image, setImage] = useState(null);
   
 
   const units = [t('addProduct.units'), t('addProduct.kg'), t('addProduct.ltr'), t('addProduct.pc')];
@@ -60,6 +66,8 @@ export const AddProductScreen = ({navigation}) => {
   const categoryOptions = categories.map(cat => cat.name);
   const selectedCategory = categories[categoryIndex?.row];
   const subcategoryOptions = selectedCategory?.childes?.map(sub => sub.name) || [];
+  const [images, setImages] = useState([]);
+const [thumbnail, setThumbnail] = useState(null);
 
   const onProductPostedSuccess = () => {
     navigation.reset({
@@ -68,77 +76,117 @@ export const AddProductScreen = ({navigation}) => {
     });
   };
 
-  const handleImagePick = async (field, setFieldValue) => {
-    console.log("IMAGE PICKING", field)
-    const hasPermission = await requestGalleryPermission();
-    if (!hasPermission) {
-      // Optionally show a message to the user
-      return;
+  const handleImagePick = async (field) => {
+  const hasPermission = await requestGalleryPermission();
+  if (!hasPermission) return;
+
+  const result = await launchImageLibrary({
+    mediaType: 'photo',
+    selectionLimit: field === 'images' ? 5 : 1,
+    quality: 0.8,
+  });
+
+  if (result.assets && result.assets.length > 0) {
+    if (field === 'thumbnail') {
+      setThumbnail(result.assets[0]);
+    } else {
+      setImages(result.assets);
     }
-    const result = await launchImageLibrary({mediaType: 'photo'});
-    if (result.assets && result.assets.length > 0) {
-      const asset = result.assets[0];
-      // asset.uri, asset.fileName, asset.type
-      setFieldValue(field, {
-        uri: asset.uri,
-        name: asset.fileName || 'image.jpg',
-        type: asset.type || 'image/jpeg',
-      });
-    }
-  };
+  }
+};
 
   const handleSubmit = values => {
-    // Add tags to form values
-    values.tags = tags;
+    // setIsLoading(true)
+     if (isSubmitting) return; // Prevent multiple submissions
     
-    // Create FormData object for multipart/form-data
-    const formData = new FormData();
-    
-    // Add all form fields
-    // formData.append('_token', '6n1vA3eDukR2VsPBJJfHjTQBOjxevVqJGZkbOBjM');
-    formData.append('category_id', values.category_id);
-    formData.append('sub_category_id', values.sub_category_id);
-    formData.append('unit', values.unit);
-    formData.append('is_living', values.is_living === 'Living' ? '1' : '0');
-    formData.append('name[]', values.name_en);
-    formData.append('name[]', values.name_ur);
-    formData.append('description[]', values.description_en);
-    formData.append('description[]', values.description_ur);
-    formData.append('unit_price', values.unit_price);
-    formData.append('current_stock', values.current_stock);
-    formData.append('minimum_order_qty', values.min_order_qty);
-    formData.append('tags', values.tags);
+    setIsSubmitting(true);
 
-    // Add image if exists
-    if (image) {
-      formData.append('images[]', {
-        uri: image.uri,
-        type: image.type,
-        name: image.name
-      });
+
+  const formData = new FormData();
+   if (images.length === 0) {
+    Toast.show({
+      type: 'error',
+      text1: 'Please select at least one product image'
+    })
+    // Alert.alert('Error', 'Please select at least one product image');
+    return;
+  }
+
+
+  formData.append('product_type', 'physical'); // or 'digital'
+  formData.append('discount_type', 'flat'); // or 'percent'
+  formData.append('discount', '0');
+  formData.append('tax', '0');
+  formData.append('tax_model', 'exclude');
+  formData.append('code', Math.random().toString(36).substring(2, 10)); // random code
+  
+  // Language data
+  formData.append('lang[]', 'en');
+  formData.append('lang[]', 'ur');
+  formData.append('name[]', values.name_en);
+  formData.append('name[]', values.name_ur);
+  formData.append('description[]', values.description_en);
+  formData.append('description[]', values.description_ur);
+  
+  // Category and other fields
+  formData.append('category_id', values.category_id);
+  formData.append('sub_category_id', values.sub_category_id || '');
+  formData.append('unit', values.unit);
+  
+  // Pricing
+  formData.append('unit_price', values.unit_price);
+  formData.append('purchase_price', values.unit_price); // same as unit_price if not specified
+  formData.append('current_stock', values.current_stock);
+  formData.append('minimum_order_qty', values.min_order_qty);
+  
+  // Handle images upload - CRITICAL FIX
+  images.forEach((image, index) => {
+    formData.append('images[]', {
+      uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
+      name: image.fileName || `image_${Date.now()}_${index}.jpg`,
+      type: image.type || 'image/jpeg'
+    });
+  });
+
+  // Handle thumbnail upload
+  if (thumbnail) {
+    formData.append('thumbnail', {
+      uri: Platform.OS === 'android' ? thumbnail.uri : thumbnail.uri.replace('file://', ''),
+      name: thumbnail.fileName || `thumbnail_${Date.now()}.jpg`,
+      type: thumbnail.type || 'image/jpeg'
+    });
+  }
+
+  // Debug what's being sent
+  console.log('FormData contents:', [...formData._parts]);
+  // Tags
+  // formData.append('tags', JSON.stringify(tags));
+  tags?.forEach((tag, index) => {
+  formData.append(`tags[${index}]`, tag);
+});
+  
+  // Shipping (required for physical products)
+  formData.append('shipping_cost', '0');
+  
+  console.info("SENDING")
+  axiosSellerClient.post('products/add', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  .then(response => {
+    console.info("SUBMITED", response)
+    if (response.data.success) {
+      // onProductPostedSuccess();
+      setIsSubmitting(false)
     }
-
-    try {
-      axiosSellerClient.post('product/add-new', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      .then(response => {
-        if (response.data.success) {
-          onProductPostedSuccess();
-        }
-      })
-      .catch(error => {
-        console.log("error", error);
-      });
-    } catch (error) {
-      console.log("error", error);
-    }finally{
-      onProductPostedSuccess();
-    }
-  };
-
+  })
+  .catch(error => {
+    console.error("Error:",error,JSON.stringify( error.response?.data, null, 4));
+    setIsSubmitting(false)
+  }).finally(()=>setIsSubmitting(false));
+};
+  
   const handleTagInput = (text) => {
     // If user types comma or presses space/enter, add tag
     if (text.endsWith(',') || text.endsWith(' ')) {
@@ -169,6 +217,7 @@ export const AddProductScreen = ({navigation}) => {
             backgroundColor: '#FFF',
             flexGrow: 1,
             justifyContent: 'flex-start',
+            
           },
         ]}>
         <Layout
@@ -178,6 +227,7 @@ export const AddProductScreen = ({navigation}) => {
             {
               flex: 1,
               backgroundColor: '#fff',
+              marginBottom: 100
             },
           ]}>
           
@@ -189,6 +239,7 @@ export const AddProductScreen = ({navigation}) => {
               category_id: '',
               sub_category_id: '',
               unit: '',
+
               is_living: 'Living',
               name_en: '',
               name_ur: '',
@@ -420,22 +471,81 @@ export const AddProductScreen = ({navigation}) => {
                     ))}
                   </View>
                 </Layout>
-                {/* Media Upload */}
-                <View style={styles.uploadBox}>
-                  <TouchableOpacity style={styles.uploadTouchable} onPress={() => { handleImagePick('image', setImage)}}>
-                    <Image source={require('../../../assets/new/icons/upload-icon.png')} style={styles.uploadIcon} />
-                    <View style={styles.uploadTextBox}>
-                      <Text style={styles.uploadText}>{t('addProduct.uploadMedia')}</Text>
-                    </View>
-                  </TouchableOpacity>
-                  <Text style={styles.uploadHint}>{t('addProduct.uploadMediaHint')}</Text>
-                </View>
+
+{/* Thumbnail Upload */}
+<View style={styles.uploadBox}>
+  <TouchableOpacity 
+    style={styles.uploadTouchable} 
+    onPress={() => handleImagePick('thumbnail')}>
+    <Image source={require('../../../assets/new/icons/upload-icon.png')} style={styles.uploadIcon} />
+    <View style={styles.uploadTextBox}>
+      <Text style={styles.uploadText}>
+        {thumbnail ? 'Thumbnail Selected' : 'Upload Thumbnail'}
+      </Text>
+    </View>
+  </TouchableOpacity>
+  {thumbnail && (
+    <View style={styles.imagePreviewContainer}>
+      <Image 
+        source={{uri: thumbnail.uri}} 
+        style={styles.previewImage} 
+      />
+      <TouchableOpacity 
+        style={styles.removeImageButton}
+        onPress={() => setThumbnail(null)}>
+        <Text style={styles.removeImageText}>×</Text>
+      </TouchableOpacity>
+    </View>
+  )}
+</View>
+
+{/* Multiple Images Upload */}
+<View style={styles.uploadBox}>
+  <TouchableOpacity 
+    style={styles.uploadTouchable} 
+    onPress={() => handleImagePick('images')}>
+    <Image source={require('../../../assets/new/icons/upload-icon.png')} style={styles.uploadIcon} />
+    <View style={styles.uploadTextBox}>
+      <Text style={styles.uploadText}>
+        {images.length > 0 
+          ? `${images.length} Images Selected` 
+          : 'Upload Product Images'}
+      </Text>
+    </View>
+  </TouchableOpacity>
+  <ScrollView 
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={styles.imagesScrollContainer}>
+    {images.map((img, index) => (
+      <View key={index} style={styles.imagePreviewContainer}>
+        <Image 
+          source={{uri: img.uri}} 
+          style={styles.previewImage} 
+        />
+        <TouchableOpacity 
+          style={styles.removeImageButton}
+          onPress={() => {
+            const newImages = [...images];
+            newImages.splice(index, 1);
+            setImages(newImages);
+          }}>
+          <Text style={styles.removeImageText}>×</Text>
+        </TouchableOpacity>
+      </View>
+    ))}
+  </ScrollView>
+</View>
+
                 {/* Submit Button */}
                 <TouchableOpacity
                   style={styles.submitButton}
-                  onPress={handleSubmit}>
-                  <Text style={styles.submitButtonText}>{t('addProduct.submitAd')}</Text>
+                  onPress={handleSubmit } 
+                  disabled={isSubmitting}
+                  >
+                {isSubmitting?   <ActivityIndicator color="#fff" />: <Text style={styles.submitButtonText}>{t('addProduct.submitAd')}</Text>}
                 </TouchableOpacity>
+
               </Layout>
             )}
           </Formik>
@@ -446,6 +556,14 @@ export const AddProductScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  submitButtonDisabled: {
+      opacity: 0.7,
+    },
+    loadingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
   subTitle: {
     marginVertical: 8,
     textAlign: 'center',
@@ -608,4 +726,36 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 2,
   },
+  previewImage: {
+  width: 100,
+  height: 100,
+  borderRadius: 4,
+  marginRight: 10,
+  resizeMode: 'cover',
+},
+imagePreviewContainer: {
+  position: 'relative',
+  marginRight: 10,
+  marginTop: 10,
+},
+removeImageButton: {
+  position: 'absolute',
+  top: -5,
+  right: 5,
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+removeImageText: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 14,
+  lineHeight: 18,
+},
+imagesScrollContainer: {
+  paddingVertical: 10,
+},
 });
