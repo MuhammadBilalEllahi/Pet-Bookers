@@ -1,20 +1,23 @@
 import { Button, Divider, Icon, Layout, Text, useTheme } from '@ui-kitten/components';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Image, ScrollView, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, ScrollView, TouchableOpacity, View } from 'react-native';
 import { AirbnbRating } from 'react-native-ratings';
-import { ProductsList } from '../../components/buyer/ProductsList';
-import { ThemedIcon } from '../../components/Icon';
-import { Price } from '../../components/Price';
-import { ProductImagesSlider } from '../../components/product';
-import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
+import { ProductsList } from '../../../components/buyer/ProductsList';
+import { ThemedIcon } from '../../../components/Icon';
+import { Price } from '../../../components/Price';
+import { ProductImagesSlider } from '../../../components/product';
+import { flexeStyles, spacingStyles } from '../../../utils/globalStyles';
 import React, { useCallback, useEffect, useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import { axiosBuyerClient } from '../../utils/axiosClient';
+import { axiosBuyerClient } from '../../../utils/axiosClient';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectBaseUrls } from '../../store/configs';
-import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
-import { loadSellerProducts, selectSellerProducts } from '../../store/sellerDetails';
-import { calculateDiscountedPrice } from '../../utils/products';
+
+
+
+import { loadSellerProducts, selectSellerProducts } from '../../../store/sellerDetails';
+import { calculateDiscountedPrice } from '../../../utils/products';
+import { selectBaseUrls } from '../../../store/configs';
+import ProductDetailShimmer from './components/ProductDetailShimmer';
 
 
 export const ProductDetailScreen = ({ route, navigation }) => {
@@ -28,6 +31,10 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const baseUrls = useSelector(selectBaseUrls);
   const { productId, slug } = route.params || {};
   // loadSellerAllProducts
+
+
+const [addingToCart, setAddingToCart] = useState(false);
+const [addedToCart, setAddedToCart] = useState(false);
 
 
    const navigateToProductDetail = (productId, slug) => {
@@ -118,12 +125,38 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     fetchRelatedProducts();
   }, [product?.id]);
 
+   if (loading || !product) {
+    return (<ProductDetailShimmer />);
+  }
   // const navigateToProductDetail = (productId, slug) => {
   //   console.error("NAVIGATINF")
   //   navigation.navigate('ProductDetail', { productId, slug });
   // };
 
-  const addToCart = (product) => {
+  const addToCart = async (product) => {
+    
+    try {
+      
+    setAddingToCart(true);
+      console.log("[addToCart data]======", product, "------------------>",product.id, );
+      const response = await axiosBuyerClient.post('cart/add', {
+        id: product.id,
+        quantity: 1,
+      });
+      console.log('Product added to cart:', response, "-=================================?>",response.data);
+      // Show success state
+    setAddingToCart(false);
+    setAddedToCart(true);
+    
+    // Reset after 2 seconds
+    setTimeout(() => {
+      setAddedToCart(false);
+    }, 2000);
+    } catch (error) {
+      console.error('Error adding to cart:', error || error?.message || error?.response?.data?.message);
+      
+    setAddingToCart(false);
+    }
     console.log("[addToCart]", product);
   };
 
@@ -132,10 +165,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     console.log("[navigateToSellerProfile]", sellerId);
   };
 
+console.log('Rendering shimmer', ProductDetailShimmer);
 
-  if (loading || !product) {
-    return <ProductDetailShimmer />;
-  }
+ 
 
 
   const productImages = product.images.map(image => ({
@@ -219,11 +251,26 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               style={{ flex: 1, backgroundColor: '#E65100', borderRadius: 6, marginRight: 8, borderWidth: 0, height: 45 }}
               textStyle={{ color: '#fff', fontWeight: 'bold' }}
               appearance="filled">Buy Now</Button>
-            <Button
-              onClick={() => addToCart(product)}
+            {/* <Button
+              onPress={() => addToCart(product)}
               style={{ flex: 1, backgroundColor: '#388E3C', borderRadius: 6, marginRight: 8, borderWidth: 0, height: 45 }}
               textStyle={{ color: '#fff', fontWeight: 'bold' }}
-              appearance="filled">Add to cart</Button>
+              appearance="filled">  Add to cart</Button> */}
+
+<Button
+  onPress={() => addToCart(product)}
+  style={{ flex: 1, backgroundColor: '#388E3C', borderRadius: 6, marginRight: 8, borderWidth: 0, height: 45 }}
+  textStyle={{ color: '#fff', fontWeight: 'bold' }}
+  appearance="filled"
+  disabled={addingToCart }
+  accessoryLeft={
+    addingToCart ? () => <ActivityIndicator size="small" color="#fff" /> : undefined
+  }
+>
+  {addingToCart ? '' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
+</Button>
+
+
             <Button
               onClick={() => { }}
               style={{ flex: 1, backgroundColor: '#fff', borderColor: '#222', borderWidth: 1, borderRadius: 6, height: 45 }}
@@ -444,145 +491,4 @@ export const ProductDetailScreen = ({ route, navigation }) => {
 };
 
 
-const ProductDetailShimmer = () => {
-  return (
-    <Layout level="3" style={{ flex: 1, backgroundColor: 'white' }}>
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingVertical: 10,
-          paddingHorizontal: 12,
-        }}
-        showsVerticalScrollIndicator={false}>
 
-        {/* Image Slider Placeholder */}
-        <ShimmerPlaceholder
-          style={{ width: '100%', height: 250, borderRadius: 8, marginBottom: 16 }}
-          LinearGradient={LinearGradient}
-          shimmerStyle={{ borderRadius: 8 }}
-        />
-
-        {/* Title and Icons Row */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <ShimmerPlaceholder
-            style={{ width: '70%', height: 22, borderRadius: 4 }}
-            LinearGradient={LinearGradient}
-          />
-          <ShimmerPlaceholder
-            style={{ width: 24, height: 24, borderRadius: 12 }}
-            LinearGradient={LinearGradient}
-          />
-          <ShimmerPlaceholder
-            style={{ width: 24, height: 24, borderRadius: 12 }}
-            LinearGradient={LinearGradient}
-          />
-        </View>
-
-        {/* Price */}
-        <ShimmerPlaceholder
-          style={{ width: 100, height: 20, borderRadius: 4, marginBottom: 8 }}
-          LinearGradient={LinearGradient}
-        />
-
-        {/* Discounted price */}
-        <ShimmerPlaceholder
-          style={{ width: 120, height: 16, borderRadius: 4, marginBottom: 16 }}
-          LinearGradient={LinearGradient}
-        />
-
-        {/* Buttons */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
-          {[...Array(3)].map((_, i) => (
-            <ShimmerPlaceholder
-              key={i}
-              style={{ flex: 1, height: 45, borderRadius: 6, marginRight: i < 2 ? 8 : 0 }}
-              LinearGradient={LinearGradient}
-            />
-          ))}
-        </View>
-
-        {/* Tabs */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 }}>
-          <ShimmerPlaceholder
-            style={{ width: 80, height: 18, borderRadius: 4 }}
-            LinearGradient={LinearGradient}
-          />
-          <ShimmerPlaceholder
-            style={{ width: 80, height: 18, borderRadius: 4 }}
-            LinearGradient={LinearGradient}
-          />
-        </View>
-
-        {/* Description Block */}
-        {[...Array(5)].map((_, i) => (
-          <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-            <ShimmerPlaceholder
-              style={{ width: '48%', height: 14, borderRadius: 4 }}
-              LinearGradient={LinearGradient}
-            />
-            <ShimmerPlaceholder
-              style={{ width: '48%', height: 14, borderRadius: 4 }}
-              LinearGradient={LinearGradient}
-            />
-          </View>
-        ))}
-
-        {/* Shop Display */}
-
-        <View style={{ flexDirection: 'row', paddingLeft: 50, marginTop: 20, alignItems: 'center' }}>
-          <ShimmerPlaceholder
-
-            style={{ width: 60, height: 60, borderRadius: 100, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-          />
-
-          <View style={{ flexDirection: 'column', marginLeft: 20 }}>
-            <ShimmerPlaceholder
-
-              style={{ width: 200, height: 16, borderRadius: 4, marginBottom: 10 }}
-              LinearGradient={LinearGradient}
-            />
-            <ShimmerPlaceholder
-
-              style={{ width: 150, height: 16, borderRadius: 4, marginBottom: 10 }}
-              LinearGradient={LinearGradient}
-            />
-          </View>
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-          <ShimmerPlaceholder
-
-            style={{ width: 160, height: 120, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-          /><ShimmerPlaceholder
-
-            style={{ width: 160, height: 120, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-          />
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginBottom: 80 }}>
-          <ShimmerPlaceholder
-
-            style={{ width: '90%', height: 30, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-          />
-        </View>
-
-
-
-
-
-        {/* {[...Array(4)].map((_, i) => (
-          <ShimmerPlaceholder
-            key={i}
-            style={{ width: '100%', height: 14, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-          />
-        ))} */}
-
-
-      </ScrollView>
-    </Layout>
-  );
-};

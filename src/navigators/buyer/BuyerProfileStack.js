@@ -7,7 +7,7 @@ import {BuyerProfileScreen} from '../../screens/buyer/BuyerProfileScreen';
 import {UpdatePasswordScreen} from '../../screens/profile/UpdatePasswordScreen';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {UpdateProfileScreen} from '../../screens/profile/UpdateProfileScreen';
-import {MyOrders} from '../../screens/buyer/MyOrders';
+import {MyOrders} from '../../screens/buyer/product/MyOrders';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 

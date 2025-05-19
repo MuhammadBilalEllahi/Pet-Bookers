@@ -45,7 +45,7 @@ export const MyCartScreen = () => {
   useEffect(() => {
     const fetchCartData = async () => {
       try {
-        const response = await axiosBuyerClient.get('cart/');
+        const response = await axiosBuyerClient.get('cart');
         console.log('Cart Response:', response.data);
       } catch (error) {
         console.log('Cart Error:', error.toString()|| error.response?.data || error.message );

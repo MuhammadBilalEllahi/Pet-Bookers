@@ -12,9 +12,10 @@ import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
 import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
 import { HomeMainScreen } from '../../screens/buyer/HomeMainScreen';
-import { ProductDetailScreen } from '../../screens/buyer/ProductDetailScreen';
+
 import { UserType } from '../../store/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ProductDetailScreen } from '../../screens/buyer/product/ProductDetailScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
