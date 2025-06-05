@@ -2,16 +2,17 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 // Screens
-import {AddProductScreen} from '../../screens/seller/AddProductScreen';
+import {AddProductScreen} from '../../screens/seller/add_product/AddProductScreen';
 import {UpdatePasswordScreen} from '../../screens/profile/UpdatePasswordScreen';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
-import {AddProductSuccessScreen} from '../../screens/seller/AddProductSuccessScreen';
 import {PaymentMethodScreen} from '../../screens/seller/PaymentMethodScreen';
 import {ProductFeatureCheckoutScreen} from '../../screens/seller/ProductFeatureCheckoutScreen';
 import {ProductFeatureSuccessScreen} from '../../screens/seller/ProductFeatureSuccessScreen';
 import { ScreenHeaderAd } from '../../components/ScreenHeaderAd';
-import AddProductSuccessAndShowFeaturedButton from '../../screens/seller/AddProductSuccessAndShowFeaturedButton';
 import { MainScreensHeader } from '../../components/buyer';
+import AddProductSuccessAndShowFeaturedButton from '../../screens/seller/add_product/AddProductSuccessAndShowFeaturedButton';
+import { AddProductSuccessScreen } from '../../screens/seller/add_product/AddProductSuccessScreen';
+
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const SellerNewProductStack = () => {

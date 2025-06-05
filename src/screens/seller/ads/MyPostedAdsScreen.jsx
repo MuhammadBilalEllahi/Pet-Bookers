@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import {Dimensions, ScrollView, View, Image, StyleSheet, TouchableOpacity, I18nManager, RefreshControl} from 'react-native';
 import {Layout, Text, Button, Icon} from '@ui-kitten/components';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { axiosSellerClient } from '../../utils/axiosClient';
-import { BASE_URL } from '../../utils/constants';
-import { AppScreens } from '../../navigators/AppNavigator';
+import { axiosSellerClient } from '../../../utils/axiosClient';
+import { BASE_URL } from '../../../utils/constants';
+import { AppScreens } from '../../../navigators/AppNavigator';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -153,7 +153,7 @@ export const MyPostedAdsScreen = ({navigation}) => {
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{padding: 16, paddingBottom: 32}}
+        contentContainerStyle={{padding: 16, paddingBottom: 52}}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

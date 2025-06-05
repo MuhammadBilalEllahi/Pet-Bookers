@@ -9,9 +9,9 @@ import {
   useTheme,
 } from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
-import {ThemedIcon} from '../../components/Icon';
-import {Price} from '../../components/Price';
+import {flexeStyles, spacingStyles} from '../../../utils/globalStyles';
+import {ThemedIcon} from '../../../components/Icon';
+import {Price} from '../../../components/Price';
 
 export const AddProductSuccessScreen = ({navigation}) => {
   const {t} = useTranslation();

@@ -4,10 +4,10 @@ import {MainScreensHeader} from '../../components/buyer';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 
 // Screens
-import {MyPostedAdsScreen} from '../../screens/seller/MyPostedAdsScreen';
+import {MyPostedAdsScreen} from '../../screens/seller/ads/MyPostedAdsScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
-import {ProductDetailScreen} from '../../screens/seller/ProductDetailScreen';
-import {EditProductScreen} from '../../screens/seller/EditProductScreen';
+import {ProductDetailScreen} from '../../screens/seller/ads/ProductDetailScreen';
+import {EditProductScreen} from '../../screens/seller/ads/EditProductScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 

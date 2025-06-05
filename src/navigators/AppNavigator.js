@@ -16,9 +16,9 @@ import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
 import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
 import PaymentPage from '../screens/buyer/checkout/PaymentPage';
 import { MyCartScreen } from '../screens/buyer/checkout/MyCartScreen';
-import { MyPostedAdsScreen } from '../screens/seller/MyPostedAdsScreen';
-import { ProductDetailScreen } from '../screens/seller/ProductDetailScreen';
-import { EditProductScreen } from '../screens/seller/EditProductScreen';
+import { MyPostedAdsScreen } from '../screens/seller/ads/MyPostedAdsScreen';
+import { ProductDetailScreen } from '../screens/seller/ads/ProductDetailScreen';
+import { EditProductScreen } from '../screens/seller/ads/EditProductScreen';
 import { MainScreensHeader } from '../components/buyer';
 
 const { Navigator, Screen } = createNativeStackNavigator();

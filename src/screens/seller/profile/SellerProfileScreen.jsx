@@ -8,14 +8,15 @@ import {
 } from '@ui-kitten/components';
 import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { AirbnbRating } from 'react-native-ratings';
-import { ProfileActionButton } from '../../components/profile';
-import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
+
+import { flexeStyles, spacingStyles } from '../../../utils/globalStyles';
 import { useDispatch } from 'react-redux';
-import { logout } from '../../store/user';
-import { getAsyncAuthToken } from '../../utils/localstorage';
-import { AppScreens } from '../../navigators/AppNavigator';
-import { useTheme } from '../../theme/ThemeContext';
+import { logout } from '../../../store/user';
+import { getAsyncAuthToken } from '../../../utils/localstorage';
+import { AppScreens } from '../../../navigators/AppNavigator';
+import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { ProfileActionButton } from '../../../components/profile';
 
 const {width, height} = Dimensions.get('window');
 
@@ -55,7 +56,7 @@ export const SellerProfileScreen = ({ navigation }) => {
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
       <Image
-        source={isDark ? require('../../../assets/new/login_page_bg_dark.png') : require('../../../assets/new/login_page_bg.png')}
+        source={isDark ? require('../../../../assets/new/login_page_bg_dark.png') : require('../../../../assets/new/login_page_bg.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />

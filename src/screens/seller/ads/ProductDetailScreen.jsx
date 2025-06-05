@@ -9,10 +9,10 @@ import {
   Alert,
 } from 'react-native';
 import { Layout, Text, Button, Icon, Spinner } from '@ui-kitten/components';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { axiosSellerClient } from '../../utils/axiosClient';
-import { MainScreensHeader } from '../../components/buyer';
+import { axiosSellerClient } from '../../../utils/axiosClient';
+import { MainScreensHeader } from '../../../components/buyer';
 
 const { width: windowWidth } = Dimensions.get('screen');
 
@@ -216,6 +216,7 @@ const SpecItem = ({ label, value, isDark, theme }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 52,
   },
   loadingContainer: {
     flex: 1,

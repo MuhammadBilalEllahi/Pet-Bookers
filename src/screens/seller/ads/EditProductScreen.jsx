@@ -8,10 +8,10 @@ import {
   Alert,
 } from 'react-native';
 import { Layout, Text, Button, Input, Spinner } from '@ui-kitten/components';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { axiosSellerClient } from '../../utils/axiosClient';
-import { MainScreensHeader } from '../../components/buyer';
+import { axiosSellerClient } from '../../../utils/axiosClient';
+import { MainScreensHeader } from '../../../components/buyer';
 
 export const EditProductScreen = ({ route, navigation }) => {
   const { productId } = route.params;

@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
 const {width}  = Dimensions.get('window');
 
-export const AddProductSuccessAndShowFeaturedButton = () => {
+export default  AddProductSuccessAndShowFeaturedButton = () => {
   const theme = useTheme();
   const navigation = useNavigation();
 
@@ -22,7 +22,7 @@ export const AddProductSuccessAndShowFeaturedButton = () => {
         {/* Success Checkmark */}
         <View style={styles.checkmarkContainer}>
           <Image
-            source={require('../../../assets/new/icons/check-mark.png')}
+            source={require('../../../../assets/new/icons/check-mark.png')}
             style={styles.checkmark}
             resizeMode="contain"
           />
@@ -41,7 +41,7 @@ export const AddProductSuccessAndShowFeaturedButton = () => {
             <View key={idx} style={styles.featuredCard}>
               <View style={styles.featuredImageBox}>
                 <Image
-                  source={require('../../../assets/new/icons/check-mark.png')}
+                  source={require('../../../../assets/new/icons/check-mark.png')}
                   style={styles.featuredImage}
                   resizeMode="contain"
                 />
@@ -241,5 +241,3 @@ shadowColor: '#FF512F',
     letterSpacing: 0.5,
   },
 });
-
-export default AddProductSuccessAndShowFeaturedButton; 

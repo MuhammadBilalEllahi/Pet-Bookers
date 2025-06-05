@@ -12,14 +12,13 @@ import {
 } from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {Formik} from 'formik';
-import {spacingStyles} from '../../utils/globalStyles';
-import {InputError, SubmitButton, } from '../../components/form';
+import {spacingStyles} from '../../../utils/globalStyles';
 import { useSelector, useDispatch } from 'react-redux';
-import { loadProductCategories, selectProductCategories } from '../../store/productCategories';
-import { axiosSellerClient } from '../../utils/axiosClient';
+import { loadProductCategories, selectProductCategories } from '../../../store/productCategories';
+import { axiosSellerClient } from '../../../utils/axiosClient';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
-import { useTheme as useThemeContext } from '../../theme/ThemeContext';
+import { useTheme as useThemeContext } from '../../../theme/ThemeContext';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -684,7 +683,7 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
     style={styles.uploadTouchable} 
     onPress={() => handleImagePick('thumbnail')}>
     <Image 
-      source={require('../../../assets/new/icons/upload-icon.png')} 
+      source={require('../../../../assets/new/icons/upload-icon.png')} 
       style={[styles.uploadIcon, { tintColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]} 
     />
     <View style={[styles.uploadTextBox, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-700'] }]}>
@@ -714,7 +713,7 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
     style={styles.uploadTouchable} 
     onPress={() => handleImagePick('images')}>
     <Image 
-      source={require('../../../assets/new/icons/upload-icon.png')} 
+      source={require('../../../../assets/new/icons/upload-icon.png')} 
       style={[styles.uploadIcon, { tintColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]} 
     />
     <View style={[styles.uploadTextBox, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-700'] }]}>

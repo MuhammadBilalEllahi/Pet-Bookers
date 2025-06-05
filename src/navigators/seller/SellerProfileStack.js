@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {MainScreensHeader} from '../../components/buyer';
 
 // Screens
-import {SellerProfileScreen} from '../../screens/seller/SellerProfileScreen';
+import {SellerProfileScreen} from '../../screens/seller/profile/SellerProfileScreen';
 import {UpdatePasswordScreen} from '../../screens/profile/UpdatePasswordScreen';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {UpdateProfileScreen} from '../../screens/profile/UpdateProfileScreen';
