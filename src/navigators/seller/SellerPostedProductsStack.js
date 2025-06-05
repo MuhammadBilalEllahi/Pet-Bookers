@@ -6,6 +6,8 @@ import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 // Screens
 import {MyPostedAdsScreen} from '../../screens/seller/MyPostedAdsScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
+import {ProductDetailScreen} from '../../screens/seller/ProductDetailScreen';
+import {EditProductScreen} from '../../screens/seller/EditProductScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -34,6 +36,34 @@ export const SellerPostedProductsStack = () => {
         component={ProductPreviewScreen}
         options={{
           title: 'ProductPreview',
+        }}
+      />
+      <Screen
+        name="ProductDetail"
+        component={ProductDetailScreen}
+        options={{
+          title: 'ProductDetail',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              title="ProductDetail"
+              hideSearch={true}
+            />
+          ),
+        }}
+      />
+      <Screen
+        name="EditProduct"
+        component={EditProductScreen}
+        options={{
+          title: 'EditProduct',
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              title="Edit Product"
+              hideSearch={true}
+            />
+          ),
         }}
       />
     </Navigator>

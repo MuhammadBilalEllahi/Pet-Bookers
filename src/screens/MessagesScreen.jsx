@@ -195,8 +195,8 @@ export const MessagesScreen = ({navigation}) => {
                     marginLeft: 4,
                   }}
                 >
-                  Online
-                </Text>
+                Online
+              </Text>
               </View>
             </View>
           </View>

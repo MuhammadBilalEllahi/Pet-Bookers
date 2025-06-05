@@ -16,6 +16,10 @@ import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
 import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
 import PaymentPage from '../screens/buyer/checkout/PaymentPage';
 import { MyCartScreen } from '../screens/buyer/checkout/MyCartScreen';
+import { MyPostedAdsScreen } from '../screens/seller/MyPostedAdsScreen';
+import { ProductDetailScreen } from '../screens/seller/ProductDetailScreen';
+import { EditProductScreen } from '../screens/seller/EditProductScreen';
+import { MainScreensHeader } from '../components/buyer';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -33,6 +37,9 @@ export const AppScreens = Object.freeze({
   SHIPING_DETAILS: 'ShipingDetails',
   PAYMENT_PAGE: 'PaymentPage',
   CART: 'MyCartScreen',
+  MY_POSTED_ADS: 'MyPostedAdsScreen',
+  PRODUCT_DETAIL: 'ProductDetail',
+  PRODUCT_DETAIL_EDIT: 'ProductDetailEdit',
 
 });
 
@@ -67,6 +74,14 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
         <Screen name={AppScreens.CART} component={MyCartScreen} />
 
+        <Screen name={AppScreens.MY_POSTED_ADS} component={MyPostedAdsScreen} />
+        <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen} />
+        <Screen name={AppScreens.PRODUCT_DETAIL_EDIT} component={EditProductScreen} options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader {...props} hideSearch={true} key="header-EditProductScreen" />
+              ),
+            }} />
         
         <Screen
               key="screen-ShipingDetails"

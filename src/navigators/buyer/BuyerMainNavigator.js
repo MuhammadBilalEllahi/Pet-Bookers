@@ -55,6 +55,9 @@ const TEXT_BLACK = '#000000';
 // Ensure text does not wrap by setting flexShrink: 0, flexGrow: 0, minWidth: 0, and allowFontScaling: false
 const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => {
   const { theme, isDark } = useTheme();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   return (
   <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
     <Image
@@ -77,6 +80,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
         flexShrink: 0,
         flexGrow: 0,
         minWidth: 0,
+          textAlign: 'center',
       }}
       numberOfLines={1}
       ellipsizeMode="clip"
@@ -105,6 +109,9 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
 // Do not change color of plus icon (no tintColor)
 const renderAddTabIconWithActive = (isActive, label) => {
   const { theme, isDark } = useTheme();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   return (
   <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
     <View
@@ -137,6 +144,7 @@ const renderAddTabIconWithActive = (isActive, label) => {
         flexShrink: 0,
         flexGrow: 0,
         minWidth: 0,
+          textAlign: 'center',
       }}
       numberOfLines={1}
       ellipsizeMode="clip"
@@ -164,8 +172,9 @@ const renderAddTabIconWithActive = (isActive, label) => {
 
 const BottomTabBar = ({ navigation, state, isAnonymous }) => {
   const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
+  const isRTL = i18n.dir() === 'rtl';
 
   return (
     <View style={styles.bottomTabBarContainer} key="bottomTabBarContainer">
@@ -180,9 +189,13 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
             overflow: showBottomTabBar ? 'visible' : 'hidden',
             backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
             borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+            flexDirection: isRTL ? 'row-reverse' : 'row',
           },
         ]}
-        onSelect={index => navigation.navigate(state.routeNames[index])}
+        onSelect={index => {
+          const rtlIndex = isRTL ? state.routes.length - 1 - index : index;
+          navigation.navigate(state.routeNames[rtlIndex]);
+        }}
         key="bottomNavigation"
       >
         <BottomNavigationTab
@@ -190,7 +203,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           icon={() =>
             renderTabIconWithActive(
               homeIcon,
-              state.index === 0,
+              state.index === (isRTL ? 4 : 0),
               t('tabs.home')
             )
           }
@@ -200,7 +213,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           icon={() =>
             renderTabIconWithActive(
               chatIcon,
-              state.index === 1,
+              state.index === (isRTL ? 3 : 1),
               t('tabs.chat')
             )
           }
@@ -209,7 +222,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           key="tab-add"
           icon={() =>
             renderAddTabIconWithActive(
-              state.index === 2,
+              state.index === (isRTL ? 2 : 2),
               t(isAnonymous ? 'tabs.sell' : 'tabs.cart')
             )
           }
@@ -219,7 +232,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           icon={() =>
             renderTabIconWithActive(
               luckyDrawIcon,
-              state.index === 3,
+              state.index === (isRTL ? 1 : 3),
               t('tabs.luckydraw'),
               { width: 48, height: 35 }
             )
@@ -230,7 +243,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           icon={() =>
             renderTabIconWithActive(
               profileUserIcon,
-              state.index === 4,
+              state.index === (isRTL ? 0 : 4),
               t('tabs.profile')
             )
           }
@@ -407,12 +420,14 @@ const styles = StyleSheet.create({
   iconWithActiveContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'column',
   },
   addButtonContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: -30,
+    flexDirection: 'column',
   },
   addButton: {
     borderWidth: 3,

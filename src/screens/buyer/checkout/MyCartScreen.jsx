@@ -5,7 +5,7 @@ import { AppScreens } from "../../../navigators/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 import { axiosBuyerClient } from "../../../utils/axiosClient";
 import { useTheme } from "../../../theme/ThemeContext";
-
+  
 const cartData = [
   {
     id: 1,
@@ -77,8 +77,8 @@ export const MyCartScreen = () => {
           <Text style={[styles.farmName, { 
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
-            <Text style={{ fontWeight: "bold" }}>Farm Name:</Text> Model Pet Farm
-          </Text>
+          <Text style={{ fontWeight: "bold" }}>Farm Name:</Text> Model Pet Farm
+        </Text>
           <View style={[styles.tableHeader, { 
             backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
           }]}>
@@ -96,9 +96,9 @@ export const MyCartScreen = () => {
               <Text style={[styles.srCell, { 
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>{index + 1}</Text>
-              <View style={styles.productCell}>
-                <Image source={item.image} style={styles.productImage} />
-                <View style={{ flex: 1 }}>
+                <View style={styles.productCell}>
+                  <Image source={item.image} style={styles.productImage} />
+                  <View style={{ flex: 1 }}>
                   <Text style={[styles.productName, { 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }]}>{item.name}</Text>
@@ -108,12 +108,12 @@ export const MyCartScreen = () => {
                   <Text style={[styles.productPrice, { 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }]}>Rs {item.price.toLocaleString()}</Text>
-                </View>
-                <TouchableOpacity>
+                  </View>
+                  <TouchableOpacity>
                   <Icon name="close-circle-outline" fill={theme['color-shadcn-destructive']} style={{ width: 24, height: 24 }} />
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
           ))}
         </View>
 
@@ -257,18 +257,18 @@ export const MyCartScreen = () => {
               fontWeight: 'bold',
               fontSize: 11
             }}>
-              «Continue Shopping
-            </Text>
-          </Button>
+            «Continue Shopping
+          </Text>
+        </Button>
           <Button 
             onPress={handleCheckout} 
             style={[styles.checkoutBtn, { 
               backgroundColor: theme['color-shadcn-primary']
             }]}
           >
-            Checkout »
-          </Button>
-        </View>
+          Checkout »
+        </Button>
+      </View>
       </ScrollView>
     </Layout>
   );

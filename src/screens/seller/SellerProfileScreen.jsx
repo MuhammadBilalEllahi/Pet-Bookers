@@ -15,12 +15,14 @@ import { logout } from '../../store/user';
 import { getAsyncAuthToken } from '../../utils/localstorage';
 import { AppScreens } from '../../navigators/AppNavigator';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const {width, height} = Dimensions.get('window');
 
 export const SellerProfileScreen = ({ navigation }) => {
   const { theme, isDark } = useTheme();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const navigateToProfileUpdate = () => {
     navigation.navigate('UpdateProfile');
@@ -98,7 +100,7 @@ export const SellerProfileScreen = ({ navigation }) => {
                   }}
                   onPress={navigateToProfileUpdate}
                 >
-                  View and edit profile
+                  {t('profile.viewAndEditProfile')}
                 </Text>
               </View>
             </View>
@@ -131,7 +133,7 @@ export const SellerProfileScreen = ({ navigation }) => {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text category="h6" style={{ 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }}>Store Full Name</Text>
+                  }}>{t('profile.storeFullName')}</Text>
                   <Button
                     appearance="ghost"
                     size="small"
@@ -184,44 +186,44 @@ export const SellerProfileScreen = ({ navigation }) => {
             ]}
           >
             <ProfileActionButton
-              title="My Ads"
-              subtitle="All ads you have posted"
+              title={t('profile.myAds')}
+              subtitle={t('profile.myAdsSubtitle')}
               iconName="browser-outline"
               onPress={navigateToMyPostedAds}
             />
             <ProfileActionButton
-              title="Farm Details"
-              subtitle="Edit your farm details"
+              title={t('profile.farmDetails')}
+              subtitle={t('profile.farmDetailsSubtitle')}
               iconName="info-outline"
               onPress={() => {}}
             />
             <ProfileActionButton
-              title="Favorites Ads"
-              subtitle="All of your favorite ads"
+              title={t('profile.favoritesAds')}
+              subtitle={t('profile.favoritesAdsSubtitle')}
               iconName="heart"
               onPress={() => {}}
             />
             <ProfileActionButton
-              title="Settings"
-              subtitle="All of your favorite ads"
+              title={t('profile.settings')}
+              subtitle={t('profile.settingsSubtitle')}
               iconName="settings-2-outline"
               onPress={navigateToAppSettings}
             />
             <ProfileActionButton
-              title="Help & Support"
-              subtitle="All of your favorite ads"
+              title={t('profile.helpSupport')}
+              subtitle={t('profile.helpSupportSubtitle')}
               iconName="question-mark-circle-outline"
               onPress={() => {}}
             />
             <ProfileActionButton
-              title="Logout"
+              title={t('profile.logout')}
+              subtitle={t('profile.logoutSubtitle')}
               iconName="power-outline"
-              subtitle="log out"
               onPress={() => {
                 dispatch(logout());
                 navigation.navigate(AppScreens.BUYER_HOME_MAIN);
               }}
-            />
+              />
           </Layout>
           <View style={styles.bottomBar}>
             <View style={[styles.pillButton, { 
@@ -230,7 +232,7 @@ export const SellerProfileScreen = ({ navigation }) => {
             }]}>
               <Text style={[styles.pillButtonText, { 
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>Our Services</Text>
+              }]}>{t('profile.ourServices')}</Text>
             </View>
             <View style={[styles.pillButton, { 
               borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
@@ -238,7 +240,7 @@ export const SellerProfileScreen = ({ navigation }) => {
             }]}>
               <Text style={[styles.pillButtonText, { 
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>Term & Conditions</Text>
+              }]}>{t('profile.termsConditions')}</Text>
             </View>
             <View style={[styles.pillButton, { 
               borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
@@ -246,9 +248,9 @@ export const SellerProfileScreen = ({ navigation }) => {
             }]}>
               <Text style={[styles.pillButtonText, { 
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>Contact us</Text>
+              }]}>{t('profile.contactUs')}</Text>
             </View>
-          </View>
+      </View>
         </ScrollView>
       </Layout>
     </View>

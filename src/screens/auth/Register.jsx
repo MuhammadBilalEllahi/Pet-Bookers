@@ -76,8 +76,8 @@ export const RegisterScreen = ({ navigation }) => {
   const { isDark, theme } = useTheme();
 
   const validationSchema = Yup.object().shape(
-    isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
-  );
+  isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
+);
 
   // Use translation keys for states and cities
   const stateKeys = [
@@ -338,7 +338,7 @@ export const RegisterScreen = ({ navigation }) => {
           logo: null,
           banner: null,
         }}
-        validationSchema={validationSchema}
+          validationSchema={validationSchema}
         onSubmit={submitForm}
       >
         {({
@@ -477,8 +477,8 @@ export const RegisterScreen = ({ navigation }) => {
               onChangeText={handleChange('firstName')}
               onBlur={handleBlur('firstName')}
               value={values.firstName}
-              status={touched.firstName && errors.firstName ? 'danger' : 'basic'}
-              caption={touched.firstName && errors.firstName ? errors.firstName : ''}
+  status={touched.firstName && errors.firstName ? 'danger' : 'basic'}
+  caption={touched.firstName && errors.firstName ? errors.firstName : ''}
             />
 
             {/* Last Name */}
@@ -538,13 +538,13 @@ export const RegisterScreen = ({ navigation }) => {
               <Text style={[styles.label, { 
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>
-                {t('phone')}
-              </Text>
+                    {t('phone')}
+                  </Text>
               <Text style={[styles.countryCodeNote, { 
                 color: theme['color-shadcn-destructive']
               }]}>
-                {t('countryCodeNote')}
-              </Text>
+              {t('countryCodeNote')}
+            </Text>
             </View>
             <View style={[styles.phoneRowImproved, { 
               backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],

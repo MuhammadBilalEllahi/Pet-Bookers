@@ -198,5 +198,64 @@
     "congratsMessage": "آپ کی مصنوع کامیابی سے لسٹ ہو گئی ہے",
     "viewAd": "میرا اشتہار دیکھیں",
     "addAnother": "ایک اور مصنوع شامل کریں"
+  },
+  "profile": {
+    "viewAndEditProfile": "پروفائل دیکھیں اور ترمیم کریں",
+    "storeFullName": "دکان کا مکمل نام",
+    "myAds": "میرے اشتہارات",
+    "myAdsSubtitle": "آپ کے تمام پوسٹ کردہ اشتہارات",
+    "farmDetails": "فارم کی تفصیلات",
+    "farmDetailsSubtitle": "اپنی فارم کی تفصیلات میں ترمیم کریں",
+    "favoritesAds": "پسندیدہ اشتہارات",
+    "favoritesAdsSubtitle": "آپ کے تمام پسندیدہ اشتہارات",
+    "settings": "ترتیبات",
+    "settingsSubtitle": "ایپ کی ترتیبات اور ترجیحات",
+    "helpSupport": "مدد اور سہارا",
+    "helpSupportSubtitle": "مدد حاصل کریں اور سپورٹ سے رابطہ کریں",
+    "logout": "لاگ آؤٹ",
+    "logoutSubtitle": "اپنے اکاؤنٹ سے سائن آؤٹ کریں",
+    "ourServices": "ہماری خدمات",
+    "termsConditions": "شرائط و ضوابط",
+    "contactUs": "ہم سے رابطہ کریں"
+  },
+  "myAds": {
+    "header": "میرے اشتہارات",
+    "tabs": {
+      "all": "سب",
+      "active": "فعال اشتہارات",
+      "closed": "بند اشتہارات"
+    },
+    "createdOn": "تاریخ تخلیق",
+    "views": "نظارے",
+    "messages": "پیغامات",
+    "badges": {
+      "free": "مفت اشتہار",
+      "featured": "نمایاں"
+    },
+    "tryFeatured": "نمایاں اشتہارات آزمائیں"
+  },
+  "productDetails": {
+    "title": "تفصیلاتِ مصنوع",
+    "edit": "ترمیم",
+    "delete": "حذف کریں",
+    "status": "حیثیت",
+    "active": "فعال",
+    "inactive": "غیر فعال",
+    "specifications": "خصوصیات",
+    "stock": "اسٹاک",
+    "unit": "یونٹ",
+    "minOrder": "کم از کم آرڈر",
+    "description": "تفصیل",
+    "confirmDelete": "کیا آپ واقعی اس مصنوع کو حذف کرنا چاہتے ہیں؟",
+    "deleteSuccess": "مصنوع کامیابی سے حذف ہو گئی",
+    "deleteError": "مصنوع حذف کرنے میں ناکام"
+  },
+  "editProduct": {
+    "title": "ترمیمِ مصنوع",
+    "save": "تبدیلیاں محفوظ کریں",
+    "cancel": "منسوخ کریں",
+    "success": "مصنوع کامیابی سے اپ ڈیٹ ہو گئی",
+    "error": "مصنوع اپ ڈیٹ کرنے میں ناکام",
+    "loading": "تبدیلیاں محفوظ ہو رہی ہیں..."
   }
 }
