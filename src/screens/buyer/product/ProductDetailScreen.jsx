@@ -1,4 +1,5 @@
-import { Button, Divider, Icon, Layout, Text, useTheme } from '@ui-kitten/components';
+import { Button, Divider, Icon, Layout, Text,  } from '@ui-kitten/components';
+import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Image, ScrollView, TouchableOpacity, View } from 'react-native';
 import { AirbnbRating } from 'react-native-ratings';
@@ -12,17 +13,14 @@ import LinearGradient from 'react-native-linear-gradient';
 import { axiosBuyerClient } from '../../../utils/axiosClient';
 import { useDispatch, useSelector } from 'react-redux';
 
-
-
 import { loadSellerProducts, selectSellerProducts } from '../../../store/sellerDetails';
 import { calculateDiscountedPrice } from '../../../utils/products';
 import { selectBaseUrls } from '../../../store/configs';
 import ProductDetailShimmer from './components/ProductDetailShimmer';
 
-
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
-  // const theme = useTheme();
+  const { theme, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,14 +28,10 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const [loadingRelated, setLoadingRelated] = useState(false);
   const baseUrls = useSelector(selectBaseUrls);
   const { productId, slug } = route.params || {};
-  // loadSellerAllProducts
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
-
-const [addingToCart, setAddingToCart] = useState(false);
-const [addedToCart, setAddedToCart] = useState(false);
-
-
-   const navigateToProductDetail = (productId, slug) => {
+  const navigateToProductDetail = (productId, slug) => {
     console.log("[navigateToProductDetail]", productId, slug);
     navigation.navigate('ProductDetail', {productId: productId, slug: slug});
   };
@@ -46,8 +40,6 @@ const [addedToCart, setAddedToCart] = useState(false);
     console.log("[navigateToVandorDetail]", vandorId);
     navigation.navigate('VandorDetail', {sellerId: vandorId});
   };
-
-
 
   const dispatch = useDispatch();
   const { sellerProducts, sellerProductsLoading } = useSelector(selectSellerProducts);
@@ -84,7 +76,6 @@ const [addedToCart, setAddedToCart] = useState(false);
       dispatch(loadSellerProducts({ sellerId: product.seller.id, limit: 10, offset: 0 }));
     }
   }, [product?.seller?.id]);
-
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -125,37 +116,29 @@ const [addedToCart, setAddedToCart] = useState(false);
     fetchRelatedProducts();
   }, [product?.id]);
 
-   if (loading || !product) {
+  if (loading || !product) {
     return (<ProductDetailShimmer />);
   }
-  // const navigateToProductDetail = (productId, slug) => {
-  //   console.error("NAVIGATINF")
-  //   navigation.navigate('ProductDetail', { productId, slug });
-  // };
 
   const addToCart = async (product) => {
-    
     try {
-      
-    setAddingToCart(true);
+      setAddingToCart(true);
       console.log("[addToCart data]======", product, "------------------>",product.id, );
       const response = await axiosBuyerClient.post('cart/add', {
         id: product.id,
         quantity: 1,
       });
       console.log('Product added to cart:', response, "-=================================?>",response.data);
-      // Show success state
-    setAddingToCart(false);
-    setAddedToCart(true);
-    
-    // Reset after 2 seconds
-    setTimeout(() => {
-      setAddedToCart(false);
-    }, 2000);
+      setAddingToCart(false);
+      setAddedToCart(true);
+      
+      setTimeout(() => {
+        setAddedToCart(false);
+      }, 2000);
     } catch (error) {
       console.error('Error adding to cart:', error || error?.message || error?.response?.data?.message);
       
-    setAddingToCart(false);
+      setAddingToCart(false);
     }
     console.log("[addToCart]", product);
   };
@@ -165,10 +148,7 @@ const [addedToCart, setAddedToCart] = useState(false);
     console.log("[navigateToSellerProfile]", sellerId);
   };
 
-console.log('Rendering shimmer', ProductDetailShimmer);
-
- 
-
+  console.log('Rendering shimmer', ProductDetailShimmer);
 
   const productImages = product.images.map(image => ({
     id: image,
@@ -188,26 +168,20 @@ console.log('Rendering shimmer', ProductDetailShimmer);
     slug: item.slug,
   }));
 
-  // const baseUrls = useSelector(selectBaseUrls);
-
-
-
   return (
-    <Layout level="3" style={{ flex: 1, backgroundColor: 'white', }}>
+    <Layout level="3" style={{ flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          backgroundColor: 'white',
-
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
           flexGrow: 1,
           justifyContent: 'flex-start',
           paddingTop: 10,
-
         }}>
 
         <ProductImagesSlider slideList={productImages} />
-        <Layout level="1" style={{ backgroundColor: 'white' }}>
+        <Layout level="1" style={{ backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
           <Layout
             style={[
               spacingStyles.px8,
@@ -215,10 +189,15 @@ console.log('Rendering shimmer', ProductDetailShimmer);
               flexeStyles.row,
               flexeStyles.itemsCenter,
               flexeStyles.contentBetween,
-              { backgroundColor: 'white' },
+              { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] },
             ]}>
-            <Layout style={{ backgroundColor: 'white', }}>
-              <Text style={[spacingStyles.px4,]} category="h6">
+            <Layout style={{ backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
+              <Text 
+                style={[
+                  spacingStyles.px4,
+                  { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
+                ]} 
+                category="h6">
                 {product.name}
               </Text>
             </Layout>
@@ -234,61 +213,108 @@ console.log('Rendering shimmer', ProductDetailShimmer);
             />
           </Layout>
 
-          <Layout style={{ marginHorizontal: 12, marginTop: 0, backgroundColor: 'white', }}>
+          <Layout style={{ marginHorizontal: 12, marginTop: 0, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
             <Price fontSize={20} amount={product.unit_price} />
             {product.discount > 0 && (
               <Layout style={flexeStyles.row}>
                 <Price amount={product.unit_price} cross={true} />
-                <Text style={{ marginLeft: 4 }}>-{product.discount}{product.discount_type === 'percent' ? '%' : ''}</Text>
+                <Text style={{ marginLeft: 4, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }}>
+                  -{product.discount}{product.discount_type === 'percent' ? '%' : ''}
+                </Text>
               </Layout>
             )}
           </Layout>
 
-          <Divider />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          
           <Layout style={{ flexDirection: 'row', marginTop: 18, marginBottom: 8, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16 }}>
             <Button
               onClick={() => { }}
-              style={{ flex: 1, backgroundColor: '#E65100', borderRadius: 6, marginRight: 8, borderWidth: 0, height: 45 }}
-              textStyle={{ color: '#fff', fontWeight: 'bold' }}
+              style={{ 
+                flex: 1, 
+                backgroundColor: theme['color-shadcn-primary'], 
+                borderRadius: 6, 
+                marginRight: 8, 
+                borderWidth: 0, 
+                height: 45 
+              }}
+              textStyle={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold' }}
               appearance="filled">Buy Now</Button>
-            {/* <Button
+
+            <Button
               onPress={() => addToCart(product)}
-              style={{ flex: 1, backgroundColor: '#388E3C', borderRadius: 6, marginRight: 8, borderWidth: 0, height: 45 }}
-              textStyle={{ color: '#fff', fontWeight: 'bold' }}
-              appearance="filled">  Add to cart</Button> */}
-
-<Button
-  onPress={() => addToCart(product)}
-  style={{ flex: 1, backgroundColor: '#388E3C', borderRadius: 6, marginRight: 8, borderWidth: 0, height: 45 }}
-  textStyle={{ color: '#fff', fontWeight: 'bold' }}
-  appearance="filled"
-  disabled={addingToCart }
-  accessoryLeft={
-    addingToCart ? () => <ActivityIndicator size="small" color="#fff" /> : undefined
-  }
->
-  {addingToCart ? '' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
-</Button>
-
+              style={{ 
+                flex: 1, 
+                backgroundColor: theme['color-shadcn-primary'], 
+                borderRadius: 6, 
+                marginRight: 8, 
+                borderWidth: 0, 
+                height: 45 
+              }}
+              textStyle={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold' }}
+              appearance="filled"
+              disabled={addingToCart}
+              accessoryLeft={
+                addingToCart ? () => <ActivityIndicator size="small" color={theme['color-shadcn-primary-foreground']} /> : undefined
+              }
+            >
+              {addingToCart ? '' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
+            </Button>
 
             <Button
               onClick={() => { }}
-              style={{ flex: 1, backgroundColor: '#fff', borderColor: '#222', borderWidth: 1, borderRadius: 6, height: 45 }}
-              textStyle={{ color: '#222', fontWeight: 'bold' }}
+              style={{ 
+                flex: 1, 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+                borderWidth: 1, 
+                borderRadius: 6, 
+                height: 45 
+              }}
+              textStyle={{ 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], 
+                fontWeight: 'bold' 
+              }}
               appearance="outline">Chat</Button>
           </Layout>
+
           <Layout style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 8, marginTop: 8 }}>
             <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => setActiveTab('overview')}>
-              <Text style={{ fontWeight: 'bold', color: activeTab === 'overview' ? '#222' : '#888', fontSize: 16 }}>Overview</Text>
-              {activeTab === 'overview' && <View style={{ height: 4, backgroundColor: '#222', width: 60, borderRadius: 2, marginTop: 2 }} />}
+              <Text style={{ 
+                fontWeight: 'bold', 
+                color: activeTab === 'overview' 
+                  ? (isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'])
+                  : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']), 
+                fontSize: 16 
+              }}>Overview</Text>
+              {activeTab === 'overview' && <View style={{ 
+                height: 4, 
+                backgroundColor: theme['color-shadcn-primary'], 
+                width: 60, 
+                borderRadius: 2, 
+                marginTop: 2 
+              }} />}
             </TouchableOpacity>
             <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => setActiveTab('reviews')}>
-              <Text style={{ fontWeight: 'bold', color: activeTab === 'reviews' ? '#222' : '#888', fontSize: 16 }}>Reviews</Text>
-              {activeTab === 'reviews' && <View style={{ height: 4, backgroundColor: '#222', width: 60, borderRadius: 2, marginTop: 2 }} />}
+              <Text style={{ 
+                fontWeight: 'bold', 
+                color: activeTab === 'reviews' 
+                  ? (isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'])
+                  : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']), 
+                fontSize: 16 
+              }}>Reviews</Text>
+              {activeTab === 'reviews' && <View style={{ 
+                height: 4, 
+                backgroundColor: theme['color-shadcn-primary'], 
+                width: 60, 
+                borderRadius: 2, 
+                marginTop: 2 
+              }} />}
             </TouchableOpacity>
           </Layout>
+
           {activeTab === 'overview' ? (
-            <Layout style={[spacingStyles.p16, { backgroundColor: 'white' }]}
+            <Layout style={[spacingStyles.p16, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}
               level="1">
               <Text
                 category="p1"
@@ -296,10 +322,13 @@ console.log('Rendering shimmer', ProductDetailShimmer);
                   marginBottom: 10,
                   fontWeight: '700',
                   textTransform: 'uppercase',
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }}>
                 Description
               </Text>
-              <Text>{product.details}</Text>
+              <Text style={{ color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }}>
+                {product.details}
+              </Text>
 
               <Layout style={{ marginTop: 16 }}>
                 <Text
@@ -308,38 +337,39 @@ console.log('Rendering shimmer', ProductDetailShimmer);
                     marginBottom: 10,
                     fontWeight: '700',
                     textTransform: 'uppercase',
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }}>
                   Product Details
                 </Text>
 
                 <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                  <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Minimum Order Quantity:</Text>
-                  <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.minimum_order_qty} {product.unit}</Text>
+                  <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Minimum Order Quantity:</Text>
+                  <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.minimum_order_qty} {product.unit}</Text>
                 </Layout>
 
                 <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                  <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Current Stock:</Text>
-                  <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.current_stock} {product.unit}</Text>
+                  <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Current Stock:</Text>
+                  <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.current_stock} {product.unit}</Text>
                 </Layout>
 
                 <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                  <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Featured:</Text>
-                  <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.featured ? 'Yes' : 'No'}</Text>
+                  <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Featured:</Text>
+                  <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.featured ? 'Yes' : 'No'}</Text>
                 </Layout>
 
                 <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                  <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Product Type:</Text>
-                  <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.product_type}</Text>
+                  <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Product Type:</Text>
+                  <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.product_type}</Text>
                 </Layout>
 
                 <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                  <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Refundable:</Text>
-                  <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.refundable ? 'Yes' : 'No'}</Text>
+                  <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Refundable:</Text>
+                  <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.refundable ? 'Yes' : 'No'}</Text>
                 </Layout>
 
                 <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                  <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Free Shipping:</Text>
-                  <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.free_shipping ? 'Yes' : 'No'}</Text>
+                  <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Free Shipping:</Text>
+                  <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.free_shipping ? 'Yes' : 'No'}</Text>
                 </Layout>
 
                 <Layout style={{ marginTop: 16 }}>
@@ -349,32 +379,34 @@ console.log('Rendering shimmer', ProductDetailShimmer);
                       marginBottom: 10,
                       fontWeight: '700',
                       textTransform: 'uppercase',
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                     }}>
                     Seller Location
                   </Text>
                   <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                    <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>Address:</Text>
-                    <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.seller.shop.address}</Text>
+                    <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>Address:</Text>
+                    <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.seller.shop.address}</Text>
                   </Layout>
                   <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                    <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>City:</Text>
-                    <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.seller.city}</Text>
+                    <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>City:</Text>
+                    <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.seller.city}</Text>
                   </Layout>
                   <Layout style={{ flexDirection: 'row', marginBottom: 8 }}>
-                    <Text style={{ flex: 1, color: '#666', fontSize: 14 }}>State:</Text>
-                    <Text style={{ flex: 1, fontWeight: '600', fontSize: 14 }}>{product.seller.state}</Text>
+                    <Text style={{ flex: 1, color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 14 }}>State:</Text>
+                    <Text style={{ flex: 1, fontWeight: '600', color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 14 }}>{product.seller.state}</Text>
                   </Layout>
                 </Layout>
               </Layout>
             </Layout>
           ) : (
-            <Layout style={spacingStyles.p16} level="1">
+            <Layout style={[spacingStyles.p16, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]} level="1">
               <Text
                 category="p1"
                 style={{
                   marginBottom: 10,
                   fontWeight: '700',
                   textTransform: 'uppercase',
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }}>
                 Reviews ({product.reviews_count})
               </Text>
@@ -390,101 +422,175 @@ console.log('Rendering shimmer', ProductDetailShimmer);
                             marginBottom: 4,
                           },
                         ]}>
-                        <Text category="s1">{review.user?.name || 'Anonymous'}</Text>
+                        <Text 
+                          category="s1"
+                          style={{ color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }}
+                        >
+                          {review.user?.name || 'Anonymous'}
+                        </Text>
                         <AirbnbRating
                           count={5}
                           defaultRating={review.rating}
                           showRating={false}
                           size={14}
                           isDisabled={true}
-                        // selectedColor={theme['color-primary-default']}
+                          selectedColor={theme['color-shadcn-primary']}
                         />
                       </Layout>
-                      <Text>{review.comment}</Text>
-                      <Divider style={{ marginTop: 8 }} />
+                      <Text style={{ color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }}>
+                        {review.comment}
+                      </Text>
+                      <Divider style={{ marginTop: 8, backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
                     </Layout>
                   ))}
                 </Layout>
               ) : (
-                <Text>No reviews yet</Text>
+                <Text style={{ color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }}>
+                  No reviews yet
+                </Text>
               )}
             </Layout>
           )}
         </Layout>
 
         {/* SELLER INFO CARD */}
-        <View style={{ backgroundColor: '#fff', borderRadius: 12, marginHorizontal: 0, marginBottom: 16, marginTop: 4, paddingVertical: 16, paddingHorizontal: 20, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1, borderWidth: 1, borderColor: '#eee' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, }}>
+        <View style={{ 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+          borderRadius: 12, 
+          marginHorizontal: 0, 
+          marginBottom: 16, 
+          marginTop: 4, 
+          paddingVertical: 16, 
+          paddingHorizontal: 20, 
+          shadowColor: '#000', 
+          shadowOpacity: 0.04, 
+          shadowRadius: 6, 
+          shadowOffset: { width: 0, height: 2 }, 
+          elevation: 1, 
+          borderWidth: 1, 
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Image
               source={{ uri: `${baseUrls['shop_image_url']}/${product.seller.shop.image}` }}
-              style={{ width: 48, height: 48, borderRadius: 24, marginRight: 10, backgroundColor: '#eee' }}
+              style={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 24, 
+                marginRight: 10, 
+                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'] 
+              }}
             />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 17, color: '#222' }}>{product.seller.shop.name}</Text>
+              <Text style={{ 
+                fontWeight: 'bold', 
+                fontSize: 17, 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] 
+              }}>
+                {product.seller.shop.name}
+              </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                <Text style={{ color: '#888', fontSize: 13, marginRight: 2 }}>Seller Info</Text>
-                <Icon name="info" width={14} height={14} fill="#888" />
+                <Text style={{ 
+                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                  fontSize: 13, 
+                  marginRight: 2 
+                }}>
+                  Seller Info
+                </Text>
+                <Icon 
+                  name="info" 
+                  width={14} 
+                  height={14} 
+                  fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} 
+                />
               </View>
             </View>
           </View>
-          <Divider style={{ marginVertical: 8 }} />
+          <Divider style={{ 
+            marginVertical: 8,
+            backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+          }} />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <View style={{ flex: 1, alignItems: 'center', backgroundColor: '#f7f7f7', borderRadius: 10, marginRight: 6, paddingVertical: 12 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#222' }}>{product.seller.shop.products_count || 0}</Text>
-              <Text style={{ color: '#888', fontSize: 15, fontWeight: '500' }}>Products</Text>
+            <View style={{ 
+              flex: 1, 
+              alignItems: 'center', 
+              backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'], 
+              borderRadius: 10, 
+              marginRight: 6, 
+              paddingVertical: 12 
+            }}>
+              <Text style={{ 
+                fontWeight: 'bold', 
+                fontSize: 28, 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] 
+              }}>
+                {product.seller.shop.products_count || 0}
+              </Text>
+              <Text style={{ 
+                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                fontSize: 15, 
+                fontWeight: '500' 
+              }}>
+                Products
+              </Text>
             </View>
-            <View style={{ flex: 1, alignItems: 'center', backgroundColor: '#f7f7f7', borderRadius: 10, marginLeft: 6, paddingVertical: 12 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#222' }}>{product.reviews_count}</Text>
-              <Text style={{ color: '#888', fontSize: 15, fontWeight: '500' }}>Reviews</Text>
+            <View style={{ 
+              flex: 1, 
+              alignItems: 'center', 
+              backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'], 
+              borderRadius: 10, 
+              marginLeft: 6, 
+              paddingVertical: 12 
+            }}>
+              <Text style={{ 
+                fontWeight: 'bold', 
+                fontSize: 28, 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] 
+              }}>
+                {product.reviews_count}
+              </Text>
+              <Text style={{ 
+                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                fontSize: 15, 
+                fontWeight: '500' 
+              }}>
+                Reviews
+              </Text>
             </View>
           </View>
           <TouchableOpacity style={{ marginTop: 2, borderRadius: 8, overflow: 'hidden' }}>
             <LinearGradient
-              colors={["#FF512F", "#F09819"]}
+              colors={[theme['color-shadcn-primary'], theme['color-primary-400']]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ paddingVertical: 12, alignItems: 'center', borderRadius: 8 }}>
-              <Text onPress={() => { navigateToVandorDetail(product.seller.id) }} style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Visit Store</Text>
+              <Text 
+                onPress={() => { navigateToVandorDetail(product.seller.id) }} 
+                style={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold', fontSize: 18 }}
+              >
+                Visit Store
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
 
         <Layout level="1" style={[spacingStyles.px16, spacingStyles.py8]}>
-
-
           <View style={{ marginTop: 20, marginBottom: 80 }}>
-
             <ProductsList
               listTitle="Related Products"
               loading={sellerProductsLoading}
-              list={parsedProducts(relatedProducts.filter(p => p.id !== product.id))} // Exclude current product
-              // onProductPress={(item) => navigateToProductDetail(item.id, item.slug)}
-                        onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
-
+              list={parsedProducts(relatedProducts.filter(p => p.id !== product.id))}
+              onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
             />
 
             <ProductsList
               listTitle="From Seller"
               loading={sellerProductsLoading}
-              list={parsedProducts(sellerProducts.products.filter(p => p.id !== product.id))} // Exclude current product
+              list={parsedProducts(sellerProducts.products.filter(p => p.id !== product.id))}
               onProductPress={(item) => navigateToProductDetail(item.id, item.slug)}
             />
-
-
           </View>
-
-
-
         </Layout>
-
-        {/* {loadingRelated && parsedRelatedProducts.length > 0 && <ProductsList
-          list={parsedProducts(relatedProducts)}
-          loading={loadingRelated}
-          listTitle="Related Products"
-          hideViewAllBtn={true}
-          containerStyle={{ marginVertical: 16, paddingHorizontal: 14 }}
-          onProductDetail={navigateToProductDetail}
-        />} */}
       </ScrollView>
     </Layout>
   );

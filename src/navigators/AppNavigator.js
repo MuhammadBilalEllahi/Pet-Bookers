@@ -32,7 +32,7 @@ export const AppScreens = Object.freeze({
   LUCKYDRAW_INSTANCE: 'LuckyDrawInstance',
   SHIPING_DETAILS: 'ShipingDetails',
   PAYMENT_PAGE: 'PaymentPage',
-  CART: 'Cart',
+  CART: 'MyCartScreen',
 
 });
 

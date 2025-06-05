@@ -14,8 +14,9 @@ import { axiosBuyerClient, axiosSellerClient } from '../../utils/axiosClient';
 import { useDispatch } from 'react-redux';
 import { setAuthToken, setUserType, UserType } from '../../store/user';
 import { AppScreens } from '../../navigators/AppNavigator';
-import {launchImageLibrary} from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
+import { useTheme } from '../../theme/ThemeContext';
 
 import * as Yup from 'yup';
 
@@ -72,6 +73,7 @@ export const RegisterScreen = ({ navigation }) => {
   const { isItSeller: initialIsSeller = true } = route.params || {};
   const [isItSeller, setIsItSeller] = useState(initialIsSeller);
   const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
+  const { isDark, theme } = useTheme();
 
   const validationSchema = Yup.object().shape(
     isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
@@ -233,22 +235,33 @@ export const RegisterScreen = ({ navigation }) => {
     <AuthContainer>
       <Image source={require('../../../assets/latest/petbooker_icon.png')} style={styles.topLeftLogo} />
 
-      <Text style={styles.title}>{t('createaccount')}</Text>
-      <Text style={styles.subtitle}>{t('fillUpTheFormToCreateAnAccount')}</Text>
+      <Text style={[styles.title, { 
+        color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+      }]}>{t('createaccount')}</Text>
+      <Text style={[styles.subtitle, { 
+        color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
+      }]}>{t('fillUpTheFormToCreateAnAccount')}</Text>
 
       {/* User Type Toggle */}
       <View style={styles.userTypeContainer}>
-        <Text style={styles.label}>{t('accountType')}</Text>
+        <Text style={[styles.label, { 
+          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+        }]}>{t('accountType')}</Text>
         <TouchableOpacity
-          style={styles.userTypeButton}
+          style={[styles.userTypeButton, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+          }]}
           onPress={() => setUserTypeModalVisible(true)}
         >
-          <Text style={styles.userTypeButtonText}>
+          <Text style={[styles.userTypeButtonText, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>
             {isItSeller ? t('seller') : t('buyer')}
           </Text>
           <Icon
             name="chevron-down"
-            fill="#8F9BB3"
+            fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
             style={{ width: 20, height: 20 }}
           />
         </TouchableOpacity>
@@ -261,15 +274,19 @@ export const RegisterScreen = ({ navigation }) => {
         onRequestClose={() => setUserTypeModalVisible(false)}
       >
         <TouchableOpacity
-          style={styles.modalOverlay}
+          style={[styles.modalOverlay, { 
+            backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)'
+          }]}
           activeOpacity={1}
           onPressOut={() => setUserTypeModalVisible(false)}
         >
-          <View style={styles.userTypeModal}>
+          <View style={[styles.userTypeModal, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+          }]}>
             <TouchableOpacity
               style={[
                 styles.userTypeOption,
-                isItSeller && styles.userTypeOptionSelected
+                isItSeller && { backgroundColor: theme['color-shadcn-primary'] }
               ]}
               onPress={() => {
                 setIsItSeller(true);
@@ -278,7 +295,7 @@ export const RegisterScreen = ({ navigation }) => {
             >
               <Text style={[
                 styles.userTypeOptionText,
-                isItSeller && styles.userTypeOptionTextSelected
+                { color: isItSeller ? theme['color-shadcn-primary-foreground'] : theme['color-shadcn-primary'] }
               ]}>
                 {t('seller')}
               </Text>
@@ -286,7 +303,7 @@ export const RegisterScreen = ({ navigation }) => {
             <TouchableOpacity
               style={[
                 styles.userTypeOption,
-                !isItSeller && styles.userTypeOptionSelected
+                !isItSeller && { backgroundColor: theme['color-shadcn-primary'] }
               ]}
               onPress={() => {
                 setIsItSeller(false);
@@ -295,7 +312,7 @@ export const RegisterScreen = ({ navigation }) => {
             >
               <Text style={[
                 styles.userTypeOptionText,
-                !isItSeller && styles.userTypeOptionTextSelected
+                { color: !isItSeller ? theme['color-shadcn-primary-foreground'] : theme['color-shadcn-primary'] }
               ]}>
                 {t('buyer')}
               </Text>
@@ -315,16 +332,15 @@ export const RegisterScreen = ({ navigation }) => {
           confirmPassword: '',
           state: '',
           city: '',
-          // Seller-specific fields
           image: null,
           shop_name: '',
           shop_address: '',
           logo: null,
           banner: null,
         }}
-          validationSchema={validationSchema}
-
-        onSubmit={submitForm}>
+        validationSchema={validationSchema}
+        onSubmit={submitForm}
+      >
         {({
           handleChange,
           handleBlur,
@@ -338,49 +354,66 @@ export const RegisterScreen = ({ navigation }) => {
             {/* Seller Personal Image Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
-                <Text style={styles.label}>{t('profileImage') || 'Profile Image'}</Text>
+                <Text style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>{t('profileImage') || 'Profile Image'}</Text>
                 <ImagePicker
                   title={t('chooseProfileImage') || 'Choose Image'}
                   onPress={() => handleImagePick('image', setFieldValue)}
                   imageUri={values.image ? values.image.uri : null}
-
                 />
                 {values.image && values.image.uri && (
-                  <Text style={{ color: 'green', fontSize: 12 }}>{t('imageSelected') || 'Image selected'}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('imageSelected') || 'Image selected'}</Text>
                 )}
               </View>
             )}
+
             {/* Shop Name */}
             {isItSeller && (
               <Input
                 label={(evaProps) => (
-                  <Text {...evaProps} style={styles.label}>
+                  <Text {...evaProps} style={[styles.label, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}>
                     {t('shopName') || 'Shop Name'}
                   </Text>
                 )}
-                placeholderTextColor={styles.placeholderTextColor}
+                placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                 placeholder={t('enterShopName') || 'Enter shop name'}
-                style={styles.input}
-                textStyle={styles.textStyle}
+                style={[styles.input, { 
+                  backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                  borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                }]}
+                textStyle={[styles.textStyle, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}
                 onChangeText={handleChange('shop_name')}
                 onBlur={handleBlur('shop_name')}
                 value={values.shop_name}
-                caption={touched.shop_name && errors.shop_name ? errors.shop_name :''}
+                caption={touched.shop_name && errors.shop_name ? errors.shop_name : ''}
                 status={errors.shop_name && touched.shop_name ? 'danger' : 'basic'}
               />
             )}
+
             {/* Shop Address */}
             {isItSeller && (
               <Input
                 label={(evaProps) => (
-                  <Text {...evaProps} style={styles.label}>
+                  <Text {...evaProps} style={[styles.label, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}>
                     {t('shopAddress') || 'Shop Address'}
                   </Text>
                 )}
-                placeholderTextColor={styles.placeholderTextColor}
+                placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                 placeholder={t('enterShopAddress') || 'Enter shop address'}
-                style={styles.input}
-                textStyle={styles.textStyle}
+                style={[styles.input, { 
+                  backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                  borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                }]}
+                textStyle={[styles.textStyle, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}
                 onChangeText={handleChange('shop_address')}
                 onBlur={handleBlur('shop_address')}
                 value={values.shop_address}
@@ -388,80 +421,111 @@ export const RegisterScreen = ({ navigation }) => {
                 status={errors.shop_address && touched.shop_address ? 'danger' : 'basic'}
               />
             )}
+
             {/* Shop Logo Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
-                <Text style={styles.label}>{t('farmLogo') || 'Shop Logo'}</Text>
+                <Text style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>{t('farmLogo') || 'Shop Logo'}</Text>
                 <ImagePicker
                   title={t('choosefarmLogo') || 'Choose Logo'}
                   onPress={() => handleImagePick('logo', setFieldValue)}
                   imageUri={values.logo ? values.logo.uri : null}
                 />
                 {values.logo && values.logo.uri && (
-                  <Text style={{ color: 'green', fontSize: 12 }}>{t('logoSelected') || 'Logo selected'}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('logoSelected') || 'Logo selected'}</Text>
                 )}
               </View>
             )}
+
             {/* Shop Banner Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
-                <Text style={styles.label}>{t('farmBanner') || 'Shop Banner'}</Text>
+                <Text style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>{t('farmBanner') || 'Shop Banner'}</Text>
                 <ImagePicker
                   title={t('choosefarmBanner') || 'Choose Banner'}
                   onPress={() => handleImagePick('banner', setFieldValue)}
                   imageUri={values.banner ? values.banner.uri : null}
                 />
                 {values.banner && values.banner.uri && (
-                  <Text style={{ color: 'green', fontSize: 12 }}>{t('bannerSelected') || 'Banner selected'}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('bannerSelected') || 'Banner selected'}</Text>
                 )}
               </View>
             )}
+
+            {/* First Name */}
             <Input
               label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
+                <Text {...evaProps} style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
                   {t('firstname')}
                 </Text>
               )}
-              placeholderTextColor={styles.placeholderTextColor}
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
               placeholder="John"
-              style={styles.input}
-              textStyle={styles.textStyle}
+              style={[styles.input, { 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]}
+              textStyle={[styles.textStyle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
               onChangeText={handleChange('firstName')}
               onBlur={handleBlur('firstName')}
               value={values.firstName}
-  status={touched.firstName && errors.firstName ? 'danger' : 'basic'}
-  caption={touched.firstName && errors.firstName ? errors.firstName : ''}
+              status={touched.firstName && errors.firstName ? 'danger' : 'basic'}
+              caption={touched.firstName && errors.firstName ? errors.firstName : ''}
             />
+
+            {/* Last Name */}
             <Input
               label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
+                <Text {...evaProps} style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
                   {t('lastname')}
                 </Text>
               )}
-              placeholderTextColor={styles.placeholderTextColor}
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
               placeholder="Doe"
-              style={styles.input}
-              textStyle={styles.textStyle}
+              style={[styles.input, { 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]}
+              textStyle={[styles.textStyle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
               onChangeText={handleChange('lastName')}
               onBlur={handleBlur('lastName')}
               value={values.lastName}
-              caption={
-                touched.lastName &&  errors.lastName  ? errors.lastName : ''
-              }
+              caption={touched.lastName && errors.lastName ? errors.lastName : ''}
               status={errors.lastName && touched.lastName ? 'danger' : 'basic'}
             />
+
+            {/* Email */}
             <Input
               label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
+                <Text {...evaProps} style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
                   {t('email')}
                 </Text>
               )}
-              placeholderTextColor={styles.placeholderTextColor}
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
               placeholder="abc@gmail.com"
               textContentType="emailAddress"
               keyboardType="email-address"
-              style={styles.input}
-              textStyle={styles.textStyle}
+              style={[styles.input, { 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]}
+              textStyle={[styles.textStyle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}
               value={values.email}
@@ -469,43 +533,58 @@ export const RegisterScreen = ({ navigation }) => {
               status={errors.email && touched.email ? 'danger' : 'basic'}
             />
 
-
-            {/* Improved Phone Field with Country Code */}
-            <View  style={{flexDirection: 'row'}}>
-            <Text  style={styles.label}>
-                    {t('phone')}
-                  </Text>
-                  <Text style={styles.countryCodeNote}>
-              {t('countryCodeNote')}
-            </Text>
+            {/* Phone Field */}
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={[styles.label, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>
+                {t('phone')}
+              </Text>
+              <Text style={[styles.countryCodeNote, { 
+                color: theme['color-shadcn-destructive']
+              }]}>
+                {t('countryCodeNote')}
+              </Text>
             </View>
-            <View style={styles.phoneRowImproved}>
-              
+            <View style={[styles.phoneRowImproved, { 
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+            }]}>
               <TouchableOpacity
-                style={styles.countryCodeTouchable}
+                style={[styles.countryCodeTouchable, { 
+                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                  borderRightColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                }]}
                 onPress={() => setCountryModalVisible(true)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.countryCodeText}>
+                <Text style={[styles.countryCodeText, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
                   {COUNTRY_CODES.find(c => c.code === values.countryCode)?.label || COUNTRY_CODES[0].label}
                 </Text>
-                <Text style={styles.countryCodeDropdownIcon}>▼</Text>
+                <Text style={[styles.countryCodeDropdownIcon, { 
+                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                }]}>▼</Text>
               </TouchableOpacity>
               <Input
-                
-                placeholderTextColor={styles.placeholderTextColor}
+                placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                 placeholder="300 123 4567"
-                style={styles.phoneInputImproved}
-                textStyle={styles.textStyle}
+                style={[styles.phoneInputImproved, { 
+                  backgroundColor: 'transparent'
+                }]}
+                textStyle={[styles.textStyle, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}
                 keyboardType="phone-pad"
                 onChangeText={handleChange('phone')}
                 onBlur={handleBlur('phone')}
                 value={values.phone}
                 maxLength={15}
-                // Remove border on left to blend with country code
-                // UnderlayColor handled by style
               />
             </View>
+
+            {/* Country Code Modal */}
             <Modal
               visible={countryModalVisible}
               transparent
@@ -513,46 +592,58 @@ export const RegisterScreen = ({ navigation }) => {
               onRequestClose={() => setCountryModalVisible(false)}
             >
               <TouchableOpacity
-                style={styles.modalOverlay}
+                style={[styles.modalOverlay, { 
+                  backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)'
+                }]}
                 activeOpacity={1}
                 onPressOut={() => setCountryModalVisible(false)}
               >
-                <View style={styles.countryModal}>
+                <View style={[styles.countryModal, { 
+                  backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+                }]}>
                   <FlatList
                     data={COUNTRY_CODES}
                     keyExtractor={item => item.code}
                     renderItem={({ item }) => (
                       <TouchableOpacity
-                        style={styles.countryModalItem}
+                        style={[styles.countryModalItem, { 
+                          borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                        }]}
                         onPress={() => {
                           setFieldValue('countryCode', item.code);
                           setCountryModalVisible(false);
                         }}
                       >
-                        <Text style={styles.countryModalItemText}>{item.label}</Text>
+                        <Text style={[styles.countryModalItemText, { 
+                          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                        }]}>{item.label}</Text>
                       </TouchableOpacity>
                     )}
                   />
                 </View>
               </TouchableOpacity>
             </Modal>
-            <Text style={{fontSize: 12}} status={errors.phone && touched.phone ? 'danger' : 'basic'}>
-                {touched.phone && errors.phone ? errors.phone : ''}
-                </Text>
 
-            {/* State Dropdown Select */}
+            {/* State Select */}
             <Select
               placeholder={t('selectOption')}
-              placeholderTextColor={styles.placeholderTextColor}
-              textStyle={styles.textStyle}
-              style={styles.select}
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+              textStyle={[styles.textStyle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
+              style={[styles.select, { 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]}
               selectedIndex={
                 values.state
                   ? new IndexPath(stateKeys.findIndex(key => key === values.state))
                   : null
               }
               label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
+                <Text {...evaProps} style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
                   {t('state')}
                 </Text>
               )}
@@ -567,24 +658,30 @@ export const RegisterScreen = ({ navigation }) => {
                 <SelectItem
                   title={t(stateKey)}
                   key={i}
-                  placeholderTextColor={styles.placeholderTextColor}
-                  textStyle={styles.selectItem}
+                  placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                  textStyle={[styles.selectItem, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}
                 />
               ))}
             </Select>
-            <Text style={{fontSize: 12}}
-            status={touched.state && errors.state  ? 'danger' : 'basic'}
-            >{touched.state && errors.state ? errors.state : ''}</Text>
 
-            {/* City Dropdown Select */}
+            {/* City Select */}
             <Select
               disabled={!values.state}
               placeholder={t('selectOption')}
-              placeholderTextColor={styles.placeholderTextColor}
-              textStyle={styles.textStyle}
-              style={styles.select}
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+              textStyle={[styles.textStyle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
+              style={[styles.select, { 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]}
               label={(evaProps) => (
-                <Text {...evaProps} style={styles.label}>
+                <Text {...evaProps} style={[styles.label, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
                   {t('city')}
                 </Text>
               )}
@@ -605,84 +702,92 @@ export const RegisterScreen = ({ navigation }) => {
                 <SelectItem
                   title={t(cityKey)}
                   key={i}
-                  placeholderTextColor={styles.placeholderTextColor}
-                  textStyle={styles.selectItem}
+                  placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                  textStyle={[styles.selectItem, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}
                 />
               ))}
             </Select>
-            <Text
-            style={{fontSize: 12}}
-            status={ touched.city && errors.city? 'danger' : 'basic'}
-            >{touched.city && errors.city? errors.city : ''}</Text>
 
+            {/* Password */}
             {(() => {
               const [showPassword, setShowPassword] = React.useState(false);
               return (
                 <Input
                   label={(evaProps) => (
-                    <Text {...evaProps} style={styles.label}>
+                    <Text {...evaProps} style={[styles.label, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}>
                       {t('password')}
                     </Text>
                   )}
                   secureTextEntry={!showPassword}
-                  placeholderTextColor={styles.placeholderTextColor}
-                  style={styles.input}
-                  textStyle={styles.textStyle}
+                  placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                  style={[styles.input, { 
+                    backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                    borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                  }]}
+                  textStyle={[styles.textStyle, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}
                   onChangeText={handleChange('password')}
                   onBlur={handleBlur('password')}
                   value={values.password}
-                  caption={
-                    touched.password && errors.password ? errors.password: ''
-                  }
+                  caption={touched.password && errors.password ? errors.password : ''}
                   status={errors.password && touched.password ? 'danger' : 'basic'}
                   accessoryRight={props => (
                     <Icon
                       {...props}
                       name={showPassword ? "eye-off" : "eye"}
-                      fill="#8F9BB3"
-                      style={{ width: 26, height: 26 , marginRight: 5}}
+                      fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                      style={{ width: 26, height: 26, marginRight: 5 }}
                       onPress={() => setShowPassword(v => !v)}
                     />
                   )}
                 />
               );
             })()}
+
+            {/* Confirm Password */}
             {(() => {
               const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
               return (
                 <Input
                   label={(evaProps) => (
-                    <Text {...evaProps} style={styles.label}>
+                    <Text {...evaProps} style={[styles.label, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}>
                       {t('confirmpassword')}
                     </Text>
                   )}
                   secureTextEntry={!showConfirmPassword}
-                  placeholderTextColor={styles.placeholderTextColor}
-                  style={styles.input}
-                  textStyle={styles.textStyle}
+                  placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                  style={[styles.input, { 
+                    backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                    borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                  }]}
+                  textStyle={[styles.textStyle, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}
                   onChangeText={handleChange('confirmPassword')}
                   onBlur={handleBlur('confirmPassword')}
                   value={values.confirmPassword}
-                  caption={
-                    touched.confirmPassword && errors.confirmPassword ? errors.confirmPassword : ''
-                  }
-                  status={
-                    errors.confirmPassword && touched.confirmPassword
-                      ? 'danger'
-                      : 'basic'
-                  }
+                  caption={touched.confirmPassword && errors.confirmPassword ? errors.confirmPassword : ''}
+                  status={errors.confirmPassword && touched.confirmPassword ? 'danger' : 'basic'}
                   accessoryRight={props => (
                     <Icon
                       {...props}
                       name={showConfirmPassword ? "eye-off" : "eye"}
-                      fill="#8F9BB3"
-                      style={{ width: 26, height: 26 , marginRight: 5}}
+                      fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                      style={{ width: 26, height: 26, marginRight: 5 }}
                       onPress={() => setShowConfirmPassword(v => !v)}
                     />
                   )}
                 />
               );
             })()}
+
             <View style={styles.buttonContainer}>
               <SubmitButton
                 btnText={t('signup')}
@@ -692,7 +797,9 @@ export const RegisterScreen = ({ navigation }) => {
               <TextButton
                 iconName={"arrow-right"}
                 title={t('alreadyHaveAnAccount')}
-                style={styles.alreadyHaveAnAccount}
+                style={[styles.alreadyHaveAnAccount, { 
+                  borderColor: theme['color-shadcn-primary']
+                }]}
                 onPress={() => navigateToPage('Login')}
               />
             </View>
@@ -700,11 +807,15 @@ export const RegisterScreen = ({ navigation }) => {
         )}
       </Formik>
       <Layout style={[flexeStyles.row, flexeStyles.contentBetween]}>
-        <Text category="c1">{t('alreadymember')}</Text>
+        <Text category="c1" style={{ 
+          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+        }}>{t('alreadymember')}</Text>
         <Text
           category="p2"
           status="primary"
-          style={styles.externalLink}
+          style={[styles.externalLink, { 
+            color: theme['color-shadcn-primary']
+          }]}
           onPress={() => navigateToPage('Login')}>
           {t('signin')}
         </Text>
@@ -712,7 +823,6 @@ export const RegisterScreen = ({ navigation }) => {
     </AuthContainer>
   );
 };
-
 
 const styles = StyleSheet.create({
   subTitle: {
@@ -725,31 +835,22 @@ const styles = StyleSheet.create({
   },
   input: {
     marginVertical: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.42)',
-    borderColor: 'rgb(170, 170, 170)',
+    borderRadius: 10,
     borderWidth: 1,
   },
   selectItem: {
-    color: 'black',
-    backgroundColor: 'rgba(41, 255, 3, 0) !important',
-    borderColor: 'rgba(24, 29, 180, 0)',
-    borderWidth: 1,
+    backgroundColor: 'transparent',
   },
   select: {
     marginTop: 10,
-    backgroundColor: 'rgba(130, 130, 130, 0) !important',
-    borderColor: 'rgba(24, 29, 180, 0)',
+    borderRadius: 10,
     borderWidth: 1,
   },
-  // Improved phone row styles
   phoneRowImproved: {
     flexDirection: 'row',
     alignItems: 'center',
-    // marginTop: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgb(170, 170, 170)',
-    backgroundColor: 'rgba(255,255,255,0.42)',
     overflow: 'hidden',
   },
   countryCodeTouchable: {
@@ -757,20 +858,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: 'rgba(245,245,245,0.95)',
     borderRightWidth: 1,
-    borderRightColor: 'rgb(170, 170, 170)',
     minWidth: 90,
     justifyContent: 'center',
   },
   countryCodeText: {
     fontSize: 16,
-    color: '#222',
     marginRight: 4,
   },
   countryCodeDropdownIcon: {
     fontSize: 12,
-    color: '#888',
     marginLeft: 2,
   },
   phoneInputImproved: {
@@ -778,19 +875,14 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     marginLeft: 0,
     borderWidth: 0,
-    backgroundColor: 'transparent',
     paddingLeft: 10,
-    // Remove border to blend with container
   },
-  // Modal styles for country code picker
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   countryModal: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     width: 280,
     maxHeight: 350,
@@ -805,37 +897,26 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   countryModalItemText: {
     fontSize: 16,
-    color: '#222',
-  },
-  phoneRow: {
-    // Deprecated, kept for backward compatibility
-    display: 'none',
-  },
-  countryCodeSelect: {
-    // Deprecated, kept for backward compatibility
-    display: 'none',
   },
   countryCodeNote: {
-    color: 'red',
     fontSize: 12,
     marginBottom: 4,
     marginLeft: 2,
   },
-  textStyle: { fontSize: 14, paddingVertical: 4 },
+  textStyle: { 
+    fontSize: 14, 
+    paddingVertical: 4 
+  },
   label: {
-    color: 'black',
     fontSize: 16,
   },
   externalLink: {
     marginLeft: 5,
   },
-  placeholderTextColor: 'rgb(136, 136, 136)',
   alreadyHaveAnAccount: {
-    borderColor: '#27AE60',
     borderWidth: 1.5,
     paddingVertical: 10,
     paddingHorizontal: 24,
@@ -872,19 +953,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.42)',
-    borderWidth: 1,
-    borderColor: 'rgb(170, 170, 170)',
     borderRadius: 8,
     padding: 12,
     marginTop: 8,
+    borderWidth: 1,
   },
   userTypeButtonText: {
     fontSize: 16,
-    color: '#222',
   },
   userTypeModal: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     width: 280,
     paddingVertical: 8,
@@ -898,16 +975,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  userTypeOptionSelected: {
-    backgroundColor: '#27AE60',
   },
   userTypeOptionText: {
-    fontSize: 16,
-    color: '#222',
-  },
-  userTypeOptionTextSelected: {
-    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

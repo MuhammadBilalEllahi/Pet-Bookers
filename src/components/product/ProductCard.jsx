@@ -1,8 +1,10 @@
+import React from 'react';
 import {Dimensions, Image, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Text, useTheme} from '@ui-kitten/components';
 import {Price} from '../Price';
 import {AirbnbRating} from 'react-native-ratings';
-import {spacingStyles} from '../../utils/globalStyles';
+import {spacingStyles, flexeStyles} from '../../utils/globalStyles';
+import {ThemedIcon} from '../Icon';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -19,18 +21,30 @@ export const ProductCard = ({
   cardWidth,
   onProductDetail,
   slug,
+  isDark,
+  theme,
 }) => {
 
   return (
     <TouchableOpacity
       activeOpacity={0.92}
-      style={[styles.card, {width: cardWidth || windowWidth * 0.45}]}
+      style={[
+        styles.card,
+        {
+          width: cardWidth || windowWidth * 0.45,
+          // backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+        }
+      ]}
       onPress={() => onProductDetail && onProductDetail(id, slug)}
     >
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: image }}
-          style={styles.image}
+          style={[
+            styles.image,
+            { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'] }
+          ]}
+          resizeMode="cover"
         />
         {isSoldOut && (
           <View style={styles.soldOutContainer}>
@@ -47,13 +61,35 @@ export const ProductCard = ({
         )}
       </View>
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>{name}</Text>
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>Rs {price}</Text>
+        <Text
+          category="s1"
+          numberOfLines={2}
+          style={[
+            styles.title,
+            { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
+          ]}
+        >
+          {name}
+        </Text>
+        <View style={[flexeStyles.row, flexeStyles.itemsCenter, styles.priceRow]}>
+          <Text
+            category="h6"
+            style={[
+              styles.price,
+              { color: theme['color-shadcn-primary'] }
+            ]}
+          >
+            Rs {price}
+          </Text>
           {oldPrice > 0 && (
             <Text style={styles.oldPrice}>Rs {oldPrice}</Text>
           )}
         </View>
+        <ThemedIcon
+          name="heart-outline"
+          fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+          style={styles.heartIcon}
+        />
         {/* Optionally show rating */}
         {/* <View style={styles.ratingRow}>
           <AirbnbRating
@@ -90,6 +126,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: '#f5f5f5',
     borderTopLeftRadius: 14,
+    
     borderTopRightRadius: 14,
     overflow: 'hidden',
     position: 'relative',
@@ -98,13 +135,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-    borderRadius: 10
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
   },
   soldOutContainer: {
     position: 'absolute',
     width: '90%',
     height: '100%',
-    backgroundColor: '#ffffffcc',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
@@ -132,7 +169,8 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 8,
-    paddingLeft: 2
+    paddingLeft: 2,
+    
   },
   title: {
     fontWeight: '700',
@@ -156,6 +194,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textDecorationLine: 'line-through',
     fontWeight: '500',
+  },
+  heartIcon: {
+    width: 24,
+    height: 24,
   },
   /*
   ratingRow: {

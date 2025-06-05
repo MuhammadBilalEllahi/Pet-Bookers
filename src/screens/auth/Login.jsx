@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import { AppScreens } from '../../navigators/AppNavigator';
 import { useRoute } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { useTheme } from '../../theme/ThemeContext';
 // import axios from 'axios';
 
 // const SELLER_LOGIN_URL = 'https://petbookers.com.pk/api/v3/seller/auth/login';
@@ -46,6 +47,7 @@ export const LoginScreen = ({ navigation  }) => {
   console.debug("THIS IS ", initialIsSeller, email, password)
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { isDark, theme } = useTheme();
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [selectedTab, setSelectedTab] = useState('email');
@@ -130,8 +132,12 @@ export const LoginScreen = ({ navigation  }) => {
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.titleText}>{t('yourPetOurSecurity')}</Text>
-          <Text style={styles.subtitleText}>
+          <Text style={[styles.titleText, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>{t('yourPetOurSecurity')}</Text>
+          <Text style={[styles.subtitleText, { 
+            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
+          }]}>
             {t('theBestMarketplaceFor')}
             {'\n'}
             {t('exoticPets')}
@@ -141,36 +147,45 @@ export const LoginScreen = ({ navigation  }) => {
 
       <View style={styles.middleSection}>
         <View style={styles.toggleRow}>
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              onPress={() => setSelectedTab('email')}
-              style={[styles.toggleButton, selectedTab === 'email' && styles.toggleActive]}>
-              <Text style={selectedTab === 'email' ? styles.toggleTextActive : styles.toggleTextInactive}>{t('email')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setSelectedTab('phone')}
-              style={[styles.toggleButton, selectedTab === 'phone' && styles.toggleActive]}>
-              <Text style={selectedTab === 'phone' ? styles.toggleTextActive : styles.toggleTextInactive}>{t('phone')}</Text>
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity
+            onPress={() => setSelectedTab('email')}
+            style={[styles.toggleButton, selectedTab === 'email' && styles.toggleActive]}>
+              <Text style={[selectedTab === 'email' ? styles.toggleTextActive : styles.toggleTextInactive, { 
+                color: selectedTab === 'email' ? theme['color-basic-100'] : theme['color-shadcn-primary']
+              }]}>{t('email')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setSelectedTab('phone')}
+            style={[styles.toggleButton, selectedTab === 'phone' && styles.toggleActive]}>
+              <Text style={[selectedTab === 'phone' ? styles.toggleTextActive : styles.toggleTextInactive, { 
+                color: selectedTab === 'phone' ? theme['color-basic-100'] : theme['color-shadcn-primary']
+              }]}>{t('phone')}</Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={styles.userTypeButton}
+            style={[styles.userTypeButton, { 
+              backgroundColor: isDark ? theme['color-shadcn-secondary'] : 'rgba(39, 174, 96, 0.1)',
+              borderColor: theme['color-shadcn-primary']
+            }]}
             onPress={() => setUserTypeModalVisible(true)}
           >
             <View style={styles.userTypeButtonContent}>
               <Icon
                 name={isSeller ? "shopping-bag" : "person"}
-                fill="#27AE60"
+                fill={theme['color-shadcn-primary']}
                 style={{ width: 16, height: 16, marginRight: 8 }}
               />
-              <Text style={styles.userTypeButtonText}>
+              <Text style={[styles.userTypeButtonText, { 
+                color: theme['color-shadcn-primary']
+              }]}>
                 {isSeller ? t('seller') : t('buyer')}
               </Text>
             </View>
             <Icon
               name="chevron-down"
-              fill="#27AE60"
+              fill={theme['color-shadcn-primary']}
               style={{ width: 16, height: 16 }}
             />
           </TouchableOpacity>
@@ -183,11 +198,15 @@ export const LoginScreen = ({ navigation  }) => {
           onRequestClose={() => setUserTypeModalVisible(false)}
         >
           <TouchableOpacity
-            style={styles.modalOverlay}
+            style={[styles.modalOverlay, { 
+              backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)'
+            }]}
             activeOpacity={1}
             onPressOut={() => setUserTypeModalVisible(false)}
           >
-            <View style={styles.userTypeModal}>
+            <View style={[styles.userTypeModal, { 
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}>
               <TouchableOpacity
                 style={[
                   styles.userTypeOption,
@@ -200,12 +219,12 @@ export const LoginScreen = ({ navigation  }) => {
               >
                 <Icon
                   name="shopping-bag"
-                  fill={isSeller ? "#fff" : "#27AE60"}
+                  fill={isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary']}
                   style={{ width: 16, height: 16, marginRight: 8 }}
                 />
                 <Text style={[
                   styles.userTypeOptionText,
-                  isSeller && styles.userTypeOptionTextSelected
+                  { color: isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary'] }
                 ]}>
                   {t('seller')}
                 </Text>
@@ -222,12 +241,12 @@ export const LoginScreen = ({ navigation  }) => {
               >
                 <Icon
                   name="person"
-                  fill={!isSeller ? "#fff" : "#27AE60"}
+                  fill={!isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary']}
                   style={{ width: 16, height: 16, marginRight: 8 }}
                 />
                 <Text style={[
                   styles.userTypeOptionText,
-                  !isSeller && styles.userTypeOptionTextSelected
+                  { color: !isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary'] }
                 ]}>
                   {t('buyer')}
                 </Text>
@@ -262,14 +281,19 @@ export const LoginScreen = ({ navigation  }) => {
                   placeholder={t('email')}
                   textContentType="emailAddress"
                   keyboardType="email-address"
-                  style={styles.input}
-                  textStyle={{ fontSize: 14, paddingVertical: 4 }}
+                  style={[styles.input, { 
+                    backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                    borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                  }]}
+                  textStyle={[styles.textStyle, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}
                   onChangeText={handleChange('email')}
                   onBlur={handleBlur('email')}
                   value={values.email}
-                  caption={touched.email && errors.email? errors.email: ''}
+                  caption={touched.email && errors.email ? errors.email : ''}
                   status={errors.email && touched.email ? 'danger' : 'basic'}
-                  accessoryLeft={<Icon name="email" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
+                  accessoryLeft={<Icon name="email" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
                 />
               ) : (
                 <Input
@@ -278,12 +302,17 @@ export const LoginScreen = ({ navigation  }) => {
                   value={values.phone}
                   onChangeText={handleChange('phone')}
                   textContentType="telephoneNumber"
-                  textStyle={{ fontSize: 14, paddingVertical: 4 }}
-                  style={styles.input}
+                  textStyle={[styles.textStyle, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}
+                  style={[styles.input, { 
+                    backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                    borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                  }]}
                   onBlur={handleBlur('phone')}
                   caption={touched.phone && errors.phone ? errors.phone : ''}
                   status={errors.phone && touched.phone ? 'danger' : 'basic'}
-                  accessoryLeft={<Icon name="phone" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
+                  accessoryLeft={<Icon name="phone" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
                   // Note: phone login is not supported by the seller endpoint, but UI is kept for consistency
                   editable={false}
                 />
@@ -299,13 +328,20 @@ export const LoginScreen = ({ navigation  }) => {
                   <Input
                     placeholder={t('password')}
                     label={evaProps => (
-                      <Text {...evaProps} style={styles.label}>
+                      <Text {...evaProps} style={[styles.label, { 
+                        color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                      }]}>
                         {t('password')}
                       </Text>
                     )}
-                    textStyle={{ fontSize: 14, paddingVertical: 4 }}
+                    textStyle={[styles.textStyle, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}
                     secureTextEntry={!showPassword}
-                    style={styles.input}
+                    style={[styles.input, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
                     onChangeText={handleChange('password')}
                     onBlur={handleBlur('password')}
                     value={values.password}
@@ -313,13 +349,13 @@ export const LoginScreen = ({ navigation  }) => {
                       touched.password && <InputError errorText={errors.password} />
                     }
                     status={errors.password && touched.password ? 'danger' : 'basic'}
-                    accessoryLeft={<Icon name="lock" fill="#8F9BB3" style={{ width: 20, height: 20 }} />}
+                    accessoryLeft={<Icon name="lock" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
                     accessoryRight={props => (
                       <Icon
                         {...props}
                         name={showPassword ? "eye-off" : "eye"}
-                        fill="#8F9BB3"
-                        style={{ width: 26, height: 26 , marginRight: 5}}
+                        fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                        style={{ width: 26, height: 26, marginRight: 5 }}
                         onPress={() => setShowPassword(v => !v)}
                       />
                     )}
@@ -334,12 +370,16 @@ export const LoginScreen = ({ navigation  }) => {
                     checked={rememberMe}
                     onChange={setRememberMe}
                   />
-                  <Text style={styles.rememberMeText}>{t('rememberMe')}</Text>
+                  <Text style={[styles.rememberMeText, { 
+                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                  }]}>{t('rememberMe')}</Text>
                 </View>
                 <Text
                   category="p2"
                   status="primary"
-                  style={styles.forgotPasswordLinkText}
+                  style={[styles.forgotPasswordLinkText, { 
+                    color: theme['color-shadcn-primary']
+                  }]}
                   onPress={() => navigateToPage('ForgotPassword')}>
                   {t('forgotpassword')}
                 </Text>
@@ -349,7 +389,9 @@ export const LoginScreen = ({ navigation  }) => {
                 disabled={isBtnDisabled || isSubmitting}
                 onPress={handleSubmit}
               />
-              <Text style={styles.noAccountText}> {t('noAccountSignUpNow')}</Text>
+              <Text style={[styles.noAccountText, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}> {t('noAccountSignUpNow')}</Text>
             </Layout>
           )}
         </Formik>
@@ -357,7 +399,9 @@ export const LoginScreen = ({ navigation  }) => {
         <TextButton
           iconName={"person"}
           title={t('signup')}
-          style={styles.signupButton}
+          style={[styles.signupButton, { 
+            borderColor: theme['color-shadcn-primary']
+          }]}
           onPress={() => navigateToPage('Register')}
         />
       </View>
@@ -379,13 +423,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   titleText: {
-    color: '#000',
     fontSize: 21,
     fontWeight: '900',
     textAlign: 'center',
   },
   subtitleText: {
-    color: '#121212',
     fontWeight: '400',
     fontSize: 13,
     letterSpacing: 0.5,
@@ -411,7 +453,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor: '#27AE60',
     borderWidth: 0.7,
     marginRight: 10,
   },
@@ -419,24 +460,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#27AE60',
   },
   toggleTextActive: {
-    color: 'white',
     fontWeight: '600',
     fontSize: 11,
   },
   toggleTextInactive: {
-    color: '#27AE60',
     fontWeight: '600',
     fontSize: 11,
   },
   input: {
     marginVertical: 10,
-    backgroundColor: 'white',
     borderRadius: 10,
-    borderColor: '#C1C1C1',
     borderWidth: 1,
   },
   label: {
-    color: '#121212',
     fontSize: 16,
     marginBottom: 7,
   },
@@ -445,7 +481,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'space-between',
-    // marginVertical: 10,
   },
   rememberMeContainer: {
     flexDirection: 'row',
@@ -455,34 +490,18 @@ const styles = StyleSheet.create({
     fontSize: 5,
   },
   rememberMeText: {
-    color: 'gray',
     marginLeft: 5,
   },
   forgotPasswordLinkText: {
-    color: '#121212',
+    fontWeight: '600',
   },
   noAccountText: {
-    color: '#121212',
     fontWeight: '600',
     marginVertical: 10,
     fontSize: 14,
     textAlign: 'center',
   },
-  languageContainer: {
-    marginTop: 24,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textDecorationLine: 'none',
-  },
-  languageText: {
-    fontWeight: 'bold',
-    marginHorizontal: 10,
-    textDecorationLine: 'none',
-    color: '#121212',
-  },
   signupButton: {
-    borderColor: '#27AE60',
     borderWidth: 1.5,
     paddingVertical: 10,
     paddingHorizontal: 24,
@@ -490,17 +509,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     alignSelf: 'center',
   },
-  signupText: {
-    color: '#27AE60',
-    fontWeight: '600',
-  },
   userTypeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(39, 174, 96, 0.1)',
-    borderWidth: 1,
-    borderColor: '#27AE60',
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 16,
@@ -512,17 +524,14 @@ const styles = StyleSheet.create({
   },
   userTypeButtonText: {
     fontSize: 14,
-    color: '#27AE60',
     fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   userTypeModal: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     width: 200,
     paddingVertical: 8,
@@ -545,7 +554,6 @@ const styles = StyleSheet.create({
   },
   userTypeOptionText: {
     fontSize: 14,
-    color: '#27AE60',
     fontWeight: '500',
   },
   userTypeOptionTextSelected: {

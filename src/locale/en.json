@@ -195,6 +195,10 @@
     "descriptionURPlaceholder": "Write a description of what you are selling",
     "pricePlaceholder": "Price",
     "totalQuantityPlaceholder": "1",
-    "minOrderQuantityPlaceholder": "1"
+    "minOrderQuantityPlaceholder": "1",
+    "congratsTitle": "Congratulations!",
+    "congratsMessage": "Your product has been successfully listed",
+    "viewAd": "View My Ad",
+    "addAnother": "Add Another Product"
   }
 }

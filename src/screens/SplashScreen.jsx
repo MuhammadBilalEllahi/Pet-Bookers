@@ -9,10 +9,12 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { loadAppConfigs } from '../store/configs';
+import { useTheme } from '../theme/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 
 export const SplashScreen = ({ navigation }) => {
+  const { isDark, theme } = useTheme();
   
   // const navigation= useNavigation();
   // const dispatch = useDispatch();
@@ -31,11 +33,14 @@ export const SplashScreen = ({ navigation }) => {
 
   //   initializeApp();
   // }, []);
+  
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { 
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]}>
       <Image
-        source={require('../../assets/new/welcome_screen_bg.png')}
+        source={isDark ? require('../../assets/new/welcome_screen_bg_dark.png') : require('../../assets/new/welcome_screen_bg.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
@@ -46,8 +51,12 @@ export const SplashScreen = ({ navigation }) => {
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.titleText}>Your Pet, Our Security!</Text>
-          <Text style={styles.subtitleText}>
+          <Text style={[styles.titleText, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Your Pet, Our Security!</Text>
+          <Text style={[styles.subtitleText, { 
+            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
+          }]}>
             The best marketplace for {'\n'} exotic pets
           </Text>
         </View>
@@ -59,7 +68,6 @@ export const SplashScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
   },
   backgroundImage: {
     position: 'absolute',
@@ -69,7 +77,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: 'center',
-    // justifyContent: 'center',
     justifyContent: 'flex-start',
     paddingTop: height * 0.25,
   },
@@ -83,13 +90,11 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   titleText: {
-    color: '#000',
     fontSize: 24,
     fontWeight: '900',
     textAlign: 'center',
   },
   subtitleText: {
-    color: '#121212',
     fontWeight: '400',
     fontSize: 16,
     letterSpacing: 0.5,

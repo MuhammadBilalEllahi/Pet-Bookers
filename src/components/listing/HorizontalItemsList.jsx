@@ -8,7 +8,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Spinner, Text, useTheme } from '@ui-kitten/components';
+import { Spinner, Text } from '@ui-kitten/components';
+import { useTheme } from '../../theme/ThemeContext';
 import { ThemedIcon } from '../Icon';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
@@ -33,7 +34,7 @@ export const HorizontalItemsList = ({
   onItemPress,
   onViewAll,
 }) => {
-  const theme = useTheme();
+  const {theme, isDark} = useTheme();
   const { t, i18n } = useTranslation();
 
   return (
@@ -45,7 +46,12 @@ export const HorizontalItemsList = ({
           flexeStyles.itemsCenter,
           flexeStyles.contentBetween,
         ]}>
-        <Text category="s1" style={styles.listTitle}>
+        <Text 
+          category="s1" 
+          style={[
+            styles.listTitle,
+            {color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']}
+          ]}>
           {listTitle}
         </Text>
         {!(loading || loadingError) && (
@@ -54,16 +60,22 @@ export const HorizontalItemsList = ({
             onPress={onViewAll}
             activeOpacity={0.7}
           >
-            <Text category="label" status="primary" style={styles.viewAllText}>
+            <Text 
+              category="label" 
+              status="primary" 
+              style={[
+                styles.viewAllText,
+                {color: theme['color-shadcn-primary']}
+              ]}>
               {t('viewAll')}
-            </Text>
+            </Text> 
             <ThemedIcon
               name={
                 i18n.dir() === 'rtl'
                   ? 'arrow-ios-back-outline'
                   : 'arrow-ios-forward-outline'
               }
-              fill={theme['color-primary-default']}
+              fill={theme['color-shadcn-primary']}
               style={{ marginLeft: 2, marginRight: 2 }}
             />
           </TouchableOpacity>
@@ -84,17 +96,39 @@ export const HorizontalItemsList = ({
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={{ height: 60, width: 60, borderRadius: 100, marginBottom: 5 }}
+              shimmerColors={isDark ? 
+                [theme['color-shadcn-card'], theme['color-shadcn-secondary'], theme['color-shadcn-card']] :
+                [theme['color-basic-200'], theme['color-basic-300'], theme['color-basic-200']]
+              }
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={{ height: 10, width: 40, borderRadius: 2 }}
+              shimmerColors={isDark ? 
+                [theme['color-shadcn-card'], theme['color-shadcn-secondary'], theme['color-shadcn-card']] :
+                [theme['color-basic-200'], theme['color-basic-300'], theme['color-basic-200']]
+              }
             />
           </View>
           ))}</>
           )}
-          {loadingError && <Text appearance="hint" style={styles.errorText}>{loadingError}</Text>}
+          {loadingError && (
+            <Text 
+              appearance="hint" 
+              style={[
+                styles.errorText,
+                {color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+              ]}>
+              {loadingError}
+            </Text>
+          )}
           {!loading && !loadingError && (
-            <Text appearance="hint" style={styles.errorText}>
+            <Text 
+              appearance="hint" 
+              style={[
+                styles.errorText,
+                {color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+              ]}>
               {t('messages.noData') || 'No data to display yet, please refresh later.'}
             </Text>
           )}
@@ -113,11 +147,15 @@ export const HorizontalItemsList = ({
               onPress={() => onItemPress(item.id)}
               activeOpacity={0.8}
             >
-              <View style={styles.imageWrapper}>
+              <View style={[
+                styles.imageWrapper,
+                {backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-200']}
+              ]}>
                 <Image
                   style={[
                     styles.image,
                     roundedImage && { borderRadius: ITEM_WIDTH / 2 },
+                    {backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-300']}
                   ]}
                   source={{ uri: item.image }}
                   resizeMode="cover"
@@ -126,7 +164,10 @@ export const HorizontalItemsList = ({
               <Text
                 category="c1"
                 numberOfLines={2}
-                style={styles.text}
+                style={[
+                  styles.text,
+                  {color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']}
+                ]}
                 ellipsizeMode="tail"
               >
                 {item.name}
@@ -156,7 +197,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 15,
     letterSpacing: 0.5,
-    color: '#222',
   },
   viewAllText: {
     fontWeight: '600',
@@ -185,7 +225,6 @@ const styles = StyleSheet.create({
     height: ITEM_WIDTH - 4,
     borderRadius: 40,
     overflow: 'hidden',
-    backgroundColor: '#d1d1d1',
     marginBottom: 4,
     justifyContent: 'center',
     alignItems: 'center',
@@ -194,12 +233,10 @@ const styles = StyleSheet.create({
     width: ITEM_WIDTH - 8,
     height: ITEM_WIDTH - 8,
     borderRadius: 8,
-    backgroundColor: '#eaeaea',
   },
   text: {
     fontSize: 12,
     textAlign: 'center',
-    color: '#333',
     marginTop: 2,
     fontWeight: '500',
     textTransform: 'capitalize',
@@ -208,7 +245,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: '#888',
     textAlign: 'center',
     marginVertical: 8,
   },

@@ -1,7 +1,8 @@
 import { FlatList, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Layout, Spinner, Text, useTheme } from '@ui-kitten/components';
+import { Layout, Spinner, Text } from '@ui-kitten/components';
 import { ThemedIcon } from '../Icon';
+import { useTheme } from '../../theme/ThemeContext';
 import { ProductCard } from '../product/ProductCard';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { useCallback } from 'react';
@@ -25,16 +26,17 @@ export const ProductsList = ({
   onLoadMore,
   hasMore,
 }) => {
-  const theme = useTheme();
+  const { theme, isDark } = useTheme();
   const { t, i18n } = useTranslation();
 
   const renderFooter = useCallback(() => {
-  if (!loading) return null;
-  return <ProductCardShimmer/>;
-}, [loading]);
-if (!loading && !loadingError && (!list || list.length === 0)) {
-  return null;
-}
+    if (!loading) return null;
+    return <ProductCardShimmer />;
+  }, [loading]);
+
+  if (!loading && !loadingError && (!list || list.length === 0)) {
+    return null;
+  }
 
   return (
     <View style={containerStyle}>
@@ -45,14 +47,26 @@ if (!loading && !loadingError && (!list || list.length === 0)) {
           flexeStyles.itemsCenter,
           flexeStyles.contentBetween,
         ]}>
-        
-          <Text category="p1" style={styles.listTitle}>
-         {listTitle} 
+        <Text 
+          category="p1" 
+          style={[
+            styles.listTitle,
+            { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
+          ]}>
+          {listTitle}
         </Text>
-      
+
         {!(hideViewAllBtn || loading || loadingError || list.length === 0) && (
-          <TouchableOpacity style={[flexeStyles.row, flexeStyles.itemsCenter]}>
-            <Text category="label" status="primary" style={styles.listTitle}>
+          <TouchableOpacity 
+            style={[flexeStyles.row, flexeStyles.itemsCenter]}
+            activeOpacity={0.7}
+          >
+            <Text 
+              category="label" 
+              style={[
+                styles.listTitle,
+                { color: theme['color-shadcn-primary'] }
+              ]}>
               {t('viewAll')}
             </Text>
             <ThemedIcon
@@ -61,34 +75,25 @@ if (!loading && !loadingError && (!list || list.length === 0)) {
                   ? 'arrow-ios-back-outline'
                   : 'arrow-ios-forward-outline'
               }
-              fill={theme['color-primary-default']}
+              fill={theme['color-shadcn-primary']}
+              style={{ marginLeft: 2 }}
             />
           </TouchableOpacity>
         )}
       </View>
-      {loading  ? (
-        
-  <View style={styles.shimmerContainer}>
-    {[...Array(2)].map((_, idx) => (
-      <ProductCardShimmer key={idx} />
-    ))}
-  </View>
-)
-:(
-      //   <Layout
-      //     style={[
-      //       flexeStyles.row,
-      //       flexeStyles.contentCenter,
-      //       flexeStyles.itemsCenter,
-      //       spacingStyles.py8,
-      //     ]}>
-      //     {loading && <Spinner />}
-      //     {loadingError && <Text>{loadingError}</Text>}
-      //     {!loading && !loadingError && (
-      //       <Text>No Data to display yet, please refresh later.</Text>
-      //     )}
-      //   </Layout>
-      // ) : (
+      {loading ? (
+        <View style={styles.shimmerContainer}>
+          {[...Array(2)].map((_, idx) => (
+            <ProductCardShimmer 
+              key={idx}
+              shimmerColors={isDark ? 
+                [theme['color-shadcn-card'], theme['color-shadcn-secondary'], theme['color-shadcn-card']] :
+                [theme['color-basic-200'], theme['color-basic-300'], theme['color-basic-200']]
+              }
+            />
+          ))}
+        </View>
+      ) : (
         <FlatList
           showsHorizontalScrollIndicator={false}
           style={styles.listContainer}
@@ -96,7 +101,13 @@ if (!loading && !loadingError && (!list || list.length === 0)) {
           data={list}
           keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => (
-            <ProductCard {...item} onProductDetail={onProductDetail} cardWidth={SMALL_CARD_WIDTH} />
+            <ProductCard 
+              {...item} 
+              onProductDetail={onProductDetail} 
+              cardWidth={SMALL_CARD_WIDTH}
+              isDark={isDark}
+              theme={theme}
+            />
           )}
           onEndReachedThreshold={0.5}
           onEndReached={() => {
@@ -105,11 +116,8 @@ if (!loading && !loadingError && (!list || list.length === 0)) {
             }
           }}
           ListFooterComponent={renderFooter}
-
         />
-
       )}
-
     </View>
   );
 };
@@ -118,37 +126,19 @@ const styles = StyleSheet.create({
   listHeader: {
     paddingHorizontal: 10,
   },
-  listTitle: { textTransform: 'uppercase', fontWeight: '700' },
+  listTitle: { 
+    textTransform: 'uppercase', 
+    fontWeight: '700',
+    fontSize: 15,
+    letterSpacing: 0.5,
+  },
   listContainer: {
     flexGrow: 0,
     marginTop: 8,
   },
-  card: {
-    marginHorizontal: 4,
-    padding: 10,
-    maxWidth: 130, // Decreased maxWidth for smaller card
-  },
-  image: {
-    width: 90, // Decreased image width
-    height: 90, // Decreased image height
-    alignSelf: 'center',
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    textTransform: 'capitalize',
-    textAlign: 'center',
-  },
   shimmerContainer: {
-  flexDirection: 'row',
-  // paddingHorizontal: 10,
-  justifyContent: 'space-between',
-},
-textLine: {
-    height: 14,
-    width: '20%',
-    borderRadius: 4,
-    marginBottom: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
   },
 });

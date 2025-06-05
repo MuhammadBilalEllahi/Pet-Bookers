@@ -1,6 +1,7 @@
 import React from 'react';
 import {Dimensions, ScrollView, View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {Layout, Text, Button, Icon} from '@ui-kitten/components';
+import { useTheme } from '../../theme/ThemeContext';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -32,49 +33,67 @@ const ads = [
 ];
 
 export const MyPostedAdsScreen = ({navigation}) => {
+  const { isDark, theme } = useTheme();
+
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: '#fff'}}>
+    <Layout level="3" style={{flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{padding: 16, paddingBottom: 32}}>
-        <Text style={styles.header}>My Ads</Text>
+        <Text style={[styles.header, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>My Ads</Text>
         <View style={styles.tabRow}>
-          <TouchableOpacity style={[styles.tab, styles.tabActive]}><Text style={styles.tabTextActive}>All</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Active Ads</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Closed Ads</Text></TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, styles.tabActive, { backgroundColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+            <Text style={[styles.tabTextActive, { color: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>All</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-200'] }]}>
+            <Text style={[styles.tabText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Active Ads</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-200'] }]}>
+            <Text style={[styles.tabText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Closed Ads</Text>
+          </TouchableOpacity>
         </View>
         {ads.map((ad, idx) => (
-          <View key={ad.id} style={styles.card}>
+          <View key={ad.id} style={[styles.card, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+          }]}>
             <View style={styles.cardTopRow}>
-              <Image source={{uri: ad.avatar}} style={styles.avatar} />
+              <Image source={{uri: ad.avatar}} style={[styles.avatar, { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-300'] }]} />
               <View style={{flex: 1, marginLeft: 10}}>
-                <Text style={styles.userName}>{ad.user}</Text>
-                <Text style={styles.adTitle}>{ad.title}</Text>
-                <Text style={styles.price}>{ad.price}</Text>
+                <Text style={[styles.userName, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{ad.user}</Text>
+                <Text style={[styles.adTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{ad.title}</Text>
+                <Text style={[styles.price, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{ad.price}</Text>
               </View>
               <TouchableOpacity style={{padding: 4}}>
-                <Icon name="more-vertical" fill="#888" style={{width: 22, height: 22}} />
+                <Icon name="more-vertical" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{width: 22, height: 22}} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.created}>Created on {ad.created}</Text>
+            <Text style={[styles.created, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Created on {ad.created}</Text>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Icon name="eye" fill="#888" style={styles.statIcon} />
-                <Text style={styles.statText}>{ad.views} Views</Text>
+                <Icon name="eye" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={styles.statIcon} />
+                <Text style={[styles.statText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{ad.views} Views</Text>
               </View>
               <View style={styles.statItem}>
-                <Icon name="message-circle" fill="#888" style={styles.statIcon} />
-                <Text style={styles.statText}>{ad.messages} Messages</Text>
+                <Icon name="message-circle" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={styles.statIcon} />
+                <Text style={[styles.statText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{ad.messages} Messages</Text>
               </View>
               <View style={{flex: 1, alignItems: 'flex-end'}}>
-                <View style={[styles.badge, ad.featured ? styles.badgeFeatured : styles.badgeFree]}>
-                  <Text style={[styles.badgeText, ad.featured ? styles.badgeTextFeatured : styles.badgeTextFree]}>{ad.badge}</Text>
+                <View style={[
+                  styles.badge, 
+                  ad.featured ? styles.badgeFeatured : styles.badgeFree,
+                  { backgroundColor: ad.featured ? theme['color-shadcn-primary'] : (isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']) }
+                ]}>
+                  <Text style={[
+                    styles.badgeText, 
+                    { color: ad.featured ? theme['color-shadcn-primary-foreground'] : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']) }
+                  ]}>{ad.badge}</Text>
                 </View>
               </View>
             </View>
-            <TouchableOpacity style={styles.featuredBtn}>
-              <Text style={styles.featuredBtnText}>Try Featured Ads</Text>
+            <TouchableOpacity style={[styles.featuredBtn, { backgroundColor: theme['color-shadcn-primary'] }]}>
+              <Text style={[styles.featuredBtnText, { color: theme['color-shadcn-primary-foreground'] }]}>Try Featured Ads</Text>
             </TouchableOpacity>
           </View>
         ))}
@@ -88,7 +107,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
     marginBottom: 10,
-    color: '#222',
   },
   tabRow: {
     flexDirection: 'row',
@@ -98,25 +116,20 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#f5f5f5',
     marginRight: 8,
   },
   tabActive: {
     backgroundColor: '#222',
   },
   tabText: {
-    color: '#888',
     fontWeight: 'bold',
   },
   tabTextActive: {
-    color: '#fff',
     fontWeight: 'bold',
   },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
     marginBottom: 18,
     padding: 14,
     shadowColor: '#000',
@@ -133,27 +146,22 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 8,
-    backgroundColor: '#eee',
   },
   userName: {
     fontWeight: 'bold',
     fontSize: 15,
-    color: '#222',
   },
   adTitle: {
     fontWeight: 'bold',
     fontSize: 15,
-    color: '#222',
     marginTop: 2,
   },
   price: {
     fontWeight: 'bold',
     fontSize: 15,
-    color: '#888',
     marginTop: 2,
   },
   created: {
-    color: '#888',
     fontSize: 12,
     marginBottom: 8,
     marginLeft: 2,
@@ -175,7 +183,6 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    color: '#888',
     fontWeight: 'bold',
   },
   badge: {
@@ -206,18 +213,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     width: '100%',
-    backgroundColor: 'linear-gradient(90deg, #FF512F 0%, #F09819 100%)',
-    background: 'linear-gradient(90deg, #FF512F 0%, #F09819 100%)',
-    // fallback for React Native: use a solid color
-    backgroundColor: '#FF512F',
-    shadowColor: '#FF512F',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2,
   },
   featuredBtnText: {
-    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
     letterSpacing: 0.5,

@@ -4,6 +4,7 @@ import { Layout, Text, Button, Select, SelectItem, IndexPath, Icon } from "@ui-k
 import { AppScreens } from "../../../navigators/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 import { axiosBuyerClient } from "../../../utils/axiosClient";
+import { useTheme } from "../../../theme/ThemeContext";
 
 const cartData = [
   {
@@ -28,6 +29,7 @@ export const MyCartScreen = () => {
   const [selectedPayment, setSelectedPayment] = useState(new IndexPath(0));
   const [orderNote, setOrderNote] = useState("");
   const [coupon, setCoupon] = useState("");
+  const { theme, isDark } = useTheme();
 
   const subtotal = cartData.reduce((sum, item) => sum + item.price, 0);
   const tax = 0;
@@ -36,7 +38,6 @@ export const MyCartScreen = () => {
   const total = subtotal + tax + shippingPrice - discount;
 
   const navigation = useNavigation();
-
 
   const handleCheckout = () => {
     navigation.navigate(AppScreens.SHIPING_DETAILS);
@@ -50,7 +51,6 @@ export const MyCartScreen = () => {
       } catch (error) {
         console.log('Cart Error:', error.toString()|| error.response?.data || error.message );
         if (error.response?.status === 401) {
-          // Handle unauthorized error - maybe redirect to login
           console.log('Authentication required');
         }
       }
@@ -59,45 +59,69 @@ export const MyCartScreen = () => {
   },[])
 
   return (
-    <Layout style={styles.container}>
+    <Layout style={[styles.container, { 
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: 160 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <Text style={styles.header}>Shopping Cart</Text>
+        <Text style={[styles.header, { 
+          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+        }]}>Shopping Cart</Text>
         
-
-        {/* Cart Table */}
-        <View style={styles.cartBox}>
-        <Text style={styles.farmName}>
-          <Text style={{ fontWeight: "bold" }}>Farm Name:</Text> Model Pet Farm
-        </Text>
-          <View style={styles.tableHeader}>
-            <Text style={styles.srHeader}>Sr#</Text>
-            <Text style={styles.productHeader}>Product Details</Text>
+        <View style={[styles.cartBox, { 
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+        }]}>
+          <Text style={[styles.farmName, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>
+            <Text style={{ fontWeight: "bold" }}>Farm Name:</Text> Model Pet Farm
+          </Text>
+          <View style={[styles.tableHeader, { 
+            backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          }]}>
+            <Text style={[styles.srHeader, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Sr#</Text>
+            <Text style={[styles.productHeader, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Product Details</Text>
           </View>
           {cartData.map((item, index) => (
-            <View key={item.id} style={styles.cartRow}>
-              <Text style={styles.srCell}>{index + 1}</Text>
+            <View key={item.id} style={[styles.cartRow, { 
+              borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+            }]}>
+              <Text style={[styles.srCell, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>{index + 1}</Text>
               <View style={styles.productCell}>
                 <Image source={item.image} style={styles.productImage} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.productName}>{item.name}</Text>
-                  <Text style={styles.productDesc}>{item.product}</Text>
-                  <Text style={styles.productPrice}>Rs {item.price.toLocaleString()}</Text>
+                  <Text style={[styles.productName, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}>{item.name}</Text>
+                  <Text style={[styles.productDesc, { 
+                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                  }]}>{item.product}</Text>
+                  <Text style={[styles.productPrice, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}>Rs {item.price.toLocaleString()}</Text>
                 </View>
                 <TouchableOpacity>
-                  <Icon name="close-circle-outline" fill="#d32f2f" style={{ width: 24, height: 24 }} />
+                  <Icon name="close-circle-outline" fill={theme['color-shadcn-destructive']} style={{ width: 24, height: 24 }} />
                 </TouchableOpacity>
               </View>
             </View>
           ))}
         </View>
 
-        {/* Payment Method & Note */}
         <Select
-          style={styles.select}
+          style={[styles.select, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+          }]}
           value={paymentMethods[selectedPayment.row]}
           selectedIndex={selectedPayment}
           onSelect={index => setSelectedPayment(index)}
@@ -108,142 +132,299 @@ export const MyCartScreen = () => {
           ))}
         </Select>
         <TextInput
-          style={styles.noteInput}
+          style={[styles.noteInput, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}
           placeholder="Order Note (Optional)"
+          placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
           value={orderNote}
           onChangeText={setOrderNote}
           multiline
         />
 
-        {/* Summary Box */}
-        <View style={styles.summaryBox}>
+        <View style={[styles.summaryBox, { 
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+        }]}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Sub Total</Text>
-            <Text style={styles.summaryValue}>Rs {subtotal}</Text>
+            <Text style={[styles.summaryLabel, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Sub Total</Text>
+            <Text style={[styles.summaryValue, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Rs {subtotal}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tax</Text>
-            <Text style={styles.summaryValue}>Rs {tax}</Text>
+            <Text style={[styles.summaryLabel, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Tax</Text>
+            <Text style={[styles.summaryValue, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Rs {tax}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Shipping</Text>
-            <Text style={styles.summaryValue}>Rs {shippingPrice}</Text>
+            <Text style={[styles.summaryLabel, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Shipping</Text>
+            <Text style={[styles.summaryValue, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Rs {shippingPrice}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Discount/Promo</Text>
-            <Text style={styles.summaryValue}>- Rs {discount}</Text>
+            <Text style={[styles.summaryLabel, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Discount/Promo</Text>
+            <Text style={[styles.summaryValue, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>- Rs {discount}</Text>
           </View>
           <View style={styles.couponRow}>
             <TextInput
-              style={styles.couponInput}
+              style={[styles.couponInput, { 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
               placeholder="Coupon Code"
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
               value={coupon}
               onChangeText={setCoupon}
             />
-            <Button style={styles.couponBtn}>Apply Code</Button>
+            <Button 
+              style={[styles.couponBtn, { 
+                backgroundColor: theme['color-shadcn-primary']
+              }]}
+            >
+              Apply Code
+            </Button>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={[styles.summaryLabel, { fontWeight: "bold" }]}>Total</Text>
-            <Text style={[styles.summaryValue, { fontWeight: "bold", color: "#388e3c" }]}>
+            <Text style={[styles.summaryLabel, { 
+              fontWeight: "bold",
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Total</Text>
+            <Text style={[styles.summaryValue, { 
+              fontWeight: "bold",
+              color: theme['color-shadcn-primary']
+            }]}>
               Rs {total}
             </Text>
           </View>
         </View>
 
-        {/* Features */}
         <View style={styles.featuresRow}>
           <View style={styles.feature}>
-            <Icon name="car-outline" fill="#222" style={styles.featureIcon} />
-            <Text style={styles.featureText}>3 Days Free Delivery</Text>
+            <Icon name="car-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
+            <Text style={[styles.featureText, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>3 Days Free Delivery</Text>
           </View>
           <View style={styles.feature}>
-            <Icon name="award-outline" fill="#222" style={styles.featureIcon} />
-            <Text style={styles.featureText}>100% Original Products</Text>
+            <Icon name="award-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
+            <Text style={[styles.featureText, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>100% Original Products</Text>
           </View>
           <View style={styles.feature}>
-            <Icon name="credit-card-outline" fill="#222" style={styles.featureIcon} />
-            <Text style={styles.featureText}>Money Back Guarantee</Text>
+            <Icon name="credit-card-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
+            <Text style={[styles.featureText, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Money Back Guarantee</Text>
           </View>
           <View style={styles.feature}>
-            <Icon name="shield-outline" fill="#222" style={styles.featureIcon} />
-            <Text style={styles.featureText}>Safe Payments</Text>
+            <Icon name="shield-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
+            <Text style={[styles.featureText, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Safe Payments</Text>
           </View>
         </View>
 
-           {/* Footer Buttons */}
-      <View style={styles.footerButtonRow}>
-        <Button style={styles.continueBtn}  status="basic">
-          <Text style={{ color: '#121212', fontWeight: 'bold', fontSize: 11 }}>
-            «Continue Shopping
-          </Text>
-        </Button>
-        <Button onPress={handleCheckout} style={styles.checkoutBtn}>
-          Checkout »
-        </Button>
-      </View>
+        <View style={[styles.footerButtonRow, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+          borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+        }]}>
+          <Button 
+            style={[styles.continueBtn, { 
+              backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-100'],
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+            }]} 
+            status="basic"
+          >
+            <Text style={{ 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+              fontWeight: 'bold',
+              fontSize: 11
+            }}>
+              «Continue Shopping
+            </Text>
+          </Button>
+          <Button 
+            onPress={handleCheckout} 
+            style={[styles.checkoutBtn, { 
+              backgroundColor: theme['color-shadcn-primary']
+            }]}
+          >
+            Checkout »
+          </Button>
+        </View>
       </ScrollView>
-   
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  header: { fontWeight: "bold", fontSize: 20, marginBottom: 4 },
-  farmName: { marginBottom: 8, fontSize: 15 },
-  cartBox: { borderWidth: 1, borderColor: "#222", borderRadius: 4, marginBottom: 16, backgroundColor: "#fff" },
-  tableHeader: { flexDirection: "row", backgroundColor: "#f5f5f5", padding: 8, borderTopLeftRadius: 4, borderTopRightRadius: 4 },
-  srHeader: { width: 32, fontWeight: "bold" },
-  productHeader: { flex: 1, fontWeight: "bold" },
-  cartRow: { flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "#eee", paddingVertical: 8, paddingHorizontal: 8 },
-  srCell: { width: 32, textAlign: "center" },
-  productCell: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
-  productImage: { width: 48, height: 48, borderRadius: 8, marginRight: 8 },
-  productName: { fontWeight: "bold", fontSize: 15 },
-  productDesc: { fontSize: 13, color: "#444" },
-  productPrice: { fontSize: 13, color: "#222" },
-  select: { marginBottom: 8, borderRadius: 4 },
-  noteInput: { borderWidth: 1, borderColor: "#ccc", borderRadius: 4, padding: 8, minHeight: 48, marginBottom: 16, fontSize: 15 },
-  summaryBox: { borderWidth: 1, borderColor: "#222", borderRadius: 4, padding: 12, marginBottom: 16, backgroundColor: "#fff" },
-  summaryRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
-  summaryLabel: { fontSize: 15 },
-  summaryValue: { fontSize: 15 },
-  couponRow: { flexDirection: "row", alignItems: "center", marginBottom: 8, gap: 8 },
-  couponInput: { flex: 1, borderWidth: 1, borderColor: "#ccc", borderRadius: 4, padding: 8, fontSize: 15 },
-  couponBtn: { borderRadius: 4, backgroundColor: "#43a047", borderWidth: 0 },
-  featuresRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 16, gap: 8 },
-  feature: { alignItems: "center", width: "48%", marginBottom: 8 },
-  featureIcon: { width: 28, height: 28, marginBottom: 4 },
-  featureText: { fontSize: 12, textAlign: "center" },
-  buttonRow: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
+  container: { 
+    flex: 1, 
+    padding: 16
+  },
+  header: { 
+    fontWeight: "bold", 
+    fontSize: 20, 
+    marginBottom: 4 
+  },
+  farmName: { 
+    marginBottom: 8, 
+    fontSize: 15 
+  },
+  cartBox: { 
+    borderWidth: 1, 
+    borderRadius: 4, 
+    marginBottom: 16
+  },
+  tableHeader: { 
+    flexDirection: "row", 
+    padding: 8, 
+    borderTopLeftRadius: 4, 
+    borderTopRightRadius: 4 
+  },
+  srHeader: { 
+    width: 32, 
+    fontWeight: "bold" 
+  },
+  productHeader: { 
+    flex: 1, 
+    fontWeight: "bold" 
+  },
+  cartRow: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    borderBottomWidth: 1, 
+    paddingVertical: 8, 
+    paddingHorizontal: 8 
+  },
+  srCell: { 
+    width: 32, 
+    textAlign: "center" 
+  },
+  productCell: { 
+    flex: 1, 
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 8 
+  },
+  productImage: { 
+    width: 48, 
+    height: 48, 
+    borderRadius: 8, 
+    marginRight: 8 
+  },
+  productName: { 
+    fontWeight: "bold", 
+    fontSize: 15 
+  },
+  productDesc: { 
+    fontSize: 13
+  },
+  productPrice: { 
+    fontSize: 13
+  },
+  select: { 
+    marginBottom: 8, 
+    borderRadius: 4 
+  },
+  noteInput: { 
+    borderWidth: 1, 
+    borderRadius: 4, 
+    padding: 8, 
+    minHeight: 48, 
+    marginBottom: 16, 
+    fontSize: 15 
+  },
+  summaryBox: { 
+    borderWidth: 1, 
+    borderRadius: 4, 
+    padding: 12, 
+    marginBottom: 16
+  },
+  summaryRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginBottom: 4 
+  },
+  summaryLabel: { 
+    fontSize: 15 
+  },
+  summaryValue: { 
+    fontSize: 15 
+  },
+  couponRow: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginBottom: 8, 
+    gap: 8 
+  },
+  couponInput: { 
+    flex: 1, 
+    borderWidth: 1, 
+    borderRadius: 4, 
+    padding: 8, 
+    fontSize: 15 
+  },
+  couponBtn: { 
+    borderRadius: 4, 
+    borderWidth: 0 
+  },
+  featuresRow: { 
+    flexDirection: "row", 
+    flexWrap: "wrap", 
+    justifyContent: "space-between", 
+    marginBottom: 16, 
+    gap: 8 
+  },
+  feature: { 
+    alignItems: "center", 
+    width: "48%", 
+    marginBottom: 8 
+  },
+  featureIcon: { 
+    width: 28, 
+    height: 28, 
+    marginBottom: 4 
+  },
+  featureText: { 
+    fontSize: 12, 
+    textAlign: "center" 
+  },
+  footerButtonRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    justifyContent: 'space-between',
+  },
   continueBtn: {
     flex: 1,
     borderRadius: 8,
     marginRight: 4,
     display: 'flex',
     flexWrap: 'nowrap',
-    borderColor: "#222",
-    backgroundColor: "#fff",
-    color: "black",
-    fontWeight: "bold",
-    fontSize: 1
+    borderWidth: 1,
   },
   checkoutBtn: {
     flex: 1,
     borderRadius: 8,
     marginLeft: 4,
-    backgroundColor:"#34981a",
     borderWidth: 0,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  footerButtonRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    justifyContent: 'space-between',
-    
   },
 });

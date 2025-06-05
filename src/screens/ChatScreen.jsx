@@ -1,4 +1,4 @@
-import {Icon, Input, Layout, Text, useTheme} from '@ui-kitten/components';
+import {Icon, Input, Layout, Text} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {FlatList, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {useDispatch} from 'react-redux';
@@ -8,6 +8,7 @@ import {setBottomTabBarVisibility} from '../store/configs';
 import {spacingStyles} from '../utils/globalStyles';
 import {useState} from 'react';
 import { MainScreensHeader } from '../components/buyer';
+import { useTheme } from '../theme/ThemeContext';
 
 const chatList = [
   {
@@ -95,7 +96,7 @@ const chatList = [
 
 export const ChatScreen = ({navigation}) => {
   const {t, i18n} = useTranslation();
-  const theme = useTheme();
+  const { theme, isDark } = useTheme();
   const dispatch = useDispatch();
   const [selectedTab, setSelectedTab] = useState('All');
   const tabs = ['All', 'Buying', 'Selling'];
@@ -117,30 +118,8 @@ export const ChatScreen = ({navigation}) => {
   };
 
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: 'white'}}>
+    <Layout level="3" style={{flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']}}>
       <MainScreensHeader navigation={navigation} hideSearch={true}/>
-      {/* <Layout
-        style={[
-          styles.header,
-          spacingStyles.px16,
-          spacingStyles.py8,
-          {
-            backgroundColor: theme['color-primary-default'],
-            shadowColor: theme['color-primary-default'],
-          },
-        ]}>
-        <Text
-          category="h4"
-          style={{color: '#fff', marginBottom: 8, textAlign: 'left'}}>
-          {t('inbox')}
-        </Text>
-        <Input
-          value={''}
-          placeholder={t('searchConversations')}
-          style={{direction: i18n.dir()}}
-          accessoryLeft={renderIcon}
-        />
-      </Layout> */}
       <View style={styles.tabBar}>
         {tabs.map(tab => (
           <TouchableOpacity
@@ -148,17 +127,67 @@ export const ChatScreen = ({navigation}) => {
             onPress={() => setSelectedTab(tab)}
             style={[styles.tab, selectedTab === tab && styles.tabActive]}
           >
-            <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+            <Text 
+              style={[
+                styles.tabText, 
+                { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] },
+                selectedTab === tab && { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
+              ]}
+            >
               {tab}
             </Text>
-            {selectedTab === tab && <View style={styles.tabUnderline} />}
+            {selectedTab === tab && (
+              <View 
+                style={[
+                  styles.tabUnderline,
+                  { backgroundColor: theme['color-shadcn-primary'] }
+                ]} 
+              />
+            )}
           </TouchableOpacity>
         ))}
       </View>
       <View style={styles.chipRow}>
-        <View style={styles.chipActive}><Text style={styles.chipTextActive}>All</Text></View>
-        <View style={styles.chip}><Text style={styles.chipText}>Unread Chats</Text></View>
-        <View style={styles.chip}><Text style={styles.chipText}>Important</Text></View>
+        <View 
+          style={[
+            styles.chipActive,
+            { backgroundColor: theme['color-shadcn-primary'] }
+          ]}
+        >
+          <Text style={[styles.chipTextActive, { color: theme['color-shadcn-primary-foreground'] }]}>
+            All
+          </Text>
+        </View>
+        <View 
+          style={[
+            styles.chip,
+            { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'] }
+          ]}
+        >
+          <Text 
+            style={[
+              styles.chipText,
+              { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }
+            ]}
+          >
+            Unread Chats
+          </Text>
+        </View>
+        <View 
+          style={[
+            styles.chip,
+            { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'] }
+          ]}
+        >
+          <Text 
+            style={[
+              styles.chipText,
+              { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }
+            ]}
+          >
+            Important
+          </Text>
+        </View>
       </View>
       <FlatList
         data={chatList}
@@ -193,15 +222,10 @@ const styles = StyleSheet.create({
   tabActive: {},
   tabText: {
     fontWeight: 'bold',
-    color: '#888',
     fontSize: 16,
-  },
-  tabTextActive: {
-    color: '#000',
   },
   tabUnderline: {
     height: 3,
-    backgroundColor: '#000',
     width: '100%',
     marginTop: 4,
     borderRadius: 2,
@@ -212,25 +236,21 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   chip: {
-    backgroundColor: '#eee',
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
     marginRight: 8,
   },
   chipActive: {
-    backgroundColor: '#000',
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
     marginRight: 8,
   },
   chipText: {
-    color: '#888',
     fontWeight: 'bold',
   },
   chipTextActive: {
-    color: '#fff',
     fontWeight: 'bold',
   },
 });

@@ -5,7 +5,6 @@ import {
   Icon,
   Layout,
   Text,
-  useTheme,
 } from '@ui-kitten/components';
 import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { AirbnbRating } from 'react-native-ratings';
@@ -15,12 +14,12 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../../store/user';
 import { getAsyncAuthToken } from '../../utils/localstorage';
 import { AppScreens } from '../../navigators/AppNavigator';
-
+import { useTheme } from '../../theme/ThemeContext';
 
 const {width, height} = Dimensions.get('window');
 
 export const SellerProfileScreen = ({ navigation }) => {
-  const theme = useTheme();
+  const { theme, isDark } = useTheme();
   const dispatch = useDispatch();
 
   const navigateToProfileUpdate = () => {
@@ -42,26 +41,25 @@ export const SellerProfileScreen = ({ navigation }) => {
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
   };
-  // navigateToPasswordUpdate
 
   const data = getAsyncAuthToken()
   console.log("DATA ", data)
 
-  // Senior-level: Memoize icons for performance and consistency
   const EditIcon = (props) => <Icon {...props} name="edit-2-outline" />;
   const LockIcon = (props) => <Icon {...props} name="lock-outline" />;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { 
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]}>
       <Image
-        source={require('../../../assets/new/login_page_bg.png')}
+        source={isDark ? require('../../../assets/new/login_page_bg_dark.png') : require('../../../assets/new/login_page_bg.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
       <Layout
         level="3"
         style={[
-          // spacingStyles.px16,
           styles.absoluteFill,
           { backgroundColor: 'transparent' },
         ]}
@@ -75,16 +73,29 @@ export const SellerProfileScreen = ({ navigation }) => {
             paddingBottom: 90,
           }}
         >
-          <Layout level="1" style={[spacingStyles.p16, { marginVertical: 0, backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 12 }]}>
+          <Layout level="1" style={[spacingStyles.p16, { 
+            marginVertical: 0, 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)', 
+            borderRadius: 12 
+          }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Avatar
                 source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
                 style={{ width: 48, height: 48, borderRadius: 24, marginRight: 14 }}
               />
               <View>
-                <Text style={{ fontWeight: 'bold', fontSize: 20, color: '#222' }}>Osama Tabassum</Text>
+                <Text style={{ 
+                  fontWeight: 'bold', 
+                  fontSize: 20, 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }}>Osama Tabassum</Text>
                 <Text
-                  style={{ color: '#121212', fontSize: 14, textDecorationLine: 'underline', marginTop: 2 }}
+                  style={{ 
+                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                    fontSize: 14, 
+                    textDecorationLine: 'underline', 
+                    marginTop: 2 
+                  }}
                   onPress={navigateToProfileUpdate}
                 >
                   View and edit profile
@@ -92,14 +103,14 @@ export const SellerProfileScreen = ({ navigation }) => {
               </View>
             </View>
           </Layout>
-          <Divider/>
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }}/>
           <Layout
             level="1"
             style={[
               spacingStyles.p16,
               {
                 marginVertical: 0,
-                backgroundColor: 'rgba(255,255,255,0.95)',
+                backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
                 borderRadius: 12,
               },
             ]}
@@ -118,7 +129,9 @@ export const SellerProfileScreen = ({ navigation }) => {
               />
               <Layout>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text category="h6">Store Full Name</Text>
+                  <Text category="h6" style={{ 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }}>Store Full Name</Text>
                   <Button
                     appearance="ghost"
                     size="small"
@@ -142,24 +155,32 @@ export const SellerProfileScreen = ({ navigation }) => {
                     showRating={false}
                     size={14}
                     isDisabled={true}
-                    selectedColor={theme['color-primary-default']}
+                    selectedColor={theme['color-shadcn-primary']}
                   />
-                  <Text category="h6" style={{ fontSize: 16, marginHorizontal: 2 }}>
+                  <Text category="h6" style={{ 
+                    fontSize: 16, 
+                    marginHorizontal: 2,
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }}>
                     3.4
                   </Text>
-                  <Text category="s1">(34)</Text>
+                  <Text category="s1" style={{ 
+                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                  }}>(34)</Text>
                 </Layout>
               </Layout>
             </Layout>
-            <Divider />
-            
+            <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }}/>
           </Layout>
 
           <Layout
             level="1"
             style={[
-              
-              { marginVertical: 0, backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 12 },
+              { 
+                marginVertical: 0, 
+                backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)', 
+                borderRadius: 12 
+              },
             ]}
           >
             <ProfileActionButton
@@ -191,9 +212,7 @@ export const SellerProfileScreen = ({ navigation }) => {
               subtitle="All of your favorite ads"
               iconName="question-mark-circle-outline"
               onPress={() => {}}
-
             />
-            
             <ProfileActionButton
               title="Logout"
               iconName="power-outline"
@@ -202,17 +221,36 @@ export const SellerProfileScreen = ({ navigation }) => {
                 dispatch(logout());
                 navigation.navigate(AppScreens.BUYER_HOME_MAIN);
               }}
-              />
+            />
           </Layout>
           <View style={styles.bottomBar}>
-        <View style={styles.pillButton}><Text style={styles.pillButtonText}>Our Services</Text></View>
-        <View style={styles.pillButton}><Text style={styles.pillButtonText}>Term & Conditions</Text></View>
-        <View style={styles.pillButton}><Text style={styles.pillButtonText}>Contact us</Text></View>
-      </View>
+            <View style={[styles.pillButton, { 
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}>
+              <Text style={[styles.pillButtonText, { 
+                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+              }]}>Our Services</Text>
+            </View>
+            <View style={[styles.pillButton, { 
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}>
+              <Text style={[styles.pillButtonText, { 
+                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+              }]}>Term & Conditions</Text>
+            </View>
+            <View style={[styles.pillButton, { 
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}>
+              <Text style={[styles.pillButtonText, { 
+                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+              }]}>Contact us</Text>
+            </View>
+          </View>
         </ScrollView>
-        
       </Layout>
-     
     </View>
   );
 };
@@ -222,17 +260,15 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     flex: 1,
     position: 'relative',
-    // backgroundColor: '#fff',
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
-    width:width ,
-    height:height *0.9,
+    width: width,
+    height: height * 0.9,
     zIndex: 0,
   },
   absoluteFill: {
-    // ...StyleSheet.absoluteFillObject,
-    // zIndex: 1,
+    zIndex: 1,
   },
   bottomBar: {
     flexDirection: 'row',
@@ -244,16 +280,13 @@ const styles = StyleSheet.create({
   },
   pillButton: {
     borderWidth: 1,
-    borderColor:'#636363',
     borderRadius: 22,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginHorizontal: -30,
-    backgroundColor: '#fff',
   },
   pillButtonText: {
     fontSize: 9,
-    color: '#646464',
     fontWeight: '500',
   },
 });

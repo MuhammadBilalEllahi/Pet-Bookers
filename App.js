@@ -1,5 +1,5 @@
 import React, {Suspense, useEffect, useMemo} from 'react';
-import {SafeAreaView, I18nManager, ActivityIndicator, View} from 'react-native';
+import {SafeAreaView, I18nManager, ActivityIndicator, View, StatusBar} from 'react-native';
 import {Provider as StoreProvider, useDispatch} from 'react-redux';
 import {ApplicationProvider, IconRegistry} from '@ui-kitten/components';
 import {EvaIconsPack} from '@ui-kitten/eva-icons';
@@ -20,6 +20,9 @@ import './src/locale';
 import {flexeStyles} from './src/utils/globalStyles';
 import { SplashScreen } from './src/screens/SplashScreen';
 import Toast from 'react-native-toast-message';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import { NavigationContainer } from '@react-navigation/native';
+import {extendTheme} from './src/theme/theme';
 
 dayjs.extend(calendar);
 dayjs.extend(localizedFormat);
@@ -44,7 +47,8 @@ dayjs.updateLocale('ur', {
   },
 });
 
-const MainApp = () => {
+const AppContent = () => {
+  const {theme, isDark} = useTheme();
   const {i18n} = useTranslation();
 
   const extendTheme = useMemo(() => {
@@ -66,17 +70,14 @@ const MainApp = () => {
 
   return (
     <SafeAreaView style={{flex: 1, direction: i18n.dir()}}>
-      
         <IconRegistry icons={EvaIconsPack} />
         <ApplicationProvider
           {...eva}
-          theme={{...eva.light, ...extendTheme}}
-          customMapping={mapping}
-          >
+        theme={theme}
+        customMapping={mapping}>
           <AppNavigator />
         </ApplicationProvider>
         <Toast/>
-        
     </SafeAreaView>
   );
 };
@@ -84,11 +85,11 @@ const MainApp = () => {
 export default function Root() {
   return (
     <StoreProvider store={store}>
+      <ThemeProvider>
     <Suspense fallback={<SplashScreen/>}>
-      <MainApp />
-      
+          <AppContent />
     </Suspense>
-    
+      </ThemeProvider>
     </StoreProvider>
   );
 };

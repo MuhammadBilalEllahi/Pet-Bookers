@@ -6,6 +6,7 @@ import {ProductsList} from '../../components/buyer/ProductsList';
 import {HorizontalItemsList} from '../../components/listing';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+import {useTheme} from '../../theme/ThemeContext';
 import {
   loadFeaturedProducts,
   loadHomeBanners,
@@ -30,6 +31,7 @@ import {calculateDiscountedPrice} from '../../utils/products';
 export const HomeMainScreen = ({navigation}) => {
   const {t} = useTranslation();
   const dispatch = useDispatch();
+  const {isDark} = useTheme();
 
   const baseUrls = useSelector(selectBaseUrls);
   const {homeBanners, homeBannersLoading, homeBannersError} =
@@ -279,7 +281,7 @@ useEffect(() => {
   }, [baseUrls, sellers]);
 
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: 'white'}}>
+    <Layout level="3" style={{flex: 1}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -288,6 +290,7 @@ useEffect(() => {
           justifyContent: 'flex-start',
           paddingTop: 10,
           paddingBottom: 90,
+          // backgroundColor: isDark ? '#121212' : 'white',
         }}>
         <FeaturedImages
           slideList={homeBanners}
@@ -309,7 +312,11 @@ useEffect(() => {
           loading={featuredProductsLoading}
           loadingError={featuredProductsError}
           listTitle={t('featuredProducts')}
-          containerStyle={{marginVertical: 0,paddingHorizontal: 14}}
+          containerStyle={{
+            marginVertical: 0,
+            paddingHorizontal: 14,
+            // backgroundColor: isDark ? '#101426' : 'white',
+          }}
           onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMoreFeatured}
           hasMore={featuredProducts.products.length < featuredProducts.total_size}
@@ -319,7 +326,11 @@ useEffect(() => {
           loading={latestProductsLoading}
           loadingError={latestProductsError}
           listTitle={t('latest')}
-          containerStyle={{marginVertical: 16,paddingHorizontal: 14}}
+          containerStyle={{
+            marginVertical: 16,
+            paddingHorizontal: 14,
+            // backgroundColor: isDark ? '#101426' : 'white',
+          }}
           onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMoreLatest}
           hasMore={latestProducts.products.length < latestProducts.total_size}
@@ -329,8 +340,12 @@ useEffect(() => {
           loading={popularProductsLoading}
           loadingError={popularProductsError}
           listTitle={t('popular')}
-          containerStyle={{marginVertical: 16, paddingHorizontal: 14}}
-          onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)    }
+          containerStyle={{
+            marginVertical: 16,
+            paddingHorizontal: 14,
+            //  backgroundColor: isDark ? '#101426' : 'white',
+          }}
+          onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMorePopular}
           hasMore={popularProducts.products.length < popularProducts.total_size}
         />

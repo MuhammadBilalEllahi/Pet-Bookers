@@ -7,14 +7,14 @@ import { ThemedIcon } from '../Icon';
 import { BackButton } from '../BackButton';
 import { BuyerMainRoutes } from '../../navigators/buyer/BuyerMainNavigator';
 import { AppScreens } from '../../navigators/AppNavigator';
+import { useTheme } from '../../theme/ThemeContext';
 
 export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack = false, hideNotification = true,
   hideSettings = true, hideCart = true }) => {
   const { t, i18n } = useTranslation();
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
-
-  // Senior-level: use state for search input
+  const { theme, isDark } = useTheme();
   const [searchValue, setSearchValue] = useState('');
 
   const renderIcon = props => <ThemedIcon {...props} name="search-outline" />;
@@ -31,14 +31,16 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
     navigation.navigate('AppSettings');
   };
 
-
   const onGoBack = () => {
     navigation.goBack();
   };
 
-
   return (
-    <Layout style={[styles.container, spacingStyles.px16, spacingStyles.py8]}>
+    <Layout style={[styles.container, spacingStyles.px16, spacingStyles.py8, { 
+      backgroundColor: isDark ? '#121212' : '#ffffff',
+      borderBottomWidth: 1,
+      borderBottomColor: isDark ? '#27272a' : '#e4e4e7'
+    }]}>
       <Layout
         style={[
           flexeStyles.row,
@@ -48,7 +50,7 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
       >
         <View style={styles.logoTitleWrapper}>
           {activateGoBack ? (
-            <BackButton fill="#121212" onPress={onGoBack} />
+            <BackButton fill={isDark ? '#ffffff' : '#09090b'} onPress={onGoBack} />
           ) : (
             <Image
               source={require('../../../assets/new/main_logo.png')}
@@ -57,7 +59,7 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
             />
           )}
           {title && (
-            <Text style={styles.titleText}>{title}</Text>
+            <Text style={[styles.titleText, { color: isDark ? '#ffffff' : '#09090b' }]}>{title}</Text>
           )}
         </View>
 
@@ -68,7 +70,6 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
             flexeStyles.contentBetween,
           ]}
         >
-          {/* Language Dropdown */}
           <View style={{ marginRight: 8 }}>
             <Button
               appearance="ghost"
@@ -85,13 +86,12 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
               )}
               accessoryRight={() => (
                 <View style={{ marginLeft: 4 }}>
-                  <Text style={{ fontSize: 14, color: '#121212' }}>
+                  <Text style={{ fontSize: 14, color: isDark ? '#ffffff' : '#09090b' }}>
                     {i18n.language === 'ur' ? 'Urdu' : 'English'}
                   </Text>
                 </View>
               )}
               onPress={() => {
-                // Toggle between English and Urdu
                 const newLang = i18n.language === 'ur' ? 'en' : 'ur';
                 i18n.changeLanguage(newLang);
               }}
@@ -99,7 +99,6 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
               style={{ paddingHorizontal: 0, minWidth: 36 }}
             />
           </View>
-
 
           {!hideNotification && <Button
             style={{ width: 20, height: 20 }}
@@ -124,15 +123,29 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
             accessoryRight={renderIcon}
             style={[
               styles.searchBar,
-              { direction: i18n.dir() }
+              { 
+                direction: i18n.dir(),
+                backgroundColor: isDark ? '#27272a' : '#ffffff',
+                borderColor: isDark ? '#3f3f46' : '#e4e4e7'
+              }
             ]}
-            textStyle={styles.searchBarText}
-            placeholderTextColor="#888"
+            textStyle={[styles.searchBarText, { color: isDark ? '#ffffff' : '#09090b' }]}
+            placeholderTextColor={isDark ? '#a1a1aa' : '#71717a'}
             size="medium"
-          // Add any additional Input props as needed
           />
-          {!hideCart && <Button appearance="ghost" style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: '#E5E7EB' }} accessoryLeft={cartIcon} onPress={() => navigation.navigate(AppScreens.CART)}>
-          </Button>}
+          {!hideCart && <Button 
+            appearance="ghost" 
+            style={{ 
+              width: 20, 
+              height: 20, 
+              borderRadius: 10, 
+              borderWidth: 1, 
+              borderColor: isDark ? '#3f3f46' : '#e4e4e7',
+              backgroundColor: isDark ? '#27272a' : '#ffffff'
+            }} 
+            accessoryLeft={cartIcon} 
+            onPress={() => navigation.navigate(AppScreens.CART)}
+          />}
         </View>
       )}
     </Layout>
@@ -141,7 +154,6 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFF',
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -156,14 +168,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // Optionally add horizontal padding if needed
   },
   searchBar: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12, // md: 12px
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB', // subtle gray border
     paddingLeft: 4,
     paddingRight: 4,
     minHeight: 32,
@@ -172,7 +181,6 @@ const styles = StyleSheet.create({
   },
   searchBarText: {
     fontSize: 15,
-    color: '#222',
     paddingVertical: 1,
   },
   logoTitleWrapper: {
@@ -182,9 +190,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 20,
-    color: '#121212',
-    marginLeft: 8, // Space between logo and title
-    flexShrink: 1, // Prevents text overflow
+    marginLeft: 8,
+    flexShrink: 1,
   },
-
 });

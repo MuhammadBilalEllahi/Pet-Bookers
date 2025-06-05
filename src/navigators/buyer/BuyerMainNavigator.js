@@ -7,8 +7,9 @@ import {
   BottomNavigation,
   BottomNavigationTab,
   Text,
-  useTheme,
+  
 } from '@ui-kitten/components';
+import { useTheme } from '../../theme/ThemeContext';
 import { ThemedIcon } from '../../components/Icon';
 import { selectShowBottomTabBar } from '../../store/configs';
 import { MainScreensHeader } from '../../components/buyer';
@@ -23,6 +24,7 @@ import { BuyerProfileStack } from './BuyerProfileStack';
 import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
 import { MyCartScreen } from '../../screens/buyer/checkout/MyCartScreen';
+import { ThemeProvider } from '../../theme/ThemeContext';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -51,7 +53,9 @@ const ICON_DARK_GREY = '#444444';
 const TEXT_BLACK = '#000000';
 
 // Ensure text does not wrap by setting flexShrink: 0, flexGrow: 0, minWidth: 0, and allowFontScaling: false
-const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => (
+const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => {
+  const { theme, isDark } = useTheme();
+  return (
   <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
     <Image
       source={iconSource}
@@ -59,7 +63,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
         width: 36,
         height: 36,
         resizeMode: 'contain',
-        tintColor: ICON_DARK_GREY,
+          tintColor: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : ICON_DARK_GREY,
         ...customIconStyle,
       }}
       key={`icon-image-${label}`}
@@ -68,7 +72,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
       style={{
         fontWeight: '700',
         fontSize: 12,
-        color: TEXT_BLACK,
+          color: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : TEXT_BLACK,
         marginTop: 2,
         flexShrink: 0,
         flexGrow: 0,
@@ -89,21 +93,26 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
           height: 6,
           resizeMode: 'contain',
           marginTop: 2,
+            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
         }}
         key={`icon-active-underline-${label}`}
       />
     )}
   </View>
 );
+};
 
 // Do not change color of plus icon (no tintColor)
-const renderAddTabIconWithActive = (isActive, label) => (
+const renderAddTabIconWithActive = (isActive, label) => {
+  const { theme, isDark } = useTheme();
+  return (
   <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
     <View
       style={[
         styles.addButton,
         {
           borderColor: 'transparent',
+            backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff',
         },
       ]}
       key={`addButton-${label}`}
@@ -114,7 +123,7 @@ const renderAddTabIconWithActive = (isActive, label) => (
           width: 70,
           height: 70,
           resizeMode: 'cover',
-          // No tintColor here, so the plus icon keeps its original color
+            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
         }}
         key={`addButton-image-${label}`}
       />
@@ -123,7 +132,7 @@ const renderAddTabIconWithActive = (isActive, label) => (
       style={{
         fontWeight: '700',
         fontSize: 12,
-        color: TEXT_BLACK,
+          color: isDark ? theme['color-shadcn-foreground'] : TEXT_BLACK,
         marginTop: 2,
         flexShrink: 0,
         flexGrow: 0,
@@ -144,15 +153,17 @@ const renderAddTabIconWithActive = (isActive, label) => (
           height: 6,
           resizeMode: 'contain',
           marginTop: 2,
+            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
         }}
         key={`addButton-active-underline-${label}`}
       />
     )}
   </View>
 );
+};
 
 const BottomTabBar = ({ navigation, state, isAnonymous }) => {
-  const theme = useTheme();
+  const { theme, isDark } = useTheme();
   const { t } = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
 
@@ -167,6 +178,8 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
             position: 'absolute',
             bottom: showBottomTabBar ? 0 : -1000,
             overflow: showBottomTabBar ? 'visible' : 'hidden',
+            backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
+            borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
           },
         ]}
         onSelect={index => navigation.navigate(state.routeNames[index])}
@@ -208,7 +221,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
               luckyDrawIcon,
               state.index === 3,
               t('tabs.luckydraw'),
-              { width: 48, height: 35 } // Increase size for lucky draw icon
+              { width: 48, height: 35 }
             )
           }
         />
@@ -229,6 +242,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
 
 export const BuyerMainNavigator = () => {
   const isAnonymous = useSelector(selectIfAnonymous);
+  const { theme, isDark } = useTheme();
   
   return (
     <Navigator
@@ -402,7 +416,6 @@ const styles = StyleSheet.create({
   },
   addButton: {
     borderWidth: 3,
-    backgroundColor: '#fff',
     width: 60,
     height: 60,
     borderRadius: 60,
@@ -412,6 +425,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   // New styles for rounded top corners of the bottom nav bar
   bottomTabBarContainer: {
@@ -420,14 +438,12 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    backgroundColor: '#fff',
-    // Optionally add shadow for iOS and elevation for Android for a floating effect
+    borderTopWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 12,
-    // To ensure the rounded corners are visible
     overflow: 'hidden',
   },
 });

@@ -12,6 +12,7 @@ import {
 } from '@ui-kitten/components';
 import { ThemedIcon } from '../../components/Icon';
 import { selectShowBottomTabBar } from '../../store/configs';
+import { useTheme as useCustomTheme } from '../../theme/ThemeContext';
 
 // Screens and Navigation Stacks
 import { SellerHomeStack } from './SellerHomeStack';
@@ -34,115 +35,129 @@ export const SellerTabRoutes = Object.freeze({
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
 const chatIcon = require('../../../assets/new/bottom_nav/chat.png');
 const sellPlusIcon = require('../../../assets/new/bottom_nav/sell_plus.png');
-const myAdsIcon = require('../../../assets/new/bottom_nav/my_adds.png'); // You need to provide this icon
+const myAdsIcon = require('../../../assets/new/bottom_nav/my_adds.png');
 const profileUserIcon = require('../../../assets/new/bottom_nav/profile_user.png');
 const activeUnderIcon = require('../../../assets/new/bottom_nav/active.png');
 
 const ICON_DARK_GREY = '#444444';
 const TEXT_BLACK = '#000000';
+const ORANGE_ACCENT = '#FF6B00';
 
-const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => (
-  <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
-    <Image
-      source={iconSource}
-      style={{
-        width: 36,
-        height: 36,
-        resizeMode: 'contain',
-        tintColor: ICON_DARK_GREY,
-        ...customIconStyle,
-      }}
-      key={`icon-image-${label}`}
-    />
-    <Text
-      style={{
-        fontWeight: '700',
-        fontSize: 12,
-        color: TEXT_BLACK,
-        marginTop: 2,
-        flexShrink: 0,
-        flexGrow: 0,
-        minWidth: 0,
-      }}
-      numberOfLines={1}
-      ellipsizeMode="clip"
-      allowFontScaling={false}
-      key={`icon-label-${label}`}
-    >
-      {label}
-    </Text>
-    {isActive && (
+const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => {
+  const { isDark } = useCustomTheme();
+  
+  return (
+    <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
       <Image
-        source={activeUnderIcon}
+        source={iconSource}
         style={{
           width: 36,
-          height: 6,
+          height: 36,
           resizeMode: 'contain',
-          marginTop: 2,
+          tintColor: isActive ? ORANGE_ACCENT : (isDark ? '#FFFFFF' : ICON_DARK_GREY),
+          ...customIconStyle,
         }}
-        key={`icon-active-underline-${label}`}
+        key={`icon-image-${label}`}
       />
-    )}
-  </View>
-);
-
-const renderAddTabIconWithActive = (isActive, label) => (
-  <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
-    <View
-      style={[
-        styles.addButton,
-        {
-          borderColor: 'transparent',
-        },
-      ]}
-      key={`addButton-${label}`}
-    >
-      <Image
-        source={sellPlusIcon}
+      <Text
         style={{
-          width: 70,
-          height: 70,
-          resizeMode: 'cover',
+          fontWeight: '700',
+          fontSize: 12,
+          color: isDark ? '#FFFFFF' : TEXT_BLACK,
+          marginTop: 2,
+          flexShrink: 0,
+          flexGrow: 0,
+          minWidth: 0,
         }}
-        key={`addButton-image-${label}`}
-      />
+        numberOfLines={1}
+        ellipsizeMode="clip"
+        allowFontScaling={false}
+        key={`icon-label-${label}`}
+      >
+        {label}
+      </Text>
+      {isActive && (
+        <Image
+          source={activeUnderIcon}
+          style={{
+            width: 36,
+            height: 6,
+            resizeMode: 'contain',
+            marginTop: 2,
+            tintColor: ORANGE_ACCENT,
+          }}
+          key={`icon-active-underline-${label}`}
+        />
+      )}
     </View>
-    <Text
-      style={{
-        fontWeight: '700',
-        fontSize: 12,
-        color: TEXT_BLACK,
-        marginTop: 2,
-        flexShrink: 0,
-        flexGrow: 0,
-        minWidth: 0,
-      }}
-      numberOfLines={1}
-      ellipsizeMode="clip"
-      allowFontScaling={false}
-      key={`addButton-label-${label}`}
-    >
-      {label}
-    </Text>
-    {isActive && (
-      <Image
-        source={activeUnderIcon}
+  );
+};
+
+const renderAddTabIconWithActive = (isActive, label) => {
+  const { isDark } = useCustomTheme();
+  
+  return (
+    <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
+      <View
+        style={[
+          styles.addButton,
+          {
+            borderColor: 'transparent',
+            backgroundColor: isDark ? '#1F1F1F' : '#fff',
+          },
+        ]}
+        key={`addButton-${label}`}
+      >
+        <Image
+          source={sellPlusIcon}
+          style={{
+            width: 70,
+            height: 70,
+            resizeMode: 'cover',
+            tintColor: ORANGE_ACCENT,
+          }}
+          key={`addButton-image-${label}`}
+        />
+      </View>
+      <Text
         style={{
-          width: 36,
-          height: 6,
-          resizeMode: 'contain',
+          fontWeight: '700',
+          fontSize: 12,
+          color: isDark ? '#FFFFFF' : TEXT_BLACK,
           marginTop: 2,
+          flexShrink: 0,
+          flexGrow: 0,
+          minWidth: 0,
         }}
-        key={`addButton-active-underline-${label}`}
-      />
-    )}
-  </View>
-);
+        numberOfLines={1}
+        ellipsizeMode="clip"
+        allowFontScaling={false}
+        key={`addButton-label-${label}`}
+      >
+        {label}
+      </Text>
+      {isActive && (
+        <Image
+          source={activeUnderIcon}
+          style={{
+            width: 36,
+            height: 6,
+            resizeMode: 'contain',
+            marginTop: 2,
+            tintColor: ORANGE_ACCENT,
+          }}
+          key={`addButton-active-underline-${label}`}
+        />
+      )}
+    </View>
+  );
+};
 
 const BottomTabBar = ({ navigation, state }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
+  const { isDark } = useCustomTheme();
 
   return (
     <View style={styles.bottomTabBarContainer} key="bottomTabBarContainer">
@@ -155,6 +170,7 @@ const BottomTabBar = ({ navigation, state }) => {
             position: 'absolute',
             bottom: showBottomTabBar ? 0 : -1000,
             overflow: showBottomTabBar ? 'visible' : 'hidden',
+            backgroundColor: isDark ? '#000000' : '#FFFFFF',
           },
         ]}
         onSelect={index => navigation.navigate(state.routeNames[index])}
@@ -248,7 +264,6 @@ const styles = StyleSheet.create({
   },
   addButton: {
     borderWidth: 3,
-    backgroundColor: '#fff',
     width: 60,
     height: 60,
     borderRadius: 60,
@@ -265,7 +280,6 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,

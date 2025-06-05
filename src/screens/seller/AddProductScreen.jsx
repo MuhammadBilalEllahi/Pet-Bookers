@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, StyleSheet, TouchableOpacity, View, Platform, Image, PermissionsAndroid, ActivityIndicator} from 'react-native';
+import {ScrollView, StyleSheet, TouchableOpacity, View, Platform, Image, PermissionsAndroid, ActivityIndicator, Modal, Dimensions} from 'react-native';
 import {
   Layout,
   Text,
@@ -8,6 +8,7 @@ import {
   Select,
   SelectItem,
   Spinner,
+  Icon,
 } from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {Formik} from 'formik';
@@ -18,6 +19,7 @@ import { loadProductCategories, selectProductCategories } from '../../store/prod
 import { axiosSellerClient } from '../../utils/axiosClient';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
+import { useTheme as useThemeContext } from '../../theme/ThemeContext';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -36,7 +38,7 @@ const requestGalleryPermission = async () => {
 
 export const AddProductScreen = ({navigation}) => {
   const {t} = useTranslation();
-  const theme = useTheme();
+  const { isDark, theme } = useThemeContext();
   const [langTab, setLangTab] = useState('en');
   const [isLiving, setIsLiving] = useState('Living');
   const [categoryIndex, setCategoryIndex] = useState(null);
@@ -45,7 +47,12 @@ export const AddProductScreen = ({navigation}) => {
   const [isLivingIndex, setIsLivingIndex] = useState(0);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [subcategoryModalVisible, setSubcategoryModalVisible] = useState(false);
+  const [unitModalVisible, setUnitModalVisible] = useState(false);
+  const [isLivingModalVisible, setIsLivingModalVisible] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
+  const [fieldValue, setFieldValue] = useState(false);
 
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,6 +75,7 @@ export const AddProductScreen = ({navigation}) => {
   const subcategoryOptions = selectedCategory?.childes?.map(sub => sub.name) || [];
   const [images, setImages] = useState([]);
 const [thumbnail, setThumbnail] = useState(null);
+const [showCongratsDialog, setShowCongratsDialog] = useState(false);
 
   const onProductPostedSuccess = () => {
     navigation.reset({
@@ -96,11 +104,8 @@ const [thumbnail, setThumbnail] = useState(null);
 };
 
   const handleSubmit = values => {
-    // setIsLoading(true)
-     if (isSubmitting) return; // Prevent multiple submissions
-    
+    if (isSubmitting) return;
     setIsSubmitting(true);
-
 
   const formData = new FormData();
    if (images.length === 0) {
@@ -108,10 +113,8 @@ const [thumbnail, setThumbnail] = useState(null);
       type: 'error',
       text1: 'Please select at least one product image'
     })
-    // Alert.alert('Error', 'Please select at least one product image');
     return;
   }
-
 
   formData.append('product_type', 'physical'); // or 'digital'
   formData.append('discount_type', 'flat'); // or 'percent'
@@ -176,15 +179,15 @@ const [thumbnail, setThumbnail] = useState(null);
   })
   .then(response => {
     console.info("SUBMITED", response)
-    if (response.data.success) {
-      // onProductPostedSuccess();
-      setIsSubmitting(false)
+      if (response.status === 200) {
+        setShowCongratsDialog(true);
+        setIsSubmitting(false);
     }
   })
   .catch(error => {
-    console.error("Error:",error,JSON.stringify( error.response?.data, null, 4));
-    setIsSubmitting(false)
-  }).finally(()=>setIsSubmitting(false));
+      console.error("Error:", error, JSON.stringify(error.response?.data, null, 4));
+      setIsSubmitting(false);
+    });
 };
   
   const handleTagInput = (text) => {
@@ -204,8 +207,158 @@ const [thumbnail, setThumbnail] = useState(null);
     setTags(tags.filter((_, i) => i !== index));
   };
 
+  const renderModal = (visible, setVisible, title, options, selectedIndex, onSelect) => {
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: '#ffffff'}}>
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setVisible(false)}>
+          <View style={[styles.modalContent, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+          }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>{title}</Text>
+              <TouchableOpacity onPress={() => setVisible(false)}>
+                <Icon
+                  name="close"
+                  fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                  style={{ width: 24, height: 24 }}
+                />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalOptions}>
+              {options.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.modalOption,
+                    selectedIndex === index && {
+                      backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                    }
+                  ]}
+                  onPress={() => {
+                    onSelect(index);
+                    setVisible(false);
+                  }}>
+                  <Text style={[styles.modalOptionText, { 
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  }]}>{option}</Text>
+                  {selectedIndex === index && (
+                    <Icon
+                      name="checkmark"
+                      fill={theme['color-shadcn-primary']}
+                      style={{ width: 20, height: 20 }}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
+  const renderCongratsDialog = () => {
+    return (
+      <Modal
+        visible={showCongratsDialog}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowCongratsDialog(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.congratsDialogContainer, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+          }]}>
+            <View style={styles.congratsIconContainer}>
+              <Icon
+                name="checkmark-circle"
+                fill={theme['color-shadcn-primary']}
+                style={{ width: 64, height: 64 }}
+              />
+            </View>
+            <Text style={[styles.congratsTitle, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>
+              {t('addProduct.congratsTitle')}
+            </Text>
+            <Text style={[styles.congratsMessage, { 
+              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+            }]}>
+              {t('addProduct.congratsMessage')}
+            </Text>
+
+            {/* Image Slider */}
+            <ScrollView 
+              horizontal 
+              pagingEnabled 
+              showsHorizontalScrollIndicator={false}
+              style={styles.imageSlider}
+            >
+              {images.map((image, index) => (
+                <View key={index} style={styles.sliderImageContainer}>
+                  <Image
+                    source={{ uri: image.uri }}
+                    style={styles.sliderImage}
+                    resizeMode="cover"
+                  />
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={styles.congratsButtons}>
+              <TouchableOpacity
+                style={[styles.congratsButton, styles.viewAdButton, { 
+                  backgroundColor: theme['color-shadcn-primary']
+                }]}
+                onPress={() => {
+                  setShowCongratsDialog(false);
+                  navigation.navigate('MyPostedAds');
+                }}>
+                <Text style={[styles.congratsButtonText, { 
+                  color: theme['color-shadcn-primary-foreground']
+                }]}>
+                  {t('addProduct.viewAd')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.congratsButton, styles.addAnotherButton, { 
+                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                }]}
+                onPress={() => {
+                  setShowCongratsDialog(false);
+                  // Reset form
+                  setCategoryIndex(null);
+                  setSubcategoryIndex(null);
+                  setUnitIndex(null);
+                  setIsLivingIndex(0);
+                  setImages([]);
+                  setThumbnail(null);
+                  setTags([]);
+                  setTagInput('');
+                }}>
+                <Text style={[styles.congratsButtonText, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
+                  {t('addProduct.addAnother')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  return (
+    <Layout level="3" style={{flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']}}>
       
       <ScrollView
         showsHorizontalScrollIndicator={false}
@@ -214,7 +367,7 @@ const [thumbnail, setThumbnail] = useState(null);
           // spacingStyles.px16,
           // spacingStyles.py8,
           {
-            backgroundColor: '#FFF',
+            backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
             flexGrow: 1,
             justifyContent: 'flex-start',
             
@@ -226,12 +379,12 @@ const [thumbnail, setThumbnail] = useState(null);
             spacingStyles.px16,
             {
               flex: 1,
-              backgroundColor: '#fff',
+              backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
               marginBottom: 100
             },
           ]}>
           
-          <Text category="s1" style={styles.sectionHeader}>
+          <Text category="s1" style={[styles.sectionHeader, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
             {t('addProduct.generalInfo')}
           </Text>
           <Formik
@@ -263,209 +416,262 @@ const [thumbnail, setThumbnail] = useState(null);
               <Layout style={styles.inputContainer}>
                 {/* Category */}
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.category')}</Text>
-                  <Select
-                    style={styles.select}
-                    placeholder={t('addProduct.categoryPlaceholder')}
-                    selectedIndex={categoryIndex}
-                    value={categoryIndex !== null ? categoryOptions[categoryIndex.row] : t('addProduct.categoryPlaceholder')}
-                    onSelect={index => {
-                      setCategoryIndex(index);
-                      setSubcategoryIndex(null);
-                      setFieldValue('category_id', categories[index.row].id);
-                    }}>
-                    {categoryOptions.map((cat, i) => (
-                      <SelectItem key={i} title={cat} />
-                    ))}
-                  </Select>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.category')}</Text>
+                  <TouchableOpacity
+                    style={[styles.select, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    onPress={() => setCategoryModalVisible(true)}>
+                    <Text style={[styles.selectText, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}>
+                      {categoryIndex !== null ? categoryOptions[categoryIndex.row] : t('addProduct.categoryPlaceholder')}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </TouchableOpacity>
                 </Layout>
                 {/* Sub Category */}
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.subCategory')}</Text>
-                  <Select
-                    style={styles.select}
-                    placeholder={t('addProduct.subCategoryPlaceholder')}
-                    selectedIndex={subcategoryIndex}
-                    value={subcategoryIndex !== null ? subcategoryOptions[subcategoryIndex.row] : t('addProduct.subCategoryPlaceholder')}
-                    onSelect={index => {
-                      setSubcategoryIndex(index);
-                      setFieldValue('sub_category_id', selectedCategory.childes[index.row].id);
-                    }}
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.subCategory')}</Text>
+                  <TouchableOpacity
+                    style={[styles.select, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    onPress={() => setSubcategoryModalVisible(true)}
                     disabled={!selectedCategory}>
-                    {subcategoryOptions.map((sub, i) => (
-                      <SelectItem key={i} title={sub} />
-                    ))}
-                  </Select>
+                    <Text style={[styles.selectText, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}>
+                      {subcategoryIndex !== null ? subcategoryOptions[subcategoryIndex.row] : t('addProduct.subCategoryPlaceholder')}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </TouchableOpacity>
                 </Layout>
                 {/* Units */}
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.units')}</Text>
-                  <Select
-                    style={styles.select}
-                    placeholder={t('addProduct.unitsPlaceholder')}
-                    selectedIndex={unitIndex}
-                    value={unitIndex !== null ? units[unitIndex.row] : t('addProduct.unitsPlaceholder')}
-                    onSelect={index => {
-                      setUnitIndex(index);
-                      setFieldValue('unit', units[index.row]);
-                    }}>
-                    {units.map((unit, i) => (
-                      <SelectItem key={i} title={unit} />
-                    ))}
-                  </Select>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.units')}</Text>
+                  <TouchableOpacity
+                    style={[styles.select, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    onPress={() => setUnitModalVisible(true)}>
+                    <Text style={[styles.selectText, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}>
+                      {unitIndex !== null ? units[unitIndex.row] : t('addProduct.unitsPlaceholder')}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </TouchableOpacity>
                 </Layout>
                 {/* Is Living */}
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.isLiving')}</Text>
-                  <Select
-                    style={styles.select}
-                    placeholder={t('addProduct.isLivingPlaceholder')}
-                    selectedIndex={isLivingIndex}
-                    value={livingOptions[isLivingIndex]}
-                    onSelect={index => {
-                      setIsLivingIndex(index.row);
-                      setFieldValue('is_living', livingOptions[index.row]);
-                    }}> 
-                    {livingOptions.map((opt, i) => (
-                      <SelectItem key={i} title={opt} />
-                    ))}
-                  </Select>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.isLiving')}</Text>
+                  <TouchableOpacity
+                    style={[styles.select, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    onPress={() => setIsLivingModalVisible(true)}>
+                    <Text style={[styles.selectText, { 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }]}>
+                      {livingOptions[isLivingIndex]}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </TouchableOpacity>
                 </Layout>
                 {/* Language Tabs */}
-                <View style={styles.tabContainer}>
+                <View style={[styles.tabContainer, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }]}>
                   <TouchableOpacity
-                    style={[styles.tab, langTab === 'en' && styles.activeTab]}
+                    style={[
+                      styles.tab, 
+                      langTab === 'en' && [styles.activeTab, { borderColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]
+                    ]}
                     onPress={() => setLangTab('en')}>
-                    <Text style={langTab === 'en' ? styles.activeTabText : styles.tabText}>English</Text>
+                    <Text style={[
+                      langTab === 'en' 
+                        ? [styles.activeTabText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]
+                        : [styles.tabText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]
+                    ]}>English</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.tab, langTab === 'ur' && styles.activeTab]}
+                    style={[
+                      styles.tab, 
+                      langTab === 'ur' && [styles.activeTab, { borderColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]
+                    ]}
                     onPress={() => setLangTab('ur')}>
-                    <Text style={langTab === 'ur' ? styles.activeTabText : styles.tabText}>Urdu</Text>
+                    <Text style={[
+                      langTab === 'ur' 
+                        ? [styles.activeTabText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]
+                        : [styles.tabText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]
+                    ]}>Urdu</Text>
                   </TouchableOpacity>
                 </View>
                 {langTab === 'en' ? (
                   <>
                     <Layout style={styles.fieldGroup}>
-                      <Text style={styles.fieldLabel}>{t('addProduct.nameEN')}</Text>
+                      <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.nameEN')}</Text>
                       <Input
-                        style={styles.input}
-                        textStyle={styles.inputText}
+                        style={[styles.input, { 
+                          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                        }]}
+                        textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                         onChangeText={handleChange('name_en')}
                         onBlur={handleBlur('name_en')}
                         value={values.name_en}
                         placeholder={t('addProduct.nameENPlaceholder')}
-                        placeholderTextColor="#BDBDBD"
+                        placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                       />
                     </Layout>
                     <Layout style={styles.fieldGroup}>
-                      <Text style={styles.fieldLabel}>{t('addProduct.descriptionEN')}</Text>
+                      <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.descriptionEN')}</Text>
                       <Input
                         multiline={true}
                         numberOfLines={8}
                         textAlignVertical="top"
-                        style={[styles.input, styles.descriptionInput]}
-                        textStyle={[styles.inputText, {paddingVertical: 10}]}
+                        style={[styles.input, styles.descriptionInput, { 
+                          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                        }]}
+                        textStyle={[styles.inputText, { paddingVertical: 10, color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                         onChangeText={handleChange('description_en')}
                         onBlur={handleBlur('description_en')}
                         value={values.description_en}
                         placeholder={t('addProduct.descriptionENPlaceholder')}
-                        placeholderTextColor="#BDBDBD"
+                        placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                       />
                     </Layout>
                   </>
                 ) : (
                   <>
                     <Layout style={styles.fieldGroup}>
-                      <Text style={styles.fieldLabel}>{t('addProduct.nameUR')}</Text>
+                      <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.nameUR')}</Text>
                       <Input
-                        style={styles.input}
-                        textStyle={styles.inputText}
+                        style={[styles.input, { 
+                          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                        }]}
+                        textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                         onChangeText={handleChange('name_ur')}
                         onBlur={handleBlur('name_ur')}
                         value={values.name_ur}
                         placeholder={t('addProduct.nameURPlaceholder')}
-                        placeholderTextColor="#BDBDBD"
+                        placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                       />
                     </Layout>
                     <Layout style={styles.fieldGroup}>
-                      <Text style={styles.fieldLabel}>{t('addProduct.descriptionUR')}</Text>
+                      <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.descriptionUR')}</Text>
                       <Input
                         multiline={true}
                         numberOfLines={4}
-                        style={[styles.input, styles.descriptionInput]}
-                        textStyle={styles.inputText}
+                        style={[styles.input, styles.descriptionInput, { 
+                          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                        }]}
+                        textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                         onChangeText={handleChange('description_ur')}
                         onBlur={handleBlur('description_ur')}
                         value={values.description_ur}
                         placeholder={t('addProduct.descriptionURPlaceholder')}
-                        placeholderTextColor="#BDBDBD"
+                        placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                       />
                     </Layout>
                   </>
                 )}
                 {/* Product Price and Stock */}
-                <Text style={styles.sectionHeader}>{t('addProduct.productPriceAndStock')}</Text>
+                <Text style={[styles.sectionHeader, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.productPriceAndStock')}</Text>
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.price')}</Text>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.price')}</Text>
                   <Input
-                    style={styles.input}
-                    textStyle={styles.inputText}
+                    style={[styles.input, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                     onChangeText={handleChange('unit_price')}
                     onBlur={handleBlur('unit_price')}
                     value={values.unit_price}
                     placeholder={t('addProduct.pricePlaceholder')}
-                    placeholderTextColor="#BDBDBD"
+                    placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                     keyboardType="numeric"
                   />
                 </Layout>
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.totalQuantity')}</Text>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.totalQuantity')}</Text>
                   <Input
-                    style={styles.input}
-                    textStyle={styles.inputText}
+                    style={[styles.input, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                     onChangeText={handleChange('current_stock')}
                     onBlur={handleBlur('current_stock')}
                     value={values.current_stock}
                     placeholder={t('addProduct.totalQuantityPlaceholder')}
-                    placeholderTextColor="#BDBDBD"
+                    placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                     keyboardType="numeric"
                   />
                 </Layout>
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.minOrderQuantity')}</Text>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.minOrderQuantity')}</Text>
                   <Input
-                    style={styles.input}
-                    textStyle={styles.inputText}
+                    style={[styles.input, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                     onChangeText={handleChange('min_order_qty')}
                     onBlur={handleBlur('min_order_qty')}
                     value={values.min_order_qty}
                     placeholder={t('addProduct.minOrderQuantityPlaceholder')}
-                    placeholderTextColor="#BDBDBD"
+                    placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                     keyboardType="numeric"
                   />
                 </Layout>
                 {/* Tags */}
-                <Text style={styles.sectionHeader}>{t('addProduct.tags')}</Text>
+                <Text style={[styles.sectionHeader, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.tags')}</Text>
                 <Layout style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>{t('addProduct.searchTags')}</Text>
+                  <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.searchTags')}</Text>
                   <Input
-                    style={styles.input}
-                    textStyle={styles.inputText}
+                    style={[styles.input, { 
+                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+                    }]}
+                    textStyle={[styles.inputText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
                     value={tagInput}
                     placeholder={t('addProduct.tagInputPlaceholder')}
-                    placeholderTextColor="#BDBDBD"
+                    placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                     onChangeText={handleTagInput}
                     onSubmitEditing={() => handleTagInput(tagInput + ',')}
                     autoCorrect={false}
                     autoCapitalize="none"
                   />
-                  <View style={styles.tagsContainer}>
+                  <View style={[styles.tagsContainer, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
                     {tags.map((tag, i) => (
-                      <View key={i} style={styles.tagChip}>
-                        <Text style={styles.tagText}>{tag}</Text>
+                      <View key={i} style={[styles.tagChip, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
+                        <Text style={[styles.tagText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{tag}</Text>
                         <TouchableOpacity onPress={() => removeTag(i)}>
-                          <Text style={styles.tagRemove}>×</Text>
+                          <Text style={[styles.tagRemove, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>×</Text>
                         </TouchableOpacity>
                       </View>
                     ))}
@@ -473,13 +679,16 @@ const [thumbnail, setThumbnail] = useState(null);
                 </Layout>
 
 {/* Thumbnail Upload */}
-<View style={styles.uploadBox}>
+<View style={[styles.uploadBox, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
   <TouchableOpacity 
     style={styles.uploadTouchable} 
     onPress={() => handleImagePick('thumbnail')}>
-    <Image source={require('../../../assets/new/icons/upload-icon.png')} style={styles.uploadIcon} />
-    <View style={styles.uploadTextBox}>
-      <Text style={styles.uploadText}>
+    <Image 
+      source={require('../../../assets/new/icons/upload-icon.png')} 
+      style={[styles.uploadIcon, { tintColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]} 
+    />
+    <View style={[styles.uploadTextBox, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-700'] }]}>
+      <Text style={[styles.uploadText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
         {thumbnail ? 'Thumbnail Selected' : 'Upload Thumbnail'}
       </Text>
     </View>
@@ -493,20 +702,23 @@ const [thumbnail, setThumbnail] = useState(null);
       <TouchableOpacity 
         style={styles.removeImageButton}
         onPress={() => setThumbnail(null)}>
-        <Text style={styles.removeImageText}>×</Text>
+        <Text style={[styles.removeImageText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>×</Text>
       </TouchableOpacity>
     </View>
   )}
 </View>
 
 {/* Multiple Images Upload */}
-<View style={styles.uploadBox}>
+<View style={[styles.uploadBox, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
   <TouchableOpacity 
     style={styles.uploadTouchable} 
     onPress={() => handleImagePick('images')}>
-    <Image source={require('../../../assets/new/icons/upload-icon.png')} style={styles.uploadIcon} />
-    <View style={styles.uploadTextBox}>
-      <Text style={styles.uploadText}>
+    <Image 
+      source={require('../../../assets/new/icons/upload-icon.png')} 
+      style={[styles.uploadIcon, { tintColor: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]} 
+    />
+    <View style={[styles.uploadTextBox, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-700'] }]}>
+      <Text style={[styles.uploadText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
         {images.length > 0 
           ? `${images.length} Images Selected` 
           : 'Upload Product Images'}
@@ -516,34 +728,91 @@ const [thumbnail, setThumbnail] = useState(null);
   <ScrollView 
     horizontal
     showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.imagesScrollContainer}>
+    contentContainerStyle={[styles.imagesScrollContainer, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
     {images.map((img, index) => (
-      <View key={index} style={styles.imagePreviewContainer}>
+      <View key={index} style={[styles.imagePreviewContainer, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
         <Image 
           source={{uri: img.uri}} 
-          style={styles.previewImage} 
+          style={[styles.previewImage, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]} 
         />
         <TouchableOpacity 
-          style={styles.removeImageButton}
+          style={[styles.removeImageButton, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}
           onPress={() => {
             const newImages = [...images];
             newImages.splice(index, 1);
             setImages(newImages);
           }}>
-          <Text style={styles.removeImageText}>×</Text>
+          <Text style={[styles.removeImageText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>×</Text>
         </TouchableOpacity>
       </View>
     ))}
   </ScrollView>
 </View>
 
+                {/* Add modals inside Formik render props */}
+                {renderModal(
+                  categoryModalVisible,
+                  setCategoryModalVisible,
+                  t('addProduct.category'),
+                  categoryOptions,
+                  categoryIndex?.row,
+                  (index) => {
+                    setCategoryIndex({ row: index });
+                    setSubcategoryIndex(null);
+                    setFieldValue('category_id', categories[index].id);
+                  }
+                )}
+
+                {renderModal(
+                  subcategoryModalVisible,
+                  setSubcategoryModalVisible,
+                  t('addProduct.subCategory'),
+                  subcategoryOptions,
+                  subcategoryIndex?.row,
+                  (index) => {
+                    setSubcategoryIndex({ row: index });
+                    setFieldValue('sub_category_id', selectedCategory.childes[index].id);
+                  }
+                )}
+
+                {renderModal(
+                  unitModalVisible,
+                  setUnitModalVisible,
+                  t('addProduct.units'),
+                  units,
+                  unitIndex?.row,
+                  (index) => {
+                    setUnitIndex({ row: index });
+                    setFieldValue('unit', units[index]);
+                  }
+                )}
+
+                {renderModal(
+                  isLivingModalVisible,
+                  setIsLivingModalVisible,
+                  t('addProduct.isLiving'),
+                  livingOptions,
+                  isLivingIndex,
+                  (index) => {
+                    setIsLivingIndex(index);
+                    setFieldValue('is_living', livingOptions[index]);
+                  }
+                )}
+
                 {/* Submit Button */}
                 <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={handleSubmit } 
-                  disabled={isSubmitting}
-                  >
-                {isSubmitting?   <ActivityIndicator color="#fff" />: <Text style={styles.submitButtonText}>{t('addProduct.submitAd')}</Text>}
+                  style={[styles.submitButton, { 
+                    backgroundColor: theme['color-shadcn-primary'],
+                    borderColor: theme['color-shadcn-primary']
+                  }]}
+                  onPress={handleSubmit}
+                  disabled={isSubmitting}>
+                  {isSubmitting ? 
+                    <ActivityIndicator color={theme['color-shadcn-primary-foreground']} /> : 
+                    <Text style={[styles.submitButtonText, { color: theme['color-shadcn-primary-foreground'] }]}>
+                      {t('addProduct.submitAd')}
+                    </Text>
+                  }
                 </TouchableOpacity>
 
               </Layout>
@@ -551,6 +820,9 @@ const [thumbnail, setThumbnail] = useState(null);
           </Formik>
         </Layout>
       </ScrollView>
+
+      {/* Add congrats dialog */}
+      {renderCongratsDialog()}
     </Layout>
   );
 };
@@ -573,7 +845,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginTop: 24,
     marginBottom: 8,
-    color: '#acacac',
     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   inputContainer: {
@@ -585,35 +856,33 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 11,
-    color: '#121212',
     marginBottom: 6,
     fontWeight: '500',
     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   select: {
-    backgroundColor: 'transparent',
-    background: 'transparent',
-    borderColor: '#222',
-    boxShadow: 'none',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 4,
     minHeight: 48,
-    justifyContent: 'center',
+  },
+  selectText: {
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   input: {
-    backgroundColor: '#fff',
-    borderColor: '#BDBDBD',
     borderWidth: 1,
     borderRadius: 2,
     marginHorizontal: 5,
     paddingVertical: 10,
     fontSize: 16,
-    
   },
   inputText: {
-    color: '#222',
     fontSize: 14,
-    
     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   descriptionInput: {
@@ -757,5 +1026,103 @@ removeImageText: {
 },
 imagesScrollContainer: {
   paddingVertical: 10,
+},
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalContent: {
+  width: '100%',
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+  maxHeight: '80%',
+  position: 'absolute',
+  bottom: 0,
+},
+modalHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+},
+modalOptions: {
+  padding: 16,
+},
+modalOption: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+  marginBottom: 8,
+},
+modalOptionText: {
+  fontSize: 16,
+},
+congratsDialogContainer: {
+  width: '90%',
+  borderRadius: 16,
+  padding: 24,
+  alignItems: 'center',
+  maxHeight: '80%',
+},
+congratsIconContainer: {
+  marginBottom: 16,
+},
+congratsTitle: {
+  fontSize: 24,
+  fontWeight: 'bold',
+  marginBottom: 8,
+  textAlign: 'center',
+},
+congratsMessage: {
+  fontSize: 16,
+  textAlign: 'center',
+  marginBottom: 24,
+},
+imageSlider: {
+  width: Dimensions.get('window').width * 0.8,
+  height: 200,
+  marginBottom: 24,
+},
+sliderImageContainer: {
+  width: Dimensions.get('window').width * 0.8,
+  height: 200,
+  marginHorizontal: 4,
+},
+sliderImage: {
+  width: '100%',
+  height: '100%',
+  borderRadius: 8,
+},
+congratsButtons: {
+  width: '100%',
+  gap: 12,
+},
+congratsButton: {
+  width: '100%',
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+},
+viewAdButton: {
+  backgroundColor: '#FF512F',
+},
+addAnotherButton: {
+  backgroundColor: '#f5f5f5',
+},
+congratsButtonText: {
+  fontSize: 16,
+  fontWeight: 'bold',
 },
 });

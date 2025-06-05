@@ -1,4 +1,4 @@
-import {Avatar, Input, Layout, Text, useTheme} from '@ui-kitten/components';
+import {Avatar, Input, Layout, Text} from '@ui-kitten/components';
 import {StyleSheet, TouchableWithoutFeedback, View} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {BackButton} from '../components/BackButton';
@@ -7,6 +7,7 @@ import {ThemedIcon} from '../components/Icon';
 import {setBottomTabBarVisibility} from '../store/configs';
 import {resetActiveRoom} from '../store/chat';
 import {flexeStyles, spacingStyles} from '../utils/globalStyles';
+import {useTheme} from '../theme/ThemeContext';
 
 const messagesList = [
   {
@@ -120,7 +121,7 @@ const messagesList = [
 ];
 
 export const MessagesScreen = ({navigation}) => {
-  const theme = useTheme();
+  const {theme, isDark} = useTheme();
   const dispatch = useDispatch();
 
   const renderSendIcon = props => (
@@ -128,7 +129,7 @@ export const MessagesScreen = ({navigation}) => {
       <ThemedIcon
         {...props}
         name="paper-plane-outline"
-        fill={theme['color-primary-default']}
+        fill={theme['color-shadcn-primary']}
       />
     </TouchableWithoutFeedback>
   );
@@ -147,6 +148,7 @@ export const MessagesScreen = ({navigation}) => {
         display: 'flex',
         justifyContent: 'space-between',
         flexGrow: 1,
+        backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
       }}>
       <Layout style={{flex: 1}}>
         <Layout
@@ -157,8 +159,9 @@ export const MessagesScreen = ({navigation}) => {
             spacingStyles.px16,
             spacingStyles.py8,
             {
-              backgroundColor: theme['color-primary-default'],
-              shadowColor: theme['color-primary-default'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+              borderBottomWidth: 1,
+              borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
             },
           ]}>
           <BackButton onPress={onGoBack} />
@@ -166,24 +169,65 @@ export const MessagesScreen = ({navigation}) => {
             style={[flexeStyles.row, flexeStyles.itemsCenter, {marginLeft: 4}]}>
             <Avatar
               source={{uri: 'https://randomuser.me/api/portraits/men/9.jpg'}}
+              style={styles.avatar}
             />
-            <View style={{marginLeft: 8}}>
-              <Text category="h6" style={styles.colorWhite}>
+            <View style={{marginLeft: 12}}>
+              <Text 
+                category="h6" 
+                style={{ 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+                  fontWeight: '600',
+                }}
+              >
                 John Doe
               </Text>
-              <Text category="c2" style={styles.colorWhite}>
-                Online
-              </Text>
+              <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
+                <View 
+                  style={[
+                    styles.onlineIndicator,
+                    { backgroundColor: theme['color-shadcn-primary'] }
+                  ]} 
+                />
+                <Text 
+                  category="c2" 
+                  style={{ 
+                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
+                    marginLeft: 4,
+                  }}
+                >
+                  Online
+                </Text>
+              </View>
             </View>
           </View>
         </Layout>
         <MessagesList messagesList={messagesList} />
       </Layout>
-      <Layout level="1" style={{padding: 10}}>
+      <Layout 
+        level="1" 
+        style={[
+          styles.inputContainer,
+          { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+            borderTopWidth: 1,
+            borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+          }
+        ]}
+      >
         <Input
           value={''}
           placeholder="Your message"
-          style={{borderRadius: 20}}
+          style={[
+            styles.input,
+            { 
+              backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+            }
+          ]}
+          textStyle={{ 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+          }}
+          placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
           accessoryRight={renderSendIcon}
         />
       </Layout>
@@ -193,11 +237,27 @@ export const MessagesScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   header: {
-    shadowOffset: {width: -2, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  colorWhite: {
-    color: '#fff',
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  onlineIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  inputContainer: {
+    padding: 12,
+    paddingBottom: 24,
+  },
+  input: {
+    borderRadius: 24,
+    borderWidth: 1,
   },
 });

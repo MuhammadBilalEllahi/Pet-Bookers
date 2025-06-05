@@ -9,11 +9,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { selectCompanyLogo } from '../../store/configs';
 import { flexeStyles } from '../../utils/globalStyles';
 // import { I18nManager } from 'react-native';
-
+import { useTheme } from '../../theme/ThemeContext';
 
 export const AuthContainer = ({ title, subTitle, children }) => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
+  const { isDark, theme } = useTheme();
   // const companyLogo = useSelector(selectCompanyLogo);
 
   const onLanguageChange = lang => {
@@ -29,12 +30,14 @@ export const AuthContainer = ({ title, subTitle, children }) => {
   // };
 
   return (
-    <Layout style={styles.container} level="1">
+    <Layout style={[styles.container, { 
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]} level="1">
 
 {/* https://petbookers.com.pk/customer/auth/login */}
       {/* https://petbookers.com.pk/customer/auth/sign-up */}
       <Image
-        source={require('../../../assets/new/login_page_bg.png')}
+        source={isDark ? require('../../../assets/new/login_page_bg_dark.png') : require('../../../assets/new/login_page_bg.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
@@ -56,17 +59,25 @@ export const AuthContainer = ({ title, subTitle, children }) => {
 
 
 
-          <Text category="h4" style={styles.title}>
+          <Text category="h4" style={[styles.title, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>
             {t(title)}
           </Text>
           {subTitle && (
-            <Text category="p1" style={styles.subTitle}>
+            <Text category="p1" style={[styles.subTitle, { 
+              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
+            }]}>
               {t(subTitle)}
             </Text>
           )}
           {children}
           <Layout style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+            <Text style={[{ 
+              fontSize: 16, 
+              fontWeight: 'bold',
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>
                {t('language')}
             </Text>
 
@@ -81,14 +92,18 @@ export const AuthContainer = ({ title, subTitle, children }) => {
               <Text
                 category="p2"
                 status="basic"
-                style={styles.languageChanger}
+                style={[styles.languageChanger, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}
                 onPress={() => onLanguageChange('en')}>
                 English
               </Text>
               <Text
                 category="p2"
                 status="basic"
-                style={styles.languageChanger}
+                style={[styles.languageChanger, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}
                 onPress={() => onLanguageChange('ur')}>
                 اردو
               </Text>
@@ -104,18 +119,12 @@ export const AuthContainer = ({ title, subTitle, children }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
   },
   backgroundImage: {
     position: 'absolute',
-
     width: '100%',
     height: '100%',
   },
-
-
-
-
   image: {
     width: '100%',
     resizeMode: 'contain',
@@ -129,10 +138,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'capitalize',
   },
-  subTitle: { marginVertical: 8, textAlign: 'center' },
+  subTitle: { 
+    marginVertical: 8, 
+    textAlign: 'center' 
+  },
   languageChanger: {
     marginHorizontal: 10,
-
     textDecorationLine: 'none',
     lineHeight: 20,
   },

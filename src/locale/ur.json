@@ -193,6 +193,10 @@
     "descriptionURPlaceholder": "جو آپ بیچ رہے ہیں اس کی تفصیل لکھیں",
     "pricePlaceholder": "قیمت",
     "totalQuantityPlaceholder": "1",
-    "minOrderQuantityPlaceholder": "1"
+    "minOrderQuantityPlaceholder": "1",
+    "congratsTitle": "مبارک ہو!",
+    "congratsMessage": "آپ کی مصنوع کامیابی سے لسٹ ہو گئی ہے",
+    "viewAd": "میرا اشتہار دیکھیں",
+    "addAnother": "ایک اور مصنوع شامل کریں"
   }
 }
