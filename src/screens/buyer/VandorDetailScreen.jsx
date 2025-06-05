@@ -16,6 +16,7 @@ import {
 } from '../../store/sellerDetails';
 import {selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
+import { ProductsList } from '../../components/buyer/ProductsList';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -193,10 +194,31 @@ export const VandorDetailScreen = ({route, navigation}) => {
           </View>
         </View>
         {/* Product Grid */}
+        {/* <ProductsList
+              list={parsedProducts}
+              listTitle={t('products')}
+              loading={sellerProductsLoading}
+              loadingError={sellerProductsError}
+              onLoadMore={handleLoadMore}
+              onProductDetail={product => {
+                navigation.navigate('ProductDetail', {productId: product.id});
+              }}
+              hasMore={sellerProducts?.products?.length < sellerProducts?.total_size}
+              hideViewAllBtn={true}
+              onViewAll={() => {
+                navigation.navigate('ProductsList', {
+                  sellerId,
+                  title: sellerInfo?.seller?.shop?.name || 'Products',
+                });
+              }}
+              cardWidth={(windowWidth - 56) / 2}
+              cardHeight={(windowWidth - 56) / 2.2}
+              /> */}
         <View style={styles.productGrid}>
           {parsedProducts.map(item => (
             <View key={item.id} style={styles.productCardWrapper}>
               <ProductCard {...item} cardWidth={(windowWidth - 56) / 2} />
+              
             </View>
           ))}
         </View>

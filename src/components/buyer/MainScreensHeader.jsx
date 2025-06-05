@@ -5,9 +5,11 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { ThemedIcon } from '../Icon';
 import { BackButton } from '../BackButton';
+import { BuyerMainRoutes } from '../../navigators/buyer/BuyerMainNavigator';
+import { AppScreens } from '../../navigators/AppNavigator';
 
-export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack=false, hideNotification=true,
-hideSettings=true }) => {
+export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack = false, hideNotification = true,
+  hideSettings = true, hideCart = true }) => {
   const { t, i18n } = useTranslation();
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
@@ -16,6 +18,7 @@ hideSettings=true }) => {
   const [searchValue, setSearchValue] = useState('');
 
   const renderIcon = props => <ThemedIcon {...props} name="search-outline" />;
+  const cartIcon = props => <ThemedIcon {...props} name="shopping-bag-outline" />;
   const NotifIcon = props => <ThemedIcon {...props} name="bell-outline" />;
   const renderSettingsIcon = props => (
     <ThemedIcon {...props} name="settings-2-outline" />
@@ -28,7 +31,7 @@ hideSettings=true }) => {
     navigation.navigate('AppSettings');
   };
 
-  
+
   const onGoBack = () => {
     navigation.goBack();
   };
@@ -44,19 +47,19 @@ hideSettings=true }) => {
         ]}
       >
         <View style={styles.logoTitleWrapper}>
-  {activateGoBack ? (
-    <BackButton fill="#121212" onPress={onGoBack} />
-  ) : (
-    <Image
-      source={require('../../../assets/new/main_logo.png')}
-      style={styles.logo}
-      resizeMode="contain"
-    />
-  )}
-  {title && (
-    <Text style={styles.titleText}>{title}</Text>
-  )}
-</View>
+          {activateGoBack ? (
+            <BackButton fill="#121212" onPress={onGoBack} />
+          ) : (
+            <Image
+              source={require('../../../assets/new/main_logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          )}
+          {title && (
+            <Text style={styles.titleText}>{title}</Text>
+          )}
+        </View>
 
         <Layout
           style={[
@@ -97,14 +100,14 @@ hideSettings=true }) => {
             />
           </View>
 
-          
+
           {!hideNotification && <Button
             style={{ width: 20, height: 20 }}
             appearance="ghost"
             accessoryLeft={NotifIcon}
             onPress={navigateToNotifications}
           />}
-          {!hideSettings &&<Button
+          {!hideSettings && <Button
             style={{ width: 20, height: 20 }}
             appearance="ghost"
             accessoryLeft={renderSettingsIcon}
@@ -126,8 +129,10 @@ hideSettings=true }) => {
             textStyle={styles.searchBarText}
             placeholderTextColor="#888"
             size="medium"
-            // Add any additional Input props as needed
+          // Add any additional Input props as needed
           />
+          {!hideCart && <Button appearance="ghost" style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: '#E5E7EB' }} accessoryLeft={cartIcon} onPress={() => navigation.navigate(AppScreens.CART)}>
+          </Button>}
         </View>
       )}
     </Layout>
@@ -148,9 +153,13 @@ const styles = StyleSheet.create({
   searchBarWrapper: {
     marginTop: 10,
     marginBottom: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     // Optionally add horizontal padding if needed
   },
   searchBar: {
+    flex: 1,
     backgroundColor: '#fff',
     borderRadius: 12, // md: 12px
     borderWidth: 1,
@@ -167,15 +176,15 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   logoTitleWrapper: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  flex: 1,
-},
-titleText: {
-  fontSize: 20,
-  color: '#121212',
-  marginLeft: 8, // Space between logo and title
-  flexShrink: 1, // Prevents text overflow
-},
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  titleText: {
+    fontSize: 20,
+    color: '#121212',
+    marginLeft: 8, // Space between logo and title
+    flexShrink: 1, // Prevents text overflow
+  },
 
 });

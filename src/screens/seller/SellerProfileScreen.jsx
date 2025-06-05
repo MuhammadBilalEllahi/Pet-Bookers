@@ -200,7 +200,7 @@ export const SellerProfileScreen = ({ navigation }) => {
               subtitle="log out"
               onPress={() => {
                 dispatch(logout());
-                navigation.navigate(AppScreens.HOME);
+                navigation.navigate(AppScreens.BUYER_HOME_MAIN);
               }}
               />
           </Layout>

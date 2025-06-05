@@ -15,6 +15,7 @@ import { RegisterScreen } from '../screens/auth/Register';
 import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
 import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
 import PaymentPage from '../screens/buyer/checkout/PaymentPage';
+import { MyCartScreen } from '../screens/buyer/checkout/MyCartScreen';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -31,7 +32,8 @@ export const AppScreens = Object.freeze({
   LUCKYDRAW_INSTANCE: 'LuckyDrawInstance',
   SHIPING_DETAILS: 'ShipingDetails',
   PAYMENT_PAGE: 'PaymentPage',
-  
+  CART: 'Cart',
+
 });
 
 export const AppNavigator = () => {
@@ -63,6 +65,7 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.AUTH} component={AuthNavigator} />
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
+        <Screen name={AppScreens.CART} component={MyCartScreen} />
 
         
         <Screen

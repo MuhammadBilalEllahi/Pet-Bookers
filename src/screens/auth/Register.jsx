@@ -43,9 +43,6 @@ const sellerSchema = {
   banner: Yup.object().nullable().required('Shop banner is required'),
 };
 
-
-
-
 // Permission request helper for gallery access
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -72,11 +69,13 @@ const COUNTRY_CODES = [
 
 export const RegisterScreen = ({ navigation }) => {
   const route = useRoute();
-  const { isItSeller = false } = route.params || {};
+  const { isItSeller: initialIsSeller = true } = route.params || {};
+  const [isItSeller, setIsItSeller] = useState(initialIsSeller);
+  const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
 
   const validationSchema = Yup.object().shape(
-  isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
-);
+    isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
+  );
 
   // Use translation keys for states and cities
   const stateKeys = [
@@ -236,6 +235,74 @@ export const RegisterScreen = ({ navigation }) => {
 
       <Text style={styles.title}>{t('createaccount')}</Text>
       <Text style={styles.subtitle}>{t('fillUpTheFormToCreateAnAccount')}</Text>
+
+      {/* User Type Toggle */}
+      <View style={styles.userTypeContainer}>
+        <Text style={styles.label}>{t('accountType')}</Text>
+        <TouchableOpacity
+          style={styles.userTypeButton}
+          onPress={() => setUserTypeModalVisible(true)}
+        >
+          <Text style={styles.userTypeButtonText}>
+            {isItSeller ? t('seller') : t('buyer')}
+          </Text>
+          <Icon
+            name="chevron-down"
+            fill="#8F9BB3"
+            style={{ width: 20, height: 20 }}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={userTypeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setUserTypeModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setUserTypeModalVisible(false)}
+        >
+          <View style={styles.userTypeModal}>
+            <TouchableOpacity
+              style={[
+                styles.userTypeOption,
+                isItSeller && styles.userTypeOptionSelected
+              ]}
+              onPress={() => {
+                setIsItSeller(true);
+                setUserTypeModalVisible(false);
+              }}
+            >
+              <Text style={[
+                styles.userTypeOptionText,
+                isItSeller && styles.userTypeOptionTextSelected
+              ]}>
+                {t('seller')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.userTypeOption,
+                !isItSeller && styles.userTypeOptionSelected
+              ]}
+              onPress={() => {
+                setIsItSeller(false);
+                setUserTypeModalVisible(false);
+              }}
+            >
+              <Text style={[
+                styles.userTypeOptionText,
+                !isItSeller && styles.userTypeOptionTextSelected
+              ]}>
+                {t('buyer')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <Formik
         initialValues={{
@@ -796,5 +863,51 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  userTypeContainer: {
+    marginBottom: 10,
+    width: '100%',
+  },
+  userTypeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+    borderWidth: 1,
+    borderColor: 'rgb(170, 170, 170)',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+  },
+  userTypeButtonText: {
+    fontSize: 16,
+    color: '#222',
+  },
+  userTypeModal: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    width: 280,
+    paddingVertical: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  userTypeOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  userTypeOptionSelected: {
+    backgroundColor: '#27AE60',
+  },
+  userTypeOptionText: {
+    fontSize: 16,
+    color: '#222',
+  },
+  userTypeOptionTextSelected: {
+    color: '#fff',
   },
 });

@@ -1,13 +1,12 @@
 import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View, Image, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import { Layout, Text, Input, CheckBox, Icon } from '@ui-kitten/components';
 import { Formik } from 'formik';
 import { InputError, SubmitButton } from '../../components/form';
 import { AuthContainer } from '../../components/auth/AuthContainer';
 const { width } = Dimensions.get('window');
-import { TouchableOpacity } from 'react-native';
 import TextButton from '../../components/form/TextButton';
 import { axiosBuyerClient, axiosSellerClient, } from '../../utils/axiosClient';
 import { setAuthToken, setUserType, UserType } from '../../store/user';
@@ -43,15 +42,16 @@ const LoginSchema = Yup.object().shape({
 
 export const LoginScreen = ({ navigation  }) => {
   const route = useRoute()
-  const { isItSeller= false, email='', password= ''} = route.params || {};
-  console.debug("THIS IS ", isItSeller, email, password)
+  const { isItSeller: initialIsSeller = true, email = '', password = '' } = route.params || {};
+  console.debug("THIS IS ", initialIsSeller, email, password)
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [selectedTab, setSelectedTab] = useState('email');
   const [rememberMe, setRememberMe] = useState(false);
-  const [isSeller, setIsSeller] = useState(isItSeller || false);
+  const [isSeller, setIsSeller] = useState(initialIsSeller);
+  const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
 
   const navigateToPage = pageName => {
     navigation.navigate(pageName);
@@ -140,18 +140,101 @@ export const LoginScreen = ({ navigation  }) => {
       </View>
 
       <View style={styles.middleSection}>
-        <View style={styles.toggleContainer}>
+        <View style={styles.toggleRow}>
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('email')}
+              style={[styles.toggleButton, selectedTab === 'email' && styles.toggleActive]}>
+              <Text style={selectedTab === 'email' ? styles.toggleTextActive : styles.toggleTextInactive}>{t('email')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('phone')}
+              style={[styles.toggleButton, selectedTab === 'phone' && styles.toggleActive]}>
+              <Text style={selectedTab === 'phone' ? styles.toggleTextActive : styles.toggleTextInactive}>{t('phone')}</Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity
-            onPress={() => setSelectedTab('email')}
-            style={[styles.toggleButton, selectedTab === 'email' && styles.toggleActive]}>
-            <Text style={selectedTab === 'email' ? styles.toggleTextActive : styles.toggleTextInactive}>{t('email')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSelectedTab('phone')}
-            style={[styles.toggleButton, selectedTab === 'phone' && styles.toggleActive]}>
-            <Text style={selectedTab === 'phone' ? styles.toggleTextActive : styles.toggleTextInactive}>{t('phone')}</Text>
+            style={styles.userTypeButton}
+            onPress={() => setUserTypeModalVisible(true)}
+          >
+            <View style={styles.userTypeButtonContent}>
+              <Icon
+                name={isSeller ? "shopping-bag" : "person"}
+                fill="#27AE60"
+                style={{ width: 16, height: 16, marginRight: 8 }}
+              />
+              <Text style={styles.userTypeButtonText}>
+                {isSeller ? t('seller') : t('buyer')}
+              </Text>
+            </View>
+            <Icon
+              name="chevron-down"
+              fill="#27AE60"
+              style={{ width: 16, height: 16 }}
+            />
           </TouchableOpacity>
         </View>
+
+        <Modal
+          visible={userTypeModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setUserTypeModalVisible(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPressOut={() => setUserTypeModalVisible(false)}
+          >
+            <View style={styles.userTypeModal}>
+              <TouchableOpacity
+                style={[
+                  styles.userTypeOption,
+                  isSeller && styles.userTypeOptionSelected
+                ]}
+                onPress={() => {
+                  setIsSeller(true);
+                  setUserTypeModalVisible(false);
+                }}
+              >
+                <Icon
+                  name="shopping-bag"
+                  fill={isSeller ? "#fff" : "#27AE60"}
+                  style={{ width: 16, height: 16, marginRight: 8 }}
+                />
+                <Text style={[
+                  styles.userTypeOptionText,
+                  isSeller && styles.userTypeOptionTextSelected
+                ]}>
+                  {t('seller')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.userTypeOption,
+                  !isSeller && styles.userTypeOptionSelected
+                ]}
+                onPress={() => {
+                  setIsSeller(false);
+                  setUserTypeModalVisible(false);
+                }}
+              >
+                <Icon
+                  name="person"
+                  fill={!isSeller ? "#fff" : "#27AE60"}
+                  style={{ width: 16, height: 16, marginRight: 8 }}
+                />
+                <Text style={[
+                  styles.userTypeOptionText,
+                  !isSeller && styles.userTypeOptionTextSelected
+                ]}>
+                  {t('buyer')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
 
         <Formik
           initialValues={{
@@ -312,6 +395,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flex: 1,
   },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   toggleContainer: {
     flexDirection: 'row',
   },
@@ -404,5 +493,62 @@ const styles = StyleSheet.create({
   signupText: {
     color: '#27AE60',
     fontWeight: '600',
+  },
+  userTypeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+    borderWidth: 1,
+    borderColor: '#27AE60',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    minWidth: 120,
+  },
+  userTypeButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userTypeButtonText: {
+    fontSize: 14,
+    color: '#27AE60',
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userTypeModal: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: 200,
+    paddingVertical: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  userTypeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  userTypeOptionSelected: {
+    backgroundColor: '#27AE60',
+  },
+  userTypeOptionText: {
+    fontSize: 14,
+    color: '#27AE60',
+    fontWeight: '500',
+  },
+  userTypeOptionTextSelected: {
+    color: '#fff',
   },
 });

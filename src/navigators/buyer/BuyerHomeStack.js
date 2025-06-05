@@ -40,6 +40,7 @@ const userType = useSelector(selectUserType)
         options={{
           header: props => <MainScreensHeader 
           title={userType}
+          hideCart={false}
           {...props} />,
             contentStyle: {
           backgroundColor: 'white'
