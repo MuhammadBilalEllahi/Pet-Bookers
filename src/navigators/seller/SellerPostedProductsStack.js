@@ -7,7 +7,7 @@ import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {MyPostedAdsScreen} from '../../screens/seller/ads/MyPostedAdsScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
 import {ProductDetailScreen} from '../../screens/seller/ads/ProductDetailScreen';
-import {EditProductScreen} from '../../screens/seller/ads/EditProductScreen';
+import {EditProductScreen} from '../../screens/seller/EditProductScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 

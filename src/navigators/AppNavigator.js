@@ -18,8 +18,8 @@ import PaymentPage from '../screens/buyer/checkout/PaymentPage';
 import { MyCartScreen } from '../screens/buyer/checkout/MyCartScreen';
 import { MyPostedAdsScreen } from '../screens/seller/ads/MyPostedAdsScreen';
 import { ProductDetailScreen } from '../screens/seller/ads/ProductDetailScreen';
-import { EditProductScreen } from '../screens/seller/ads/EditProductScreen';
 import { MainScreensHeader } from '../components/buyer';
+import { EditProductScreen } from '../screens/seller/EditProductScreen';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 

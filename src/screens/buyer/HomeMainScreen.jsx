@@ -77,6 +77,7 @@ export const HomeMainScreen = ({navigation}) => {
   const parsedProducts = useCallback(
     list => {
       if (!Array.isArray(list)) return [];
+      console.log('list', list, "baseUrls", baseUrls['product_thumbnail_url']);
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
@@ -273,11 +274,13 @@ useEffect(() => {
 
   const parsedSellers = useMemo(() => {
     if (!Array.isArray(sellers)) return [];
+    // console.log('sellers', sellers);
     return sellers.map(seller => ({
       id: seller.id,
       name: seller.name,
       image: `${baseUrls['shop_image_url']}/${seller.image}`,
     }));
+    
   }, [baseUrls, sellers]);
 
   return (
