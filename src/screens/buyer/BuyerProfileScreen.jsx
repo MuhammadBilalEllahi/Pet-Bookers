@@ -15,6 +15,7 @@ import { ProfileActionButton } from '../../components/profile';
 import { axiosBuyerClient } from '../../utils/axiosClient';
 import { useEffect } from 'react';
 import { useTheme } from '../../theme/ThemeContext';
+import { AppScreens } from '../../navigators/AppNavigator';
 
 const { width, height} = Dimensions.get('window')
 
@@ -48,8 +49,9 @@ export const BuyerProfileScreen = ({navigation}) => {
     navigation.navigate('MyOrders');
   };
 
-  const navigateToWishlist = () => {
-    navigation.navigate('MyWishlist');
+  
+  const navigateToMyWishlist = () => {
+    navigation.navigate(AppScreens.MY_WISHLIST);
   };
 
   const navigateToAppSettings = () => {
@@ -122,7 +124,7 @@ export const BuyerProfileScreen = ({navigation}) => {
             title="My Wishlist"
             subtitle="Wishlist are here"
             iconName="cube-outline"
-            onPress={navigateToWishlist}
+            onPress={navigateToMyWishlist}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton

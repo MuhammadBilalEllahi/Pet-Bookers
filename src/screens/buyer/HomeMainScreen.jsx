@@ -77,7 +77,7 @@ export const HomeMainScreen = ({navigation}) => {
   const parsedProducts = useCallback(
     list => {
       if (!Array.isArray(list)) return [];
-      console.log('list', list, "baseUrls", baseUrls['product_thumbnail_url']);
+      // console.log('list', list, "baseUrls", baseUrls['product_thumbnail_url']);
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
@@ -324,7 +324,7 @@ useEffect(() => {
           onLoadMore={handleLoadMoreFeatured}
           hasMore={featuredProducts.products.length < featuredProducts.total_size}
         />
-        <ProductsList
+        {/* <ProductsList
           list={parsedProducts(latestProducts.products)}
           loading={latestProductsLoading}
           loadingError={latestProductsError}
@@ -337,8 +337,8 @@ useEffect(() => {
           onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMoreLatest}
           hasMore={latestProducts.products.length < latestProducts.total_size}
-        />
-        <ProductsList
+        /> */}
+        {/* <ProductsList
           list={parsedProducts(popularProducts.products)}
           loading={popularProductsLoading}
           loadingError={popularProductsError}
@@ -351,17 +351,8 @@ useEffect(() => {
           onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
           onLoadMore={handleLoadMorePopular}
           hasMore={popularProducts.products.length < popularProducts.total_size}
-        />
-        <HorizontalItemsList
-          containerStyle={{marginVertical: 10, paddingHorizontal: 14}}
-          list={parsedSellers}
-          listTitle={t('sellers')}
-          roundedImage={true}
-          loading={sellersLoading}
-          loadingError={sellersError}
-          onItemPress={item => navigateToVandorDetail(item)}
-          onViewAll={navigateToAllVandorsScreen}
-        />
+        /> */}
+        
         <CategoryWiseProductsList
   categorizedProducts={categorizedProducts}
   loadingMap={categoryLoaders}
@@ -377,6 +368,16 @@ useEffect(() => {
   //   }
   // }}
 />
+<HorizontalItemsList
+          containerStyle={{marginVertical: 10, paddingHorizontal: 14}}
+          list={parsedSellers}
+          listTitle={t('sellers')}
+          roundedImage={true}
+          loading={sellersLoading}
+          loadingError={sellersError}
+          onItemPress={item => navigateToVandorDetail(item)}
+          onViewAll={navigateToAllVandorsScreen}
+        />
 
       </ScrollView>
     </Layout>

@@ -8,14 +8,18 @@ import {flexeStyles} from '../../utils/globalStyles';
 import { AppScreens } from '../../navigators/AppNavigator';
 
 export const AuthRestrictedError = ({subTitle, isItSeller=false}) => {
+  
+  const route = useRoute()
+  
+  const isitSeller = route.params?.isItSeller || isItSeller ||false;
+  const subtitle = route.params?.subTitle || subTitle || "messages.sellerLoginRequired";
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
-  const route = useRoute()
   
 
   const onNavigateToAuth = () => {
     // const { isItSeller= false} = route.params || {};
-    navigation.navigate(AppScreens.AUTH, {isItSeller: isItSeller});
+    navigation.navigate(AppScreens.AUTH, {isItSeller: isitSeller});
   };
 
   return (
@@ -38,7 +42,7 @@ export const AuthRestrictedError = ({subTitle, isItSeller=false}) => {
         {t('signin')}
       </Text>
       <Text category="p1" style={styles.subTitle}>
-        {t(subTitle)}
+        {t(subtitle)}
       </Text>
       <Layout
         style={{

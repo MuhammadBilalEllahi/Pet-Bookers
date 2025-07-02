@@ -122,7 +122,7 @@ export const EditProductScreen = ({ route, navigation }) => {
           tax: productData.tax?.toString() || '',
         });
         setThumbnail(`${baseUrls['product_thumbnail_url']}/${productData.thumbnail}`);
-        console.log('thumbnailll', `${baseUrls['product_thumbnail_url']}/${productData.thumbnail}`, "thumbnail", productData.thumbnail);
+        // console.log('thumbnailll', `${baseUrls['product_thumbnail_url']}/${productData.thumbnail}`, "thumbnail", productData.thumbnail);
         setSelectedImages(productData.images.map(image => `${baseUrls['product_image_url']}/${image.replace('product/', '')}`));
       }
     } catch (error) {

@@ -7,24 +7,26 @@ import {
   BottomNavigation,
   BottomNavigationTab,
   Text,
-  
+
 } from '@ui-kitten/components';
 import { useTheme } from '../../theme/ThemeContext';
 import { ThemedIcon } from '../../components/Icon';
 import { selectShowBottomTabBar } from '../../store/configs';
 import { MainScreensHeader } from '../../components/buyer';
-import { selectIfAnonymous, selectUserType } from '../../store/user';
+import { selectIfAnonymous, selectIsSeller, selectUserType } from '../../store/user';
 
 // Screens and Navigation Stacks
 import { BuyerHomeStack } from './BuyerHomeStack';
 import { ChatNavigator } from '../ChatNavigator';
 import { MyWishlistScreen } from '../../screens/buyer/MyWishlistScreen';
 import { BuyerProfileStack } from './BuyerProfileStack';
-  
+
 import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
 import { MyCartScreen } from '../../screens/buyer/checkout/MyCartScreen';
 import { ThemeProvider } from '../../theme/ThemeContext';
+import { SellerTabRoutes } from '../seller/SellerMainNavigator';
+import { SellerNewProductStack } from '../seller/SellerNewProductStack';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -41,7 +43,7 @@ const { Navigator, Screen } = createBottomTabNavigator();
 export const BuyerMainRoutes = Object.freeze({
   BUYER_HOME: 'BuyerHome',
   BUYER_CHAT: 'BuyerChat',
-  
+
   BUYER_LUCKYDRAW: 'BuyerLuckyDraw',
   SELLER_POST_AD: 'SellerPostAd',
   BUYER_WISHLIST: 'BuyerWishlist',
@@ -59,51 +61,51 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
   const isRTL = i18n.dir() === 'rtl';
 
   return (
-  <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
-    <Image
-      source={iconSource}
-      style={{
-        width: 36,
-        height: 36,
-        resizeMode: 'contain',
-          tintColor: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : ICON_DARK_GREY,
-        ...customIconStyle,
-      }}
-      key={`icon-image-${label}`}
-    />
-    <Text
-      style={{
-        fontWeight: '700',
-        fontSize: 12,
-          color: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : TEXT_BLACK,
-        marginTop: 2,
-        flexShrink: 0,
-        flexGrow: 0,
-        minWidth: 0,
-          textAlign: 'center',
-      }}
-      numberOfLines={1}
-      ellipsizeMode="clip"
-      allowFontScaling={false}
-      key={`icon-label-${label}`}
-    >
-      {label}
-    </Text>
-    {isActive && (
+    <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
       <Image
-        source={activeUnderIcon}
+        source={iconSource}
         style={{
           width: 36,
-          height: 6,
+          height: 36,
           resizeMode: 'contain',
-          marginTop: 2,
-            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
+          tintColor: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : ICON_DARK_GREY,
+          ...customIconStyle,
         }}
-        key={`icon-active-underline-${label}`}
+        key={`icon-image-${label}`}
       />
-    )}
-  </View>
-);
+      <Text
+        style={{
+          fontWeight: '700',
+          fontSize: 12,
+          color: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : TEXT_BLACK,
+          marginTop: 2,
+          flexShrink: 0,
+          flexGrow: 0,
+          minWidth: 0,
+          textAlign: 'center',
+        }}
+        numberOfLines={1}
+        ellipsizeMode="clip"
+        allowFontScaling={false}
+        key={`icon-label-${label}`}
+      >
+        {label}
+      </Text>
+      {isActive && (
+        <Image
+          source={activeUnderIcon}
+          style={{
+            width: 36,
+            height: 6,
+            resizeMode: 'contain',
+            marginTop: 2,
+            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
+          }}
+          key={`icon-active-underline-${label}`}
+        />
+      )}
+    </View>
+  );
 };
 
 // Do not change color of plus icon (no tintColor)
@@ -113,61 +115,61 @@ const renderAddTabIconWithActive = (isActive, label) => {
   const isRTL = i18n.dir() === 'rtl';
 
   return (
-  <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
-    <View
-      style={[
-        styles.addButton,
-        {
-          borderColor: 'transparent',
+    <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
+      <View
+        style={[
+          styles.addButton,
+          {
+            borderColor: 'transparent',
             backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff',
-        },
-      ]}
-      key={`addButton-${label}`}
-    >
-      <Image
-        source={sellPlusIcon}
-        style={{
-          width: 70,
-          height: 70,
-          resizeMode: 'cover',
+          },
+        ]}
+        key={`addButton-${label}`}
+      >
+        <Image
+          source={sellPlusIcon}
+          style={{
+            width: 70,
+            height: 70,
+            resizeMode: 'cover',
             tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
-        }}
-        key={`addButton-image-${label}`}
-      />
-    </View>
-    <Text
-      style={{
-        fontWeight: '700',
-        fontSize: 12,
+          }}
+          key={`addButton-image-${label}`}
+        />
+      </View>
+      <Text
+        style={{
+          fontWeight: '700',
+          fontSize: 12,
           color: isDark ? theme['color-shadcn-foreground'] : TEXT_BLACK,
-        marginTop: 2,
-        flexShrink: 0,
-        flexGrow: 0,
-        minWidth: 0,
-          textAlign: 'center',
-      }}
-      numberOfLines={1}
-      ellipsizeMode="clip"
-      allowFontScaling={false}
-      key={`addButton-label-${label}`}
-    >
-      {label}
-    </Text>
-    {isActive && (
-      <Image
-        source={activeUnderIcon}
-        style={{
-          width: 36,
-          height: 6,
-          resizeMode: 'contain',
           marginTop: 2,
-            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
+          flexShrink: 0,
+          flexGrow: 0,
+          minWidth: 0,
+          textAlign: 'center',
         }}
-        key={`addButton-active-underline-${label}`}
-      />
-    )}
-  </View>
-);
+        numberOfLines={1}
+        ellipsizeMode="clip"
+        allowFontScaling={false}
+        key={`addButton-label-${label}`}
+      >
+        {label}
+      </Text>
+      {isActive && (
+        <Image
+          source={activeUnderIcon}
+          style={{
+            width: 36,
+            height: 6,
+            resizeMode: 'contain',
+            marginTop: 2,
+            tintColor: isDark ? theme['color-shadcn-primary'] : undefined,
+          }}
+          key={`addButton-active-underline-${label}`}
+        />
+      )}
+    </View>
+  );
 };
 
 const BottomTabBar = ({ navigation, state, isAnonymous }) => {
@@ -223,7 +225,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           icon={() =>
             renderAddTabIconWithActive(
               state.index === (isRTL ? 2 : 2),
-              t(isAnonymous ? 'tabs.sell' : 'tabs.cart')
+              t('tabs.sell')
             )
           }
         />
@@ -256,7 +258,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
 export const BuyerMainNavigator = () => {
   const isAnonymous = useSelector(selectIfAnonymous);
   const { theme, isDark } = useTheme();
-  
+  const isSeller = useSelector(selectIsSeller);
   return (
     <Navigator
       tabBar={props => <BottomTabBar {...props} isAnonymous={isAnonymous} key="bottomTabBar" />}
@@ -269,132 +271,145 @@ export const BuyerMainNavigator = () => {
       />
       {isAnonymous
         ? [
-            <Screen
-              key="screen-BuyerChat-anon"
-              name={BuyerMainRoutes.BUYER_CHAT}
-              options={{
-                headerShown: true,
-                header: props => (
-                  <MainScreensHeader
-                    {...props}
-                    hideSearch={true}
-                    title="Chat"
-                  />
-                ),
-              }}
-            >
-              {props => (
-                <AuthRestrictedError
+          <Screen
+            key="screen-BuyerChat-anon"
+            name={BuyerMainRoutes.BUYER_CHAT}
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader
                   {...props}
-                  subTitle="messages.loginRequired"
-                  key="authError-BuyerChat-anon"
+                  hideSearch={true}
+                  title="Chat"
                 />
-              )}
-            </Screen>,
-            <Screen
-              key="screen-SellerPostAd-anon"
-              name={BuyerMainRoutes.SELLER_POST_AD}
-              options={{
-                headerShown: true,
-                header: props => (
-                  <MainScreensHeader
-                    {...props}
-                    hideSearch={true}
-                    title="AddProduct"
-                  />
-                ),
-              }}
-            >
-              {props => (
-                <AuthRestrictedError
+              ),
+            }}
+          >
+            {props => (
+              <AuthRestrictedError
+                {...props}
+                subTitle="messages.loginRequired"
+                key="authError-BuyerChat-anon"
+              />
+            )}
+          </Screen>,
+          <Screen
+            key="screen-SellerPostAd-anon"
+            name={BuyerMainRoutes.SELLER_POST_AD}
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader
                   {...props}
-                  isItSeller= {true}
-                  subTitle="messages.sellerLoginRequired"
-                  key="authError-SellerPostAd-anon"
+                  hideSearch={true}
+                  title="AddProduct"
                 />
-              )}
-            </Screen>,
-            <Screen
-              key="screen-BuyerWishlist-anon"
-              name={BuyerMainRoutes.BUYER_WISHLIST}
-              options={{
-                headerShown: true,
-                header: props => (
-                  <MainScreensHeader
-                    {...props}
-                    hideSearch={true}
-                    title="BuyerWishlist"
-                  />
-                ),
-              }}
-            >
-              {props => (
-                <AuthRestrictedError
+              ),
+            }}
+          >
+            {props => (
+              <AuthRestrictedError
+                {...props}
+                isItSeller={true}
+                subTitle="messages.sellerLoginRequired"
+                key="authError-SellerPostAd-anon"
+              />
+            )}
+          </Screen>,
+          <Screen
+            key="screen-BuyerWishlist-anon"
+            name={BuyerMainRoutes.BUYER_WISHLIST}
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader
                   {...props}
-                  subTitle="messages.buyerLoginRequired"
-                  key="authError-BuyerWishlist-anon"
+                  hideSearch={true}
+                  title="BuyerWishlist"
                 />
-              )}
-            </Screen>,
-            <Screen
-              key="screen-BuyerProfile-anon"
-              name={BuyerMainRoutes.BUYER_PROFILE}
-              options={{
-                headerShown: true,
-                header: props => (
-                  <MainScreensHeader
-                    {...props}
-                    hideSearch={true}
-                    title="Profile"
-                  />
-                ),
-              }}
-            >
-              {props => (
-                <AuthRestrictedError
+              ),
+            }}
+          >
+            {props => (
+              <AuthRestrictedError
+                {...props}
+                subTitle="messages.buyerLoginRequired"
+                key="authError-BuyerWishlist-anon"
+              />
+            )}
+          </Screen>,
+          <Screen
+            key="screen-BuyerProfile-anon"
+            name={BuyerMainRoutes.BUYER_PROFILE}
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader
                   {...props}
-                  subTitle="messages.loginRequired"
-                  key="authError-BuyerProfile-anon"
+                  hideSearch={true}
+                  title="Profile"
                 />
-              )}
-            </Screen>,
-          ]
+              ),
+            }}
+          >
+            {props => (
+              <AuthRestrictedError
+                {...props}
+                subTitle="messages.loginRequired"
+                key="authError-BuyerProfile-anon"
+              />
+            )}
+          </Screen>,
+        ]
         : [
-            <Screen
-              key="screen-BuyerChat"
-              name={BuyerMainRoutes.BUYER_CHAT}
-              component={ChatNavigator}
-            />,
-            <Screen
-              key="screen-BuyerCart"
-              name={BuyerMainRoutes.BUYER_CART}
-              component={MyCartScreen}
+          <Screen
+            key="screen-BuyerChat"
+            name={BuyerMainRoutes.BUYER_CHAT}
+            component={ChatNavigator}
+          />,
+          // <Screen
+          //   key="screen-BuyerCart"
+          //   name={BuyerMainRoutes.BUYER_CART}
+          //   // component={MyCartScreen}
+          //   component={}
 
-              options={{
-                headerShown: true,
-                header: props => (
-                  <MainScreensHeader {...props} hideSearch={true} key="header-BuyerCart" />
-                ),
-              }}
-            />,
+          //   options={{
+          //     headerShown: true,
+          //     header: props => (
+          //       <MainScreensHeader {...props} hideSearch={true} key="header-BuyerCart" />
+          //     ),
+          //   }}
+          // />,
+          <Screen
+            name={SellerTabRoutes.POST_AD}
+            component={isSeller ? SellerNewProductStack : AuthRestrictedError}
+            initialParams={{
+              isItSeller: isSeller,
+              subTitle: "messages.sellerLoginRequired"
+            }}
+            key="authError-SellerPostAd-anon"
+            options={{
+              unmountOnBlur: true,
+            }}
+          />,
 
 
-            // <Screen
-            //   key="screen-BuyerWishlist"
-            //   name={BuyerMainRoutes.BUYER_WISHLIST}
-            //   component={MyWishlistScreen}
-            //   options={{
-            //     headerShown: true,
-            //     header: props => <MainScreensHeader {...props} key="header-BuyerWishlist" />,
-            //   }}
-            // />,
+          // <Screen
+          //   key="screen-BuyerWishlist"
+          //   name={BuyerMainRoutes.BUYER_WISHLIST}
+          //   component={MyWishlistScreen}
+          //   options={{
+          //     headerShown: true,
+          //     header: props => <MainScreensHeader {...props} key="header-BuyerWishlist" />,
+          //   }}
+          // />,
 
 
-            <Screen
+          <Screen
             key="screen-BuyerLuckyDraw"
             name={BuyerMainRoutes.BUYER_LUCKYDRAW}
             component={LuckyDrawListScreen}
-            
+
 
             options={{
               headerShown: true,
@@ -405,13 +420,13 @@ export const BuyerMainNavigator = () => {
           />,
 
 
-          
-            <Screen
-              key="screen-BuyerProfile"
-              name={BuyerMainRoutes.BUYER_PROFILE}
-              component={BuyerProfileStack}
-            />,
-          ]}
+
+          <Screen
+            key="screen-BuyerProfile"
+            name={BuyerMainRoutes.BUYER_PROFILE}
+            component={BuyerProfileStack}
+          />,
+        ]}
     </Navigator>
   );
 };

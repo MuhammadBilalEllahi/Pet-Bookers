@@ -1,5 +1,5 @@
 import {Avatar, Input, Layout, Text} from '@ui-kitten/components';
-import {StyleSheet, TouchableWithoutFeedback, View} from 'react-native';
+import {Button, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {BackButton} from '../components/BackButton';
 import {MessagesList} from '../components/chat';
@@ -8,128 +8,95 @@ import {setBottomTabBarVisibility} from '../store/configs';
 import {resetActiveRoom} from '../store/chat';
 import {flexeStyles, spacingStyles} from '../utils/globalStyles';
 import {useTheme} from '../theme/ThemeContext';
-
-const messagesList = [
-  {
-    id: 12,
-    message: 'We should plan to watch it together sometime.',
-    selfMessage: false,
-    messageDateTime: '2023-05-24T19:40:00',
-    status: 'sent',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 11,
-    message: "Not yet, but I heard it's really good.",
-    selfMessage: true,
-    messageDateTime: '2023-05-24T09:39:00',
-    status: 'delivered',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 10,
-    message: 'Hey, did you watch that new movie yet?',
-    selfMessage: false,
-    messageDateTime: '2023-05-24T09:38:00',
-    status: 'sent',
-    attachmentType: 'video',
-    attachment: 'test video',
-  },
-  {
-    id: 9,
-    message: "Sure, I'll keep you updated. Have a great evening!",
-    selfMessage: true,
-    messageDateTime: '2023-05-24T09:37:00',
-    status: 'read',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 8,
-    message: 'Sounds like a plan. Let me know how it goes.',
-    selfMessage: false,
-    messageDateTime: '2023-05-24T09:36:00',
-    status: 'sent',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 7,
-    message: 'I might go out for dinner with friends. Enjoy the movie!',
-    selfMessage: true,
-    messageDateTime: '2023-05-24T09:35:00',
-    status: 'delivered',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 6,
-    message: 'Not really. Just thinking of catching a movie. How about you?',
-    selfMessage: false,
-    messageDateTime: '2023-05-24T09:34:00',
-    status: 'sent',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 5,
-    message: "That's awesome. Any plans for the evening?",
-    selfMessage: true,
-    messageDateTime: '2023-05-24T09:33:00',
-    status: 'read',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 4,
-    message: "I'm good too. Just finished work for the day.",
-    selfMessage: false,
-    messageDateTime: '2023-05-24T09:32:00',
-    status: 'read',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 3,
-    message: "Hi John! I'm doing great. How about you?",
-    selfMessage: true,
-    messageDateTime: '2023-05-24T09:31:00',
-    status: 'sent',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 2,
-    message: "Hey, how's it going?",
-    selfMessage: false,
-    messageDateTime: '2023-05-24T09:39:00',
-    status: 'sent',
-    attachmentType: null,
-    attachment: null,
-  },
-  {
-    id: 1,
-    message: "Hey, how's it going?",
-    selfMessage: false,
-    messageDateTime: '2023-05-20T09:30:00',
-    status: 'sent',
-    attachmentType: null,
-    attachment: null,
-  },
-];
+import { axiosSellerClient } from '../utils/axiosClient';
+import { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
 
 export const MessagesScreen = ({navigation}) => {
   const {theme, isDark} = useTheme();
   const dispatch = useDispatch();
+  const route = useRoute();
+  const {roomId, recipientProfile, recipientName} = route.params;
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  console.log('roomId in [MessagesScreen]', roomId);
+  console.log('recipientProfile in [MessagesScreen]', recipientProfile);
+  console.log('recipientName in [MessagesScreen]', recipientName);
+  console.log('messages in [MessagesScreen]', messages);
+  console.log('newMessage in [MessagesScreen]', newMessage);
+  console.log('isSending in [MessagesScreen]', isSending);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await axiosSellerClient.get(`messages/get-message/customer/${roomId}?limit=10&offset=0`);
+        if (response.data && Array.isArray(response.data)) {
+          const formattedMessages = response.data.map(msg => ({
+            id: msg.id,
+            message: msg.message,
+            selfMessage: msg.sender_type === 'seller',
+            messageDateTime: msg.created_at,
+            status: 'sent',
+            attachmentType: msg.attachment_type || null,
+            attachment: msg.attachment || null,
+          }));
+          setMessages(formattedMessages);
+        }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+    fetchMessages();
+  }, [roomId]);
+
+  const sendMessage = async () => {
+    console.log('newMessage in [MessagesScreen] sendMessage', newMessage);
+    if (!newMessage.trim() || isSending) {
+      return;
+    }
+
+    try {
+      setIsSending(true);
+      const response = await axiosSellerClient.post('messages/send/customer', {
+        id: roomId,
+        message: newMessage.trim(),
+      });
+      console.log('response in [MessagesScreen] sendMessage', JSON.stringify(response.data, null, 2));
+
+      if (response.status === 200) {
+        const newMsg = {
+          id: Date.now(),
+          message: newMessage.trim(),
+          selfMessage: true,
+          messageDateTime: new Date().toISOString(),
+          status: 'sent',
+          attachmentType: null,
+          attachment: null,
+        };
+        setMessages(prevMessages => [newMsg, ...prevMessages]);
+        setNewMessage('');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleSendPress = () => {
+    if (newMessage.trim() && !isSending) {
+      sendMessage();
+    }
+  };
 
   const renderSendIcon = props => (
-    <TouchableWithoutFeedback onPress={() => {}}>
+    <TouchableWithoutFeedback onPress={handleSendPress}>
       <ThemedIcon
         {...props}
-        name="paper-plane-outline"
-        fill={theme['color-shadcn-primary']}
+        name={isSending ? "clock-outline" : "paper-plane-outline"}
+        fill={isSending ? theme['color-shadcn-muted-foreground'] : theme['color-shadcn-primary']}
       />
     </TouchableWithoutFeedback>
   );
@@ -168,7 +135,7 @@ export const MessagesScreen = ({navigation}) => {
           <View
             style={[flexeStyles.row, flexeStyles.itemsCenter, {marginLeft: 4}]}>
             <Avatar
-              source={{uri: 'https://randomuser.me/api/portraits/men/9.jpg'}}
+              source={{uri: recipientProfile}}
               style={styles.avatar}
             />
             <View style={{marginLeft: 12}}>
@@ -179,7 +146,7 @@ export const MessagesScreen = ({navigation}) => {
                   fontWeight: '600',
                 }}
               >
-                John Doe
+                {recipientName || 'User'}
               </Text>
               <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
                 <View 
@@ -195,13 +162,16 @@ export const MessagesScreen = ({navigation}) => {
                     marginLeft: 4,
                   }}
                 >
-                Online
-              </Text>
+                  Online
+                </Text>
               </View>
             </View>
           </View>
         </Layout>
-        <MessagesList messagesList={messagesList} />
+        <MessagesList 
+          messagesList={messages} 
+          keyExtractor={item => item.id.toString()}
+        />
       </Layout>
       <Layout 
         level="1" 
@@ -214,22 +184,47 @@ export const MessagesScreen = ({navigation}) => {
           }
         ]}
       >
-        <Input
-          value={''}
-          placeholder="Your message"
-          style={[
-            styles.input,
-            { 
-              backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
-              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-            }
-          ]}
-          textStyle={{ 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
-          }}
-          placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-          accessoryRight={renderSendIcon}
-        />
+        <View style={styles.inputWrapper}>
+          <Input
+            value={newMessage}
+            onChangeText={setNewMessage}
+            placeholder="Your message"
+            style={[
+              styles.input,
+              { 
+                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              }
+            ]}
+            textStyle={{ 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+            }}
+            placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+            disabled={isSending}
+            onSubmitEditing={handleSendPress}
+          />
+          <TouchableOpacity 
+            onPress={handleSendPress} 
+            style={[
+              styles.sendButton,
+              { 
+                backgroundColor: isSending ? theme['color-shadcn-muted'] : theme['color-shadcn-primary'],
+                opacity: isSending ? 0.7 : 1
+              }
+            ]}
+            disabled={isSending}
+          >
+            <Text 
+              category="s1"
+              style={{ 
+                color: theme['color-shadcn-primary-foreground'],
+                fontWeight: '600'
+              }}
+            >
+              {isSending ? 'Sending...' : 'Send'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </Layout>
     </Layout>
   );
@@ -256,8 +251,23 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingBottom: 24,
   },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   input: {
+    flex: 1,
     borderRadius: 24,
     borderWidth: 1,
   },
+  sendButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 80,
+  },
 });
+

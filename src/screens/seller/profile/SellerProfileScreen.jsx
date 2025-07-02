@@ -10,13 +10,16 @@ import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { AirbnbRating } from 'react-native-ratings';
 
 import { flexeStyles, spacingStyles } from '../../../utils/globalStyles';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/user';
 import { getAsyncAuthToken } from '../../../utils/localstorage';
 import { AppScreens } from '../../../navigators/AppNavigator';
 import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { ProfileActionButton } from '../../../components/profile';
+import { axiosSellerClient } from '../../../utils/axiosClient';
+import { useEffect, useState } from 'react';
+import { selectBaseUrls } from '../../../store/configs';
 
 const {width, height} = Dimensions.get('window');
 
@@ -24,6 +27,14 @@ export const SellerProfileScreen = ({ navigation }) => {
   const { theme, isDark } = useTheme();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const [sellerData, setSellerData] = useState({
+    name: '',
+    profileImage: '',
+    storeName: '',
+    storeImage: '',
+    rating: 0,
+    totalRatings: 0
+  });
 
   const navigateToProfileUpdate = () => {
     navigation.navigate('UpdateProfile');
@@ -34,22 +45,71 @@ export const SellerProfileScreen = ({ navigation }) => {
   };
 
   const navigateToMyPostedAds = () => {
-    navigation.navigate('MyPostedAds');
+    navigation.navigate(AppScreens.MY_POSTED_ADS);
+  };
+
+  const navigateToFarmDetails = () => {
+    navigation.navigate(AppScreens.FARM_DETAILS_EDIT);
   };
 
   const navigateToOrdersList = () => {
     navigation.navigate('MyOrders');
   };
 
+  const navigateToMyWishlist = () => {
+    navigation.navigate(AppScreens.MY_WISHLIST);
+  };
+
+  const baseUrls = useSelector(selectBaseUrls);
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
   };
 
-  const data = getAsyncAuthToken()
-  console.log("DATA ", data)
-
   const EditIcon = (props) => <Icon {...props} name="edit-2-outline" />;
   const LockIcon = (props) => <Icon {...props} name="lock-outline" />;
+
+  useEffect(() => {
+    const fetchSellerInfo = async () => {
+      try {
+        const response = await axiosSellerClient.get('/seller-info');
+        const data = response.data;
+        if (data) {
+          const fullName = `${data.f_name || ''} ${data.l_name || ''}`.trim();
+          setSellerData(prev => ({
+            ...prev,
+            name: fullName || '',
+            profileImage: data.image ? `https://petbookers.com.pk/storage/app/public/profile/${data.image}` : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching seller info:', error);
+      }
+    };
+
+    const fetchShopInfo = async () => {
+      try {
+        const shopResponse = await axiosSellerClient.get('/shop-info');
+        const shopData = shopResponse.data;
+        if (shopData) {
+          setSellerData(prev => ({
+            ...prev,
+            storeName: shopData.name || '',
+            storeImage: shopData.image ? `${baseUrls['shop_image_url']}/${shopData.image}` : '',
+            rating: shopData.rating || 0,
+            totalRatings: shopData.rating_count || 0
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching shop info:', error);
+      }
+    };
+
+    const fetchData = async () => {
+      await Promise.all([fetchSellerInfo(), fetchShopInfo()]);
+    };
+    
+    fetchData();
+  }, []);
 
   return (
     <View style={[styles.container, { 
@@ -83,7 +143,7 @@ export const SellerProfileScreen = ({ navigation }) => {
           }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Avatar
-                source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+                source={{ uri: sellerData.profileImage || 'https://randomuser.me/api/portraits/men/1.jpg' }}
                 style={{ width: 48, height: 48, borderRadius: 24, marginRight: 14 }}
               />
               <View>
@@ -91,7 +151,7 @@ export const SellerProfileScreen = ({ navigation }) => {
                   fontWeight: 'bold', 
                   fontSize: 20, 
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }}>Osama Tabassum</Text>
+                }}>{sellerData.name || 'Loading...'}</Text>
                 <Text
                   style={{ 
                     color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
@@ -121,7 +181,7 @@ export const SellerProfileScreen = ({ navigation }) => {
             <Layout style={[flexeStyles.row, { marginBottom: 8 }]}>
               <Image
                 source={{
-                  uri: 'https://randomuser.me/api/portraits/thumb/men/75.jpg',
+                  uri: sellerData.storeImage || 'https://randomuser.me/api/portraits/thumb/men/75.jpg',
                 }}
                 style={{
                   width: 50,
@@ -134,7 +194,7 @@ export const SellerProfileScreen = ({ navigation }) => {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text category="h6" style={{ 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }}>{t('profile.storeFullName')}</Text>
+                  }}>{sellerData.storeName || t('profile.storeFullName')}</Text>
                   <Button
                     appearance="ghost"
                     size="small"
@@ -154,7 +214,7 @@ export const SellerProfileScreen = ({ navigation }) => {
                 >
                   <AirbnbRating
                     count={5}
-                    defaultRating={3.4}
+                    defaultRating={sellerData.rating}
                     showRating={false}
                     size={14}
                     isDisabled={true}
@@ -165,17 +225,18 @@ export const SellerProfileScreen = ({ navigation }) => {
                     marginHorizontal: 2,
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }}>
-                    3.4
+                    {sellerData.rating}
                   </Text>
                   <Text category="s1" style={{ 
                     color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                  }}>(34)</Text>
+                  }}>({sellerData.totalRatings})</Text>
                 </Layout>
               </Layout>
             </Layout>
             <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }}/>
           </Layout>
 
+          {/* Rest of the component remains the same */}
           <Layout
             level="1"
             style={[
@@ -196,13 +257,13 @@ export const SellerProfileScreen = ({ navigation }) => {
               title={t('profile.farmDetails')}
               subtitle={t('profile.farmDetailsSubtitle')}
               iconName="info-outline"
-              onPress={() => {}}
+              onPress={navigateToFarmDetails}
             />
             <ProfileActionButton
               title={t('profile.favoritesAds')}
               subtitle={t('profile.favoritesAdsSubtitle')}
               iconName="heart"
-              onPress={() => {}}
+              onPress={navigateToMyWishlist}
             />
             <ProfileActionButton
               title={t('profile.settings')}
@@ -224,7 +285,7 @@ export const SellerProfileScreen = ({ navigation }) => {
                 dispatch(logout());
                 navigation.navigate(AppScreens.BUYER_HOME_MAIN);
               }}
-              />
+            />
           </Layout>
           <View style={styles.bottomBar}>
             <View style={[styles.pillButton, { 

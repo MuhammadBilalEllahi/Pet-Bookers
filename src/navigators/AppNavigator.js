@@ -20,7 +20,9 @@ import { MyPostedAdsScreen } from '../screens/seller/ads/MyPostedAdsScreen';
 import { ProductDetailScreen } from '../screens/seller/ads/ProductDetailScreen';
 import { MainScreensHeader } from '../components/buyer';
 import { EditProductScreen } from '../screens/seller/EditProductScreen';
-
+import { FarmDetailsEditScreen } from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
+import { SellerPostedProductsStack } from './seller/SellerPostedProductsStack';
+import { MyWishlistScreen } from '../screens/buyer/product/MyWishlistScreen';
 const { Navigator, Screen } = createNativeStackNavigator();
 
 // Enum for App Screens
@@ -40,6 +42,8 @@ export const AppScreens = Object.freeze({
   MY_POSTED_ADS: 'MyPostedAdsScreen',
   PRODUCT_DETAIL: 'ProductDetail',
   PRODUCT_DETAIL_EDIT: 'ProductDetailEdit',
+  FARM_DETAILS_EDIT: 'FarmDetailsEdit',
+  MY_WISHLIST: 'MyWishlist',  
 
 });
 
@@ -73,8 +77,9 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
         <Screen name={AppScreens.CART} component={MyCartScreen} />
-
-        <Screen name={AppScreens.MY_POSTED_ADS} component={MyPostedAdsScreen} />
+        <Screen name={AppScreens.MY_WISHLIST} component={MyWishlistScreen} />
+{/* <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} /> */}
+        <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} />
         <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen} />
         <Screen name={AppScreens.PRODUCT_DETAIL_EDIT} component={EditProductScreen} options={{
               headerShown: true,
@@ -82,7 +87,12 @@ export const AppNavigator = () => {
                 <MainScreensHeader {...props} hideSearch={true} key="header-EditProductScreen" />
               ),
             }} />
-        
+        <Screen name={AppScreens.FARM_DETAILS_EDIT} component={FarmDetailsEditScreen} options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader {...props} hideSearch={true} key="header-FarmDetailsEditScreen" />
+              ),
+            }} />
         <Screen
               key="screen-ShipingDetails"
               name={AppScreens.SHIPING_DETAILS}

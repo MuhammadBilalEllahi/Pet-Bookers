@@ -22,6 +22,7 @@ export const ConversationItem = (props) => {
     lastUpdated,
     unreadMessages,
     onViewRoomMessages,
+    messageStatus,
   } = props;
 
   // If new structure (name exists), use new UI
@@ -74,15 +75,24 @@ export const ConversationItem = (props) => {
               )}
               {msgText && <Text style={{ flexShrink: 1 }}>{msgText}</Text>}
             </View>
-            {unreadMessages > 0 && (
-              <View
-                style={[
-                  styles.unreadCounter,
-                  { backgroundColor: theme['color-primary-default'] },
-                ]}>
-                <Text style={styles.unreadNumber}>{unreadMessages}</Text>
-              </View>
-            )}
+            <View style={styles.statusContainer}>
+              {messageStatus?.isSentByUs && (
+                <ThemedIcon
+                  name={messageStatus.isSeen ? 'done-all-outline' : 'checkmark-outline'}
+                  fill={messageStatus.isSeen ? theme['color-primary-default'] : theme['color-basic-600']}
+                  iconStyle={{width: 16, height: 16, marginRight: 4}}
+                />
+              )}
+              {unreadMessages > 0 && (
+                <View
+                  style={[
+                    styles.unreadCounter,
+                    { backgroundColor: theme['color-primary-default'] },
+                  ]}>
+                  <Text style={styles.unreadNumber}>{unreadMessages}</Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </View>
@@ -145,6 +155,10 @@ const styles = StyleSheet.create({
   messageInnerContainer: {
     flex: 1,
     flexGrow: 1,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   unreadCounter: {
     width: 24,

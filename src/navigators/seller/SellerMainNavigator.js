@@ -20,6 +20,12 @@ import { ChatNavigator } from '../ChatNavigator';
 import { SellerNewProductStack } from './SellerNewProductStack';
 import { SellerProfileStack } from './SellerProfileStack';
 import { SellerPostedProductsStack } from './SellerPostedProductsStack';
+import { BuyerMainRoutes } from '../buyer/BuyerMainNavigator';
+import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
+import { MainScreensHeader } from '../../components/buyer';
+import { selectIsSeller } from '../../store/user';
+import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
+
 
 const { Navigator, Screen } = createBottomTabNavigator();
 
@@ -38,7 +44,7 @@ const sellPlusIcon = require('../../../assets/new/bottom_nav/sell_plus.png');
 const myAdsIcon = require('../../../assets/new/bottom_nav/my_adds.png');
 const profileUserIcon = require('../../../assets/new/bottom_nav/profile_user.png');
 const activeUnderIcon = require('../../../assets/new/bottom_nav/active.png');
-
+const luckyDrawIcon = require('../../../assets/new/bottom_nav/lucky_draw.png');
 const ICON_DARK_GREY = '#444444';
 const TEXT_BLACK = '#000000';
 const ORANGE_ACCENT = '#FF6B00';
@@ -201,20 +207,21 @@ const BottomTabBar = ({ navigation, state }) => {
           icon={() =>
             renderAddTabIconWithActive(
               state.index === 2,
-              t('tabs.add')
+              t('tabs.sell')
             )
           }
         />
         <BottomNavigationTab
-          key="tab-myads"
+          key="tab-luckydraw"
           icon={() =>
             renderTabIconWithActive(
-              myAdsIcon,
+              luckyDrawIcon,
               state.index === 3,
-              t('tabs.myads')
+              t('tabs.luckydraw')
             )
           }
         />
+          
         <BottomNavigationTab
           key="tab-profile"
           icon={() =>
@@ -231,6 +238,7 @@ const BottomTabBar = ({ navigation, state }) => {
 };
 
 export const SellerMainNavigator = () => {
+  
   return (
     <Navigator
       tabBar={props => <BottomTabBar {...props} />}
@@ -238,14 +246,29 @@ export const SellerMainNavigator = () => {
     >
       <Screen name={SellerTabRoutes.HOME} component={SellerHomeStack} />
       <Screen name={SellerTabRoutes.CHAT} component={ChatNavigator} />
+      
       <Screen
         name={SellerTabRoutes.POST_AD}
         component={SellerNewProductStack}
+       
         options={{
           unmountOnBlur: true,
         }}
       />
-      <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} />
+      <Screen
+            // key="screen-BuyerLuckyDraw"
+            name={BuyerMainRoutes.BUYER_LUCKYDRAW}
+            component={LuckyDrawListScreen}
+            
+
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader {...props} hideSearch={true} key="header-BuyerLuckyDraw" />
+              ),
+            }}
+          />
+      
       <Screen name={SellerTabRoutes.PROFILE} component={SellerProfileStack} />
     </Navigator>
   );

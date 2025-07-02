@@ -53,6 +53,13 @@ export const selectUserType = createSelector(selectUserData, userData => {
   return userData.userType;
 });
 
+export const selectIsSeller = createSelector(selectUserData, userData => {
+  return userData.userType === UserType.SELLER;
+});
+export const selectIsBuyer = createSelector(selectUserData, userData => {
+  return userData.userType === UserType.BUYER;
+});
+
 export const selectIfAnonymous = createSelector(selectUserData, userData => {
   return userData.userType === UserType.ANONYMOUS;
 });
