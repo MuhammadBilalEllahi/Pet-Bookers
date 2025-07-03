@@ -122,8 +122,8 @@ export const BuyerProfileScreen = ({navigation}) => {
         <Layout level="1" style={{ backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)' }}>
           <ProfileActionButton
             title="My Wishlist"
-            subtitle="Wishlist are here"
-            iconName="cube-outline"
+            subtitle="Your saved items"
+            iconName="heart-outline"
             onPress={navigateToMyWishlist}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />

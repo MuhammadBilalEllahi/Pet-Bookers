@@ -19,6 +19,7 @@ import {
   selectPopularProducts,
   selectSellers,
 } from '../../store/buyersHome';
+import {loadWishlist} from '../../store/wishlist';
 import {
   loadProductCategories,
   loadProductsByCategory,
@@ -26,6 +27,7 @@ import {
 } from '../../store/productCategories';
 import {selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
+import { AppScreens } from '../../navigators/AppNavigator';
 
 
 export const HomeMainScreen = ({navigation}) => {
@@ -50,7 +52,7 @@ export const HomeMainScreen = ({navigation}) => {
 
   const navigateToProductDetail = (productId, slug) => {
     console.log("[navigateToProductDetail]", productId, slug);
-    navigation.navigate('ProductDetail', {productId: productId, slug: slug});
+    navigation.navigate(AppScreens.PRODUCT_DETAIL_BUYER, {productId: productId, slug: slug});
   };
 
   const navigateToVandorDetail = vandorId => {
@@ -205,6 +207,7 @@ const loadCategoryProducts = useCallback((categoryId, categoryName) => {
     dispatch(loadLatestProducts({limit: 10}));
     dispatch(loadPopularProducts({limit: 10}));
     dispatch(loadSellers());
+    dispatch(loadWishlist());
   }, []);
 
 //   useEffect(() => {

@@ -18,7 +18,7 @@ import { selectIfAnonymous, selectIsSeller, selectUserType } from '../../store/u
 // Screens and Navigation Stacks
 import { BuyerHomeStack } from './BuyerHomeStack';
 import { ChatNavigator } from '../ChatNavigator';
-import { MyWishlistScreen } from '../../screens/buyer/MyWishlistScreen';
+import { MyWishlistScreen } from '../../screens/buyer/product/MyWishlistScreen';
 import { BuyerProfileStack } from './BuyerProfileStack';
 
 import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
@@ -400,7 +400,7 @@ export const BuyerMainNavigator = () => {
           //   component={MyWishlistScreen}
           //   options={{
           //     headerShown: true,
-          //     header: props => <MainScreensHeader {...props} key="header-BuyerWishlist" />,
+          //     header: props => <MainScreensHeader {...props} hideSearch={true} title="My Wishlist" key="header-BuyerWishlist" />,
           //   }}
           // />,
 

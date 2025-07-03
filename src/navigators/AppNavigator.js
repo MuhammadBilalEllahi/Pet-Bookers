@@ -8,7 +8,7 @@ import { loadAppConfigs } from '../store/configs';
 import { AuthLoaderScreen } from '../screens/AuthLoaderScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { AuthNavigator } from './AuthNavigator';
-import { BuyerMainNavigator } from './buyer/BuyerMainNavigator';
+import { BuyerMainNavigator, BuyerMainRoutes } from './buyer/BuyerMainNavigator';
 import { SellerMainNavigator } from './seller/SellerMainNavigator';
 import { LoginScreen } from '../screens/auth/Login';
 import { RegisterScreen } from '../screens/auth/Register';
@@ -18,6 +18,7 @@ import PaymentPage from '../screens/buyer/checkout/PaymentPage';
 import { MyCartScreen } from '../screens/buyer/checkout/MyCartScreen';
 import { MyPostedAdsScreen } from '../screens/seller/ads/MyPostedAdsScreen';
 import { ProductDetailScreen } from '../screens/seller/ads/ProductDetailScreen';
+import { ProductDetailScreen as ProductDetailScreenBuyer } from '../screens/buyer/product/ProductDetailScreen';
 import { MainScreensHeader } from '../components/buyer';
 import { EditProductScreen } from '../screens/seller/EditProductScreen';
 import { FarmDetailsEditScreen } from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
@@ -45,7 +46,7 @@ export const AppScreens = Object.freeze({
   PRODUCT_DETAIL_EDIT: 'ProductDetailEdit',
   FARM_DETAILS_EDIT: 'FarmDetailsEdit',
   MY_WISHLIST: 'MyWishlist',  
-
+  PRODUCT_DETAIL_BUYER: 'ProductDetailBuyer',
 });
 
 export const AppNavigator = () => {
@@ -82,7 +83,31 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.MY_ORDERS} component={MyOrders} />
 {/* <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} /> */}
         <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} />
-        <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen} />
+        <Screen
+            key="screen-BuyerWishlist"
+            name={BuyerMainRoutes.BUYER_WISHLIST}
+            component={MyWishlistScreen}
+            options={{
+              headerShown: true,
+              header: props => <MainScreensHeader activateGoBack={true} {...props} hideWishlist={true}
+               title="My Wishlist" key="header-BuyerWishlist" />,
+            }}
+          />
+
+        <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen}
+        options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ProductDetailScreen" />
+              ),
+            }} />
+        <Screen name={AppScreens.PRODUCT_DETAIL_BUYER} component={ProductDetailScreenBuyer}
+        options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ProductDetailScreenBuyer" />
+              ),
+            }} />
         <Screen name={AppScreens.PRODUCT_DETAIL_EDIT} component={EditProductScreen} options={{
               headerShown: true,
               header: props => (

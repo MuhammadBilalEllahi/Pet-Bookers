@@ -5,6 +5,8 @@ import {Price} from '../Price';
 import {AirbnbRating} from 'react-native-ratings';
 import {spacingStyles, flexeStyles} from '../../utils/globalStyles';
 import {ThemedIcon} from '../Icon';
+import {useDispatch, useSelector} from 'react-redux';
+import {addToWishlist, removeFromWishlist, selectIsInWishlist} from '../../store/wishlist';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -24,6 +26,34 @@ export const ProductCard = ({
   isDark,
   theme,
 }) => {
+  const dispatch = useDispatch();
+  const uiKittenTheme = useTheme();
+  
+  // Get wishlist status from Redux
+  const isInWishlist = useSelector(state => selectIsInWishlist(state, id));
+
+  const toggleWishlist = (e) => {
+    e.stopPropagation(); // Prevent navigation
+    if (!id) return;
+    
+    if (isInWishlist) {
+      // Remove from wishlist
+      dispatch(removeFromWishlist({productId: id}));
+    } else {
+      // Add to wishlist with product data
+      const productData = {
+        id,
+        name,
+        slug,
+        unit_price: price,
+        discount,
+        discount_type: discountType,
+        current_stock: isSoldOut ? 0 : 1, // Basic stock info
+        thumbnail: image,
+      };
+      dispatch(addToWishlist({productId: id, productData}));
+    }
+  };
 
   return (
     <TouchableOpacity
@@ -71,25 +101,32 @@ export const ProductCard = ({
         >
           {name}
         </Text>
-        <View style={[flexeStyles.row, flexeStyles.itemsCenter, styles.priceRow]}>
-          <Text
-            category="h6"
-            style={[
-              styles.price,
-              { color: theme['color-shadcn-primary'] }
-            ]}
+        <View style={[flexeStyles.row, flexeStyles.itemsCenter, flexeStyles.contentBetween, styles.priceRow]}>
+          <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
+            <Text
+              category="h6"
+              style={[
+                styles.price,
+                { color: theme['color-shadcn-primary'] }
+              ]}
+            >
+              Rs {price}
+            </Text>
+            {oldPrice > 0 && (
+              <Text style={styles.oldPrice}>Rs {oldPrice}</Text>
+            )}
+          </View>
+          <TouchableOpacity
+            onPress={toggleWishlist}
+            style={styles.heartButton}
           >
-            Rs {price}
-          </Text>
-          {oldPrice > 0 && (
-            <Text style={styles.oldPrice}>Rs {oldPrice}</Text>
-          )}
+            <ThemedIcon
+              name={isInWishlist ? "heart" : "heart-outline"}
+              fill={isInWishlist ? uiKittenTheme['color-danger-default'] : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
+              style={styles.heartIcon}
+            />
+          </TouchableOpacity>
         </View>
-        <ThemedIcon
-          name="heart-outline"
-          fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-          style={styles.heartIcon}
-        />
         {/* Optionally show rating */}
         {/* <View style={styles.ratingRow}>
           <AirbnbRating
@@ -194,6 +231,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textDecorationLine: 'line-through',
     fontWeight: '500',
+  },
+  heartButton: {
+    padding: 4,
   },
   heartIcon: {
     width: 24,

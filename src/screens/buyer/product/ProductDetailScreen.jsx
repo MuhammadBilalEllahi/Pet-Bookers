@@ -1,4 +1,4 @@
-import { Button, Divider, Icon, Layout, Text,  } from '@ui-kitten/components';
+import { Button, Divider, Icon, Layout, Text, useTheme as useUIKittenTheme } from '@ui-kitten/components';
 import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Image, ScrollView, TouchableOpacity, View } from 'react-native';
@@ -12,8 +12,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { axiosBuyerClient } from '../../../utils/axiosClient';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { loadSellerProducts, selectSellerProducts } from '../../../store/sellerDetails';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '../../../store/wishlist';
 import { calculateDiscountedPrice } from '../../../utils/products';
 import { selectBaseUrls } from '../../../store/configs';
 import ProductDetailShimmer from './components/ProductDetailShimmer';
@@ -21,6 +23,7 @@ import ProductDetailShimmer from './components/ProductDetailShimmer';
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
   const { theme, isDark } = useTheme();
+  const uiKittenTheme = useUIKittenTheme();
   const [activeTab, setActiveTab] = useState('overview');
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const { productId, slug } = route.params || {};
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  
+  // Get wishlist status from Redux
+  const isInWishlist = useSelector(state => selectIsInWishlist(state, product?.id));
 
   const navigateToProductDetail = (productId, slug) => {
     console.log("[navigateToProductDetail]", productId, slug);
@@ -143,6 +149,32 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     console.log("[addToCart]", product);
   };
 
+  const toggleWishlist = () => {
+    if (!product?.id) return;
+    
+    if (isInWishlist) {
+      // Remove from wishlist
+      dispatch(removeFromWishlist({productId: product.id}));
+    } else {
+      // Add to wishlist with complete product data
+      const productData = {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        unit_price: product.unit_price,
+        discount: product.discount,
+        discount_type: product.discount_type,
+        current_stock: product.current_stock,
+        thumbnail: product.thumbnail,
+        images: product.images,
+        details: product.details,
+        reviews_count: product.reviews_count,
+        average_review: product.average_review,
+      };
+      dispatch(addToWishlist({productId: product.id, productData}));
+    }
+  };
+
   const navigateToSellerProfile = (sellerId) => {
     navigation.navigate('VandorDetail', { sellerId });
     console.log("[navigateToSellerProfile]", sellerId);
@@ -202,9 +234,15 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               </Text>
             </Layout>
             <Button
-              accessoryLeft={<ThemedIcon name="heart" />}
+              accessoryLeft={
+                <ThemedIcon 
+                  name={isInWishlist ? "heart" : "heart-outline"} 
+                  fill={isInWishlist ? uiKittenTheme['color-danger-default'] : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
+                />
+              }
               size="small"
               appearance="ghost"
+              onPress={toggleWishlist}
             />
             <Button
               accessoryLeft={<ThemedIcon name="share" />}

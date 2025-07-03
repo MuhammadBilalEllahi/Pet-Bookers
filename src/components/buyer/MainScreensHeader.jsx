@@ -10,7 +10,7 @@ import { AppScreens } from '../../navigators/AppNavigator';
 import { useTheme } from '../../theme/ThemeContext';
 
 export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack = false, hideNotification = true,
-  hideSettings = true, hideCart = true }) => {
+  hideSettings = true, hideCart = true, hideWishlist = false }) => {
   const { t, i18n } = useTranslation();
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
@@ -19,6 +19,7 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
 
   const renderIcon = props => <ThemedIcon {...props} name="search-outline" />;
   const cartIcon = props => <ThemedIcon {...props} name="shopping-bag-outline" />;
+  const wishlistIcon = props => <ThemedIcon {...props} name="heart-outline" />;
   const NotifIcon = props => <ThemedIcon {...props} name="bell-outline" />;
   const renderSettingsIcon = props => (
     <ThemedIcon {...props} name="settings-2-outline" />
@@ -29,6 +30,9 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
   };
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
+  };
+  const navigateToWishlist = () => {
+    navigation.navigate(BuyerMainRoutes.BUYER_WISHLIST);
   };
 
   const onGoBack = () => {
@@ -133,6 +137,20 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
             placeholderTextColor={isDark ? '#a1a1aa' : '#71717a'}
             size="medium"
           />
+          {!hideWishlist && <Button 
+            appearance="ghost" 
+            style={{ 
+              width: 20, 
+              height: 20, 
+              borderRadius: 10, 
+              borderWidth: 1, 
+              borderColor: isDark ? '#3f3f46' : '#e4e4e7',
+              backgroundColor: isDark ? '#27272a' : '#ffffff',
+              marginRight: 8
+            }} 
+            accessoryLeft={wishlistIcon} 
+            onPress={navigateToWishlist}
+          />}
           {!hideCart && <Button 
             appearance="ghost" 
             style={{ 

@@ -7,6 +7,7 @@ import buyersHomeReducer from './buyersHome';
 import productCategoriesReducer from './productCategories';
 import chatReducer from './chat';
 import sellerDetailsReducer from './sellerDetails';
+import wishlistReducer from './wishlist';
 
 const rootReducer = combineReducers({
   configs: configsReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   productCategories: productCategoriesReducer,
   chat: chatReducer,
   sellerDetails: sellerDetailsReducer,
+  wishlist: wishlistReducer,
 });
 
 export const store = configureStore({
