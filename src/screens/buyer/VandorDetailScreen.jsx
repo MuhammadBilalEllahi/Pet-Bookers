@@ -80,7 +80,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
 
   if (sellerInfoLoading) {
     return (
-      <Layout level="3" style={styles.loadingContainer}>
+      <Layout level="3" style={styles(theme).loadingContainer}>
         <Spinner size="large" />
       </Layout>
     );
@@ -88,7 +88,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
 
   if (sellerInfoError || !sellerInfo) {
     return (
-      <Layout level="3" style={styles.errorContainer}>
+      <Layout level="3" style={styles(theme).errorContainer}>
         <Text status="danger">{sellerInfoError || 'Failed to load seller information'}</Text>
       </Layout>
     );
@@ -112,7 +112,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
   }));
 
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: '#f9f9f9'}}>
+    <Layout level="3" style={{flex: 1, backgroundColor: theme['background-basic-color-2']}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -123,7 +123,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
           paddingBottom: 90,
         }}>
         {/* Banner */}
-        <View style={styles.bannerShadow}>
+        <View style={styles(theme).bannerShadow}>
           <Image
             source={{
               
@@ -131,25 +131,25 @@ export const VandorDetailScreen = ({route, navigation}) => {
                 ? `https://petbookers.com.pk/storage/app/public/shop/banner/${sellerInfo.seller.shop.banner}`
                 : undefined,
             }}
-            style={styles.banner}
+            style={styles(theme).banner}
             defaultSource={require('../../../assets/new/lion.png')}
           />
         </View>
         {/* Store Info Card */}
-        <View style={styles.storeInfoCard}>
-          <View style={styles.storeInfoRow}>
+        <View style={styles(theme).storeInfoCard}>
+          <View style={styles(theme).storeInfoRow}>
             <Image
               source={{
                 uri: sellerInfo?.seller?.shop?.image
                   ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
                   : undefined,
               }}
-              style={styles.avatar}
+              style={styles(theme).avatar}
               defaultSource={require('../../../assets/new/lion.png')}
             />
             <View style={{flex: 1}}>
-              <Text style={styles.storeName}>{sellerInfo?.seller?.shop?.name || 'Unknown Store'}</Text>
-              <View style={styles.ratingRow}>
+              <Text style={styles(theme).storeName}>{sellerInfo?.seller?.shop?.name || 'Unknown Store'}</Text>
+              <View style={styles(theme).ratingRow}>
                 <AirbnbRating
                   count={5}
                   defaultRating={sellerInfo?.avg_rating || 0}
@@ -159,27 +159,27 @@ export const VandorDetailScreen = ({route, navigation}) => {
                   selectedColor={theme['color-primary-default']}
                   starContainerStyle={{marginRight: 4}}
                 />
-                <Text style={styles.ratingValue}>{sellerInfo?.avg_rating || 0}</Text>
-                <Text style={styles.ratingCount}>({sellerInfo?.total_review || 0})</Text>
+                <Text style={styles(theme).ratingValue}>{sellerInfo?.avg_rating || 0}</Text>
+                <Text style={styles(theme).ratingCount}>({sellerInfo?.total_review || 0})</Text>
               </View>
-              <Text style={styles.orderCount}>{sellerInfo?.total_order || 0} Orders</Text>
-              <Text style={styles.addressText}>{sellerInfo?.seller?.shop?.address || 'No address provided'}</Text>
-              <Text style={styles.contactText}>{sellerInfo?.seller?.shop?.contact || 'No contact provided'}</Text>
+              <Text style={styles(theme).orderCount}>{sellerInfo?.total_order || 0} Orders</Text>
+              <Text style={styles(theme).addressText}>{sellerInfo?.seller?.shop?.address || 'No address provided'}</Text>
+              <Text style={styles(theme).contactText}>{sellerInfo?.seller?.shop?.contact || 'No contact provided'}</Text>
             </View>
             <Button
               appearance="ghost"
               accessoryLeft={<ThemedIcon name="message-square-outline" status="primary" />}
               size="small"
-              style={styles.messageBtn}
+              style={styles(theme).messageBtn}
             />
           </View>
         </View>
         {/* Search Bar */}
-        <View style={styles.searchBarShadow}>
-          <View style={styles.searchBarRow}>
+        <View style={styles(theme).searchBarShadow}>
+          <View style={styles(theme).searchBarRow}>
             <Input
               placeholder="Search in Store"
-              style={styles.searchInput}
+              style={styles(theme).searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
               onSubmitEditing={handleSearch}
@@ -189,7 +189,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
               appearance="ghost"
               accessoryLeft={<ThemedIcon name="funnel-outline" />}
               size="small"
-              style={styles.filterBtn}
+              style={styles(theme).filterBtn}
             />
           </View>
         </View>
@@ -214,16 +214,16 @@ export const VandorDetailScreen = ({route, navigation}) => {
               cardWidth={(windowWidth - 56) / 2}
               cardHeight={(windowWidth - 56) / 2.2}
               /> */}
-        <View style={styles.productGrid}>
-          {parsedProducts.map(item => (
-            <View key={item.id} style={styles.productCardWrapper}>
+        <View style={styles(theme).productGrid}>
+          {/* {parsedProducts.map(item => (
+            <View key={item.id} style={styles(theme).productCardWrapper}>
               <ProductCard {...item} cardWidth={(windowWidth - 56) / 2} />
               
             </View>
-          ))}
+          ))} */}
         </View>
         {sellerProductsLoading && (
-          <View style={styles.loadingMoreContainer}>
+          <View style={styles(theme).loadingMoreContainer}>
             <Spinner size="small" />
           </View>
         )}
@@ -232,7 +232,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
   bannerShadow: {
     borderRadius: 10,
     overflow: 'hidden',
@@ -251,12 +251,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   storeInfoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: theme['background-basic-color-1'],
     borderRadius: 14,
     marginHorizontal: 16,
     marginBottom: 16,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: theme['text-basic-color'],
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: {width: 0, height: 2},
@@ -271,14 +271,14 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 35,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: theme['background-basic-color-1'],
     marginRight: 14,
-    backgroundColor: '#eee',
+    backgroundColor: theme['background-basic-color-3'],
   },
   storeName: {
     fontWeight: 'bold',
     fontSize: 20,
-    color: '#222',
+    color: theme['text-basic-color'],
     marginBottom: 2,
   },
   ratingRow: {
@@ -289,17 +289,17 @@ const styles = StyleSheet.create({
   ratingValue: {
     fontWeight: 'bold',
     fontSize: 16,
-    color: '#222',
+    color: theme['text-basic-color'],
     marginLeft: 4,
   },
   ratingCount: {
     fontSize: 14,
-    color: '#888',
+    color: theme['color-basic-600'],
     marginLeft: 2,
   },
   orderCount: {
     fontSize: 14,
-    color: '#888',
+    color: theme['color-basic-600'],
     marginTop: 2,
   },
   messageBtn: {
@@ -309,33 +309,33 @@ const styles = StyleSheet.create({
   searchBarShadow: {
     marginHorizontal: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: theme['text-basic-color'],
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: {width: 0, height: 2},
     elevation: 1,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme['background-basic-color-1'],
     padding: 2,
   },
   searchBarRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme['background-basic-color-1'],
     padding: 4,
   },
   searchInput: {
     flexGrow: 1,
     marginRight: 4,
     borderRadius: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme['background-basic-color-2'],
     borderWidth: 0,
     paddingHorizontal: 10,
   },
   filterBtn: {
     borderRadius: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme['background-basic-color-2'],
     borderWidth: 0,
   },
   productGrid: {
@@ -364,12 +364,12 @@ const styles = StyleSheet.create({
   },
   addressText: {
     fontSize: 14,
-    color: '#666',
+    color: theme['color-basic-700'],
     marginTop: 4,
   },
   contactText: {
     fontSize: 14,
-    color: '#666',
+    color: theme['color-basic-700'],
     marginTop: 2,
   },
 });

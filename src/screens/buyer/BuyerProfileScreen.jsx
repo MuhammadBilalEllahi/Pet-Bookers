@@ -46,7 +46,7 @@ export const BuyerProfileScreen = ({navigation}) => {
   };
 
   const navigateToOrdersList = () => {
-    navigation.navigate('MyOrders');
+    navigation.navigate(AppScreens.MY_ORDERS);
   };
 
   

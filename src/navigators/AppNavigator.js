@@ -23,6 +23,7 @@ import { EditProductScreen } from '../screens/seller/EditProductScreen';
 import { FarmDetailsEditScreen } from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
 import { SellerPostedProductsStack } from './seller/SellerPostedProductsStack';
 import { MyWishlistScreen } from '../screens/buyer/product/MyWishlistScreen';
+import { MyOrders } from '../screens/buyer/product/MyOrders';
 const { Navigator, Screen } = createNativeStackNavigator();
 
 // Enum for App Screens
@@ -34,7 +35,7 @@ export const AppScreens = Object.freeze({
   AUTH: 'Auth',
   SELLER_HOME_MAIN: 'SellerHomeMain',
   BUYER_HOME_MAIN: 'BuyerHomeMain',
-  
+  MY_ORDERS: 'MyOrders',
   LUCKYDRAW_INSTANCE: 'LuckyDrawInstance',
   SHIPING_DETAILS: 'ShipingDetails',
   PAYMENT_PAGE: 'PaymentPage',
@@ -78,6 +79,7 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
         <Screen name={AppScreens.CART} component={MyCartScreen} />
         <Screen name={AppScreens.MY_WISHLIST} component={MyWishlistScreen} />
+        <Screen name={AppScreens.MY_ORDERS} component={MyOrders} />
 {/* <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} /> */}
         <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} />
         <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen} />

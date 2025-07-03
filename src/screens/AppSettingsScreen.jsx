@@ -5,10 +5,12 @@ import {ScrollView} from 'react-native';
 import {LanguageSwitcher} from '../components/modals';
 import {ProfileActionButton} from '../components/profile';
 import {spacingStyles} from '../utils/globalStyles';
+import { useTheme } from '../theme/ThemeContext';
 
 export const AppSettingsScreen = ({navigation}) => {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const {t, i18n} = useTranslation();
+  const {theme, isDark}  = useTheme();
 
   const toggleLanguageModal = show => {
     setShowLanguageModal(show);
@@ -20,7 +22,7 @@ export const AppSettingsScreen = ({navigation}) => {
       style={[
         spacingStyles.px16,
         {
-          flex: 1,
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],          flex: 1,
           overflow: 'scroll',
         },
       ]}>

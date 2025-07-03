@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { light, dark } from './theme';
 
+
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
