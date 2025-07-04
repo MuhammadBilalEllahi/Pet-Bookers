@@ -183,7 +183,31 @@ export const MyCartScreen = () => {
       Alert.alert('Cart Empty', 'Please add items to cart before checkout');
       return;
     }
-    navigation.navigate(AppScreens.SHIPING_DETAILS);
+
+    const selectedMethod = paymentMethods[selectedShipping.row];
+    
+    if (!selectedMethod) {
+      Alert.alert('Error', 'Please select a shipping method first');
+      return;
+    }
+
+    // Pass cart data and selected payment method to shipping details
+    const checkoutData = {
+      cartData,
+      selectedPaymentMethod: selectedMethod,
+      orderNote,
+      couponCode: appliedCouponCode,
+      couponDiscount,
+      totals: {
+        subtotal,
+        tax,
+        shipping: totalShippingPrice,
+        discount,
+        total
+      }
+    };
+
+    navigation.navigate(AppScreens.SHIPING_DETAILS, { checkoutData });
   };
 
   const removeFarmFromCart = async (sellerId, farmName) => {

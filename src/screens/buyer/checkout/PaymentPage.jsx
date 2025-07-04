@@ -15,10 +15,13 @@ export default function PaymentPage({ navigation }) {
 
 
 
-  const handleConfirmPayment = () => {
-    // Navigate to confirmation or home
-    // navigation.navigate(AppScreens.ORDER_CONFIRMATION);
-  };
+  // const handleConfirmPayment = () => {
+  //   if(COD){
+  //     axiosBuyerClient.post('order/place', {
+  //   }
+  //   // Navigate to confirmation or home
+  //   // navigation.navigate(AppScreens.ORDER_CONFIRMATION);
+  // };
 
   return (
     <ScrollView>
