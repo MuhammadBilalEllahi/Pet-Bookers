@@ -7,7 +7,367 @@ import { axiosBuyerClient } from "../../../utils/axiosClient";
 import { useTheme } from "../../../theme/ThemeContext";
 import { useSelector } from "react-redux";
 import { selectBaseUrls } from "../../../store/configs";
+import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
+import LinearGradient from 'react-native-linear-gradient';
 
+const ShimmerPlaceHolder = createShimmerPlaceholder(LinearGradient);
+
+// Cart Loading Shimmer Component
+const CartShimmer = ({ isDark, theme }) => {
+  const renderCartItemShimmer = (index) => (
+    <View key={index} style={[styles.cartRow, {
+      borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+    }]}>
+      {/* Sr# */}
+      <View style={styles.srCell}>
+        <ShimmerPlaceHolder
+          style={{ width: 20, height: 16, borderRadius: 4 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+      </View>
+      
+      {/* Product Details */}
+      <View style={styles.productCell}>
+        {/* Product Image */}
+        <ShimmerPlaceHolder
+          style={[styles.productImage, { borderRadius: 8 }]}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+        
+        <View style={{ flex: 1, paddingLeft: 12 }}>
+          {/* Product Name */}
+          <ShimmerPlaceHolder
+            style={{ width: '80%', height: 18, borderRadius: 4, marginBottom: 8 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+            ]}
+          />
+          
+          {/* Quantity Row */}
+          <View style={styles.quantityRow}>
+            <ShimmerPlaceHolder
+              style={{ width: 28, height: 28, borderRadius: 14 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+            <ShimmerPlaceHolder
+              style={{ width: 20, height: 16, borderRadius: 4, marginHorizontal: 12 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+            <ShimmerPlaceHolder
+              style={{ width: 28, height: 28, borderRadius: 14 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+          </View>
+          
+          {/* Price */}
+          <ShimmerPlaceHolder
+            style={{ width: '60%', height: 16, borderRadius: 4 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+            ]}
+          />
+        </View>
+        
+        {/* Remove Button */}
+        <ShimmerPlaceHolder
+          style={{ width: 24, height: 24, borderRadius: 12 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+      </View>
+    </View>
+  );
+
+  const renderFarmShimmer = (index) => (
+    <View 
+      key={index}
+      style={[styles.cartBox, {
+        borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+        backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+      }]}
+    >
+      {/* Farm Header */}
+      <View style={styles.farmHeader}>
+        <ShimmerPlaceHolder
+          style={{ width: '60%', height: 18, borderRadius: 4 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+        <ShimmerPlaceHolder
+          style={{ width: 80, height: 14, borderRadius: 4 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+      </View>
+      
+      {/* Table Header */}
+      <View style={[styles.tableHeader, {
+        backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+      }]}>
+        <ShimmerPlaceHolder
+          style={{ width: 30, height: 16, borderRadius: 4 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-card'] : theme['color-basic-400'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300']
+          ]}
+        />
+        <ShimmerPlaceHolder
+          style={{ width: 120, height: 16, borderRadius: 4, marginLeft: 12 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-card'] : theme['color-basic-400'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300']
+          ]}
+        />
+      </View>
+      
+      {/* Cart Items */}
+      {[0, 1].map(itemIndex => renderCartItemShimmer(`${index}-${itemIndex}`))}
+      
+      {/* Farm Summary */}
+      <View style={[styles.farmSummary, {
+        backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+        borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+      }]}>
+        <View style={styles.summaryRow}>
+          <ShimmerPlaceHolder
+            style={{ width: 100, height: 16, borderRadius: 4 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-card'] : theme['color-basic-400'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300']
+            ]}
+          />
+          <ShimmerPlaceHolder
+            style={{ width: 80, height: 16, borderRadius: 4 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-card'] : theme['color-basic-400'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300']
+            ]}
+          />
+        </View>
+        <View style={styles.summaryRow}>
+          <ShimmerPlaceHolder
+            style={{ width: 90, height: 16, borderRadius: 4 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-card'] : theme['color-basic-400'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300']
+            ]}
+          />
+          <ShimmerPlaceHolder
+            style={{ width: 70, height: 16, borderRadius: 4 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-card'] : theme['color-basic-400'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300']
+            ]}
+          />
+        </View>
+      </View>
+    </View>
+  );
+
+  return (
+    <Layout style={[styles.container, {
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 160 }} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <ShimmerPlaceHolder
+          style={{ width: 200, height: 24, borderRadius: 6, marginBottom: 16 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+
+        {/* Farm Boxes */}
+        {[0, 1].map(index => renderFarmShimmer(index))}
+
+        {/* Shipping Method Select */}
+        <ShimmerPlaceHolder
+          style={{ height: 56, borderRadius: 8, marginBottom: 16 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+
+        {/* Order Note Input */}
+        <ShimmerPlaceHolder
+          style={{ height: 80, borderRadius: 8, marginBottom: 16 }}
+          shimmerColors={[
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+            isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          ]}
+        />
+
+        {/* Summary Box */}
+        <View style={[styles.summaryBox, {
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+        }]}>
+          <ShimmerPlaceHolder
+            style={{ width: 150, height: 20, borderRadius: 4, marginBottom: 16 }}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+            ]}
+          />
+          
+          {/* Summary Rows */}
+          {[0, 1, 2, 3, 4].map(index => (
+            <View key={index} style={styles.summaryRow}>
+              <ShimmerPlaceHolder
+                style={{ width: 80, height: 16, borderRadius: 4 }}
+                shimmerColors={[
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                  isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                ]}
+              />
+              <ShimmerPlaceHolder
+                style={{ width: 100, height: 16, borderRadius: 4 }}
+                shimmerColors={[
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                  isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                ]}
+              />
+            </View>
+          ))}
+          
+          {/* Coupon Row */}
+          <View style={styles.couponRow}>
+            <ShimmerPlaceHolder
+              style={{ flex: 1, height: 48, borderRadius: 8, marginRight: 12 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+            <ShimmerPlaceHolder
+              style={{ width: 100, height: 48, borderRadius: 8 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+          </View>
+          
+          {/* Total Row */}
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <ShimmerPlaceHolder
+              style={{ width: 60, height: 18, borderRadius: 4 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+            <ShimmerPlaceHolder
+              style={{ width: 120, height: 18, borderRadius: 4 }}
+              shimmerColors={[
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* Features Row */}
+        <View style={styles.featuresRow}>
+          {[0, 1, 2, 3].map(index => (
+            <View key={index} style={styles.feature}>
+              <ShimmerPlaceHolder
+                style={{ width: 32, height: 32, borderRadius: 16, marginBottom: 8 }}
+                shimmerColors={[
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                  isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                ]}
+              />
+              <ShimmerPlaceHolder
+                style={{ width: '80%', height: 14, borderRadius: 4 }}
+                shimmerColors={[
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                  isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+                  isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                ]}
+              />
+            </View>
+          ))}
+        </View>
+
+        {/* Footer Buttons */}
+        <View style={[styles.footerButtonRow, {
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+          borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+        }]}>
+          <ShimmerPlaceHolder
+            style={[styles.continueBtn, { borderRadius: 8 }]}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+            ]}
+          />
+          <ShimmerPlaceHolder
+            style={[styles.checkoutBtn, { borderRadius: 8 }]}
+            shimmerColors={[
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+              isDark ? theme['color-shadcn-accent'] : theme['color-basic-300'],
+              isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+            ]}
+          />
+        </View>
+      </ScrollView>
+    </Layout>
+  );
+};
 
 
 export const MyCartScreen = () => {
@@ -431,18 +791,7 @@ export const MyCartScreen = () => {
   };
 
   if (loading) {
-    return (
-      <Layout style={[styles.container, {
-        backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
-        justifyContent: 'center',
-        alignItems: 'center'
-      }]}>
-        <Icon name="loader-outline" fill={theme['color-shadcn-primary']} style={{ width: 40, height: 40 }} />
-        <Text style={[styles.loadingText, {
-          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>Loading your cart...</Text>
-      </Layout>
-    );
+    return <CartShimmer isDark={isDark} theme={theme} />;
   }
 
   if (cartData.length === 0) {
@@ -463,7 +812,10 @@ export const MyCartScreen = () => {
           style={[styles.browseBtn, {
             backgroundColor: theme['color-shadcn-primary']
           }]}
-          onPress={() => navigation.navigate('BuyerHome')}
+          onPress={() => navigation.reset({
+            index: 0,
+            routes: [{ name: AppScreens.BUYER_HOME_MAIN }],
+          })}
         >
           Browse Products
         </Button>
@@ -698,7 +1050,10 @@ export const MyCartScreen = () => {
               borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
             }]}
             status="basic"
-            onPress={() => navigation.navigate('BuyerHome')}
+            onPress={() => navigation.reset({
+              index: 0,
+              routes: [{ name: AppScreens.BUYER_HOME_MAIN }],
+            })}
           >
             <Text style={{
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],

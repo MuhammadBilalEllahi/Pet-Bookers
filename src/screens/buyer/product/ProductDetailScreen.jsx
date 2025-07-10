@@ -1,7 +1,7 @@
 import { Button, Divider, Icon, Layout, Text, useTheme as useUIKittenTheme } from '@ui-kitten/components';
 import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, FlatList, Image, ScrollView, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, ScrollView, TouchableOpacity, View } from 'react-native';
 import { AirbnbRating } from 'react-native-ratings';
 import { ProductsList } from '../../../components/buyer/ProductsList';
 import { ThemedIcon } from '../../../components/Icon';
@@ -18,7 +18,15 @@ import { loadSellerProducts, selectSellerProducts } from '../../../store/sellerD
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '../../../store/wishlist';
 import { calculateDiscountedPrice } from '../../../utils/products';
 import { selectBaseUrls } from '../../../store/configs';
+import { 
+  selectIsBuyerAuthenticated, 
+  selectIsSellerAuthenticated,
+  selectCustomerInfo
+} from '../../../store/user';
+import { BuyerAuthModal } from '../../../components/modals';
 import ProductDetailShimmer from './components/ProductDetailShimmer';
+import { smartBuyerClient, handleAuthError, setAuthModalHandlers } from '../../../utils/authAxiosClient';
+import Toast from 'react-native-toast-message';
 
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
@@ -33,9 +41,22 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const { productId, slug } = route.params || {};
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
   
   // Get wishlist status from Redux
   const isInWishlist = useSelector(state => selectIsInWishlist(state, product?.id));
+  
+  // Get authentication states
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const customerInfo = useSelector(selectCustomerInfo);
+
+  // Set up auth modal handlers
+  useEffect(() => {
+    setAuthModalHandlers({
+      showBuyerAuthModal: () => setShowBuyerAuthModal(true),
+    });
+  }, []);
 
   const navigateToProductDetail = (productId, slug) => {
     console.log("[navigateToProductDetail]", productId, slug);
@@ -127,16 +148,42 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   }
 
   const addToCart = async (product) => {
+    // Check if user is authenticated as buyer
+    if (!isBuyerAuthenticated) {
+      // Show informative alert based on current auth state
+      const message = isSellerAuthenticated 
+        ? 'You are signed in as a seller. Please also sign in as a buyer to add items to cart.'
+        : 'Please sign in as a buyer to add items to cart.';
+      
+      Alert.alert(
+        'Buyer Authentication Required',
+        message,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
+        ]
+      );
+      return;
+    }
+
     try {
       setAddingToCart(true);
-      console.log("[addToCart data]======", product, "------------------>",product.id, );
-      const response = await axiosBuyerClient.post('cart/add', {
+      console.log("[addToCart data]======", product, "-------------------->", product.id);
+      
+      const response = await smartBuyerClient.post('cart/add', {
         id: product.id,
         quantity: 1,
       });
-      console.log('Product added to cart:', response, "-=================================?>",response.data);
+      
+      console.log('Product added to cart:', response, "-=================================?>", response.data);
       setAddingToCart(false);
       setAddedToCart(true);
+      
+      Toast.show({
+        type: 'success',
+        text1: 'Added to Cart',
+        text2: 'Product added to cart successfully!'
+      });
       
       setTimeout(() => {
         setAddedToCart(false);
@@ -145,34 +192,52 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       console.error('Error adding to cart:', error || error?.message || error?.response?.data?.message);
       
       setAddingToCart(false);
+      
+      // Handle auth errors with proper modal display
+      handleAuthError(error, (err) => {
+        const errorMessage = err?.response?.data?.message || err?.message || 'Failed to add to cart';
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errorMessage
+        });
+      });
     }
     console.log("[addToCart]", product);
   };
 
-  const toggleWishlist = () => {
-    if (!product?.id) return;
-    
-    if (isInWishlist) {
-      // Remove from wishlist
-      dispatch(removeFromWishlist({productId: product.id}));
-    } else {
-      // Add to wishlist with complete product data
-      const productData = {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        unit_price: product.unit_price,
-        discount: product.discount,
-        discount_type: product.discount_type,
-        current_stock: product.current_stock,
-        thumbnail: product.thumbnail,
-        images: product.images,
-        details: product.details,
-        reviews_count: product.reviews_count,
-        average_review: product.average_review,
-      };
-      dispatch(addToWishlist({productId: product.id, productData}));
+  // Handle wishlist toggle with authentication check
+  const handleWishlistToggle = () => {
+    if (!isBuyerAuthenticated) {
+      const message = isSellerAuthenticated 
+        ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
+        : 'Please sign in as a buyer to add items to wishlist.';
+      
+      Alert.alert(
+        'Buyer Authentication Required',
+        message,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
+        ]
+      );
+      return;
     }
+
+    if (isInWishlist) {
+      dispatch(removeFromWishlist({ productId: product.id }));
+    } else {
+      dispatch(addToWishlist({ 
+        productId: product.id, 
+        productData: product 
+      }));
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setShowBuyerAuthModal(false);
+    // Refresh wishlist after successful authentication
+    // The wishlist will automatically reload due to auth state change
   };
 
   const navigateToSellerProfile = (sellerId) => {
@@ -242,7 +307,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               }
               size="small"
               appearance="ghost"
-              onPress={toggleWishlist}
+              onPress={handleWishlistToggle}
             />
             <Button
               accessoryLeft={<ThemedIcon name="share" />}
@@ -630,6 +695,14 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           </View>
         </Layout>
       </ScrollView>
+      
+      {/* Buyer Authentication Modal */}
+      <BuyerAuthModal
+        visible={showBuyerAuthModal}
+        onClose={() => setShowBuyerAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        title="Sign in as Buyer"
+      />
     </Layout>
   );
 };

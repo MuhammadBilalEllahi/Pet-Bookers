@@ -44,9 +44,12 @@ export const SellerHomeStack = () => {
           header: props => (
             <MainScreensHeader
               {...props}
-              hideSearch={true}
+              // hideSearch={tr}
+              hideWishlist={false}
+              hideCart={false}
               // title="HomeMainScreen"
               title={UserType.SELLER === userType ? 'Seller': UserType.BUYER === userType   ? 'Customer' : 'Guest'}
+
             />
           ),
         }}

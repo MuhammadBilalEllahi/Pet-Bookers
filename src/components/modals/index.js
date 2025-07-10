@@ -1,2 +1,3 @@
-export {LanguageSwitcher} from './LanguageSwitcher';
-export {ProductsFilterModal} from './ProductsFilterModal';
+export * from './LanguageSwitcher';
+export * from './ProductsFilterModal';
+export * from './BuyerAuthModal';

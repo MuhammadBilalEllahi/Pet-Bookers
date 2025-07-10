@@ -1,442 +1,428 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Alert, Image, TouchableOpacity } from 'react-native';
-import { Button, Layout, Text, Input, Icon } from '@ui-kitten/components';
+import { View, StyleSheet, Alert, ScrollView } from 'react-native';
+import { Layout, Text, Input, Button } from '@ui-kitten/components';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { InputError, BtnIndicator } from '../../components/form';
-import { spacingStyles } from '../../utils/globalStyles';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '../../theme/ThemeContext';
+import Toast from 'react-native-toast-message';
+
+import { smartBuyerClient, handleAuthError, setAuthModalHandlers } from '../../utils/authAxiosClient';
+import { BuyerAuthModal } from '../../components/modals';
 import { 
   selectCustomerInfo, 
-  selectCustomerLoading, 
-  selectCustomerError,
+  selectIsBuyerAuthenticated, 
+  selectIsSellerAuthenticated,
   fetchCustomerInfo,
-  logout
+  logoutBuyer
 } from '../../store/user';
-import { axiosBuyerClient } from '../../utils/axiosClient';
-import Toast from 'react-native-toast-message';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { InputError, SubmitButton } from '../../components/form';
 
-const UpdateProfileSchema = Yup.object().shape({
+const ProfileSchema = Yup.object().shape({
   f_name: Yup.string()
-    .required('First name is required')
     .min(2, 'First name must be at least 2 characters')
-    .max(50, 'First name must be less than 50 characters'),
+    .required('First name is required'),
   l_name: Yup.string()
-    .required('Last name is required')
     .min(2, 'Last name must be at least 2 characters')
-    .max(50, 'Last name must be less than 50 characters'),
+    .required('Last name is required'),
+  email: Yup.string()
+    .email('Invalid email address')
+    .required('Email is required'),
   phone: Yup.string()
-    .required('Phone number is required')
-    .matches(/^(\+92|0)?[0-9]{10,11}$/, 'Enter a valid Pakistani phone number'),
+    .matches(/^\d+$/, 'Phone must be numeric')
+    .min(10, 'Phone must be at least 10 digits')
+    .required('Phone is required'),
 });
 
 export const UpdateProfileScreen = ({ navigation }) => {
+  const { t } = useTranslation();
+  const { theme, isDark } = useTheme();
   const dispatch = useDispatch();
+  
+  const [loading, setLoading] = useState(false);
+  const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
+  
+  // Get state from Redux
   const customerInfo = useSelector(selectCustomerInfo);
-  const customerLoading = useSelector(selectCustomerLoading);
-  const customerError = useSelector(selectCustomerError);
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
 
-  const [isBtnDisable, setIsBtnDisable] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-
+  // Set up auth modal handlers
   useEffect(() => {
-    if (!customerInfo) {
-      dispatch(fetchCustomerInfo());
-    }
-  }, [dispatch, customerInfo]);
+    setAuthModalHandlers({
+      showBuyerAuthModal: () => setShowBuyerAuthModal(true),
+    });
+  }, []);
 
-  const submitForm = async values => {
+  // Check authentication and load profile on component mount
+  useEffect(() => {
+    if (isBuyerAuthenticated) {
+      // Fetch latest customer info if not available
+      if (!customerInfo) {
+        dispatch(fetchCustomerInfo());
+      }
+    } else {
+      // Show different message based on auth state
+      if (isSellerAuthenticated) {
+        Alert.alert(
+          'Buyer Authentication Required',
+          'You are currently signed in as a seller. To update your buyer profile, please also sign in as a buyer.',
+          [
+            { text: 'Cancel', style: 'cancel', onPress: () => navigation.goBack() },
+            { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
+          ]
+        );
+      } else {
+        setShowBuyerAuthModal(true);
+      }
+    }
+  }, [isBuyerAuthenticated, isSellerAuthenticated, customerInfo, dispatch]);
+
+  const handleUpdateProfile = async (values, { setSubmitting }) => {
     try {
-      setIsBtnDisable(true);
+      setLoading(true);
       
       const formData = new FormData();
-      formData.append('f_name', values.f_name.trim());
-      formData.append('l_name', values.l_name.trim());
-      formData.append('phone', values.phone.trim());
+      formData.append('f_name', values.f_name);
+      formData.append('l_name', values.l_name);
+      formData.append('email', values.email);
+      formData.append('phone', values.phone);
+      formData.append('_method', 'PUT');
 
-      // Add image if selected
-      if (selectedImage) {
-        formData.append('image', {
-          uri: selectedImage.uri,
-          type: selectedImage.type,
-          name: selectedImage.fileName || 'profile.jpg',
-        });
-      }
-
-      const response = await axiosBuyerClient.put('customer/update-profile', formData, {
+      const response = await smartBuyerClient.put('customer/update-profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      if (response.data) {
-        Toast.show({
-          type: 'success',
-          text1: 'Profile Updated',
-          text2: response.data.message || 'Your profile has been updated successfully',
-          position: 'top',
-        });
-
-        // Refresh customer info
-        dispatch(fetchCustomerInfo());
-        navigation.goBack();
-      }
-    } catch (error) {
-      console.error('Update profile error:', error);
+      console.log('Profile updated:', response.data);
       
-      let errorMessage = 'Failed to update profile';
-      if (error.response?.data?.errors) {
-        errorMessage = error.response.data.errors[0].message || errorMessage;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-
+      // Refresh customer info after successful update
+      dispatch(fetchCustomerInfo());
+      
       Toast.show({
-        type: 'error',
-        text1: 'Update failed',
-        text2: errorMessage,
-        position: 'top',
+        type: 'success',
+        text1: 'Success',
+        text2: 'Profile updated successfully!'
+      });
+      
+      navigation.goBack();
+      
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      handleAuthError(error, (err) => {
+        const errorMessage = err?.response?.data?.message || err?.message || 'Failed to update profile';
+        Toast.show({
+          type: 'error',
+          text1: 'Update Failed',
+          text2: errorMessage
+        });
       });
     } finally {
-      setIsBtnDisable(false);
+      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const selectImage = () => {
-    const options = {
-      mediaType: 'photo',
-      includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
-      quality: 0.8,
-    };
+  const handleDeleteAccount = async () => {
+    if (!customerInfo?.id) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Customer ID not found'
+      });
+      return;
+    }
 
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel || response.errorMessage) {
-        return;
-      }
-
-      if (response.assets && response.assets[0]) {
-        setSelectedImage(response.assets[0]);
-      }
-    });
-  };
-
-  const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.',
+      'Are you sure you want to delete your account? This action cannot be undone.',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: confirmDeleteAccount,
-        },
+          onPress: async () => {
+            try {
+              setLoading(true);
+              
+              const response = await smartBuyerClient.get(`customer/account-delete/${customerInfo.id}`);
+              console.log('Account deletion response:', response.data);
+              
+              // Logout buyer after account deletion
+              dispatch(logoutBuyer());
+              
+              Toast.show({
+                type: 'success',
+                text1: 'Account Deleted',
+                text2: 'Your account has been successfully deleted'
+              });
+              
+              navigation.navigate('Login');
+              
+            } catch (error) {
+              console.error('Error deleting account:', error);
+              handleAuthError(error, (err) => {
+                const errorMessage = err?.response?.data?.message || err?.message || 'Failed to delete account';
+                Toast.show({
+                  type: 'error',
+                  text1: 'Deletion Failed',
+                  text2: errorMessage
+                });
+              });
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
       ]
     );
   };
 
-  const confirmDeleteAccount = async () => {
-    try {
-      setIsDeletingAccount(true);
-      
-      const response = await axiosBuyerClient.get(`customer/account-delete/${customerInfo.id}`);
-
-      if (response.data) {
-        Toast.show({
-          type: 'success',
-          text1: 'Account Deleted',
-          text2: response.data.message || 'Your account has been deleted successfully',
-          position: 'top',
-        });
-
-        // Logout user
-        dispatch(logout());
-      }
-    } catch (error) {
-      console.error('Delete account error:', error);
-      
-      let errorMessage = 'Failed to delete account';
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-
-      Toast.show({
-        type: 'error',
-        text1: 'Delete failed',
-        text2: errorMessage,
-        position: 'top',
-      });
-    } finally {
-      setIsDeletingAccount(false);
-    }
+  const handleAuthSuccess = () => {
+    setShowBuyerAuthModal(false);
+    // Fetch customer info after successful authentication
+    dispatch(fetchCustomerInfo());
   };
 
-  const navigateToPasswordUpdate = () => {
-    navigation.navigate('UpdatePassword');
-  };
-
-  // Loading state
-  if (customerLoading && !customerInfo) {
+  if (!isBuyerAuthenticated) {
     return (
-      <Layout level="3" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading profile...</Text>
-      </Layout>
+      <>
+        <Layout style={[styles.authContainer, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
+          <Text style={[styles.authMessage, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+            {isSellerAuthenticated 
+              ? 'Please sign in as a buyer to update your profile'
+              : 'Please sign in to update your profile'
+            }
+          </Text>
+          <Button
+            onPress={() => setShowBuyerAuthModal(true)}
+            style={styles.authButton}
+          >
+            Sign in as Buyer
+          </Button>
+        </Layout>
+        
+        <BuyerAuthModal
+          visible={showBuyerAuthModal}
+          onClose={() => {
+            setShowBuyerAuthModal(false);
+            navigation.goBack();
+          }}
+          onSuccess={handleAuthSuccess}
+          title="Sign in as Buyer"
+        />
+      </>
     );
   }
 
-  // Error state
-  if (customerError && !customerInfo) {
+  if (!customerInfo) {
     return (
-      <Layout level="3" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text status="danger">Error: {customerError}</Text>
-        <Button 
-          style={{ marginTop: 16 }}
-          onPress={() => dispatch(fetchCustomerInfo())}
-        >
-          Retry
-        </Button>
+      <Layout style={[styles.loadingContainer, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
+        <Text style={[styles.loadingText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+          Loading profile...
+        </Text>
       </Layout>
     );
   }
-
-  const profileImageUri = selectedImage?.uri || 
-    (customerInfo?.image ? `https://petbookers.com.pk/storage/app/public/profile/${customerInfo.image}` : null);
-
-  // Senior: Memoize icon for performance and consistency
-  const LockIcon = React.useCallback(
-    (props) => <Icon {...props} name="lock-outline" />,
-    []
-  );
-
-  const TrashIcon = React.useCallback(
-    (props) => <Icon {...props} name="trash-2-outline" />,
-    []
-  );
-
-  const CameraIcon = React.useCallback(
-    (props) => <Icon {...props} name="camera-outline" />,
-    []
-  );
 
   return (
-    <Layout level="3" style={{ flex: 1 }}>
+    <Layout style={[styles.container, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
       <ScrollView
-        showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          spacingStyles.px16,
-          {
-            flexGrow: 1,
-            paddingTop: 16,
-          },
-        ]}
+        contentContainerStyle={styles.scrollContent}
       >
-        <Layout style={spacingStyles.p16} level="1">
-          <Text>Fill up all the fields to update your profile</Text>
-          
-          {/* Profile Image Section */}
-          <View style={styles.imageContainer}>
-            <TouchableOpacity onPress={selectImage} style={styles.imageWrapper}>
-              {profileImageUri ? (
-                <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <Icon name="person-outline" style={styles.placeholderIcon} />
-                </View>
-              )}
-              <View style={styles.cameraOverlay}>
-                <Icon name="camera-outline" style={styles.cameraIcon} />
-              </View>
-            </TouchableOpacity>
-            <Text category="p2" style={styles.imageText}>
-              Tap to change profile picture
-            </Text>
-          </View>
+        <Text style={[styles.title, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+          Update Profile
+        </Text>
 
-          <Formik
-            initialValues={{
-              f_name: customerInfo?.f_name || '',
-              l_name: customerInfo?.l_name || '',
-              email: customerInfo?.email || '',
-              phone: customerInfo?.phone || '',
-            }}
-            enableReinitialize={true}
-            validationSchema={UpdateProfileSchema}
-            onSubmit={submitForm}
-          >
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              errors,
-              touched,
-            }) => (
-              <Layout>
+        <Formik
+          initialValues={{
+            f_name: customerInfo.f_name || '',
+            l_name: customerInfo.l_name || '',
+            email: customerInfo.email || '',
+            phone: customerInfo.phone || '',
+          }}
+          validationSchema={ProfileSchema}
+          onSubmit={handleUpdateProfile}
+          enableReinitialize={true}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  First Name
+                </Text>
                 <Input
-                  label="First Name"
-                  placeholder="First Name"
-                  style={styles.input}
+                  placeholder="Enter your first name"
+                  value={values.f_name}
                   onChangeText={handleChange('f_name')}
                   onBlur={handleBlur('f_name')}
-                  value={values.f_name}
-                  caption={
-                    touched.f_name && (
-                      <InputError errorText={errors.f_name} />
-                    )
-                  }
-                  status={
-                    errors.f_name && touched.f_name ? 'danger' : 'basic'
-                  }
-                />
-                <Input
-                  label="Last Name"
-                  placeholder="Last Name"
                   style={styles.input}
+                />
+                {touched.f_name && errors.f_name && (
+                  <InputError error={errors.f_name} />
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  Last Name
+                </Text>
+                <Input
+                  placeholder="Enter your last name"
+                  value={values.l_name}
                   onChangeText={handleChange('l_name')}
                   onBlur={handleBlur('l_name')}
-                  value={values.l_name}
-                  caption={
-                    touched.l_name && (
-                      <InputError errorText={errors.l_name} />
-                    )
-                  }
-                  status={
-                    errors.l_name && touched.l_name ? 'danger' : 'basic'
-                  }
+                  style={styles.input}
                 />
+                {touched.l_name && errors.l_name && (
+                  <InputError error={errors.l_name} />
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  Email
+                </Text>
                 <Input
-                  label="Email"
-                  textContentType="emailAddress"
-                  keyboardType="email-address"
-                  placeholder="example@example.com"
+                  placeholder="Enter your email"
                   value={values.email}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                   style={styles.input}
-                  disabled
-                  caption="You cannot change your email address."
                 />
+                {touched.email && errors.email && (
+                  <InputError error={errors.email} />
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  Phone
+                </Text>
                 <Input
-                  label="Mobile No."
-                  keyboardType="phone-pad"
-                  placeholder="03001234567"
-                  style={styles.input}
+                  placeholder="Enter your phone number"
+                  value={values.phone}
                   onChangeText={handleChange('phone')}
                   onBlur={handleBlur('phone')}
-                  value={values.phone}
-                  caption={
-                    touched.phone && <InputError errorText={errors.phone} />
-                  }
-                  status={errors.phone && touched.phone ? 'danger' : 'basic'}
+                  keyboardType="phone-pad"
+                  style={styles.input}
                 />
-                <Button
-                  style={{ marginTop: 16, borderRadius: 100 }}
-                  disabled={isBtnDisable}
-                  accessoryRight={isBtnDisable && BtnIndicator}
-                  onPress={handleSubmit}
-                >
-                  Update Profile
-                </Button>
-              </Layout>
-            )}
-          </Formik>
+                {touched.phone && errors.phone && (
+                  <InputError error={errors.phone} />
+                )}
+              </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtonsContainer}>
-            <Button
-              appearance="outline"
-              status="primary"
-              accessoryLeft={LockIcon}
-              style={styles.actionButton}
-              onPress={navigateToPasswordUpdate}
-            >
-              Change Password
-            </Button>
-            
-            <Button
-              appearance="outline"
-              status="danger"
-              accessoryLeft={TrashIcon}
-              style={[styles.actionButton, styles.deleteButton]}
-              disabled={isDeletingAccount}
-              accessoryRight={isDeletingAccount && BtnIndicator}
-              onPress={handleDeleteAccount}
-            >
-              Delete Account
-            </Button>
-          </View>
-        </Layout>
+              <SubmitButton
+                onPress={handleSubmit}
+                disabled={loading || isSubmitting}
+                title="Update Profile"
+                style={styles.updateButton}
+              />
+            </View>
+          )}
+        </Formik>
+
+        <View style={styles.dangerZone}>
+          <Text style={[styles.dangerTitle, { color: theme['color-danger-500'] }]}>
+            Danger Zone
+          </Text>
+          <Button
+            onPress={handleDeleteAccount}
+            disabled={loading}
+            style={[styles.deleteButton, { backgroundColor: theme['color-danger-500'] }]}
+            appearance="filled"
+          >
+            Delete Account
+          </Button>
+        </View>
       </ScrollView>
+
+      {/* Buyer Authentication Modal */}
+      <BuyerAuthModal
+        visible={showBuyerAuthModal}
+        onClose={() => {
+          setShowBuyerAuthModal(false);
+          navigation.goBack();
+        }}
+        onSuccess={handleAuthSuccess}
+        title="Sign in as Buyer"
+      />
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
-  input: {
-    marginVertical: 8,
+  container: {
+    flex: 1,
   },
-  imageContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
   },
-  imageWrapper: {
-    position: 'relative',
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  imagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#E4E9F2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderIcon: {
-    width: 40,
-    height: 40,
-    tintColor: '#8F9BB3',
-  },
-  cameraOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#FF6D1A',
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  cameraIcon: {
-    width: 16,
-    height: 16,
-    tintColor: '#FFFFFF',
-  },
-  imageText: {
-    marginTop: 8,
-    opacity: 0.7,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 24,
     textAlign: 'center',
   },
-  actionButtonsContainer: {
-    marginTop: 30,
-    gap: 16,
+  form: {
+    marginBottom: 32,
   },
-  actionButton: {
-    borderRadius: 100,
+  inputContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  input: {
+    borderRadius: 8,
+  },
+  updateButton: {
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  authContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  authMessage: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  authButton: {
+    minWidth: 200,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+  },
+  dangerZone: {
+    borderTopWidth: 1,
+    borderTopColor: '#ff4757',
+    paddingTop: 24,
+    marginTop: 16,
+  },
+  dangerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   deleteButton: {
-    borderColor: '#FF3D71',
+    borderRadius: 8,
   },
 });

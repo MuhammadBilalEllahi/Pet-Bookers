@@ -347,7 +347,7 @@ export default function ShipingDetails({ route }) {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('BuyerHome')
+            onPress: () => navigation.navigate(AppScreens.BUYER_HOME_MAIN)
           }
         ]
       );
@@ -422,7 +422,7 @@ export default function ShipingDetails({ route }) {
           [
             {
               text: 'OK',
-              onPress: () => navigation.navigate('BuyerHome')
+              onPress: () => navigation.navigate(AppScreens.BUYER_HOME_MAIN)
             }
           ]
         );

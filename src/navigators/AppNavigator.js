@@ -16,7 +16,7 @@ import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
 import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
 import PaymentPage from '../screens/buyer/checkout/PaymentPage';
 import { MyCartScreen } from '../screens/buyer/checkout/MyCartScreen';
-import { MyPostedAdsScreen } from '../screens/seller/ads/MyPostedAdsScreen';
+import MyPostedAdsScreen from '../screens/seller/ads/MyPostedAdsScreen';
 import { ProductDetailScreen } from '../screens/seller/ads/ProductDetailScreen';
 import { ProductDetailScreen as ProductDetailScreenBuyer } from '../screens/buyer/product/ProductDetailScreen';
 import { MainScreensHeader } from '../components/buyer';
@@ -84,11 +84,40 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.AUTH} component={AuthNavigator} />
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
-        <Screen name={AppScreens.CART} component={MyCartScreen} />
-        <Screen name={AppScreens.MY_WISHLIST} component={MyWishlistScreen} />
-        <Screen name={AppScreens.MY_ORDERS} component={MyOrders} />
+        <Screen name={AppScreens.CART} component={MyCartScreen} 
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyCartScreen" />
+          ),
+        }}
+        />
+        <Screen name={AppScreens.MY_WISHLIST} component={MyWishlistScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyWishlistScreen" />
+          ),
+        }}
+        />
+        <Screen name={AppScreens.MY_ORDERS} component={MyOrders}
+          options={
+            {
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyOrdersScreen" />
+              ),
+            }
+          } />
 {/* <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} /> */}
-        <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} />
+        <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} 
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyPostedAdsScreen" />
+          ),
+        }}
+        />
         <Screen
             key="screen-BuyerWishlist"
             name={BuyerMainRoutes.BUYER_WISHLIST}
@@ -99,9 +128,30 @@ export const AppNavigator = () => {
                title="My Wishlist" key="header-BuyerWishlist" />,
             }}
           />
-          <Screen name={AppScreens.ADDRESS_LIST} component={AddressListScreen} />
-          <Screen name={AppScreens.ADD_ADDRESS} component={AddAddressScreen} />
-          <Screen name={AppScreens.EDIT_ADDRESS} component={EditAddressScreen} />
+          <Screen name={AppScreens.ADDRESS_LIST} component={AddressListScreen}
+          options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-AddressListScreen" />
+              ),
+            }}
+          />
+          <Screen name={AppScreens.ADD_ADDRESS} component={AddAddressScreen}
+          options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-AddAddressScreen" />
+              ),
+            }}
+          />
+          <Screen name={AppScreens.EDIT_ADDRESS} component={EditAddressScreen}
+          options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-EditAddressScreen" />
+              ),
+            }}
+          />
 
         <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen}
         options={{
@@ -133,22 +183,34 @@ export const AppNavigator = () => {
               key="screen-ShipingDetails"
               name={AppScreens.SHIPING_DETAILS}
               component={ShipingDetails}
+              options={{
+                headerShown: true,
+                header: props => (
+                  <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ShipingDetails" />
+                ),
+              }}
             />
             <Screen
             key="screen-LuckyDrawInstance"
             name={AppScreens.LUCKYDRAW_INSTANCE}
             component={LuckyDrawInstance}
-            // options={{
-            //   headerShown: true,
-            //   header: props => (
-            //     <MainScreensHeader {...props} hideSearch={true} key="header-LuckyDrawInstance" />
-            //   ),
-            // }}
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-LuckyDrawInstance" />
+              ),
+            }}
           />
           <Screen
             key="screen-PaymentPage"
             name={AppScreens.PAYMENT_PAGE}
             component={PaymentPage}
+            options={{
+              headerShown: true,
+              header: props => (
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-PaymentPage" />
+              ),
+            }}
           />
 
       </Navigator>

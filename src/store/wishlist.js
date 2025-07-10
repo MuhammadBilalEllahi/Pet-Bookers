@@ -1,229 +1,149 @@
-import {createAsyncThunk, createSelector, createSlice} from '@reduxjs/toolkit';
-import {axiosBuyerClient} from '../utils/axiosClient';
+import {createSelector, createSlice} from '@reduxjs/toolkit';
+import {smartBuyerClient, handleAuthError} from '../utils/authAxiosClient';
 
 const initialState = {
-  wishlistItems: [],
+  wishlist: [],
   wishlistLoading: false,
   wishlistError: null,
-  isInitialized: false,
-  // Keep track of product IDs in wishlist for quick lookup
-  wishlistProductIds: [],
 };
 
-// Load complete wishlist
-export const loadWishlist = createAsyncThunk(
-  'wishlist/loadWishlist',
-  async (_, {rejectWithValue}) => {
-    try {
-      const {data} = await axiosBuyerClient.get('customer/wish-list/');
-      console.log('Wishlist loaded:', data);
-      return data || [];
+// ASYNC THUNK ACTIONS
+export const loadWishlist = () => async (dispatch) => {
+  try {
+    dispatch(setWishlistLoading(true));
+    const {data} = await smartBuyerClient.get('customer/wish-list/');
+    console.log('[loadWishlist] success:', data);
+    dispatch(setWishlist(data || []));
     } catch (error) {
-      console.error('Error loading wishlist:', error);
-      return rejectWithValue(
-        error?.response?.data?.message || 'Failed to load wishlist'
-      );
-    }
+    console.error('[loadWishlist] error:', error);
+    handleAuthError(error, (err) => {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to load wishlist';
+      dispatch(setWishlistError(errorMessage));
+    });
   }
-);
+};
 
-// Add item to wishlist
-export const addToWishlist = createAsyncThunk(
-  'wishlist/addToWishlist',
-  async ({productId, productData}, {rejectWithValue}) => {
-    try {
-      const response = await axiosBuyerClient.post('customer/wish-list/add', {
+export const addToWishlist = ({productId, productData}) => async (dispatch) => {
+  try {
+    dispatch(setWishlistLoading(true));
+    console.log('[addToWishlist] Adding product:', {productId, productData});
+    
+    const response = await smartBuyerClient.post('customer/wish-list/add', {
         product_id: productId,
       });
-      console.log('Added to wishlist:', response.data);
-      
-      // Return the product info for optimistic update
-      return {
-        productId, 
-        productData,
-        wishlistItemId: response.data?.id, // API might return the wishlist item ID
-        response: response.data
-      };
+    
+    console.log('[addToWishlist] success:', response.data);
+    
+    // Add to local state immediately for better UX
+    dispatch(addWishlistItem({
+      id: productId,
+      ...productData
+    }));
+    
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      return rejectWithValue(
-        error?.response?.data?.message || 'Failed to add to wishlist'
-      );
-    }
+    console.error('[addToWishlist] error:', error);
+    handleAuthError(error, (err) => {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to add to wishlist';
+      dispatch(setWishlistError(errorMessage));
+    });
   }
-);
+};
 
-// Remove item from wishlist
-export const removeFromWishlist = createAsyncThunk(
-  'wishlist/removeFromWishlist',
-  async ({productId, wishlistItemId}, {rejectWithValue}) => {
-    try {
-      const response = await axiosBuyerClient.delete('customer/wish-list/remove', {
-        data: {
-          product_id: productId,
-        },
-      });
-      console.log('Removed from wishlist:', response.data);
-      
-      return {productId, wishlistItemId, response: response.data};
+export const removeFromWishlist = ({productId}) => async (dispatch) => {
+  try {
+    dispatch(setWishlistLoading(true));
+    console.log('[removeFromWishlist] Removing product:', productId);
+    
+    const response = await smartBuyerClient.delete('customer/wish-list/remove', {
+      data: { product_id: productId }
+    });
+    
+    console.log('[removeFromWishlist] success:', response.data);
+    
+    // Remove from local state immediately for better UX
+    dispatch(removeWishlistItem(productId));
+    
     } catch (error) {
-      console.error('Error removing from wishlist:', error);
-      return rejectWithValue(
-        error?.response?.data?.message || 'Failed to remove from wishlist'
-      );
-    }
+    console.error('[removeFromWishlist] error:', error);
+    handleAuthError(error, (err) => {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to remove from wishlist';
+      dispatch(setWishlistError(errorMessage));
+    });
   }
-);
+};
 
-const wishlistSlice = createSlice({
+const slice = createSlice({
   name: 'wishlist',
   initialState,
   reducers: {
-    // Clear wishlist (useful for logout)
-    clearWishlist: (state) => {
-      state.wishlistItems = [];
-      state.wishlistProductIds = [];
-      state.isInitialized = false;
-      state.wishlistError = null;
-    },
-    // Mark as initialized
-    setWishlistInitialized: (state) => {
-      state.isInitialized = true;
-    },
-  },
-  extraReducers: (builder) => {
-    // Load wishlist
-    builder.addCase(loadWishlist.pending, (state) => {
-      state.wishlistLoading = true;
-      state.wishlistError = null;
-    });
-    builder.addCase(loadWishlist.fulfilled, (state, {payload}) => {
-      state.wishlistItems = payload;
-      state.wishlistProductIds = payload.map(item => item.product_id);
+    setWishlist: (state, {payload}) => {
+      state.wishlist = Array.isArray(payload) ? payload : [];
       state.wishlistLoading = false;
       state.wishlistError = null;
-      state.isInitialized = true;
-    });
-    builder.addCase(loadWishlist.rejected, (state, {payload}) => {
-      state.wishlistLoading = false;
+    },
+    setWishlistLoading: (state, {payload}) => {
+      state.wishlistLoading = payload;
+    },
+    setWishlistError: (state, {payload}) => {
       state.wishlistError = payload;
-      state.isInitialized = true;
-    });
-
-    // Add to wishlist
-    builder.addCase(addToWishlist.pending, (state, {meta}) => {
-      // Optimistically add to wishlist
-      const {productId, productData} = meta.arg;
-      if (!state.wishlistProductIds.includes(productId)) {
-        state.wishlistProductIds.push(productId);
-        
-        // Add optimistic wishlist item if we have product data
-        if (productData) {
-          const optimisticItem = {
-            id: `temp_${productId}_${Date.now()}`, // Temporary ID
-            product_id: productId,
-            product: productData,
-            created_at: new Date().toISOString(),
-          };
-          state.wishlistItems.push(optimisticItem);
-        }
+      state.wishlistLoading = false;
+    },
+    addWishlistItem: (state, {payload}) => {
+      // Check if item already exists
+      const existingIndex = state.wishlist.findIndex(item => item.id === payload.id);
+      if (existingIndex === -1) {
+        state.wishlist.push(payload);
       }
-    });
-    builder.addCase(addToWishlist.fulfilled, (state, {payload, meta}) => {
-      const {productId, productData} = meta.arg;
-      const {wishlistItemId} = payload;
-      
-      // Update with real data if we got wishlist item ID from API
-      if (wishlistItemId && productData) {
-        // Remove temporary item
-        state.wishlistItems = state.wishlistItems.filter(item => 
-          !item.id.toString().startsWith('temp_')
-        );
-        
-        // Add real item
-        const realItem = {
-          id: wishlistItemId,
-          product_id: productId,
-          product: productData,
-          created_at: new Date().toISOString(),
-        };
-        state.wishlistItems.push(realItem);
-      }
-      
-      // Keep the optimistic update for product IDs
-      if (!state.wishlistProductIds.includes(productId)) {
-        state.wishlistProductIds.push(productId);
-      }
-    });
-    builder.addCase(addToWishlist.rejected, (state, {meta}) => {
-      // Revert optimistic update
-      const {productId} = meta.arg;
-      state.wishlistProductIds = state.wishlistProductIds.filter(id => id !== productId);
-      
-      // Remove optimistic wishlist item
-      state.wishlistItems = state.wishlistItems.filter(item => 
-        item.product_id !== productId || !item.id.toString().startsWith('temp_')
-      );
-    });
-
-    // Remove from wishlist
-    builder.addCase(removeFromWishlist.pending, (state, {meta}) => {
-      // Optimistically remove from wishlist
-      const {productId, wishlistItemId} = meta.arg;
-      state.wishlistProductIds = state.wishlistProductIds.filter(id => id !== productId);
-      if (wishlistItemId) {
-        state.wishlistItems = state.wishlistItems.filter(item => item.id !== wishlistItemId);
-      }
-    });
-    builder.addCase(removeFromWishlist.fulfilled, (state, {payload, meta}) => {
-      const {productId, wishlistItemId} = meta.arg;
-      // Keep the optimistic update
-      state.wishlistProductIds = state.wishlistProductIds.filter(id => id !== productId);
-      if (wishlistItemId) {
-        state.wishlistItems = state.wishlistItems.filter(item => item.id !== wishlistItemId);
-      }
-    });
-    builder.addCase(removeFromWishlist.rejected, (state, {meta, payload}) => {
-      // Revert optimistic update - re-add to wishlist
-      const {productId, wishlistItemId} = meta.arg;
-      if (!state.wishlistProductIds.includes(productId)) {
-        state.wishlistProductIds.push(productId);
-      }
-      // Note: We can't easily revert the wishlistItems array, so we might need to reload
-      console.warn('Failed to remove from wishlist, consider reloading:', payload);
-    });
+      state.wishlistLoading = false;
+      state.wishlistError = null;
+    },
+    removeWishlistItem: (state, {payload}) => {
+      state.wishlist = state.wishlist.filter(item => item.id !== payload);
+      state.wishlistLoading = false;
+      state.wishlistError = null;
+    },
+    clearWishlist: (state) => {
+      state.wishlist = [];
+      state.wishlistLoading = false;
+      state.wishlistError = null;
+    },
   },
 });
 
-// Actions
-export const {clearWishlist, setWishlistInitialized} = wishlistSlice.actions;
+// ACTIONS
+export const {
+  setWishlist,
+  setWishlistLoading,
+  setWishlistError,
+  addWishlistItem,
+  removeWishlistItem,
+  clearWishlist,
+} = slice.actions;
 
-// Selectors
-const selectWishlistState = (state) => state.wishlist;
+// SELECTORS
+const selectWishlistData = (state) => state.wishlist;
 
-export const selectWishlist = createSelector(
-  selectWishlistState,
-  (wishlist) => ({
-    wishlistItems: wishlist.wishlistItems,
-    wishlistLoading: wishlist.wishlistLoading,
-    wishlistError: wishlist.wishlistError,
-    isInitialized: wishlist.isInitialized,
-  })
-);
+export const selectWishlist = createSelector(selectWishlistData, (wishlistData) => {
+  return wishlistData.wishlist;
+});
 
-export const selectWishlistProductIds = createSelector(
-  selectWishlistState,
-  (wishlist) => wishlist.wishlistProductIds
-);
+export const selectWishlistLoading = createSelector(selectWishlistData, (wishlistData) => {
+  return wishlistData.wishlistLoading;
+});
+
+export const selectWishlistError = createSelector(selectWishlistData, (wishlistData) => {
+  return wishlistData.wishlistError;
+});
 
 export const selectIsInWishlist = createSelector(
-  [selectWishlistProductIds, (state, productId) => productId],
-  (wishlistProductIds, productId) => wishlistProductIds.includes(productId)
+  [selectWishlist, (state, productId) => productId],
+  (wishlist, productId) => {
+    return wishlist.some(item => item.id === productId);
+  }
 );
 
-export const selectWishlistCount = createSelector(
-  selectWishlistState,
-  (wishlist) => wishlist.wishlistItems.length
-);
+export const selectWishlistCount = createSelector(selectWishlist, (wishlist) => {
+  return wishlist.length;
+});
 
-export default wishlistSlice.reducer; 
+export default slice.reducer; 

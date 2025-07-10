@@ -3,7 +3,12 @@ import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Layout, Spinner} from '@ui-kitten/components';
 import {flexeStyles} from '../utils/globalStyles';
-import {setAuthToken, setUserType, UserType} from '../store/user';
+import {
+  setAuthToken, 
+  setUserType, 
+  UserType,
+  loadDualAuthFromStorage
+} from '../store/user';
 import { StyleSheet,Image, Dimensions } from 'react-native';
 import { AppScreens } from '../navigators/AppNavigator';
 
@@ -15,20 +20,32 @@ export const AuthLoaderScreen = ({navigation}) => {
 
   const loadUserToken = async () => {
     try {
+      // First, try to load dual auth tokens
+      await dispatch(loadDualAuthFromStorage());
+      
+      // For backward compatibility, also check legacy tokens
       const token = await AsyncStorage.getItem('auth-token');
       const userType = await AsyncStorage.getItem('user-type');
-      if (!token || !userType) {
-        throw new Error('No auth data found.');
-      }
-
-      dispatch(setAuthToken(token));
-      dispatch(setUserType(userType));
-      if (userType === UserType.BUYER) {
-        navigation.navigate(AppScreens.BUYER_HOME_MAIN);
+      
+      if (token && userType) {
+        // Set legacy auth for backward compatibility
+        dispatch(setAuthToken(token));
+        dispatch(setUserType(userType));
+        
+        // Navigate based on legacy user type
+        if (userType === UserType.BUYER) {
+          navigation.navigate(AppScreens.BUYER_HOME_MAIN);
+        } else {
+          navigation.navigate(AppScreens.SELLER_HOME_MAIN);
+        }
       } else {
-        navigation.navigate(AppScreens.SELLER_HOME_MAIN);
+        // No legacy auth found, navigate to buyer home as default
+        // (the AppNavigator will handle showing auth screens if no dual auth exists)
+        navigation.navigate(AppScreens.BUYER_HOME_MAIN);
       }
     } catch (error) {
+      console.error('Error loading auth tokens:', error);
+      // On error, default to buyer home
       navigation.navigate(AppScreens.BUYER_HOME_MAIN);
     }
   };

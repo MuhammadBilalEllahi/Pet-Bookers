@@ -23,7 +23,7 @@ import { BuyerProfileStack } from './BuyerProfileStack';
 
 import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
-import { MyCartScreen } from '../../screens/buyer/checkout/MyCartScreen';
+import MyCartScreen from '../../screens/buyer/checkout/MyCartScreen';
 import { ThemeProvider } from '../../theme/ThemeContext';
 import { SellerTabRoutes } from '../seller/SellerMainNavigator';
 import { SellerNewProductStack } from '../seller/SellerNewProductStack';

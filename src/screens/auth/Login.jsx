@@ -9,7 +9,14 @@ import { AuthContainer } from '../../components/auth/AuthContainer';
 const { width } = Dimensions.get('window');
 import TextButton from '../../components/form/TextButton';
 import { axiosBuyerClient, axiosSellerClient, } from '../../utils/axiosClient';
-import { setAuthToken, setUserType, UserType, handleUserLogin } from '../../store/user';
+import { 
+  setAuthToken, 
+  setUserType, 
+  UserType, 
+  handleUserLogin,
+  handleBuyerLogin,
+  handleSellerLogin
+} from '../../store/user';
 import { getAuthToken } from '../../utils/localstorage';
 import { useDispatch } from 'react-redux';
 import { AppScreens } from '../../navigators/AppNavigator';
@@ -91,7 +98,17 @@ export const LoginScreen = ({ navigation  }) => {
       if (response?.data?.token) {
         console.log("IN TOKEN")
         const userType = isSeller ? UserType.SELLER : UserType.BUYER;
+        
+        // Use new dual auth system
+        if (isSeller) {
+          dispatch(handleSellerLogin(response.data.token));
+        } else {
+          dispatch(handleBuyerLogin(response.data.token));
+        }
+        
+        // Also maintain legacy auth for backward compatibility
         dispatch(handleUserLogin(response.data.token, userType));
+        
         navigateToPage( isSeller ?  AppScreens.SELLER_HOME_MAIN: AppScreens.BUYER_HOME_MAIN)
       }
 
