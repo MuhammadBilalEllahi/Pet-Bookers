@@ -6,7 +6,6 @@ import {EvaIconsPack} from '@ui-kitten/eva-icons';
 import {useTranslation} from 'react-i18next';
 import * as eva from '@eva-design/eva';
 import {default as mapping} from './mapping.json';
-import {getCustomThem} from './custom-theme';
 import {AppNavigator} from './src/navigators/AppNavigator';
 import dayjs from 'dayjs';
 import calendar from 'dayjs/plugin/calendar';
@@ -22,7 +21,6 @@ import { SplashScreen } from './src/screens/SplashScreen';
 import Toast from 'react-native-toast-message';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { NavigationContainer } from '@react-navigation/native';
-import {extendTheme} from './src/theme/theme';
 
 dayjs.extend(calendar);
 dayjs.extend(localizedFormat);
@@ -51,10 +49,6 @@ const AppContent = () => {
   const {theme, isDark} = useTheme();
   const {i18n} = useTranslation();
 
-  const extendTheme = useMemo(() => {
-    return getCustomThem(i18n.language);
-  }, [i18n.language]);
-
   useEffect(() => {
     I18nManager.forceRTL(i18n.language === 'ur');
     dayjs.locale(i18n.language);
@@ -70,14 +64,18 @@ const AppContent = () => {
 
   return (
     <SafeAreaView style={{flex: 1, direction: i18n.dir()}}>
-        <IconRegistry icons={EvaIconsPack} />
-        <ApplicationProvider
-          {...eva}
+      <StatusBar 
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme['background-basic-color-1']}
+      />
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider
+        {...eva}
         theme={theme}
         customMapping={mapping}>
-          <AppNavigator />
-        </ApplicationProvider>
-        <Toast/>
+        <AppNavigator />
+      </ApplicationProvider>
+      <Toast/>
     </SafeAreaView>
   );
 };
@@ -86,9 +84,9 @@ export default function Root() {
   return (
     <StoreProvider store={store}>
       <ThemeProvider>
-    <Suspense fallback={<SplashScreen/>}>
+        <Suspense fallback={<SplashScreen/>}>
           <AppContent />
-    </Suspense>
+        </Suspense>
       </ThemeProvider>
     </StoreProvider>
   );

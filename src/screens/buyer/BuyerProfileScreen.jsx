@@ -8,11 +8,21 @@ import {
 } from '@ui-kitten/components';
 import {Dimensions, Image, ScrollView, StyleSheet, View} from 'react-native';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
-import { useDispatch } from 'react-redux';
-import { logout, setAuthToken, setUserType, UserType } from '../../store/user';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  logout, 
+  setAuthToken, 
+  setUserType, 
+  UserType,
+  fetchCustomerInfo,
+  selectCustomerInfo,
+  selectCustomerLoading,
+  selectCustomerError,
+  selectIsBuyer,
+  selectAuthToken
+} from '../../store/user';
 import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../../utils/localstorage';
 import { ProfileActionButton } from '../../components/profile';
-import { axiosBuyerClient } from '../../utils/axiosClient';
 import { useEffect } from 'react';
 import { useTheme } from '../../theme/ThemeContext';
 import { AppScreens } from '../../navigators/AppNavigator';
@@ -22,20 +32,23 @@ const { width, height} = Dimensions.get('window')
 export const BuyerProfileScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const { theme, isDark } = useTheme();
+  
+  // Redux selectors
+  const customerInfo = useSelector(selectCustomerInfo);
+  const customerLoading = useSelector(selectCustomerLoading);
+  const customerError = useSelector(selectCustomerError);
+  const isBuyer = useSelector(selectIsBuyer);
+  const authToken = useSelector(selectAuthToken);
+  
   const EditIcon = props => <Icon {...props} name="edit-2-outline" />;
   const LockIcon = props => <Icon {...props} name="lock-outline" />;
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await axiosBuyerClient.get('customer/info');
-        console.log(response);
-      } catch (error) {
-        console.error('Error fetching profile:', error || error?.message || error?.response?.data?.message);
-      }
+    // Fetch customer info if user is buyer and authenticated
+    if (isBuyer && authToken) {
+      dispatch(fetchCustomerInfo());
     }
-    fetchUserProfile();
-  }, []);
+  }, [dispatch, isBuyer, authToken]);
 
   const navigateToProfileUpdate = () => {
     navigation.navigate('UpdateProfile');
@@ -52,6 +65,10 @@ export const BuyerProfileScreen = ({navigation}) => {
   
   const navigateToMyWishlist = () => {
     navigation.navigate(AppScreens.MY_WISHLIST);
+  };
+
+  const navigateToAddressList = () => {
+    navigation.navigate(AppScreens.ADDRESS_LIST);
   };
 
   const navigateToAppSettings = () => {
@@ -92,27 +109,76 @@ export const BuyerProfileScreen = ({navigation}) => {
           borderRadius: 12 
         }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar
-                source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
-                style={{ width: 48, height: 48, borderRadius: 24, marginRight: 14 }}
-              />
-              <View>
-                <Text style={{ 
-                  fontWeight: 'bold', 
-                  fontSize: 20, 
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }}>Osama Tabassum</Text>
-                <Text
-                  style={{ 
-                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
-                    fontSize: 14, 
-                    textDecorationLine: 'underline', 
-                    marginTop: 2 
+              {customerLoading ? (
+                <View style={{ width: 48, height: 48, borderRadius: 24, marginRight: 14, backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'], justifyContent: 'center', alignItems: 'center' }}>
+                  <Icon name="loader-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-600']} style={{ width: 24, height: 24 }} />
+                </View>
+              ) : (
+                <Avatar
+                  source={{ 
+                    uri: customerInfo?.image 
+                      ? `https://petbookers.com/storage/app/public/profile/${customerInfo.image}`
+                      : 'https://randomuser.me/api/portraits/men/1.jpg'
                   }}
-                  onPress={navigateToProfileUpdate}
-                >
-                  View and edit profile
-                </Text>
+                  style={{ width: 48, height: 48, borderRadius: 24, marginRight: 14 }}
+                />
+              )}
+              <View style={{ flex: 1 }}>
+                {customerLoading ? (
+                  <>
+                    <View style={{ width: '60%', height: 20, backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'], borderRadius: 4, marginBottom: 4 }} />
+                    <View style={{ width: '40%', height: 14, backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'], borderRadius: 4 }} />
+                  </>
+                ) : customerError ? (
+                  <>
+                    <Text style={{ 
+                      fontWeight: 'bold', 
+                      fontSize: 20, 
+                      color: isDark ? theme['color-danger-500'] : theme['color-danger-600']
+                    }}>Error loading profile</Text>
+                    <Text
+                      style={{ 
+                        color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                        fontSize: 14, 
+                        textDecorationLine: 'underline', 
+                        marginTop: 2 
+                      }}
+                      onPress={() => dispatch(fetchCustomerInfo())}
+                    >
+                      Tap to retry
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={{ 
+                      fontWeight: 'bold', 
+                      fontSize: 20, 
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }}>
+                      {customerInfo ? `${customerInfo.f_name || ''} ${customerInfo.l_name || ''}`.trim() || customerInfo.name || 'Unknown User' : 'Guest User'}
+                    </Text>
+                    <Text
+                      style={{ 
+                        color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                        fontSize: 14, 
+                        textDecorationLine: 'underline', 
+                        marginTop: 2 
+                      }}
+                      onPress={navigateToProfileUpdate}
+                    >
+                      View and edit profile
+                    </Text>
+                    {customerInfo?.email && (
+                      <Text style={{ 
+                        color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
+                        fontSize: 12,
+                        marginTop: 2
+                      }}>
+                        {customerInfo.email}
+                      </Text>
+                    )}
+                  </>
+                )}
               </View>
             </View>
           </Layout>
@@ -125,6 +191,13 @@ export const BuyerProfileScreen = ({navigation}) => {
             subtitle="Your saved items"
             iconName="heart-outline"
             onPress={navigateToMyWishlist}
+          />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title="Manage Addresses"
+            subtitle="Add and edit delivery addresses"
+            iconName="map-outline"
+            onPress={navigateToAddressList}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton

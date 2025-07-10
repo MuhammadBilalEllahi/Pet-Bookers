@@ -71,16 +71,16 @@ export const MyCartScreen = () => {
   const totalBeforeCoupon = subtotal + tax + totalShippingPrice - discount;
   const total = totalBeforeCoupon - couponDiscount;
 
-  const fetchCartData = async () => {
-    try {
+    const fetchCartData = async () => {
+      try {
       setLoading(true);
-      const response = await axiosBuyerClient.get('cart');
-      console.log('Cart Response:', JSON.stringify(response.data, null, 2));
+        const response = await axiosBuyerClient.get('cart');
+        console.log('Cart Response:', JSON.stringify(response.data, null, 2));
       setCartData(response.data || []);
-    } catch (error) {
+      } catch (error) {
       console.log('Cart Error:', error.toString() || error.response?.data || error.message);
-      if (error.response?.status === 401) {
-        console.log('Authentication required');
+        if (error.response?.status === 401) {
+          console.log('Authentication required');
       }
       setCartData([]);
     } finally {
@@ -318,7 +318,7 @@ export const MyCartScreen = () => {
             </TouchableOpacity>
           </View>
           <Text style={[styles.productPrice, {
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>Rs {(item.price * item.quantity).toLocaleString()}</Text>
         </View>
         <TouchableOpacity 
@@ -356,7 +356,7 @@ export const MyCartScreen = () => {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
             <Text style={{ fontWeight: "bold" }}>Farm:</Text> {group.shop_info}
-          </Text>
+        </Text>
           <TouchableOpacity 
             style={[styles.removeFarmBtn, {
               // backgroundColor: isDark ? theme['color-shadcn-destructive'] : theme['color-danger-default']
@@ -377,16 +377,16 @@ export const MyCartScreen = () => {
           </TouchableOpacity>
         </View>
         
-        <View style={[styles.tableHeader, {
-          backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-        }]}>
-          <Text style={[styles.srHeader, {
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Sr#</Text>
-          <Text style={[styles.productHeader, {
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Product Details</Text>
-        </View>
+          <View style={[styles.tableHeader, {
+            backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          }]}>
+            <Text style={[styles.srHeader, {
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Sr#</Text>
+            <Text style={[styles.productHeader, {
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Product Details</Text>
+          </View>
         
         {group.items.map((item, index) => renderCartItem(item, index))}
         
@@ -409,9 +409,9 @@ export const MyCartScreen = () => {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>Farm Shipping</Text>
               <Text style={[styles.summaryValue, {
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>Rs {groupTotalShipping.toLocaleString()}</Text>
-            </View>
+                  </View>
           )}
           {groupShippingMethodCost > 0 && (
             <View style={styles.summaryRow}>
@@ -423,7 +423,7 @@ export const MyCartScreen = () => {
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
                 fontSize: 12
               }]}>Rs {groupShippingMethodCost.toLocaleString()}</Text>
-            </View>
+                </View>
           )}
         </View>
       </View>
@@ -607,27 +607,27 @@ export const MyCartScreen = () => {
           )}
           {/* Hide coupon input when coupon is already applied */}
           {couponDiscount === 0 && (
-            <View style={styles.couponRow}>
-              <TextInput
-                style={[styles.couponInput, {
-                  backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-                  borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}
-                placeholder="Coupon Code"
-                placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-                value={coupon}
-                onChangeText={setCoupon}
-              />
-              <Button
+          <View style={styles.couponRow}>
+            <TextInput
+              style={[styles.couponInput, {
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}
+              placeholder="Coupon Code"
+              placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+              value={coupon}
+              onChangeText={setCoupon}
+            />
+            <Button
                 onPress={handleApplyCoupon}   
-                style={[styles.couponBtn, {
-                  backgroundColor: theme['color-shadcn-primary']
-                }]}
-              >
-                Apply Code
-              </Button>
-            </View>
+              style={[styles.couponBtn, {
+                backgroundColor: theme['color-shadcn-primary']
+              }]}
+            >
+              Apply Code
+            </Button>
+          </View>
           )}
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={[styles.summaryLabel, {
@@ -650,12 +650,12 @@ export const MyCartScreen = () => {
                   </Text>
                 </>
               ) : (
-                <Text style={[styles.summaryValue, {
-                  fontWeight: "bold",
-                  color: theme['color-shadcn-primary']
-                }]}>
+            <Text style={[styles.summaryValue, {
+              fontWeight: "bold",
+              color: theme['color-shadcn-primary']
+            }]}>
                   Rs {total.toLocaleString()}
-                </Text>
+            </Text>
               )}
             </View>
           </View>
@@ -706,17 +706,17 @@ export const MyCartScreen = () => {
               fontSize: 11
             }}>
               « Continue Shopping
-            </Text>
-          </Button>
+          </Text>
+        </Button>
           <Button
             onPress={handleCheckout}
             style={[styles.checkoutBtn, {
               backgroundColor: theme['color-shadcn-primary']
             }]}
           >
-            Checkout »
-          </Button>
-        </View>
+          Checkout »
+        </Button>
+      </View>
       </ScrollView>
     </Layout>
   );

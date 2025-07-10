@@ -122,7 +122,7 @@ export default function ShipingDetails({ route }) {
         setShowCoordinateInputs(false);
         // Open add address form if not already open
         if (!showAddAddress) {
-          setShowAddAddress(true);
+    setShowAddAddress(true);
         }
         setFetchingLocation(false);
       },
@@ -523,24 +523,24 @@ export default function ShipingDetails({ route }) {
   }
 
   return (
-    <ScrollView>
+   <ScrollView>
       <Layout style={[styles.container, {
         backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
       }]}>
-        {/* Progress Bar */}
-        <View style={styles.progressRow}>
-          <View style={styles.progressStepActive}>
-            <Icon name="person-outline" fill="#fff" style={styles.progressIcon} />
-          </View>
-          <View style={styles.progressLineActive} />
-          <View style={styles.progressStepActive}>
-            <Icon name="shopping-bag-outline" fill="#fff" style={styles.progressIcon} />
-          </View>
-          <View style={styles.progressLineInactive} />
-          <View style={styles.progressStepInactive}>
-            <Icon name="credit-card-outline" fill="#bbb" style={styles.progressIcon} />
-          </View>
+      {/* Progress Bar */}
+      <View style={styles.progressRow}>
+        <View style={styles.progressStepActive}>
+          <Icon name="person-outline" fill="#fff" style={styles.progressIcon} />
         </View>
+        <View style={styles.progressLineActive} />
+        <View style={styles.progressStepActive}>
+          <Icon name="shopping-bag-outline" fill="#fff" style={styles.progressIcon} />
+        </View>
+        <View style={styles.progressLineInactive} />
+        <View style={styles.progressStepInactive}>
+          <Icon name="credit-card-outline" fill="#bbb" style={styles.progressIcon} />
+        </View>
+      </View>
 
         {/* Shipping Address */}
         <View style={[styles.sectionBox, {
@@ -576,8 +576,8 @@ export default function ShipingDetails({ route }) {
                 <View style={[styles.addressDetails, {
                   backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
                 }]}>
-                  <View style={styles.addressRow}>
-                    <Icon name="checkmark-circle-2-outline" fill="#43a047" style={{ width: 18, height: 18, marginRight: 4 }} />
+        <View style={styles.addressRow}>
+            <Icon name="checkmark-circle-2-outline" fill="#43a047" style={{ width: 18, height: 18, marginRight: 4 }} />
                     <Text style={[styles.verifiedText, { color: "#43a047" }]}>Verified</Text>
                     <Icon name="phone-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={{ width: 18, height: 18, marginLeft: 12, marginRight: 4 }} />
                     <Text style={[styles.phoneText, {
@@ -757,7 +757,7 @@ export default function ShipingDetails({ route }) {
                       color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-500']
                     }]}>
                       No GPS coordinates set. Use "Current Location" button above.
-                    </Text>
+          </Text>
                   )}
                 </View>
               ) : (
@@ -789,8 +789,8 @@ export default function ShipingDetails({ route }) {
                   'Enter coordinates manually or tap "Done" to save' : 
                   'Use "Current Location" button to get GPS coordinates automatically'
                 }
-              </Text>
-            </View>
+          </Text>
+        </View>
             
             <Button
               style={[styles.saveAddressBtn, {
@@ -800,10 +800,10 @@ export default function ShipingDetails({ route }) {
             >
               Save Address
             </Button>
-          </View>
+      </View>
         )}
 
-        {/* Billing Address */}
+      {/* Billing Address */}
         <View style={[styles.sectionBox, {
           borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
           backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
@@ -812,42 +812,42 @@ export default function ShipingDetails({ route }) {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>Choose Billing Address</Text>
           
-          <CheckBox
-            checked={sameAsShipping}
-            onChange={handleSameAsShipping}
-            style={styles.checkbox}
-          >
-            {evaProps => (
+        <CheckBox
+          checked={sameAsShipping}
+          onChange={handleSameAsShipping}
+          style={styles.checkbox}
+        >
+          {evaProps => (
               <Text {...evaProps} style={[styles.checkboxText, {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>
                 Same as shipping address
-              </Text>
-            )}
-          </CheckBox>
+            </Text>
+          )}
+        </CheckBox>
           
-          {!sameAsShipping && (
-            <View>
-              <Input
-                label="Contact Person Name"
+        {!sameAsShipping && (
+          <View>
+            <Input
+              label="Contact Person Name"
                 value={billingAddress.contact_person_name}
                 onChangeText={val => setBillingAddress({ ...billingAddress, contact_person_name: val })}
-                style={styles.input}
-              />
-              <Input
-                label="Phone"
+              style={styles.input}
+            />
+            <Input
+              label="Phone"
                 value={billingAddress.phone}
                 onChangeText={val => setBillingAddress({ ...billingAddress, phone: val })}
-                style={styles.input}
+              style={styles.input}
                 keyboardType="phone-pad"
-              />
-              <Input
-                label="Address"
+            />
+            <Input
+              label="Address"
                 value={billingAddress.address}
                 onChangeText={val => setBillingAddress({ ...billingAddress, address: val })}
-                style={styles.input}
-                multiline
-              />
+              style={styles.input}
+              multiline
+            />
               <Input
                 label="City"
                 value={billingAddress.city}
@@ -865,10 +865,10 @@ export default function ShipingDetails({ route }) {
                 value={billingAddress.country}
                 onChangeText={val => setBillingAddress({ ...billingAddress, country: val })}
                 style={styles.input}
-              />
-            </View>
-          )}
-        </View>
+            />
+          </View>
+        )}
+      </View>
 
         {/* Order Summary & Payment */}
         {checkoutData && (
@@ -916,40 +916,40 @@ export default function ShipingDetails({ route }) {
             
             {/* Order Totals */}
             <View style={styles.summarySection}>
-              <View style={styles.summaryRow}>
+        <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Subtotal</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Rs {cartSummary.subtotal.toLocaleString()}</Text>
-              </View>
-              <View style={styles.summaryRow}>
+        </View>
+        <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Tax</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Rs {cartSummary.tax.toLocaleString()}</Text>
-              </View>
-              <View style={styles.summaryRow}>
+        </View>
+        <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Shipping</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Rs {cartSummary.shipping.toLocaleString()}</Text>
-              </View>
-              <View style={styles.summaryRow}>
+        </View>
+        <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Discount</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>- Rs {cartSummary.discount.toLocaleString()}</Text>
-              </View>
+        </View>
               {checkoutData.couponDiscount > 0 && (
-                <View style={styles.summaryRow}>
+        <View style={styles.summaryRow}>
                   <Text style={[styles.summaryLabel, {
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }]}>Coupon ({checkoutData.couponCode})</Text>
@@ -970,72 +970,72 @@ export default function ShipingDetails({ route }) {
                   fontSize: 18
                 }]}>Rs {cartSummary.total.toLocaleString()}</Text>
               </View>
-            </View>
-          </View>
+        </View>
+      </View>
         )}
 
-        {/* Features */}
-        <View style={styles.featuresRow}>
-          <View style={styles.feature}>
+      {/* Features */}
+      <View style={styles.featuresRow}>
+        <View style={styles.feature}>
             <Icon name="car-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>3 Days Free Delivery</Text>
-          </View>
-          <View style={styles.feature}>
+        </View>
+        <View style={styles.feature}>
             <Icon name="award-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>100% Original Products</Text>
-          </View>
-          <View style={styles.feature}>
+        </View>
+        <View style={styles.feature}>
             <Icon name="credit-card-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>Money Back Guarantee</Text>
-          </View>
-          <View style={styles.feature}>
+        </View>
+        <View style={styles.feature}>
             <Icon name="shield-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>Safe Payments</Text>
-          </View>
         </View>
+      </View>
 
-        {/* Footer Buttons */}
-        <View style={styles.footerRow}>
-          <Button
+      {/* Footer Buttons */}
+      <View style={styles.footerRow}>
+        <Button
             style={[styles.farmCartBtn, {
               backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-100'],
               borderColor: isDark ? theme['color-shadcn-border'] : '#d35400'
             }]}
-            onPress={() => navigation.goBack()}
-            appearance="outline"
-          >
+          onPress={() => navigation.goBack()}
+          appearance="outline"
+        >
             <Text style={{ 
               color: isDark ? theme['color-shadcn-foreground'] : '#d35400', 
               fontWeight: "bold" 
             }}>« Farm Cart</Text>
-          </Button>
-          <Button
+        </Button>
+        <Button
             style={[styles.checkoutBtn, {
               backgroundColor: theme['color-shadcn-primary']
             }]}
-            onPress={handleContinue}
+          onPress={handleContinue}
             disabled={addresses.length === 0 || placingOrder}
             accessoryLeft={placingOrder ? 
               <Icon name="loader-outline" fill={theme['color-basic-100']} style={{ width: 20, height: 20 }} /> :
               null
             }
-          >
+        >
             {placingOrder ? 'Processing Payment...' : 
              checkoutData?.selectedPaymentMethod?.title?.toLowerCase().includes('cod') ? 'Place Order' :
              checkoutData?.selectedPaymentMethod?.title?.toLowerCase().includes('easypaisa') ? 'Pay via EasyPaisa' :
              'Payment »'}
-          </Button>
-        </View>
-      </Layout>
-    </ScrollView>
+        </Button>
+      </View>
+    </Layout>
+   </ScrollView>
   );
 }
 

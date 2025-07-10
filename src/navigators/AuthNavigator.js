@@ -6,12 +6,16 @@ import { useRoute } from '@react-navigation/native';
 import { RegisterScreen } from '../screens/auth/Register';
 import { LoginScreen } from '../screens/auth/Login';
 import { ForgotPasswordScreen } from '../screens/auth/ForgotPassword';
+import { VerifyOTPScreen } from '../screens/auth/VerifyOTP';
+import { ResetPasswordScreen } from '../screens/auth/ResetPassword';
 
 // Auth Route Enum for maintainability and intellisense
 export const AuthRoutes = Object.freeze({
   REGISTER: { name: 'Register', component: RegisterScreen },
   LOGIN: { name: 'Login', component: LoginScreen },
   FORGOT_PASSWORD: { name: 'ForgotPassword', component: ForgotPasswordScreen },
+  VERIFY_OTP: { name: 'VerifyOTP', component: VerifyOTPScreen },
+  RESET_PASSWORD: { name: 'ResetPassword', component: ResetPasswordScreen },
 });
 
 const { Navigator, Screen } = createNativeStackNavigator();
@@ -56,6 +60,14 @@ export const AuthNavigator = () => {
       <Screen
         name={AuthRoutes.FORGOT_PASSWORD.name}
         component={AuthRoutes.FORGOT_PASSWORD.component}
+      />
+      <Screen
+        name={AuthRoutes.VERIFY_OTP.name}
+        component={AuthRoutes.VERIFY_OTP.component}
+      />
+      <Screen
+        name={AuthRoutes.RESET_PASSWORD.name}
+        component={AuthRoutes.RESET_PASSWORD.component}
       />
     </Navigator>
   );

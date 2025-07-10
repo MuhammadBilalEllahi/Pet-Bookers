@@ -25,6 +25,9 @@ import { FarmDetailsEditScreen } from '../screens/seller/profile/farmdetails/Far
 import { SellerPostedProductsStack } from './seller/SellerPostedProductsStack';
 import { MyWishlistScreen } from '../screens/buyer/product/MyWishlistScreen';
 import { MyOrders } from '../screens/buyer/product/MyOrders';
+import { AddressListScreen } from '../screens/profile/AddressListScreen';
+import { AddAddressScreen } from '../screens/profile/AddAddressScreen';
+import { EditAddressScreen } from '../screens/profile/EditAddressScreen';
 const { Navigator, Screen } = createNativeStackNavigator();
 
 // Enum for App Screens
@@ -47,6 +50,9 @@ export const AppScreens = Object.freeze({
   FARM_DETAILS_EDIT: 'FarmDetailsEdit',
   MY_WISHLIST: 'MyWishlist',  
   PRODUCT_DETAIL_BUYER: 'ProductDetailBuyer',
+  ADDRESS_LIST: 'AddressList',
+  ADD_ADDRESS: 'AddAddress',
+  EDIT_ADDRESS: 'EditAddress',
 });
 
 export const AppNavigator = () => {
@@ -93,6 +99,9 @@ export const AppNavigator = () => {
                title="My Wishlist" key="header-BuyerWishlist" />,
             }}
           />
+          <Screen name={AppScreens.ADDRESS_LIST} component={AddressListScreen} />
+          <Screen name={AppScreens.ADD_ADDRESS} component={AddAddressScreen} />
+          <Screen name={AppScreens.EDIT_ADDRESS} component={EditAddressScreen} />
 
         <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen}
         options={{

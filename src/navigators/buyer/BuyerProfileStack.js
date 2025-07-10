@@ -8,6 +8,7 @@ import {UpdatePasswordScreen} from '../../screens/profile/UpdatePasswordScreen';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {UpdateProfileScreen} from '../../screens/profile/UpdateProfileScreen';
 import {MyOrders} from '../../screens/buyer/product/MyOrders';
+import {AddressListScreen} from '../../screens/profile/AddressListScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -67,6 +68,20 @@ export const BuyerProfileStack = () => {
                         {...props}
                         hideSearch={true}
                         title="UpdatePassword"
+                      />
+                    ),
+        }}
+      />
+      <Screen
+        name="AddressList"
+        component={AddressListScreen}
+        options={{
+          title: 'Manage Addresses',
+          header: props => (
+                      <MainScreensHeader
+                        {...props}
+                        hideSearch={true}
+                        title="Manage Addresses"
                       />
                     ),
         }}
