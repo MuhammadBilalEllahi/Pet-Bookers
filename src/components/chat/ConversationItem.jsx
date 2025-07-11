@@ -16,6 +16,7 @@ export const ConversationItem = (props) => {
     adStatus,
     // fallback for old structure
     title,
+    subtitle, // New field for shop name
     imgUrl,
     msgText,
     attachmentType,
@@ -65,7 +66,12 @@ export const ConversationItem = (props) => {
         />
         <View style={{ flexGrow: 1 }}>
           <View style={[styles.titleContainer, { flexDirection: 'row' }]}>
-            <Text style={styles.title}>{title}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>{title}</Text>
+              {subtitle && (
+                <Text style={[styles.subtitle, { color: theme['color-basic-600'] }]}>{subtitle}</Text>
+              )}
+            </View>
             {/* Optionally show lastUpdated here */}
           </View>
           <View style={[styles.messageContainer, { flexDirection: 'row' }]}>
@@ -147,7 +153,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     flexGrow: 1,
   },
-  title: { fontSize: 18, fontWeight: '700', marginRight: 4 },
+  title: { fontSize: 16, fontWeight: '700', marginRight: 4 },
+  subtitle: { fontSize: 14, marginTop: 2, marginRight: 4 },
   messageContainer: {
     justifyContent: 'space-between',
     flexGrow: 1,

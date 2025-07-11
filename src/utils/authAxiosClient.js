@@ -186,10 +186,65 @@ export const createSmartBuyerClient = () => {
   };
 };
 
+// Smart client that checks both auth states and provides appropriate guidance for seller
+export const createSmartSellerClient = () => {
+  const makeRequest = async (method, url, data = null, config = {}) => {
+    const { isBuyerAuthenticated, isSellerAuthenticated } = getAuthState();
+    
+    if (!isSellerAuthenticated) {
+      const error = new Error('Seller authentication required');
+      error.type = AuthError.SELLER_NOT_AUTHENTICATED;
+      error.isBuyerAuthenticated = isBuyerAuthenticated;
+      
+      error.showModal = () => {
+        if (authModalHandlers.showSellerAuthModal) {
+          authModalHandlers.showSellerAuthModal();
+        } else {
+          const message = isBuyerAuthenticated 
+            ? 'You are signed in as a buyer. Please also sign in as a seller to continue.'
+            : 'Please sign in as a seller to continue';
+          
+          Toast.show({
+            type: 'error',
+            text1: 'Seller Authentication Required',
+            text2: message,
+          });
+        }
+      };
+      throw error;
+    }
+
+    // Make the actual request
+    switch (method.toLowerCase()) {
+      case 'get':
+        return axiosSellerClient.get(url, config);
+      case 'post':
+        return axiosSellerClient.post(url, data, config);
+      case 'put':
+        return axiosSellerClient.put(url, data, config);
+      case 'delete':
+        return axiosSellerClient.delete(url, config);
+      case 'patch':
+        return axiosSellerClient.patch(url, data, config);
+      default:
+        throw new Error(`Unsupported HTTP method: ${method}`);
+    }
+  };
+
+  return {
+    get: (url, config) => makeRequest('get', url, null, config),
+    post: (url, data, config) => makeRequest('post', url, data, config),
+    put: (url, data, config) => makeRequest('put', url, data, config),
+    delete: (url, config) => makeRequest('delete', url, null, config),
+    patch: (url, data, config) => makeRequest('patch', url, data, config),
+  };
+};
+
 // Create client instances
 export const authBuyerClient = createAuthenticatedBuyerClient();
 export const authSellerClient = createAuthenticatedSellerClient();
 export const smartBuyerClient = createSmartBuyerClient();
+export const smartSellerClient = createSmartSellerClient();
 
 // Helper function to handle auth errors consistently
 export const handleAuthError = (error, fallbackAction = null) => {

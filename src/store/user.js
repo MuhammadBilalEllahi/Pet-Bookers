@@ -12,7 +12,7 @@ import {
   delSellerAuthToken,
   clearAllAuthTokens
 } from '../utils/localstorage';
-import { axiosBuyerClient } from '../utils/axiosClient';
+import { axiosBuyerClient, axiosSellerClient } from '../utils/axiosClient';
 
 
 // Use a plain JS object to represent the enum
@@ -42,6 +42,10 @@ const initialState = {
   customerInfo: null,
   customerLoading: false,
   customerError: null,
+  // Seller info (seller-specific)
+  sellerInfo: null,
+  sellerLoading: false,
+  sellerError: null,
 };
 
 const slice = createSlice({
@@ -101,6 +105,9 @@ const slice = createSlice({
     },
     logoutSeller: (state) => {
       state.sellerAuth = { token: null, isAuthenticated: false };
+      state.sellerInfo = null;
+      state.sellerLoading = false;
+      state.sellerError = null;
       delSellerAuthToken();
     },
 
@@ -116,6 +123,20 @@ const slice = createSlice({
     setCustomerError: (state, {payload}) => {
       state.customerError = payload;
       state.customerLoading = false;
+    },
+
+    // ==================== SELLER INFO ACTIONS ====================
+    setSellerLoading: (state, {payload}) => {
+      state.sellerLoading = payload;
+    },
+    setSellerInfo: (state, {payload}) => {
+      state.sellerInfo = payload;
+      state.sellerLoading = false;
+      state.sellerError = null;
+    },
+    setSellerError: (state, {payload}) => {
+      state.sellerError = payload;
+      state.sellerLoading = false;
     },
   },
 });
@@ -135,7 +156,11 @@ export const {
   // Customer info actions
   setCustomerLoading,
   setCustomerInfo,
-  setCustomerError
+  setCustomerError,
+  // Seller info actions
+  setSellerLoading,
+  setSellerInfo,
+  setSellerError
 } = slice.actions;
 
 // ASYNC THUNK ACTIONS
@@ -165,9 +190,31 @@ export const handleBuyerLogin = (token) => async (dispatch) => {
   dispatch(fetchCustomerInfo());
 };
 
+// ASYNC THUNK ACTIONS for seller
+export const fetchSellerInfo = () => async (dispatch, getState) => {
+  const state = getState();
+  const isSellerAuthenticated = selectIsSellerAuthenticated(state);
+  
+  // Only fetch if seller is authenticated
+  if (!isSellerAuthenticated) {
+    return;
+  }
+
+  try {
+    dispatch(setSellerLoading(true));
+    const response = await axiosSellerClient.get('seller-info');
+    dispatch(setSellerInfo(response.data));
+  } catch (error) {
+    console.error('Error fetching seller info:', error);
+    const errorMessage = error?.response?.data?.message || error?.message || 'Failed to fetch seller info';
+    dispatch(setSellerError(errorMessage));
+  }
+};
+
 // Helper action to handle post-login for sellers
 export const handleSellerLogin = (token) => async (dispatch) => {
   dispatch(setSellerAuth(token));
+  dispatch(fetchSellerInfo());
 };
 
 // Legacy helper action (for backward compatibility)
@@ -199,6 +246,7 @@ export const loadDualAuthFromStorage = () => async (dispatch) => {
     
     if (sellerToken) {
       dispatch(setSellerAuth(sellerToken));
+      dispatch(fetchSellerInfo());
     }
   } catch (error) {
     console.error('Error loading auth tokens from storage:', error);
@@ -272,6 +320,27 @@ export const selectCustomerLoading = createSelector(selectUserData, userData => 
 
 export const selectCustomerError = createSelector(selectUserData, userData => {
   return userData.customerError;
+});
+
+// Seller info selectors
+export const selectSellerInfo = createSelector(selectUserData, userData => {
+  return userData.sellerInfo;
+});
+
+export const selectSellerLoading = createSelector(selectUserData, userData => {
+  return userData.sellerLoading;
+});
+
+export const selectSellerError = createSelector(selectUserData, userData => {
+  return userData.sellerError;
+});
+
+export const selectSellerId = createSelector(selectUserData, userData => {
+  return userData.sellerInfo?.id;
+});
+
+export const selectCustomerId = createSelector(selectUserData, userData => {
+  return userData.customerInfo?.id;
 });
 
 export default slice.reducer;
