@@ -18,6 +18,8 @@ import { loadSellerProducts, selectSellerProducts } from '../../../store/sellerD
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '../../../store/wishlist';
 import { calculateDiscountedPrice } from '../../../utils/products';
 import { selectBaseUrls } from '../../../store/configs';
+import { setActiveRoom } from '../../../store/chat';
+import { setBottomTabBarVisibility } from '../../../store/configs';
 import { 
   selectIsBuyerAuthenticated, 
   selectIsSellerAuthenticated,
@@ -27,6 +29,7 @@ import { BuyerAuthModal } from '../../../components/modals';
 import ProductDetailShimmer from './components/ProductDetailShimmer';
 import { smartBuyerClient, handleAuthError, setAuthModalHandlers } from '../../../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
+import { ChatRoutes } from '../../../navigators/ChatNavigator';
 
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
@@ -240,6 +243,60 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     // The wishlist will automatically reload due to auth state change
   };
 
+  // Handle chat with seller
+  const handleChatWithSeller = () => {
+    // Check if user is authenticated as buyer
+    if (!isBuyerAuthenticated) {
+      const message = isSellerAuthenticated 
+        ? 'You are signed in as a seller. Please also sign in as a buyer to chat with other sellers.'
+        : 'Please sign in as a buyer to chat with sellers.';
+      
+      Alert.alert(
+        'Buyer Authentication Required',
+        message,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
+        ]
+      );
+      return;
+    }
+
+    // Set up the chat state similar to ChatScreen
+    dispatch(setBottomTabBarVisibility(false));
+    dispatch(
+      setActiveRoom({
+        roomId: product.seller.id,
+        recipient: {
+          name: product.seller.shop.name,
+          profile: `${baseUrls['shop_image_url']}/${product.seller.shop.image}`,
+        },
+      }),
+    );
+
+    // Navigate to Messages screen with seller info
+    navigation.navigate(ChatRoutes.MESSAGES, {
+      roomId: product.seller.id, // seller_id for buyer chat
+      recipientProfile: `${baseUrls['shop_image_url']}/${product.seller.shop.image}`,
+      recipientName: product.seller.shop.name,
+      chatType: 'buyer', // buyer chatting with seller
+      // Add product information for initial message context
+      productInfo: {
+        id: product.id,
+        name: product.name,
+        price: product.unit_price,
+        image: `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`,
+        slug: product.slug,
+        url: `${baseUrls['product_url']}/${product.slug}`,
+        seller: {
+          id: product.seller.id,
+          name: product.seller.shop.name,
+          shopName: product.seller.shop.name
+        }
+      }
+    });
+  };
+
   const navigateToSellerProfile = (sellerId) => {
     navigation.navigate('VandorDetail', { sellerId });
     console.log("[navigateToSellerProfile]", sellerId);
@@ -365,7 +422,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
             </Button>
 
             <Button
-              onClick={() => { }}
+              onPress={handleChatWithSeller}
               style={{ 
                 flex: 1, 
                 backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],

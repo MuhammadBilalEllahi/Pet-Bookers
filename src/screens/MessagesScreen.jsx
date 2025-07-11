@@ -1,5 +1,5 @@
 import {Avatar, Input, Layout, Text} from '@ui-kitten/components';
-import {Button, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View, Alert} from 'react-native';
+import {Button, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View, Alert, Image} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {BackButton} from '../components/BackButton';
 import {MessagesList} from '../components/chat';
@@ -21,7 +21,7 @@ export const MessagesScreen = ({navigation}) => {
   const {theme, isDark} = useTheme();
   const dispatch = useDispatch();
   const route = useRoute();
-  const {roomId, recipientProfile, recipientName, chatType} = route.params;
+  const {roomId, recipientProfile, recipientName, chatType, productInfo} = route.params;
   
   // Authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
@@ -32,7 +32,7 @@ export const MessagesScreen = ({navigation}) => {
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log('Chat params:', { roomId, recipientProfile, recipientName, chatType });
+  console.log('Chat params:', { roomId, recipientProfile, recipientName, chatType, productInfo });
 
   // Check authentication based on chat type
   const isAuthenticated = chatType === 'buyer' ? isBuyerAuthenticated : isSellerAuthenticated;
@@ -314,6 +314,54 @@ export const MessagesScreen = ({navigation}) => {
           </View>
         </Layout>
         
+        {/* Product Info Card - Show when coming from ProductDetailScreen */}
+        {productInfo && (
+          <View style={[
+            styles.productInfoCard,
+            { 
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+              borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+            }
+          ]}>
+            <View style={styles.productInfoHeader}>
+              <ThemedIcon
+                name="info-outline"
+                style={[styles.productInfoIcon, { 
+                  fill: theme['color-shadcn-primary'] 
+                }]}
+              />
+              <Text style={[styles.productInfoTitle, {
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>
+                Chatting about this product
+              </Text>
+            </View>
+            <View style={styles.productInfoContent}>
+              <Image
+                source={{ uri: productInfo.image }}
+                style={styles.productImage}
+              />
+              <View style={styles.productDetails}>
+                <Text style={[styles.productName, {
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>
+                  {productInfo.name}
+                </Text>
+                <Text style={[styles.productPrice, {
+                  color: theme['color-shadcn-primary']
+                }]}>
+                  PKR {productInfo.price?.toLocaleString() || '0'}
+                </Text>
+                <Text style={[styles.productShop, {
+                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                }]}>
+                  From: {productInfo.seller?.shopName || 'Shop'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+        
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ThemedIcon
@@ -480,6 +528,59 @@ const styles = StyleSheet.create({
   authButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  productInfoCard: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderBottomWidth: 1,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  productInfoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  productInfoIcon: {
+    width: 16,
+    height: 16,
+    marginRight: 6,
+  },
+  productInfoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  productInfoContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
+    backgroundColor: '#f0f0f0',
+  },
+  productDetails: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  productPrice: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  productShop: {
+    fontSize: 12,
   },
   loadingContainer: {
     flex: 1,

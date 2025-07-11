@@ -28,6 +28,8 @@ import { MyOrders } from '../screens/buyer/product/MyOrders';
 import { AddressListScreen } from '../screens/profile/AddressListScreen';
 import { AddAddressScreen } from '../screens/profile/AddAddressScreen';
 import { EditAddressScreen } from '../screens/profile/EditAddressScreen';
+import { ChatNavigator, ChatRoutes } from './ChatNavigator';
+import { MessagesScreen } from '../screens/MessagesScreen';
 const { Navigator, Screen } = createNativeStackNavigator();
 
 // Enum for App Screens
@@ -118,6 +120,8 @@ export const AppNavigator = () => {
           ),
         }}
         />
+        <Screen name={ChatRoutes.ROOMS_LIST} component={ChatNavigator} />
+        <Screen name={ChatRoutes.MESSAGES} component={MessagesScreen} />
         <Screen
             key="screen-BuyerWishlist"
             name={BuyerMainRoutes.BUYER_WISHLIST}
