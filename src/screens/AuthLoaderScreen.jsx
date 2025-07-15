@@ -26,17 +26,17 @@ export const AuthLoaderScreen = ({navigation}) => {
       // For backward compatibility, also check legacy tokens
       const token = await AsyncStorage.getItem('auth-token');
       const userType = await AsyncStorage.getItem('user-type');
-      
+
       if (token && userType) {
         // Set legacy auth for backward compatibility
-        dispatch(setAuthToken(token));
-        dispatch(setUserType(userType));
+      dispatch(setAuthToken(token));
+      dispatch(setUserType(userType));
         
         // Navigate based on legacy user type
-        if (userType === UserType.BUYER) {
-          navigation.navigate(AppScreens.BUYER_HOME_MAIN);
-        } else {
-          navigation.navigate(AppScreens.SELLER_HOME_MAIN);
+      if (userType === UserType.BUYER) {
+        navigation.navigate(AppScreens.BUYER_HOME_MAIN);
+      } else {
+        navigation.navigate(AppScreens.SELLER_HOME_MAIN);
         }
       } else {
         // No legacy auth found, navigate to buyer home as default

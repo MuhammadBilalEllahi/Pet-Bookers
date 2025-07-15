@@ -226,7 +226,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       );
       return;
     }
-
+    
     if (isInWishlist) {
       dispatch(removeFromWishlist({ productId: product.id }));
     } else {

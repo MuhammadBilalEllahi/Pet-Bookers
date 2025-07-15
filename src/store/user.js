@@ -241,8 +241,8 @@ export const loadDualAuthFromStorage = () => async (dispatch) => {
     
     if (buyerToken) {
       dispatch(setBuyerAuth(buyerToken));
-      dispatch(fetchCustomerInfo());
-    }
+    dispatch(fetchCustomerInfo());
+  }
     
     if (sellerToken) {
       dispatch(setSellerAuth(sellerToken));

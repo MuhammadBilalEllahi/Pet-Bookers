@@ -59,9 +59,9 @@ export const UpdateProfileScreen = ({ navigation }) => {
   useEffect(() => {
     if (isBuyerAuthenticated) {
       // Fetch latest customer info if not available
-      if (!customerInfo) {
-        dispatch(fetchCustomerInfo());
-      }
+    if (!customerInfo) {
+      dispatch(fetchCustomerInfo());
+    }
     } else {
       // Show different message based on auth state
       if (isSellerAuthenticated) {
@@ -101,20 +101,20 @@ export const UpdateProfileScreen = ({ navigation }) => {
       // Refresh customer info after successful update
       dispatch(fetchCustomerInfo());
       
-      Toast.show({
-        type: 'success',
+        Toast.show({
+          type: 'success',
         text1: 'Success',
         text2: 'Profile updated successfully!'
-      });
-      
-      navigation.goBack();
+        });
+
+        navigation.goBack();
       
     } catch (error) {
       console.error('Error updating profile:', error);
       handleAuthError(error, (err) => {
         const errorMessage = err?.response?.data?.message || err?.message || 'Failed to update profile';
-        Toast.show({
-          type: 'error',
+      Toast.show({
+        type: 'error',
           text1: 'Update Failed',
           text2: errorMessage
         });
@@ -132,8 +132,8 @@ export const UpdateProfileScreen = ({ navigation }) => {
         text1: 'Error',
         text2: 'Customer ID not found'
       });
-      return;
-    }
+        return;
+      }
 
     Alert.alert(
       'Delete Account',
@@ -144,36 +144,36 @@ export const UpdateProfileScreen = ({ navigation }) => {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            try {
+    try {
               setLoading(true);
-              
+      
               const response = await smartBuyerClient.get(`customer/account-delete/${customerInfo.id}`);
               console.log('Account deletion response:', response.data);
               
               // Logout buyer after account deletion
               dispatch(logoutBuyer());
               
-              Toast.show({
-                type: 'success',
-                text1: 'Account Deleted',
+        Toast.show({
+          type: 'success',
+          text1: 'Account Deleted',
                 text2: 'Your account has been successfully deleted'
-              });
-              
+        });
+
               navigation.navigate('Login');
               
-            } catch (error) {
+    } catch (error) {
               console.error('Error deleting account:', error);
               handleAuthError(error, (err) => {
                 const errorMessage = err?.response?.data?.message || err?.message || 'Failed to delete account';
-                Toast.show({
-                  type: 'error',
+      Toast.show({
+        type: 'error',
                   text1: 'Deletion Failed',
                   text2: errorMessage
                 });
-              });
-            } finally {
+      });
+    } finally {
               setLoading(false);
-            }
+    }
           }
         }
       ]
@@ -202,7 +202,7 @@ export const UpdateProfileScreen = ({ navigation }) => {
           >
             Sign in as Buyer
           </Button>
-        </Layout>
+      </Layout>
         
         <BuyerAuthModal
           visible={showBuyerAuthModal}
@@ -235,19 +235,19 @@ export const UpdateProfileScreen = ({ navigation }) => {
       >
         <Text style={[styles.title, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
           Update Profile
-        </Text>
+            </Text>
 
-        <Formik
-          initialValues={{
+          <Formik
+            initialValues={{
             f_name: customerInfo.f_name || '',
             l_name: customerInfo.l_name || '',
             email: customerInfo.email || '',
             phone: customerInfo.phone || '',
-          }}
+            }}
           validationSchema={ProfileSchema}
           onSubmit={handleUpdateProfile}
-          enableReinitialize={true}
-        >
+            enableReinitialize={true}
+          >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
             <View style={styles.form}>
               <View style={styles.inputContainer}>
@@ -318,28 +318,28 @@ export const UpdateProfileScreen = ({ navigation }) => {
               </View>
 
               <SubmitButton
-                onPress={handleSubmit}
+                  onPress={handleSubmit}
                 disabled={loading || isSubmitting}
                 title="Update Profile"
                 style={styles.updateButton}
               />
             </View>
-          )}
-        </Formik>
+            )}
+          </Formik>
 
         <View style={styles.dangerZone}>
           <Text style={[styles.dangerTitle, { color: theme['color-danger-500'] }]}>
             Danger Zone
           </Text>
-          <Button
-            onPress={handleDeleteAccount}
+            <Button
+              onPress={handleDeleteAccount}
             disabled={loading}
             style={[styles.deleteButton, { backgroundColor: theme['color-danger-500'] }]}
             appearance="filled"
-          >
-            Delete Account
-          </Button>
-        </View>
+            >
+              Delete Account
+            </Button>
+          </View>
       </ScrollView>
 
       {/* Buyer Authentication Modal */}
