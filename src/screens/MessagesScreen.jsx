@@ -297,7 +297,7 @@ export const MessagesScreen = ({navigation}) => {
                     marginLeft: 4,
                   }}
                 >
-                  {chatType === 'buyer' ? 'Chatting as Buyer' : 'Chatting as Seller'}
+                  {chatType === 'buyer' ?   'You are Chatting as Seller': 'You are Chatting as Buyer'}
                 </Text>
               </View>
             </View>
@@ -309,7 +309,7 @@ export const MessagesScreen = ({navigation}) => {
                 ? theme['color-info-default'] 
                 : theme['color-warning-default']
             }]}>
-              {chatType === 'buyer' ? 'Buyer' : 'Seller'}
+              {chatType === 'buyer' ?   'Seller': 'Buyer'}
             </Text>
           </View>
         </Layout>

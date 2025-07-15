@@ -56,8 +56,8 @@ export const ChatScreen = ({navigation}) => {
   const fetchBuyerChats = async () => {
     if (!isBuyerAuthenticated) {
       setBuyerChatList([]);
-      return;
-    }
+          return;
+        }
 
     try {
       setBuyerLoading(true);
@@ -65,8 +65,8 @@ export const ChatScreen = ({navigation}) => {
       
       console.log('Buyer chat response:', JSON.stringify(response.data, null, 2));
       
-      if (response.data && response.data.chat) {
-        const formattedChats = response.data.chat.map(chat => {
+        if (response.data && response.data.chat) {
+          const formattedChats = response.data.chat.map(chat => {
           const isSentByUs = chat.sent_by_customer === 1;
           const isSeen = isSentByUs ? chat.seen_by_seller === 1 : chat.seen_by_customer === 1;
           
@@ -93,43 +93,43 @@ export const ChatScreen = ({navigation}) => {
               : shopName; // Fallback to shop name if no seller name
             subtitle = seller?.f_name && seller?.l_name ? shopName : null;
           }
-          
-          return {
+            
+            return {
             id: `buyer_${chat.id}`,
             originalId: chat.id,
             title: sellerName,
             subtitle: subtitle,
             imgUrl: seller?.image === 'def.png' 
-              ? 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
+                ? 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
               : seller?.image 
                 ? `https://petbookers.com.pk/storage/app/public/seller/${seller.image}`
-                : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png',
-            msgText: chat.message,
-            lastUpdated: chat.updated_at,
+                  : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png',
+              msgText: chat.message,
+              lastUpdated: chat.updated_at,
             unreadMessages: chat.seen_by_customer === 0 ? 1 : 0, // Fix: 0 means unseen, 1 means seen
             recipientId: seller?.id,
             recipientName: sellerName,
             recipientImage: seller?.image === 'def.png' 
-              ? 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
+                ? 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
               : seller?.image 
                 ? `https://petbookers.com.pk/storage/app/public/seller/${seller.image}`
-                : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png',
-            isImportant: false,
+                  : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png',
+              isImportant: false,
             type: 'Buying',
             chatType: 'buyer',
-            messageStatus: {
-              isSentByUs,
-              isSeen,
-              timestamp: chat.updated_at
-            }
-          };
-        });
+              messageStatus: {
+                isSentByUs,
+                isSeen,
+                timestamp: chat.updated_at
+              }
+            };
+          });
         setBuyerChatList(formattedChats);
-      }
-    } catch (error) {
+        }
+      } catch (error) { 
       console.error('Error fetching buyer chats:', error);
       setBuyerChatList([]);
-    } finally {
+      } finally {
       setBuyerLoading(false);
     }
   };
@@ -450,15 +450,15 @@ export const ChatScreen = ({navigation}) => {
             style={[styles.tab, selectedTab === tab && styles.tabActive]}
           >
             <View style={styles.tabContent}>
-              <Text 
-                style={[
-                  styles.tabText, 
-                  { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] },
-                  selectedTab === tab && { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
-                ]}
-              >
-                {tab}
-              </Text>
+            <Text 
+              style={[
+                styles.tabText, 
+                { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] },
+                selectedTab === tab && { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
+              ]}
+            >
+              {tab}
+            </Text>
               {/* Show badge for tabs that require authentication */}
               {((tab === 'Buying' && !isBuyerAuthenticated) || (tab === 'Selling' && !isSellerAuthenticated)) && (
                 <Icon
