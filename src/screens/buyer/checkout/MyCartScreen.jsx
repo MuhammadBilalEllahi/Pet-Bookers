@@ -9,6 +9,8 @@ import { useSelector } from "react-redux";
 import { selectBaseUrls } from "../../../store/configs";
 import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
+import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from "../../../store/user";
+import { BuyerAuthModal } from '../../../components/modals/BuyerAuthModal';
 
 const ShimmerPlaceHolder = createShimmerPlaceholder(LinearGradient);
 
@@ -385,6 +387,9 @@ export const MyCartScreen = () => {
   const baseUrls = useSelector(selectBaseUrls);
   const navigation = useNavigation();
   const [paymentMethods, setPaymentMethods] = useState([]);
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
 
   // COD and EasyPaisa
   const getPaymentMethods = async () => {
@@ -631,6 +636,37 @@ export const MyCartScreen = () => {
   useEffect(() => {
     fetchCartData();
   }, []);
+
+  // Buyer auth modal success handler
+  const handleAuthSuccess = () => {
+    setShowBuyerAuthModal(false);
+    fetchCartData();
+  };
+
+  // If not authenticated as buyer, show auth state UI
+  if (!isBuyerAuthenticated) {
+    return (
+      <Layout style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}> 
+        <Text style={[styles.emptyTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], textAlign: 'center', marginBottom: 24 }]}> 
+          {isSellerAuthenticated 
+            ? 'Please sign in as a buyer to view your cart' 
+            : 'Please sign in to view your cart'}
+        </Text>
+        <Button
+          onPress={() => setShowBuyerAuthModal(true)}
+          style={[styles.browseBtn, { backgroundColor: theme['color-shadcn-primary'], minWidth: 200 }]}
+        >
+          Sign in as Buyer
+        </Button>
+        <BuyerAuthModal
+          visible={showBuyerAuthModal}
+          onClose={() => setShowBuyerAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          title="Sign in as Buyer"
+        />
+      </Layout>
+    );
+  }
 
   const renderCartItem = (item, index) => (
     <View key={item.id} style={[styles.cartRow, {

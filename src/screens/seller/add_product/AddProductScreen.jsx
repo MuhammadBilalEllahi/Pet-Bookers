@@ -19,6 +19,7 @@ import { axiosSellerClient } from '../../../utils/axiosClient';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import { useTheme as useThemeContext } from '../../../theme/ThemeContext';
+import { AppScreens } from '../../../navigators/AppNavigator';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -319,7 +320,7 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
                 }]}
                 onPress={() => {
                   setShowCongratsDialog(false);
-                  navigation.navigate('MyPostedAds');
+                  navigation.navigate(AppScreens.MY_POSTED_ADS);
                 }}>
                 <Text style={[styles.congratsButtonText, { 
                   color: theme['color-shadcn-primary-foreground']

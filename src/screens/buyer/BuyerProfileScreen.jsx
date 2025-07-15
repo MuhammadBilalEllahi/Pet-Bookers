@@ -59,7 +59,7 @@ export const BuyerProfileScreen = ({navigation}) => {
   };
 
   const navigateToOrdersList = () => {
-    navigation.navigate(AppScreens.MY_ORDERS);
+    navigation.navigate(AppScreens.CART);
   };
 
   
@@ -185,6 +185,13 @@ export const BuyerProfileScreen = ({navigation}) => {
 
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
         
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title="Cart"
+            subtitle="Settings are here now"
+            iconName="shopping-cart-outline"
+            onPress={navigateToOrdersList}
+          />
         <Layout level="1" style={{ backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)' }}>
           <ProfileActionButton
             title="My Wishlist"
@@ -206,13 +213,7 @@ export const BuyerProfileScreen = ({navigation}) => {
             iconName="settings-2-outline"
             onPress={navigateToAppSettings}
           />
-          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
-          <ProfileActionButton
-            title="Cart"
-            subtitle="Settings are here now"
-            iconName="shopping-cart-outline"
-            onPress={navigateToOrdersList}
-          />
+          
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
             title="Logout"

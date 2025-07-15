@@ -53,7 +53,7 @@ export const SellerProfileScreen = ({ navigation }) => {
   };
 
   const navigateToOrdersList = () => {
-    navigation.navigate('MyOrders');
+    navigation.navigate(AppScreens.CART);
   };
 
   const navigateToMyWishlist = () => {
@@ -253,6 +253,13 @@ export const SellerProfileScreen = ({ navigation }) => {
               iconName="browser-outline"
               onPress={navigateToMyPostedAds}
             />
+            <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title="Cart"
+            subtitle="Settings are here now"
+            iconName="shopping-cart-outline"
+            onPress={navigateToOrdersList}
+          />
             <ProfileActionButton
               title={t('profile.farmDetails')}
               subtitle={t('profile.farmDetailsSubtitle')}

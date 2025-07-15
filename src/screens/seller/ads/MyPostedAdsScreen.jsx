@@ -31,7 +31,7 @@ const MyPostedAdsScreen = ({ navigation }) => {
       setLoading(true);
       const response = await authSellerClient.get(`products/list`);
       console.log('Seller Products:', response.data);
-      setProducts(response.data?.products || []);
+      setProducts(response.data || []);
       
       const checking = await authSellerClient.get(`products/details/49`);
       console.log('Product details check:', checking.data);
@@ -176,33 +176,72 @@ const MyPostedAdsScreen = ({ navigation }) => {
           data={products}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.productItem, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-200'] }]}
-              onPress={() => handleProductPress(item)}
-            >
-              <View style={styles.productInfo}>
-                <Text style={[styles.productName, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-                  {item.name}
-                </Text>
-                <Text style={[styles.productPrice, { color: theme['color-primary-500'] }]}>
-                  ${item.unit_price}
-                </Text>
-                <Text style={[styles.productStock, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
-                  Stock: {item.current_stock || 0}
-                </Text>
-              </View>
-              <View style={styles.productActions}>
-                <Text style={[styles.productStatus, { 
-                  color: item.status === 'active' ? theme['color-success-500'] : theme['color-warning-500']
-                }]}>
-                  {item.status || 'pending'}
-                </Text>
+            <View style={{ marginBottom: 18 }}>
+              <TouchableOpacity
+                style={[
+                  {
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                    borderRadius: 14,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 8,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 2,
+                  },
+                ]}
+                onPress={() => handleProductPress(item)}
+                activeOpacity={0.92}
+              >
+                {/* Avatar/Image */}
+                <View style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'], marginRight: 14, justifyContent: 'center', alignItems: 'center' }}>
+                  {/* Placeholder icon */}
+                </View>
+                {/* Info */}
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 13, fontWeight: 'bold', marginBottom: 2 }}>Seller</Text>
+                  <Text style={{ color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], fontSize: 16, fontWeight: 'bold', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 15, fontWeight: 'bold', marginBottom: 2 }}>Rs {item.unit_price}</Text>
+                  {/* Date, views, messages, featured badge */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                    <Text style={{ color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 12, marginRight: 12 }}>
+                      Created on {item.created_at ? new Date(item.created_at).toLocaleDateString() : '01/05/2025'}
+                    </Text>
+                    <Text style={{ color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 12, marginRight: 8 }}>0 Views</Text>
+                    <Text style={{ color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 12, marginRight: 8 }}>0 Messages</Text>
+                    <View style={{ backgroundColor: theme['color-warning-default'], borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2, marginLeft: 4 }}>
+                      <Text style={{ color: '#fff', fontSize: 11, fontWeight: 'bold' }}>Featured</Text>
+                    </View>
+                  </View>
+                </View>
+                {/* Ellipsis icon */}
+                <View style={{ marginLeft: 8, marginTop: 2 }}>
+                  <Text style={{ color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], fontSize: 22 }}>⋮</Text>
                 </View>
               </TouchableOpacity>
+              {/* Try Featured Ads Button */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: theme['color-shadcn-primary'],
+                  borderRadius: 8,
+                  marginTop: 8,
+                  paddingVertical: 10,
+                  alignItems: 'center',
+                }}
+                onPress={() => Toast.show({ type: 'info', text1: 'Feature Coming Soon', text2: 'Try Featured Ads functionality coming soon!' })}
+              >
+                <Text style={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold', fontSize: 16 }}>Try Featured Ads</Text>
+              </TouchableOpacity>
+
+          
+              
+            </View>
           )}
           showsVerticalScrollIndicator={false}
         />
-      )}
+        )}
             </View>
   );
 };
