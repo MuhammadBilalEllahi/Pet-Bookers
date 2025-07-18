@@ -77,6 +77,9 @@ export const BuyerProfileScreen = ({navigation}) => {
   const navigateToPage = (page) => {
     navigation.navigate(page);
   };
+  const navigateToMyOrderList = () => {
+    navigation.navigate(AppScreens.MY_ORDER_LIST);
+  };
 
   return (
     <Layout
@@ -198,6 +201,13 @@ export const BuyerProfileScreen = ({navigation}) => {
             subtitle="Your saved items"
             iconName="heart-outline"
             onPress={navigateToMyWishlist}
+          />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title="My Orders"
+            subtitle="Your saved items"
+            iconName="map-outline"
+            onPress={navigateToMyOrderList}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton

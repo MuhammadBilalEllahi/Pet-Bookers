@@ -24,12 +24,15 @@ import { EditProductScreen } from '../screens/seller/EditProductScreen';
 import { FarmDetailsEditScreen } from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
 import { SellerPostedProductsStack } from './seller/SellerPostedProductsStack';
 import { MyWishlistScreen } from '../screens/buyer/product/MyWishlistScreen';
-import { MyOrders } from '../screens/buyer/product/MyOrders';
+import { MyOrderList, MyOrders } from '../screens/buyer/product/MyOrders';
 import { AddressListScreen } from '../screens/profile/AddressListScreen';
 import { AddAddressScreen } from '../screens/profile/AddAddressScreen';
 import { EditAddressScreen } from '../screens/profile/EditAddressScreen';
 import { ChatNavigator, ChatRoutes } from './ChatNavigator';
 import { MessagesScreen } from '../screens/MessagesScreen';
+import { SellerInfoScreen } from '../screens/seller/profile/farmdetails/SellerInfoScreen';
+import { VandorDetailScreen } from '../screens/buyer/VandorDetailScreen';
+import { RefundScreen } from '../screens/buyer/product/RefundScreen';
 const { Navigator, Screen } = createNativeStackNavigator();
 
 // Enum for App Screens
@@ -41,7 +44,7 @@ export const AppScreens = Object.freeze({
   AUTH: 'Auth',
   SELLER_HOME_MAIN: 'SellerHomeMain',
   BUYER_HOME_MAIN: 'BuyerHomeMain',
-  MY_ORDERS: 'MyOrders',
+  MY_ORDER_LIST: 'MyOrderList',
   LUCKYDRAW_INSTANCE: 'LuckyDrawInstance',
   SHIPING_DETAILS: 'ShipingDetails',
   PAYMENT_PAGE: 'PaymentPage',
@@ -55,6 +58,9 @@ export const AppScreens = Object.freeze({
   ADDRESS_LIST: 'AddressList',
   ADD_ADDRESS: 'AddAddress',
   EDIT_ADDRESS: 'EditAddress',
+  SELLER_INFO: 'SellerInfoScreen',
+  VANDOR_DETAIL: 'VandorDetailScreen',  
+  REFUND_SCREEN: 'RefundScreen',
 });
 
 export const AppNavigator = () => {
@@ -102,12 +108,12 @@ export const AppNavigator = () => {
           ),
         }}
         />
-        <Screen name={AppScreens.MY_ORDERS} component={MyOrders}
+        <Screen name={AppScreens.MY_ORDER_LIST} component={MyOrderList}
           options={
             {
               headerShown: true,
               header: props => (
-                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyOrdersScreen" />
+                <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyOrderListScreen" />
               ),
             }
           } />
@@ -117,6 +123,14 @@ export const AppNavigator = () => {
           headerShown: true,
           header: props => (
             <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyPostedAdsScreen" />
+          ),
+        }}
+        />
+        <Screen name={AppScreens.VANDOR_DETAIL} component={VandorDetailScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-VandorDetailScreen" />
           ),
         }}
         />
@@ -183,6 +197,14 @@ export const AppNavigator = () => {
                 <MainScreensHeader {...props} hideSearch={true} key="header-FarmDetailsEditScreen" />
               ),
             }} />
+        <Screen name={AppScreens.SELLER_INFO} component={SellerInfoScreen}
+  options={{
+    headerShown: true,
+    header: props => (
+      <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-SellerInfoScreen" />
+    ),
+  }}
+/>
         <Screen
               key="screen-ShipingDetails"
               name={AppScreens.SHIPING_DETAILS}
@@ -216,6 +238,14 @@ export const AppNavigator = () => {
               ),
             }}
           />
+          <Screen name={AppScreens.REFUND_SCREEN} component={RefundScreen}
+  options={{
+    headerShown: true,
+    header: props => (
+      <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-RefundScreen" />
+    ),
+  }}
+/>
 
       </Navigator>
       
