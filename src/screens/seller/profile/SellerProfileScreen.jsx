@@ -20,6 +20,12 @@ import { ProfileActionButton } from '../../../components/profile';
 import { axiosSellerClient } from '../../../utils/axiosClient';
 import { useEffect, useState } from 'react';
 import { selectBaseUrls } from '../../../store/configs';
+import { 
+  selectSellerProfileData, 
+  selectSellerProfileLoading, 
+  selectSellerProfileError,
+  fetchSellerProfileData 
+} from '../../../store/user';
 
 const {width, height} = Dimensions.get('window');
 
@@ -27,14 +33,12 @@ export const SellerProfileScreen = ({ navigation }) => {
   const { theme, isDark } = useTheme();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const [sellerData, setSellerData] = useState({
-    name: '',
-    profileImage: '',
-    storeName: '',
-    storeImage: '',
-    rating: 0,
-    totalRatings: 0
-  });
+  
+  // Get seller profile data from Redux store
+  const sellerData = useSelector(selectSellerProfileData);
+  const sellerLoading = useSelector(selectSellerProfileLoading);
+  const sellerError = useSelector(selectSellerProfileError);
+  const baseUrls = useSelector(selectBaseUrls);
 
   const navigateToProfileUpdate = () => {
     navigation.navigate('UpdateProfile');
@@ -59,60 +63,21 @@ export const SellerProfileScreen = ({ navigation }) => {
   const navigateToMyWishlist = () => {
     navigation.navigate(AppScreens.MY_WISHLIST);
   };
+  
   const navigateToMyOrderList = () => {
     navigation.navigate(AppScreens.MY_ORDER_LIST);
   };
 
-  const baseUrls = useSelector(selectBaseUrls);
   const navigateToAppSettings = () => {
     navigation.navigate('AppSettings');
   };
 
   const EditIcon = (props) => <Icon {...props} name="edit-2-outline" />;
-  const LockIcon = (props) => <Icon {...props} name="lock-outline" />;
 
   useEffect(() => {
-    const fetchSellerInfo = async () => {
-      try {
-        const response = await axiosSellerClient.get('/seller-info');
-        const data = response.data;
-        if (data) {
-          const fullName = `${data.f_name || ''} ${data.l_name || ''}`.trim();
-          setSellerData(prev => ({
-            ...prev,
-            name: fullName || '',
-            profileImage: data.image ? `https://petbookers.com.pk/storage/app/public/profile/${data.image}` : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching seller info:', error);
-      }
-    };
-
-    const fetchShopInfo = async () => {
-      try {
-        const shopResponse = await axiosSellerClient.get('/shop-info');
-        const shopData = shopResponse.data;
-        if (shopData) {
-          setSellerData(prev => ({
-            ...prev,
-            storeName: shopData.name || '',
-            storeImage: shopData.image ? `${baseUrls['shop_image_url']}/${shopData.image}` : '',
-            rating: shopData.rating || 0,
-            totalRatings: shopData.rating_count || 0
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching shop info:', error);
-      }
-    };
-
-    const fetchData = async () => {
-      await Promise.all([fetchSellerInfo(), fetchShopInfo()]);
-    };
-    
-    fetchData();
-  }, []);
+    // Fetch seller profile data from Redux store
+    dispatch(fetchSellerProfileData());
+  }, [dispatch]);
 
   return (
     <View style={[styles.container, { 

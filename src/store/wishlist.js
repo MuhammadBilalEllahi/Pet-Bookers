@@ -12,7 +12,7 @@ export const loadWishlist = () => async (dispatch) => {
   try {
     dispatch(setWishlistLoading(true));
     const {data} = await smartBuyerClient.get('customer/wish-list/');
-    console.log('[loadWishlist] success:', data);
+    // console.log('[loadWishlist] success:', data);
     dispatch(setWishlist(data || []));
     } catch (error) {
     console.error('[loadWishlist] error:', error);
@@ -34,14 +34,27 @@ export const addToWishlist = ({productId, productData}) => async (dispatch) => {
     
     console.log('[addToWishlist] success:', response.data);
     
-    // Add to local state immediately for better UX
+    // Add to local state only on successful response
     dispatch(addWishlistItem({
       id: productId,
       ...productData
     }));
     
     } catch (error) {
-    console.error('[addToWishlist] error:', error);
+    console.error('[addToWishlist] error:', error.response?.data || error.message);
+    
+    // Check if the error is "Already in your wishlist"
+    const errorMessage = error.response?.data?.message || error.message;
+    if (errorMessage === "Already in your wishlist") {
+      // If it's already in wishlist, add it to local state to keep UI consistent
+      dispatch(addWishlistItem({
+        id: productId,
+        ...productData
+      }));
+      // Don't treat this as an error since the item is actually in the wishlist
+      return;
+    }
+    
     handleAuthError(error, (err) => {
       const errorMessage = err?.response?.data?.message || err?.message || 'Failed to add to wishlist';
       dispatch(setWishlistError(errorMessage));
@@ -138,7 +151,9 @@ export const selectWishlistError = createSelector(selectWishlistData, (wishlistD
 export const selectIsInWishlist = createSelector(
   [selectWishlist, (state, productId) => productId],
   (wishlist, productId) => {
-    return wishlist.some(item => item.id === productId);
+    const isInWishlist = wishlist.some(item => item.id === productId);
+    // console.log(`[selectIsInWishlist] Product ${productId} - isInWishlist: ${isInWishlist}, wishlist items:`, wishlist.map(item => item.id));
+    return isInWishlist;
   }
 );
 

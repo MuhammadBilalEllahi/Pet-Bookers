@@ -46,6 +46,18 @@ const initialState = {
   sellerInfo: null,
   sellerLoading: false,
   sellerError: null,
+  // Seller profile data (persisted across re-renders)
+  sellerProfileData: {
+    name: '',
+    profileImage: '',
+    storeName: '',
+    storeImage: '',
+    rating: 0,
+    totalRatings: 0,
+    lastUpdated: null
+  },
+  sellerProfileLoading: false,
+  sellerProfileError: null,
 };
 
 const slice = createSlice({
@@ -108,6 +120,17 @@ const slice = createSlice({
       state.sellerInfo = null;
       state.sellerLoading = false;
       state.sellerError = null;
+      state.sellerProfileData = {
+        name: '',
+        profileImage: '',
+        storeName: '',
+        storeImage: '',
+        rating: 0,
+        totalRatings: 0,
+        lastUpdated: null
+      };
+      state.sellerProfileLoading = false;
+      state.sellerProfileError = null;
       delSellerAuthToken();
     },
 
@@ -138,6 +161,43 @@ const slice = createSlice({
       state.sellerError = payload;
       state.sellerLoading = false;
     },
+
+    // ==================== SELLER PROFILE DATA ACTIONS ====================
+    setSellerProfileLoading: (state, {payload}) => {
+      state.sellerProfileLoading = payload;
+    },
+    setSellerProfileData: (state, {payload}) => {
+      state.sellerProfileData = {
+        ...payload,
+        lastUpdated: new Date().toISOString()
+      };
+      state.sellerProfileLoading = false;
+      state.sellerProfileError = null;
+    },
+    setSellerProfileError: (state, {payload}) => {
+      state.sellerProfileError = payload;
+      state.sellerProfileLoading = false;
+    },
+    updateSellerProfileData: (state, {payload}) => {
+      state.sellerProfileData = {
+        ...state.sellerProfileData,
+        ...payload,
+        lastUpdated: new Date().toISOString()
+      };
+    },
+    clearSellerProfileData: (state) => {
+      state.sellerProfileData = {
+        name: '',
+        profileImage: '',
+        storeName: '',
+        storeImage: '',
+        rating: 0,
+        totalRatings: 0,
+        lastUpdated: null
+      };
+      state.sellerProfileLoading = false;
+      state.sellerProfileError = null;
+    },
   },
 });
 
@@ -160,7 +220,13 @@ export const {
   // Seller info actions
   setSellerLoading,
   setSellerInfo,
-  setSellerError
+  setSellerError,
+  // Seller profile data actions
+  setSellerProfileLoading,
+  setSellerProfileData,
+  setSellerProfileError,
+  updateSellerProfileData,
+  clearSellerProfileData
 } = slice.actions;
 
 // ASYNC THUNK ACTIONS
@@ -211,10 +277,64 @@ export const fetchSellerInfo = () => async (dispatch, getState) => {
   }
 };
 
+// ASYNC THUNK ACTIONS for seller profile data
+export const fetchSellerProfileData = () => async (dispatch, getState) => {
+  const state = getState();
+  const isSellerAuthenticated = selectIsSellerAuthenticated(state);
+  const currentProfileData = selectSellerProfileData(state);
+  
+  // Only fetch if seller is authenticated
+  if (!isSellerAuthenticated) {
+    return;
+  }
+
+  // Check if we have recent data (less than 5 minutes old)
+  if (currentProfileData.lastUpdated) {
+    const lastUpdated = new Date(currentProfileData.lastUpdated);
+    const now = new Date();
+    const diffInMinutes = (now - lastUpdated) / (1000 * 60);
+    
+    if (diffInMinutes < 5) {
+      console.log('Using cached seller profile data');
+      return;
+    }
+  }
+
+  try {
+    dispatch(setSellerProfileLoading(true));
+    
+    // Fetch both seller info and shop info in parallel
+    const [sellerResponse, shopResponse] = await Promise.all([
+      axiosSellerClient.get('/seller-info'),
+      axiosSellerClient.get('/shop-info')
+    ]);
+
+    const sellerData = sellerResponse.data;
+    const shopData = shopResponse.data;
+
+    // Combine the data
+    const profileData = {
+      name: sellerData ? `${sellerData.f_name || ''} ${sellerData.l_name || ''}`.trim() : '',
+      profileImage: sellerData?.image ? `https://petbookers.com.pk/storage/app/public/profile/${sellerData.image}` : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png',
+      storeName: shopData?.name || '',
+      storeImage: shopData?.image ? `https://petbookers.com.pk/storage/app/public/shop/${shopData.image}` : '',
+      rating: shopData?.rating || 0,
+      totalRatings: shopData?.rating_count || 0
+    };
+
+    dispatch(setSellerProfileData(profileData));
+  } catch (error) {
+    console.error('Error fetching seller profile data:', error);
+    const errorMessage = error?.response?.data?.message || error?.message || 'Failed to fetch seller profile data';
+    dispatch(setSellerProfileError(errorMessage));
+  }
+};
+
 // Helper action to handle post-login for sellers
 export const handleSellerLogin = (token) => async (dispatch) => {
   dispatch(setSellerAuth(token));
   dispatch(fetchSellerInfo());
+  dispatch(fetchSellerProfileData());
 };
 
 // Legacy helper action (for backward compatibility)
@@ -247,6 +367,7 @@ export const loadDualAuthFromStorage = () => async (dispatch) => {
     if (sellerToken) {
       dispatch(setSellerAuth(sellerToken));
       dispatch(fetchSellerInfo());
+      dispatch(fetchSellerProfileData());
     }
   } catch (error) {
     console.error('Error loading auth tokens from storage:', error);
@@ -333,6 +454,19 @@ export const selectSellerLoading = createSelector(selectUserData, userData => {
 
 export const selectSellerError = createSelector(selectUserData, userData => {
   return userData.sellerError;
+});
+
+// Seller profile data selectors
+export const selectSellerProfileData = createSelector(selectUserData, userData => {
+  return userData.sellerProfileData;
+});
+
+export const selectSellerProfileLoading = createSelector(selectUserData, userData => {
+  return userData.sellerProfileLoading;
+});
+
+export const selectSellerProfileError = createSelector(selectUserData, userData => {
+  return userData.sellerProfileError;
 });
 
 export const selectSellerId = createSelector(selectUserData, userData => {

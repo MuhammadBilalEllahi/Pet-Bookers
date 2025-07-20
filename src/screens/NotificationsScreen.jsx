@@ -5,144 +5,87 @@ import dayjs from 'dayjs';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import {ThemedIcon} from '../components/Icon';
 import {flexeStyles, spacingStyles} from '../utils/globalStyles';
+import { useEffect } from 'react';
+import { axiosBuyerClient } from '../utils/axiosClient';
+import { useSelector, useDispatch } from 'react-redux';
+import { setNotifications, removeNotification } from '../store/notifications';
 
 const {width: windowWidth} = Dimensions.get('window');
 
-const notifications = [
-  {
-    id: 0,
-    title: 'New Message',
-    description: 'You have received a new message from John Doe.',
-    timestamp: '2023-05-23T08:30:00Z',
-    isUnread: true,
-    orderId: 'c971d46e-24a8-4c8f-bb8a-69e0f714c5db',
-    notificationType: 'order',
-  },
-  {
-    id: 1,
-    title: 'New Friend Request',
-    description: 'Jane Smith sent you a friend request.',
-    timestamp: '2023-05-22T14:45:00Z',
-    isUnread: false,
-    orderId: '',
-    notificationType: 'promotion',
-  },
-  {
-    id: 2,
-    title: 'New Comment',
-    description: 'Michael Johnson commented on your post.',
-    timestamp: '2023-05-21T11:15:00Z',
-    isUnread: true,
-    orderId: '',
-    notificationType: 'promotion',
-  },
-  {
-    id: 3,
-    title: 'New Notification',
-    description: 'You have a new notification.',
-    timestamp: '2023-05-20T17:20:00Z',
-    isUnread: false,
-    orderId: '',
-    notificationType: 'promotion',
-  },
-  {
-    id: 4,
-    title: 'New Like',
-    description: 'David Wilson liked your photo.',
-    timestamp: '2023-05-19T09:10:00Z',
-    isUnread: true,
-    orderId: '',
-    notificationType: 'promotion',
-  },
-  {
-    id: 5,
-    title: 'New Event Invitation',
-    description: 'You have been invited to an event by Olivia Anderson.',
-    timestamp: '2023-05-18T12:35:00Z',
-    isUnread: false,
-    orderId: '',
-    notificationType: 'promotion',
-  },
-  {
-    id: 6,
-    title: 'New Message',
-    description: 'James Martinez sent you a new message.',
-    timestamp: '2023-05-17T16:55:00Z',
-    isUnread: true,
-    orderId: 'f3e9c7d4-5630-4a1b-af02-86d5b1c16e9d',
-    notificationType: 'order',
-  },
-  {
-    id: 7,
-    title: 'New Friend Request',
-    description: 'Sophia Thompson sent you a friend request.',
-    timestamp: '2023-05-16T13:40:00Z',
-    isUnread: false,
-    orderId: '',
-    notificationType: 'order',
-  },
-  {
-    id: 8,
-    title: 'New Comment',
-    description: 'Daniel Davis commented on your post.',
-    timestamp: '2023-05-15T10:25:00Z',
-    isUnread: true,
-    orderId: '',
-    notificationType: 'order',
-  },
-  {
-    id: 9,
-    title: 'New Notification',
-    description: 'You have a new notification.',
-    timestamp: '2023-05-14T15:50:00Z',
-    isUnread: false,
-    orderId: '',
-    notificationType: 'promotion',
-  },
-];
-
 export const NotificationsScreen = ({navigation}) => {
+  const dispatch = useDispatch();
+  const notifications = useSelector(state => state.notifications.notifications);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axiosBuyerClient.get('/notifications');
+        console.log("notifications",response.data);
+        // Map backend notifications to expected shape if needed
+        const mapped = (response.data || []).map((notif, idx) => ({
+          id: notif.id ?? idx,
+          title: notif.title || 'Notification',
+          description: notif.description || notif.body || '',
+          timestamp: notif.created_at || notif.timestamp || new Date().toISOString(),
+          isUnread: notif.is_unread ?? true,
+          orderId: notif.order_id || '',
+          notificationType: notif.notification_type || 'promotion',
+        }));
+        dispatch(setNotifications(mapped));
+      } catch (e) {
+        // Optionally handle error
+      }
+    };
+    fetchNotifications();
+  }, [dispatch]);
+
   const {i18n} = useTranslation();
   const handleSwipeDeletion = swipeData => {
     const {key, value} = swipeData;
     if (i18n.dir() === 'rtl') {
       if (value === windowWidth) {
-        // dispatch(removeNotification(key));
+        dispatch(removeNotification(Number(key)));
       }
     } else {
       if (value === -windowWidth) {
-        // dispatch(removeNotification(key));
+        dispatch(removeNotification(Number(key)));
       }
     }
   };
 
   return (
     <Layout level="3" style={{flex: 1}}>
-      <SwipeListView
-        data={notifications}
-        renderItem={({item, index}, rowMap) => (
-          <NotifItem
-            notifData={item}
-            handlePress={() => {}}
-            _key={`${item.time}_${index.toString()}`}
-          />
-        )}
-        keyExtractor={(item, index) => `${item.time}_${index.toString()}`}
-        contentContainerStyle={[
-          spacingStyles.p16,
-          {
-            paddingBottom: 90,
-          },
-        ]}
-        swipeRowStyle={{marginVertical: 4}}
-        disableRightSwipe={i18n.dir() === 'ltr'}
-        disableLeftSwipe={i18n.dir() === 'rtl'}
-        recalculateHiddenLayout={true}
-        renderHiddenItem={(data, rowMap) => <RowBackButton />}
-        rightOpenValue={-windowWidth}
-        leftOpenValue={windowWidth}
-        onSwipeValueChange={handleSwipeDeletion}
-      />
+      {notifications.length === 0 ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text category="h6">No notifications yet</Text>
+        </View>
+      ) : (
+        <SwipeListView
+          data={notifications}
+          renderItem={({item, index}, rowMap) => (
+            <NotifItem
+              notifData={item}
+              handlePress={() => {}}
+              _key={item.id}
+            />
+          )}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={[
+            spacingStyles.p16,
+            {
+              paddingBottom: 90,
+            },
+          ]}
+          swipeRowStyle={{marginVertical: 4}}
+          disableRightSwipe={i18n.dir() === 'ltr'}
+          disableLeftSwipe={i18n.dir() === 'rtl'}
+          recalculateHiddenLayout={true}
+          renderHiddenItem={(data, rowMap) => <RowBackButton />}
+          rightOpenValue={-windowWidth}
+          leftOpenValue={windowWidth}
+          onSwipeValueChange={handleSwipeDeletion}
+        />
+      )}
     </Layout>
   );
 };
@@ -164,7 +107,7 @@ const NotifItem = ({notifData, handlePress, _key}) => {
           iconStyle={{marginRight: 10}}
         />
         <Layout style={{alignItems: 'flex-start'}}>
-          <Text category="c1">{dayjs(notifData.time).format('lll')}</Text>
+          <Text category="c1">{dayjs(notifData.timestamp).format('lll')}</Text>
           <Text style={{marginVertical: 4, fontWeight: '500', fontSize: 18}}>
             {notifData.title}
           </Text>

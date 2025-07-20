@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Image, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView, Alert, RefreshControl } from "react-native";
 import { Layout, Text, Button, Select, SelectItem, IndexPath, Icon } from "@ui-kitten/components";
 import { AppScreens } from "../../../navigators/AppNavigator";
@@ -11,6 +11,9 @@ import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from "../../../store/user";
 import { BuyerAuthModal } from '../../../components/modals/BuyerAuthModal';
+import { loadWishlist, addToWishlist, removeFromWishlist, selectIsInWishlist, selectWishlistLoading } from '../../../store/wishlist';
+import { useDispatch } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ShimmerPlaceHolder = createShimmerPlaceholder(LinearGradient);
 
@@ -390,6 +393,7 @@ export const MyCartScreen = () => {
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
   const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
+  const dispatch = useDispatch();
 
   // COD and EasyPaisa
   const getPaymentMethods = async () => {
@@ -403,7 +407,16 @@ export const MyCartScreen = () => {
   };
   useEffect(() => {
     getPaymentMethods();
-  }, []);
+    // Load wishlist when component mounts
+    dispatch(loadWishlist());
+  }, [dispatch]);
+  
+  // Reload wishlist when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(loadWishlist());
+    }, [dispatch])
+  );
 
   // Group cart items by seller/farm
   const groupedCartData = cartData.reduce((groups, item) => {
@@ -668,69 +681,129 @@ export const MyCartScreen = () => {
     );
   }
 
-  const renderCartItem = (item, index) => (
-    <View key={item.id} style={[styles.cartRow, {
-      borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-    }]}>
-      <Text style={[styles.srCell, {
-        color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-      }]}>{index + 1}</Text>
-      <TouchableOpacity 
-        style={styles.productCell}
-        onPress={() => navigateToProductDetail(item)}
-      >
-        <Image 
-          source={{ 
-            uri: `${baseUrls['product_thumbnail_url']}/${item.thumbnail}` 
-          }} 
-          style={styles.productImage} 
-        />
-        <View style={{ flex: 1, paddingLeft: 12 }}>
-          <Text style={[styles.productName, {
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>{item.name}</Text>
-          {/* <Text style={[styles.productDesc, {
-            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-          }]}>{item.shop_info}</Text> */}
-          <View style={styles.quantityRow}>
-            <TouchableOpacity 
-              style={[styles.quantityBtn, {
-                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-              }]}
-              onPress={() => updateQuantity(item.id, item.quantity - 1)}
-            >
-              <Icon name="minus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
-            </TouchableOpacity>
-            <Text style={[styles.quantityText, {
-              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>{item.quantity}</Text>
-            <TouchableOpacity 
-              style={[styles.quantityBtn, {
-                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-              }]}
-              onPress={() => updateQuantity(item.id, item.quantity + 1)}
-            >
-              <Icon name="plus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
-            </TouchableOpacity>
-          </View>
-          <Text style={[styles.productPrice, {
+  const renderCartItem = (item, index) => {
+    // Get wishlist status for this product
+    const isInWishlist = useSelector(state => selectIsInWishlist(state, item.product_id));
+    const wishlistLoading = useSelector(selectWishlistLoading);
+    
+    // Handle wishlist toggle
+    const handleWishlistToggle = (e) => {
+      e.stopPropagation(); // Prevent navigation
+      
+      // Check if user is authenticated as buyer
+      if (!isBuyerAuthenticated) {
+        const message = isSellerAuthenticated 
+          ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
+          : 'Please sign in as a buyer to add items to wishlist.';
+        
+        Alert.alert(
+          'Buyer Authentication Required',
+          message,
+          [{ text: 'OK', style: 'default' }]
+        );
+        return;
+      }
+      
+      if (isInWishlist) {
+        // Remove from wishlist
+        dispatch(removeFromWishlist({productId: item.product_id}));
+      } else {
+        // Add to wishlist with product data
+        const productData = {
+          id: item.product_id,
+          name: item.name,
+          slug: item.slug,
+          unit_price: item.price,
+          discount: item.discount || 0,
+          discount_type: item.discount_type || 'percent',
+          current_stock: item.current_stock || 1,
+          thumbnail: item.thumbnail,
+        };
+        dispatch(addToWishlist({productId: item.product_id, productData}));
+      }
+    };
+    
+    return (
+      <View key={item.id} style={[styles.cartRow, {
+        borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+      }]}>
+        <Text style={[styles.srCell, {
           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Rs {(item.price * item.quantity).toLocaleString()}</Text>
-        </View>
+        }]}>{index + 1}</Text>
         <TouchableOpacity 
-          onPress={() => confirmRemove(item.id, item.name)}
-          disabled={removing[item.id]}
-          style={styles.removeBtn}
+          style={styles.productCell}
+          onPress={() => navigateToProductDetail(item)}
         >
-          {removing[item.id] ? (
-            <Icon name="loader-outline" fill={theme['color-shadcn-destructive']} style={styles.removeIcon} />
-          ) : (
-            <Icon name="close-circle-outline" fill={theme['color-shadcn-destructive']} style={styles.removeIcon} />
-          )}
+          <Image 
+            source={{ 
+              uri: `${baseUrls['product_thumbnail_url']}/${item.thumbnail}` 
+            }} 
+            style={styles.productImage} 
+          />
+          <View style={{ flex: 1, paddingLeft: 12 }}>
+            <Text style={[styles.productName, {
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>{item.name}</Text>
+            {/* <Text style={[styles.productDesc, {
+              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+            }]}>{item.shop_info}</Text> */}
+            <View style={styles.quantityRow}>
+              <TouchableOpacity 
+                style={[styles.quantityBtn, {
+                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                }]}
+                onPress={() => updateQuantity(item.id, item.quantity - 1)}
+              >
+                <Icon name="minus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
+              </TouchableOpacity>
+              <Text style={[styles.quantityText, {
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>{item.quantity}</Text>
+              <TouchableOpacity 
+                style={[styles.quantityBtn, {
+                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                }]}
+                onPress={() => updateQuantity(item.id, item.quantity + 1)}
+              >
+                <Icon name="plus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
+              </TouchableOpacity>
+            </View>
+            <Text style={[styles.productPrice, {
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Rs {(item.price * item.quantity).toLocaleString()}</Text>
+          </View>
+          
+          {/* Wishlist Button */}
+          <TouchableOpacity 
+            onPress={handleWishlistToggle}
+            disabled={wishlistLoading}
+            style={styles.wishlistBtn}
+          >
+            <Icon 
+              name={isInWishlist ? "heart" : "heart-outline"}
+              fill={isInWishlist ? '#FF512F' : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
+              style={[
+                styles.wishlistIcon,
+                { opacity: wishlistLoading ? 0.6 : 1 }
+              ]}
+            />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            onPress={() => confirmRemove(item.id, item.name)}
+            disabled={removing[item.id]}
+            style={styles.removeBtn}
+          >
+            {removing[item.id] ? (
+              <Icon name="loader-outline" fill={theme['color-shadcn-destructive']} style={styles.removeIcon} />
+            ) : (
+              <Icon name="close-circle-outline" fill={theme['color-shadcn-destructive']} style={styles.removeIcon} />
+            )}
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
-    </View>
-  );
+      </View>
+    );
+  };
 
   const renderFarmCartBox = (group, groupIndex) => {
     // Calculate group subtotal
@@ -1236,6 +1309,14 @@ const styles = StyleSheet.create({
     padding: 8
   },
   removeIcon: {
+    width: 24,
+    height: 24
+  },
+  wishlistBtn: {
+    padding: 8,
+    marginRight: 4
+  },
+  wishlistIcon: {
     width: 24,
     height: 24
   },

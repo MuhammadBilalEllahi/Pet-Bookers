@@ -8,6 +8,9 @@ import { LoginScreen } from '../screens/auth/Login';
 import { ForgotPasswordScreen } from '../screens/auth/ForgotPassword';
 import { VerifyOTPScreen } from '../screens/auth/VerifyOTP';
 import { ResetPasswordScreen } from '../screens/auth/ResetPassword';
+import { SellerForgotPasswordScreen } from '../screens/seller/SellerForgotPasswordScreen';
+import { SellerVerifyOTPScreen } from '../screens/seller/SellerVerifyOTPScreen';
+import { SellerResetPasswordScreen } from '../screens/seller/SellerResetPasswordScreen';
 
 // Auth Route Enum for maintainability and intellisense
 export const AuthRoutes = Object.freeze({
@@ -16,6 +19,9 @@ export const AuthRoutes = Object.freeze({
   FORGOT_PASSWORD: { name: 'ForgotPassword', component: ForgotPasswordScreen },
   VERIFY_OTP: { name: 'VerifyOTP', component: VerifyOTPScreen },
   RESET_PASSWORD: { name: 'ResetPassword', component: ResetPasswordScreen },
+  SELLER_FORGOT_PASSWORD: { name: 'SellerForgotPassword', component: SellerForgotPasswordScreen },
+  SELLER_VERIFY_OTP: { name: 'SellerVerifyOTP', component: SellerVerifyOTPScreen },
+  SELLER_RESET_PASSWORD: { name: 'SellerResetPassword', component: SellerResetPasswordScreen },
 });
 
 const { Navigator, Screen } = createNativeStackNavigator();
@@ -68,6 +74,18 @@ export const AuthNavigator = () => {
       <Screen
         name={AuthRoutes.RESET_PASSWORD.name}
         component={AuthRoutes.RESET_PASSWORD.component}
+      />
+      <Screen
+        name={AuthRoutes.SELLER_FORGOT_PASSWORD.name}
+        component={AuthRoutes.SELLER_FORGOT_PASSWORD.component}
+      />
+      <Screen
+        name={AuthRoutes.SELLER_VERIFY_OTP.name}
+        component={AuthRoutes.SELLER_VERIFY_OTP.component}
+      />
+      <Screen
+        name={AuthRoutes.SELLER_RESET_PASSWORD.name}
+        component={AuthRoutes.SELLER_RESET_PASSWORD.component}
       />
     </Navigator>
   );

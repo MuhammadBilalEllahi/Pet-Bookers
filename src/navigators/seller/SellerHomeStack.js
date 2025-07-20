@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {MainScreensHeader} from '../../components/buyer';
+// import {MainScreensHeader} from '../../components/buyer';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 
 // Screens
@@ -10,12 +10,14 @@ import {VandorDetailScreen} from '../../screens/buyer/VandorDetailScreen';
 import {NotificationsScreen} from '../../screens/NotificationsScreen';
 import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
 import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
+import {SubCategoryProductsScreen} from '../../screens/buyer/categories/SubCategoryProductsScreen';
 import {ProductPreviewScreen} from '../../screens/seller/ProductPreviewScreen';
 import { HomeMainScreen } from '../../screens/buyer/HomeMainScreen';
 
 import { UserType } from '../../store/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ProductDetailScreen } from '../../screens/buyer/product/ProductDetailScreen';
+import { MainScreensHeader } from '../../components/buyer';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -61,6 +63,16 @@ export const SellerHomeStack = () => {
         options={{
           title: 'CategoriesList',
           
+        }}
+      />
+      <Screen
+        name="SubCategoryProducts"
+        component={SubCategoryProductsScreen}
+        options={{
+          title: 'SubCategoryProducts',
+          header: props=>(<MainScreensHeader {...props }  
+            activateGoBack={true}
+            />)
         }}
       />
       <Screen name="ProductDetail" component={ProductDetailScreen}
@@ -114,6 +126,7 @@ export const SellerHomeStack = () => {
             <MainScreensHeader
               {...props}
               hideSearch={false}
+              hideNotification={false}
               title="Notifications"
             />
           ),

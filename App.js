@@ -75,7 +75,7 @@ const AppContent = () => {
         customMapping={mapping}>
         <AppNavigator />
       </ApplicationProvider>
-      <Toast/>
+      <Toast />
     </SafeAreaView>
   );
 };

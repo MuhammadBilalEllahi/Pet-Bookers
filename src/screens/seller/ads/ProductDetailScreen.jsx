@@ -13,6 +13,9 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { axiosSellerClient } from '../../../utils/axiosClient';
 import { MainScreensHeader } from '../../../components/buyer';
+import { useSelector } from 'react-redux';
+import { selectBaseUrls } from '../../../store/configs';
+
 
 const { width: windowWidth } = Dimensions.get('screen');
 
@@ -23,7 +26,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const isRTL = i18n.dir() === 'rtl';
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
-
+  const baseUrls = useSelector(selectBaseUrls);
   console.log('productId in ProductDetailScreen', productId);
 
   useEffect(() => {
@@ -112,7 +115,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           {product.images.map((image, index) => (
             <Image
               key={index}
-              source={{ uri: `https://your-api-base-url/${image}` }}
+              source={{ uri: `${baseUrls['shop_image_url']}/${image}` }}
               style={styles.productImage}
               resizeMode="cover"
             />

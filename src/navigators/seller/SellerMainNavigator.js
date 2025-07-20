@@ -13,6 +13,7 @@ import {
 import { ThemedIcon } from '../../components/Icon';
 import { selectShowBottomTabBar } from '../../store/configs';
 import { useTheme as useCustomTheme } from '../../theme/ThemeContext';
+import { CommonActions } from '@react-navigation/native';
 
 // Screens and Navigation Stacks
 import { SellerHomeStack } from './SellerHomeStack';
@@ -165,6 +166,22 @@ const BottomTabBar = ({ navigation, state }) => {
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
   const { isDark } = useCustomTheme();
 
+  const handleTabPress = (index) => {
+    const routeName = state.routeNames[index];
+    const stackKey = state.routes[index].key;
+    navigation.navigate({
+      name: routeName,
+      key: stackKey,
+      merge: true,
+    });
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: routeName }],
+      })
+    );
+  };
+
   return (
     <View style={styles.bottomTabBarContainer} key="bottomTabBarContainer">
       <BottomNavigation
@@ -179,7 +196,7 @@ const BottomTabBar = ({ navigation, state }) => {
             backgroundColor: isDark ? '#000000' : '#FFFFFF',
           },
         ]}
-        onSelect={index => navigation.navigate(state.routeNames[index])}
+        onSelect={handleTabPress}
         key="bottomNavigation"
       >
         <BottomNavigationTab

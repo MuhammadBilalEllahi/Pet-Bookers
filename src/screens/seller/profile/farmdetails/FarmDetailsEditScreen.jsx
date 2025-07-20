@@ -14,6 +14,7 @@ import {
   Input,
   Button,
   Spinner,
+  Divider,
 } from '@ui-kitten/components';
 import { useTheme } from '../../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,8 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { selectBaseUrls } from '../../../../store/configs';
 import { useSelector } from 'react-redux';
 import { ImagePicker } from '../../../../components/form';
+import { ProfileActionButton } from '../../../../components/profile';
+import { AppScreens } from '../../../../navigators/AppNavigator';
 
 // Permission request helper for gallery access
 const requestGalleryPermission = async () => {
@@ -46,6 +49,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   const baseUrls = useSelector(selectBaseUrls);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Shop Info State
   const [shopInfo, setShopInfo] = useState({
@@ -137,6 +141,22 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
     }
   };
 
+  const navigateToSellerForgotPassword = () => {
+    navigation.navigate('SellerForgotPassword');
+  };
+
+  const navigateToSellerResetPassword = () => {
+    navigation.navigate('SellerResetPassword');
+  };
+
+  const navigateToRefundHandle = () => {
+    navigation.navigate(AppScreens.REFUND_HANDLE);
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
   if (loading) {
     return (
       <Layout style={styles.loadingContainer}>
@@ -150,48 +170,137 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
       <ScrollView style={styles.scrollView}>
-        <Layout style={styles.section}>
+        {/* Password Management Section */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <ProfileActionButton
+            title="Forgot Password"
+            subtitle="Reset your password via email/SMS"
+            iconName="info-outline"
+            onPress={navigateToSellerForgotPassword}
+          />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title="Change Password"
+            subtitle="Update your current password"
+            iconName="info-outline"
+            onPress={navigateToSellerResetPassword}
+          />
+          <ProfileActionButton
+            title="Refund Handle"
+            subtitle="Handle refund requests"
+            iconName="info-outline"
+            onPress={navigateToRefundHandle}
+          />
+        </Layout>
+
+        {/* Farm Details Section */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <View style={styles.headerRow}>
+            <Text style={[styles.sectionTitle, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Farm Details</Text>
+            <Button
+              appearance="ghost"
+              size="small"
+              onPress={toggleEditMode}
+              style={styles.editButton}
+            >
+              {isEditMode ? 'Cancel' : 'Edit'}
+            </Button>
+          </View>
+
           <View style={styles.imageContainer}>
             <Text style={[styles.label, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>{t('farmImage') || 'Farm Image'}</Text>
-            <ImagePicker
-              title={t('chooseFarmImage') || 'Choose Image'}
-              onPress={handleImagePick}
-              imageUri={shopInfo.image ? shopInfo.image.uri : null}
-            />
+            {isEditMode ? (
+              <ImagePicker
+                title={t('chooseFarmImage') || 'Choose Image'}
+                onPress={handleImagePick}
+                imageUri={shopInfo.image ? shopInfo.image.uri : null}
+              />
+            ) : (
+              <View style={styles.staticImageContainer}>
+                <Image
+                  source={{ 
+                    uri: shopInfo.image ? shopInfo.image.uri : 'https://via.placeholder.com/150?text=No+Image' 
+                  }}
+                  style={styles.staticImage}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
             {shopInfo.image && shopInfo.image.uri && (
               <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('imageSelected') || 'Image selected'}</Text>
             )}
           </View>
 
-          <Input
-            label="Farm Name"
-            value={shopInfo.name}
-            onChangeText={(text) => setShopInfo(prev => ({ ...prev, name: text }))}
-            style={styles.input}
-          />
-          <Input
-            label="Address"
-            value={shopInfo.address}
-            onChangeText={(text) => setShopInfo(prev => ({ ...prev, address: text }))}
-            style={styles.input}
-            multiline
-          />
-          <Input
-            label="Contact"
-            value={shopInfo.contact}
-            onChangeText={(text) => setShopInfo(prev => ({ ...prev, contact: text }))}
-            style={styles.input}
-          />
+          {isEditMode ? (
+            // Edit Mode - Form Inputs
+            <>
+              <Input
+                label="Farm Name"
+                value={shopInfo.name}
+                onChangeText={(text) => setShopInfo(prev => ({ ...prev, name: text }))}
+                style={styles.input}
+              />
+              <Input
+                label="Address"
+                value={shopInfo.address}
+                onChangeText={(text) => setShopInfo(prev => ({ ...prev, address: text }))}
+                style={styles.input}
+                multiline
+              />
+              <Input
+                label="Contact"
+                value={shopInfo.contact}
+                onChangeText={(text) => setShopInfo(prev => ({ ...prev, contact: text }))}
+                style={styles.input}
+              />
 
-          <Button
-            onPress={handleUpdate}
-            disabled={uploading}
-            style={styles.submitButton}
-          >
-            {uploading ? <Spinner size='small' /> : 'Save Changes'}
-          </Button>
+              <Button
+                onPress={handleUpdate}
+                disabled={uploading}
+                style={styles.submitButton}
+              >
+                {uploading ? <Spinner size='small' /> : 'Save Changes'}
+              </Button>
+            </>
+          ) : (
+            // View Mode - Static Information
+            <View style={styles.staticInfo}>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { 
+                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                }]}>Farm Name:</Text>
+                <Text style={[styles.infoValue, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>{shopInfo.name || 'Not specified'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { 
+                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                }]}>Address:</Text>
+                <Text style={[styles.infoValue, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>{shopInfo.address || 'Not specified'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { 
+                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+                }]}>Contact:</Text>
+                <Text style={[styles.infoValue, { 
+                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                }]}>{shopInfo.contact || 'Not specified'}</Text>
+              </View>
+            </View>
+          )}
         </Layout>
       </ScrollView>
     </Layout>
@@ -216,9 +325,33 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  editButton: {
+    marginLeft: 8,
+  },
   imageContainer: {
     alignItems: 'center',
     marginBottom: 16,
+  },
+  staticImageContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  staticImage: {
+    width: '100%',
+    height: '100%',
   },
   label: {
     fontSize: 16,
@@ -230,5 +363,23 @@ const styles = StyleSheet.create({
   submitButton: {
     marginTop: 16,
     marginBottom: 32,
+  },
+  staticInfo: {
+    marginTop: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    alignItems: 'flex-start',
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    width: 80,
+    marginRight: 8,
+  },
+  infoValue: {
+    fontSize: 14,
+    flex: 1,
   },
 }); 

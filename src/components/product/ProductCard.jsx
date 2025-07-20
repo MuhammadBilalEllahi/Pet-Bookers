@@ -1,12 +1,15 @@
 import React from 'react';
 import {Dimensions, Image, StyleSheet, View, TouchableOpacity} from 'react-native';
-import {Text, useTheme} from '@ui-kitten/components';
+import {Text} from '@ui-kitten/components';
+import { useTheme } from '../../theme/ThemeContext';
 import {Price} from '../Price';
 import {AirbnbRating} from 'react-native-ratings';
 import {spacingStyles, flexeStyles} from '../../utils/globalStyles';
 import {ThemedIcon} from '../Icon';
 import {useDispatch, useSelector} from 'react-redux';
-import {addToWishlist, removeFromWishlist, selectIsInWishlist} from '../../store/wishlist';
+import {addToWishlist, removeFromWishlist, selectIsInWishlist, selectWishlistLoading} from '../../store/wishlist';
+import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from '../../store/user';
+import { Alert } from 'react-native';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -24,17 +27,39 @@ export const ProductCard = ({
   onProductDetail,
   slug,
   isDark,
-  theme,
+  
 }) => {
   const dispatch = useDispatch();
-  const uiKittenTheme = useTheme();
+  const {theme} = useTheme();
   
-  // Get wishlist status from Redux
+  // Get wishlist status from Redux - ensure we're checking the correct product ID
   const isInWishlist = useSelector(state => selectIsInWishlist(state, id));
+  const wishlistLoading = useSelector(selectWishlistLoading);
+  
+  // Debug logging for wishlist state
+  // console.log(`[ProductCard] Product ${id} (${name}) - isInWishlist: ${isInWishlist}, loading: ${wishlistLoading}`);
+  
+  // Get authentication states
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
 
   const toggleWishlist = (e) => {
     e.stopPropagation(); // Prevent navigation
     if (!id) return;
+    
+    // Check if user is authenticated as buyer
+    if (!isBuyerAuthenticated) {
+      const message = isSellerAuthenticated 
+        ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
+        : 'Please sign in as a buyer to add items to wishlist.';
+      
+      Alert.alert(
+        'Buyer Authentication Required',
+        message,
+        [{ text: 'OK', style: 'default' }]
+      );
+      return;
+    }
     
     if (isInWishlist) {
       // Remove from wishlist
@@ -119,11 +144,15 @@ export const ProductCard = ({
           <TouchableOpacity
             onPress={toggleWishlist}
             style={styles.heartButton}
+            disabled={wishlistLoading}
           >
             <ThemedIcon
               name={isInWishlist ? "heart" : "heart-outline"}
-              fill={isInWishlist ? uiKittenTheme['color-danger-default'] : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
-              style={styles.heartIcon}
+              fill={isInWishlist ? '#FF512F' : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
+              style={[
+                styles.heartIcon,
+                { opacity: wishlistLoading ? 0.6 : 1 }
+              ]}
             />
           </TouchableOpacity>
         </View>

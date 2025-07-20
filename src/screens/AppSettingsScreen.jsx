@@ -20,7 +20,7 @@ export const AppSettingsScreen = ({navigation}) => {
     <Layout
       level="3"
       style={[
-        spacingStyles.px16,
+        // spacingStyles.px16,
         {
           backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],          flex: 1,
           overflow: 'scroll',
@@ -34,7 +34,7 @@ export const AppSettingsScreen = ({navigation}) => {
           paddingTop: 10,
           paddingBottom: 90,
         }}>
-        <Layout level="1" style={[spacingStyles.p16, {marginVertical: 4}]}>
+        <Layout level="1" style={[ {marginVertical: 4}]}>
           <ProfileActionButton
             title={t('changeLanguage')}
             rightTitle={i18n.language === 'en' ? 'English' : 'اردو'}
@@ -43,7 +43,8 @@ export const AppSettingsScreen = ({navigation}) => {
             onPress={() => toggleLanguageModal(true)}
           />
         </Layout>
-        <Layout level="1" style={[spacingStyles.p16, {marginVertical: 4}]}>
+
+        <Layout level="1" style={[ {marginVertical: 4}]}>
           <ProfileActionButton
             title={t('pagesTitles.AboutUs')}
             iconName="info-outline"

@@ -232,9 +232,9 @@
     "messages": "Messages",
     "badges": {
       "free": "Free Ad",
-      "featured": "Featured"
+      "featured": "Boosted"
     },
-    "tryFeatured": "Try Featured Ads"
+    "tryFeatured": "Try Boosted Ads"
   },
   "productDetails": {
     "title": "Product Details",

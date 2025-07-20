@@ -33,6 +33,11 @@ import { MessagesScreen } from '../screens/MessagesScreen';
 import { SellerInfoScreen } from '../screens/seller/profile/farmdetails/SellerInfoScreen';
 import { VandorDetailScreen } from '../screens/buyer/VandorDetailScreen';
 import { RefundScreen } from '../screens/buyer/product/RefundScreen';
+import { AddProductScreen } from '../screens/seller/add_product/AddProductScreen';
+import { AllProductsScreen } from '../screens/buyer/AllProductsScreen';
+import { NotificationsScreen } from '../screens/NotificationsScreen';
+import { RefundHandle } from '../screens/seller/profile/farmdetails/pages/RefundHandle';
+
 const { Navigator, Screen } = createNativeStackNavigator();
 
 // Enum for App Screens
@@ -61,6 +66,10 @@ export const AppScreens = Object.freeze({
   SELLER_INFO: 'SellerInfoScreen',
   VANDOR_DETAIL: 'VandorDetailScreen',  
   REFUND_SCREEN: 'RefundScreen',
+  SELLER_ADD_PRODUCT: 'AddProductScreen',
+  ALL_PRODUCTS: 'AllProductsScreen',
+  NOTIFICATIONS: 'NotificationsScreen',
+  REFUND_HANDLE: 'RefundHandle',
 });
 
 export const AppNavigator = () => {
@@ -92,6 +101,22 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.AUTH} component={AuthNavigator} />
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
+        <Screen name={AppScreens.SELLER_ADD_PRODUCT} component={AddProductScreen} />
+        {/* <Screen name={AppScreens.NOTIFICATIONS} component={NotificationsScreen} 
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-NotificationsScreen" />
+          ),
+        }} /> */}
+        <Screen name={AppScreens.ALL_PRODUCTS} component={AllProductsScreen} 
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-AllProductsScreen" />
+          ),
+        }}
+        />
         <Screen name={AppScreens.CART} component={MyCartScreen} 
         options={{
           headerShown: true,
@@ -197,6 +222,19 @@ export const AppNavigator = () => {
                 <MainScreensHeader {...props} hideSearch={true} key="header-FarmDetailsEditScreen" />
               ),
             }} />
+              <Screen
+        name={AppScreens.REFUND_HANDLE}
+        component={RefundHandle}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader
+            activateGoBack={true}
+             {...props} title="Refund Management" hideSearch={true} />
+          ),
+          
+        }}
+      />
         <Screen name={AppScreens.SELLER_INFO} component={SellerInfoScreen}
   options={{
     headerShown: true,

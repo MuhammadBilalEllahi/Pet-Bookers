@@ -7,6 +7,7 @@ import { selectIsSellerAuthenticated, selectIsBuyerAuthenticated } from '../../.
 import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
+import { AppScreens } from '../../../navigators/AppNavigator';
 
 const MyPostedAdsScreen = ({ navigation }) => {
   const { t } = useTranslation();
@@ -72,7 +73,7 @@ const MyPostedAdsScreen = ({ navigation }) => {
       }
       return;
     }
-    navigation.navigate('AddProduct');
+    navigation.navigate(AppScreens.SELLER_ADD_PRODUCT);
   };
 
   // Check authentication on component mount
@@ -232,7 +233,7 @@ const MyPostedAdsScreen = ({ navigation }) => {
                 }}
                 onPress={() => Toast.show({ type: 'info', text1: 'Feature Coming Soon', text2: 'Try Featured Ads functionality coming soon!' })}
               >
-                <Text style={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold', fontSize: 16 }}>Try Featured Ads</Text>
+                <Text style={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold', fontSize: 16 }}>{t('myAds.tryFeatured')}</Text>
               </TouchableOpacity>
 
           

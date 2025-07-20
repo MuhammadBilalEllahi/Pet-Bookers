@@ -397,7 +397,7 @@ export const LoginScreen = ({ navigation  }) => {
                   style={[styles.forgotPasswordLinkText, { 
                     color: theme['color-shadcn-primary']
                   }]}
-                  onPress={() => navigateToPage('ForgotPassword')}>
+                  onPress={() => navigateToPage(isSeller ? 'SellerForgotPassword' : 'ForgotPassword')}>
                   {t('forgotpassword')}
                 </Text>
               </View>

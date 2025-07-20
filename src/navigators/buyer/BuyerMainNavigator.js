@@ -27,6 +27,7 @@ import MyCartScreen from '../../screens/buyer/checkout/MyCartScreen';
 import { ThemeProvider } from '../../theme/ThemeContext';
 import { SellerTabRoutes } from '../seller/SellerMainNavigator';
 import { SellerNewProductStack } from '../seller/SellerNewProductStack';
+import { CommonActions } from '@react-navigation/native';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -178,6 +179,23 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
   const isRTL = i18n.dir() === 'rtl';
 
+  const handleTabPress = (index) => {
+    const rtlIndex = isRTL ? state.routes.length - 1 - index : index;
+    const routeName = state.routeNames[rtlIndex];
+    const stackKey = state.routes[rtlIndex].key;
+    navigation.navigate({
+      name: routeName,
+      key: stackKey,
+      merge: true,
+    });
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: routeName }],
+      })
+    );
+  };
+
   return (
     <View style={styles.bottomTabBarContainer} key="bottomTabBarContainer">
       <BottomNavigation
@@ -194,10 +212,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
             flexDirection: isRTL ? 'row-reverse' : 'row',
           },
         ]}
-        onSelect={index => {
-          const rtlIndex = isRTL ? state.routes.length - 1 - index : index;
-          navigation.navigate(state.routeNames[rtlIndex]);
-        }}
+        onSelect={handleTabPress}
         key="bottomNavigation"
       >
         <BottomNavigationTab

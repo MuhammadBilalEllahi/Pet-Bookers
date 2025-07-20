@@ -58,7 +58,7 @@ export default  AddProductSuccessAndShowFeaturedButton = () => {
         </View>
         {/* Try Featured Ads Button */}
         <TouchableOpacity style={styles.tryFeaturedBtn} onPress={handleTryFeatured}>
-          <Text style={styles.tryFeaturedBtnText}>Try Featured Ads</Text>
+          <Text style={styles.tryFeaturedBtnText}>{t('tryFeatured')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </Layout>

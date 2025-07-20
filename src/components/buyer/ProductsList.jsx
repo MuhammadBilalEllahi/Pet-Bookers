@@ -25,9 +25,13 @@ export const ProductsList = ({
   onProductDetail,
   onLoadMore,
   hasMore,
+  onViewAll,
+  productType,
+  categoryId,
 }) => {
   const { theme, isDark } = useTheme();
   const { t, i18n } = useTranslation();
+  
 
   const renderFooter = useCallback(() => {
     if (!loading) return null;
@@ -60,6 +64,7 @@ export const ProductsList = ({
           <TouchableOpacity 
             style={[flexeStyles.row, flexeStyles.itemsCenter]}
             activeOpacity={0.7}
+            onPress={onViewAll}
           >
             <Text 
               category="label" 

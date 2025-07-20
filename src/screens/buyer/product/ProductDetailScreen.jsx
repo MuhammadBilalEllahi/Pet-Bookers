@@ -269,7 +269,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         roomId: product.seller.id,
         recipient: {
           name: product.seller.shop.name,
-          profile: `${baseUrls['shop_image_url']}/${product.seller.shop.image}`,
+          profile: `${baseUrls['shop_image_url']}/${product?.seller?.shop?.image ?? ""}`,
         },
       }),
     );

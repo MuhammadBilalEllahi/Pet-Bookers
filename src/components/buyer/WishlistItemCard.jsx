@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {Text, Button, Icon, Layout, useTheme as useUIKittenTheme} from '@ui-kitten/components';
+import {Text, Button, Layout} from '@ui-kitten/components';
 import {useSelector} from 'react-redux';
 import {ThemedIcon} from '../Icon';
 import {Price} from '../Price';
@@ -24,7 +24,6 @@ export const WishlistItemCard = ({
   isRemoving = false,
 }) => {
   const {theme, isDark} = useTheme();
-  const uiKittenTheme = useUIKittenTheme();
   const baseUrls = useSelector(selectBaseUrls);
 
   const handleRemove = () => {
@@ -55,7 +54,7 @@ export const WishlistItemCard = ({
     <ThemedIcon
       {...props}
       name="heart"
-      fill={uiKittenTheme['color-danger-default']}
+        fill={theme['color-danger-default']}
       style={{width: 20, height: 20}}
     />
   );
@@ -171,8 +170,8 @@ export const WishlistItemCard = ({
                 styles.stock,
                 {
                   color: product.current_stock > 0
-                    ? uiKittenTheme['color-success-default']
-                    : uiKittenTheme['color-danger-default'],
+                    ? theme['color-success-default']
+                    : theme['color-danger-default'],
                 },
               ]}>
               {product.current_stock > 0 ? 'In Stock' : 'Out of Stock'}
