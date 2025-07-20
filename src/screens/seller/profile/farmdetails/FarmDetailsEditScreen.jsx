@@ -153,6 +153,10 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
     navigation.navigate(AppScreens.REFUND_HANDLE);
   };
 
+  const navigateToCouponHandling = () => {
+    navigation.navigate(AppScreens.COUPON_HANDLING);
+  };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
@@ -193,6 +197,12 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
             subtitle="Handle refund requests"
             iconName="info-outline"
             onPress={navigateToRefundHandle}
+          />
+          <ProfileActionButton
+            title="Coupon Handling"
+            subtitle="Handle coupon requests"
+            iconName="info-outline"
+            onPress={navigateToCouponHandling}
           />
         </Layout>
 

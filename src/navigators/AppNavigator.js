@@ -37,6 +37,7 @@ import { AddProductScreen } from '../screens/seller/add_product/AddProductScreen
 import { AllProductsScreen } from '../screens/buyer/AllProductsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { RefundHandle } from '../screens/seller/profile/farmdetails/pages/RefundHandle';
+import CouponHandling from '../screens/seller/profile/farmdetails/pages/CouponHandling';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -70,6 +71,7 @@ export const AppScreens = Object.freeze({
   ALL_PRODUCTS: 'AllProductsScreen',
   NOTIFICATIONS: 'NotificationsScreen',
   REFUND_HANDLE: 'RefundHandle',
+  COUPON_HANDLING: 'CouponHandling',  
 });
 
 export const AppNavigator = () => {
@@ -102,6 +104,7 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
         <Screen name={AppScreens.SELLER_ADD_PRODUCT} component={AddProductScreen} />
+
         {/* <Screen name={AppScreens.NOTIFICATIONS} component={NotificationsScreen} 
         options={{
           headerShown: true,
@@ -222,17 +225,27 @@ export const AppNavigator = () => {
                 <MainScreensHeader {...props} hideSearch={true} key="header-FarmDetailsEditScreen" />
               ),
             }} />
-              <Screen
-        name={AppScreens.REFUND_HANDLE}
-        component={RefundHandle}
+                <Screen
+          name={AppScreens.REFUND_HANDLE}
+          component={RefundHandle}
+          options={{
+            headerShown: true,
+            header: props => (
+              <MainScreensHeader
+              activateGoBack={true}
+              {...props} title="Refund Management" hideSearch={true} />
+            ),
+            
+          }}
+        />
+        <Screen
+        name={AppScreens.COUPON_HANDLING}
+        component={CouponHandling}
         options={{
           headerShown: true,
           header: props => (
-            <MainScreensHeader
-            activateGoBack={true}
-             {...props} title="Refund Management" hideSearch={true} />
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-CouponHandling" />
           ),
-          
         }}
       />
         <Screen name={AppScreens.SELLER_INFO} component={SellerInfoScreen}
