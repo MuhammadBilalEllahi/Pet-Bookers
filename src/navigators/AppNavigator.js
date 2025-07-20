@@ -38,6 +38,7 @@ import { AllProductsScreen } from '../screens/buyer/AllProductsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { RefundHandle } from '../screens/seller/profile/farmdetails/pages/RefundHandle';
 import CouponHandling from '../screens/seller/profile/farmdetails/pages/CouponHandling';
+import POS from '../screens/seller/profile/farmdetails/pages/POS';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -72,6 +73,7 @@ export const AppScreens = Object.freeze({
   NOTIFICATIONS: 'NotificationsScreen',
   REFUND_HANDLE: 'RefundHandle',
   COUPON_HANDLING: 'CouponHandling',  
+  POS: 'POS',
 });
 
 export const AppNavigator = () => {
@@ -248,6 +250,14 @@ export const AppNavigator = () => {
           ),
         }}
       />
+      <Screen name={AppScreens.POS} component={POS}
+      options={{
+        headerShown: true,
+        header: props => (
+          <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-POS" />
+        ),
+      }}
+    />
         <Screen name={AppScreens.SELLER_INFO} component={SellerInfoScreen}
   options={{
     headerShown: true,

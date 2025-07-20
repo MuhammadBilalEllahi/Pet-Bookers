@@ -268,7 +268,7 @@ export const CouponHandling = ({ navigation }) => {
     <Layout style={[styles.container, { 
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
-      <MainScreensHeader title="Coupon Management" navigation={navigation} />
+      {/* <MainScreensHeader title="Coupon Management" navigation={navigation} /> */}
       
       <ScrollView style={styles.scrollView}>
         <View style={styles.headerRow}>

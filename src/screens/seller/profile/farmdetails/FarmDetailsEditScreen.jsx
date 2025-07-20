@@ -157,6 +157,10 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
     navigation.navigate(AppScreens.COUPON_HANDLING);
   };
 
+  const navigateToPOS = () => {
+    navigation.navigate(AppScreens.POS);
+  };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
@@ -203,6 +207,12 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
             subtitle="Handle coupon requests"
             iconName="info-outline"
             onPress={navigateToCouponHandling}
+          />
+          <ProfileActionButton
+            title="POS"
+            subtitle="Handle POS requests"
+            iconName="info-outline"
+            onPress={navigateToPOS}
           />
         </Layout>
 
