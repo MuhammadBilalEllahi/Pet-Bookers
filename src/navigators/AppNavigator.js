@@ -36,12 +36,19 @@ import { RefundScreen } from '../screens/buyer/product/RefundScreen';
 import { AddProductScreen } from '../screens/seller/add_product/AddProductScreen';
 import { AllProductsScreen } from '../screens/buyer/AllProductsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
-import { RefundHandle } from '../screens/seller/profile/farmdetails/pages/RefundHandle';
-import CouponHandling from '../screens/seller/profile/farmdetails/pages/CouponHandling';
-import POS from '../screens/seller/profile/farmdetails/pages/POS';
-import Order from '../screens/seller/profile/farmdetails/pages/Order';
-import ShippingMethod from '../screens/seller/profile/farmdetails/pages/ShippingMethod';
-import Shipping from '../screens/seller/profile/farmdetails/pages/Shipping';
+import { RefundHandle } from '../screens/seller/profile/farmManagement/pages/RefundHandle';
+  import { FarmManagement } from '../screens/seller/profile/farmManagement/FarmManagement';
+import CouponHandling from '../screens/seller/profile/farmManagement/pages/CouponHandling';
+import POS from '../screens/seller/profile/farmManagement/pages/POS';
+import Order from '../screens/seller/profile/farmManagement/pages/Order';
+import ShippingMethod from '../screens/seller/profile/farmManagement/pages/ShippingMethod';
+import Shipping from '../screens/seller/profile/farmManagement/pages/Shipping';
+import Delivery from '../screens/seller/profile/farmManagement/pages/delivery/Delivery';
+import SellerEarningsPage from '../screens/seller/profile/farmdetails/pages/EarningsPage';
+import SellerOrdersPage from '../screens/seller/profile/farmdetails/pages/OrdersPage';
+import SellerReviewsPage from '../screens/seller/profile/farmdetails/pages/ReviewsPage';
+import SellerTransactionsPage from '../screens/seller/profile/farmdetails/pages/TransactionsPage';
+import SellerShopSettingsPage from '../screens/seller/profile/farmdetails/pages/ShopSettingsModal';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -80,7 +87,14 @@ export const AppScreens = Object.freeze({
   ORDER: 'Order',
   SHIPPING: 'Shipping',
   SHIPPING_METHOD: 'ShippingMethod',
-});
+  DELIVERY: 'Delivery',
+  FARM_MANAGEMENT: 'FarmManagement',
+  EARNINGS_STATS: 'EarningsStats',
+  REVIEWS_STATS: 'ReviewsStats',
+  ORDERS_STATS: 'OrdersStats',
+  TRANSACTIONS_STATS: 'TransactionsStats',
+  SHOP_SETTINGS: 'ShopSettings',
+    });
 
 export const AppNavigator = () => {
   const dispatch = useDispatch();
@@ -153,6 +167,15 @@ export const AppNavigator = () => {
               ),
             }
           } />
+          <Screen name={AppScreens.FARM_MANAGEMENT} component={FarmManagement}
+          options={{
+            headerShown: true,
+            header: props => (
+              <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-FarmManagementScreen" />
+            ),
+          }}
+          />
+
 {/* <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} /> */}
         <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} 
         options={{
@@ -288,6 +311,57 @@ export const AppNavigator = () => {
       ),
     }}
     />
+    <Screen name={AppScreens.DELIVERY} component={Delivery}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-Delivery" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.EARNINGS_STATS} component={SellerEarningsPage}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-EarningsStats" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.REVIEWS_STATS} component={SellerReviewsPage}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ReviewsStats" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.ORDERS_STATS} component={SellerOrdersPage}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-OrdersStats" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.TRANSACTIONS_STATS} component={SellerTransactionsPage}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-TransactionsStats" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.SHOP_SETTINGS} component={SellerShopSettingsPage}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ShopSettings" />
+      ),
+    }}
+    />
+
+
+
         <Screen name={AppScreens.SELLER_INFO} component={SellerInfoScreen}
   options={{
     headerShown: true,

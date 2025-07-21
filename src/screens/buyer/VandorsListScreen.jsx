@@ -4,6 +4,7 @@ import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {loadSellers, selectSellers} from '../../store/buyersHome';
 import {selectBaseUrls} from '../../store/configs';
+import { useTheme } from '../../theme/ThemeContext';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -11,6 +12,7 @@ export const VandorsListScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const baseUrls = useSelector(selectBaseUrls);
   const {sellers, sellersLoading, sellersError} = useSelector(selectSellers);
+  const { theme, isDark } = useTheme();
 
   useEffect(() => {
     dispatch(loadSellers());
@@ -37,12 +39,18 @@ export const VandorsListScreen = ({navigation}) => {
   }
 
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: '#fff'}}>
+    <Layout level="3" style={{flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['background-basic-color-1']}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-start', paddingTop: 10, paddingBottom: 90}}>
-        <Text style={styles.header}>All Sellers</Text>
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'flex-start',
+          paddingTop: 10,
+          paddingBottom: 90,
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['background-basic-color-1'],
+        }}>
+        <Text style={[styles.header, { color: isDark ? theme['color-shadcn-foreground'] : theme['text-basic-color'] }]}>All Sellers</Text>
         <View style={styles.grid}>
           {sellers.map(item => (
             <TouchableOpacity
@@ -51,9 +59,9 @@ export const VandorsListScreen = ({navigation}) => {
               onPress={() => navigateToVandorDetail(item.id)}>
               <Image
                 source={{uri: `${baseUrls['shop_image_url']}/${item.image}`}}
-                style={styles.sellerImage}
+                style={[styles.sellerImage, { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-300'] }]}
               />
-              <Text style={styles.sellerName}>{item.name}</Text>
+              <Text style={[styles.sellerName, { color: isDark ? theme['color-shadcn-foreground'] : theme['text-basic-color'] }]}>{item.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -69,7 +77,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     marginLeft: 12,
     marginTop: 8,
-    color: '#222',
   },
   grid: {
     flexDirection: 'row',
@@ -86,13 +93,11 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: '#eee',
     marginBottom: 8,
   },
   sellerName: {
     textAlign: 'center',
     fontSize: 15,
-    color: '#222',
     fontWeight: '500',
     marginTop: 2,
     textTransform: 'capitalize',

@@ -289,5 +289,17 @@
     "uploadImageError": "تصویر اپلوڈ کرنے میں ناکام",
     "permissionDenied": "تصاویر اپلوڈ کرنے کے لیے اسٹوریج کی اجازت درکار ہے",
     "imagePickerError": "تصویر منتخب کرنے میں ناکام"
-  }
+  },
+  "Transactions": "ٹرانزیکشنز",
+  "Request Withdrawal": "رقم نکالنے کی درخواست",
+  "No transactions found": "کوئی ٹرانزیکشن نہیں ملی",
+  "Withdrawal": "رقم نکالنا",
+  "Cancel": "منسوخ کریں",
+  "Submit Request": "درخواست جمع کروائیں",
+  "Select Withdrawal Method": "رقم نکالنے کا طریقہ منتخب کریں",
+  "Amount": "رقم",
+  "RequestWithdrawal": "رقم نکالنے کی درخواست",
+  "Product Reviews": "مصنوعات کے تبصرے",
+  "No reviews found": "کوئی تبصرہ نہیں ملا",
+  "No product reviews yet": "ابھی تک کوئی مصنوعات کے تبصرے نہیں ہیں"
 }

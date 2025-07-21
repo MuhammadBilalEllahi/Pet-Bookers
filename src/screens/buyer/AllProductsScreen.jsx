@@ -303,7 +303,7 @@ export const AllProductsScreen = ({ route, navigation }) => {
         paddingVertical: 50 
       }}>
         <ThemedIcon 
-          name="package-outline" 
+          name="info-outline" 
           fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
           style={{ width: 64, height: 64, marginBottom: 16 }}
         />

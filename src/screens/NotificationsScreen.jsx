@@ -19,8 +19,8 @@ export const NotificationsScreen = ({navigation}) => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axiosBuyerClient.get('/notifications');
-        console.log("notifications",response.data);
+      const response = await axiosBuyerClient.get('/notifications');
+      console.log("notifications",response.data);
         // Map backend notifications to expected shape if needed
         const mapped = (response.data || []).map((notif, idx) => ({
           id: notif.id ?? idx,
@@ -60,31 +60,31 @@ export const NotificationsScreen = ({navigation}) => {
           <Text category="h6">No notifications yet</Text>
         </View>
       ) : (
-        <SwipeListView
-          data={notifications}
-          renderItem={({item, index}, rowMap) => (
-            <NotifItem
-              notifData={item}
-              handlePress={() => {}}
+      <SwipeListView
+        data={notifications}
+        renderItem={({item, index}, rowMap) => (
+          <NotifItem
+            notifData={item}
+            handlePress={() => {}}
               _key={item.id}
-            />
-          )}
+          />
+        )}
           keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={[
-            spacingStyles.p16,
-            {
-              paddingBottom: 90,
-            },
-          ]}
-          swipeRowStyle={{marginVertical: 4}}
-          disableRightSwipe={i18n.dir() === 'ltr'}
-          disableLeftSwipe={i18n.dir() === 'rtl'}
-          recalculateHiddenLayout={true}
-          renderHiddenItem={(data, rowMap) => <RowBackButton />}
-          rightOpenValue={-windowWidth}
-          leftOpenValue={windowWidth}
-          onSwipeValueChange={handleSwipeDeletion}
-        />
+        contentContainerStyle={[
+          spacingStyles.p16,
+          {
+            paddingBottom: 90,
+          },
+        ]}
+        swipeRowStyle={{marginVertical: 4}}
+        disableRightSwipe={i18n.dir() === 'ltr'}
+        disableLeftSwipe={i18n.dir() === 'rtl'}
+        recalculateHiddenLayout={true}
+        renderHiddenItem={(data, rowMap) => <RowBackButton />}
+        rightOpenValue={-windowWidth}
+        leftOpenValue={windowWidth}
+        onSwipeValueChange={handleSwipeDeletion}
+      />
       )}
     </Layout>
   );

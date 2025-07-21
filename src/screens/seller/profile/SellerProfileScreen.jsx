@@ -56,6 +56,10 @@ export const SellerProfileScreen = ({ navigation }) => {
     navigation.navigate(AppScreens.FARM_DETAILS_EDIT);
   };
 
+  const navigateToFarmManagement = () => {
+    navigation.navigate(AppScreens.FARM_MANAGEMENT);
+  };
+
   const navigateToOrdersList = () => {
     navigation.navigate(AppScreens.CART);
   };
@@ -241,6 +245,12 @@ export const SellerProfileScreen = ({ navigation }) => {
               subtitle={t('profile.farmDetailsSubtitle')}
               iconName="info-outline"
               onPress={navigateToFarmDetails}
+            />
+            <ProfileActionButton
+              title={t('profile.farmManagement')}
+              subtitle={t('profile.farmManagementSubtitle')}
+              iconName="info-outline"
+              onPress={navigateToFarmManagement}
             />
             <ProfileActionButton
               title={t('profile.favoritesAds')}

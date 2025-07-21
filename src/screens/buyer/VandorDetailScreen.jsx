@@ -1,81 +1,128 @@
 import {Button, Input, Layout, Text, useTheme, Spinner} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {Dimensions, Image, ScrollView, View, StyleSheet} from 'react-native';
+import {Dimensions, Image, ScrollView, View, StyleSheet, Alert} from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
 import {ProductCard} from '../../components/product/ProductCard';
 import {ThemedIcon} from '../../components/Icon';
 import {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  loadSellerInfo,
-  loadSellerProducts,
-  selectSellerInfo,
-  selectSellerProducts,
-  clearSellerDetails,
-  loadSellerAllProducts,
-} from '../../store/sellerDetails';
+import {useSelector} from 'react-redux';
 import {selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
+import { axiosBuyerClient } from '../../utils/axiosClient';
 import { ProductsList } from '../../components/buyer/ProductsList';
+import { setActiveRoom } from '../../store/chat';
+import { setBottomTabBarVisibility } from '../../store/configs';
+import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from '../../store/user';
+import { ChatRoutes } from '../../navigators/ChatNavigator';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
 export const VandorDetailScreen = ({route, navigation}) => {
   const {t} = useTranslation();
   const theme = useTheme();
-  const dispatch = useDispatch();
   const baseUrls = useSelector(selectBaseUrls);
-  const {sellerInfo, sellerInfoLoading, sellerInfoError} = useSelector(selectSellerInfo) || {};
-  const {sellerProducts, sellerProductsLoading, sellerProductsError} = useSelector(selectSellerProducts) || {};
   const [searchQuery, setSearchQuery] = useState('');
+  const [sellerInfo, setSellerInfo] = useState(null);
+  const [sellerInfoLoading, setSellerInfoLoading] = useState(true);
+  const [sellerInfoError, setSellerInfoError] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState(null);
+  const [totalSize, setTotalSize] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const sellerId = route.params?.sellerId || 12;
-  console.log("[VandorDetailScreen]", sellerId);
 
   useEffect(() => {
-    if (!sellerId) {
-      console.warn('No seller ID provided');
-      return;
-    }
-
-    try {
-      dispatch(loadSellerInfo(sellerId));
-      dispatch(loadSellerProducts({sellerId, limit: 10}));
-    } catch (error) {
-      console.error('Error loading seller data:', error);
-    }
-
-    return () => {
-      dispatch(clearSellerDetails());
-    };
+    fetchSellerInfo();
+    fetchProducts(0, searchQuery);
   }, [sellerId]);
 
+  const fetchSellerInfo = async () => {
+    setSellerInfoLoading(true);
+    setSellerInfoError(null);
+    try {
+      const res = await axiosBuyerClient.get(`/seller`, { params: { seller_id: sellerId } });
+      setSellerInfo(res.data);
+    } catch (err) {
+      setSellerInfoError('Failed to load seller information');
+    } finally {
+      setSellerInfoLoading(false);
+    }
+  };
+
+  const fetchProducts = async (newOffset = 0, search = '') => {
+    if (newOffset === 0) setProductsLoading(true);
+    setProductsError(null);
+    try {
+      const res = await axiosBuyerClient.get(`/seller/${sellerId}/all-products`, {
+        params: { limit, offset: newOffset, search }
+      });
+      if (newOffset === 0) {
+        setProducts(res.data.products);
+      } else {
+        setProducts(prev => [...prev, ...res.data.products]);
+      }
+      setTotalSize(res.data.total_size);
+      setOffset(newOffset + limit);
+    } catch (err) {
+      setProductsError('Failed to load products');
+    } finally {
+      setProductsLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
   const handleLoadMore = () => {
-    if (
-      sellerProducts?.products?.length < sellerProducts?.total_size &&
-      !sellerProductsLoading
-    ) {
-      dispatch(
-        loadSellerProducts({
-          sellerId,
-          limit: sellerProducts?.limit || 10,
-          offset: sellerProducts?.products?.length || 0,
-        }),
-      );
+    const safeProducts = Array.isArray(products) ? products : [];
+    if (safeProducts.length < totalSize && !loadingMore) {
+      setLoadingMore(true);
+      fetchProducts(offset, searchQuery);
     }
   };
 
   const handleSearch = () => {
-    if (!sellerId) return;
-    
+    fetchProducts(0, searchQuery);
+  };
+
+  const handleChatWithSeller = () => {
+    if (!isBuyerAuthenticated) {
+      const message = isSellerAuthenticated
+        ? 'You are signed in as a seller. Please also sign in as a buyer to chat with other sellers.'
+        : 'Please sign in as a buyer to chat with sellers.';
+      Alert.alert(
+        'Buyer Authentication Required',
+        message,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          // You may want to add a sign-in action here
+        ]
+      );
+      return;
+    }
+    dispatch(setBottomTabBarVisibility(false));
     dispatch(
-      loadSellerAllProducts({
-        sellerId,
-        limit: 10,
-        offset: 0,
-        search: searchQuery,
-      }),
+      setActiveRoom({
+        roomId: sellerInfo?.seller?.id,
+        recipient: {
+          name: sellerInfo?.seller?.shop?.name,
+          profile: sellerInfo?.seller?.shop?.image
+            ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
+            : '',
+        },
+      })
     );
+    navigation.navigate(ChatRoutes.MESSAGES, {
+      roomId: sellerInfo?.seller?.id,
+      recipientProfile: sellerInfo?.seller?.shop?.image
+        ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
+        : '',
+      recipientName: sellerInfo?.seller?.shop?.name,
+      chatType: 'buyer',
+      // Optionally add more context here
+    });
   };
 
   if (sellerInfoLoading) {
@@ -94,7 +141,8 @@ export const VandorDetailScreen = ({route, navigation}) => {
     );
   }
 
-  const parsedProducts = (sellerProducts?.products || []).map(product => ({
+  const safeProducts = Array.isArray(products) ? products : [];
+  const parsedProducts = safeProducts.map(product => ({
     id: product.id,
     title: product.name,
     rating: product.rating?.[0]?.average || 0,
@@ -108,7 +156,10 @@ export const VandorDetailScreen = ({route, navigation}) => {
         )
       : product.unit_price,
     oldPrice: product.discount > 0 ? product.unit_price : 0,
-    image: `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`,
+    image:
+      baseUrls && baseUrls['product_thumbnail_url'] && product.thumbnail
+        ? `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`
+        : '',
   }));
 
   return (
@@ -126,8 +177,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
         <View style={styles(theme).bannerShadow}>
           <Image
             source={{
-              
-              uri: sellerInfo?.seller?.shop?.banner
+              uri: sellerInfo?.seller?.shop && sellerInfo.seller.shop.banner
                 ? `https://petbookers.com.pk/storage/app/public/shop/banner/${sellerInfo.seller.shop.banner}`
                 : undefined,
             }}
@@ -140,7 +190,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
           <View style={styles(theme).storeInfoRow}>
             <Image
               source={{
-                uri: sellerInfo?.seller?.shop?.image
+                uri: sellerInfo?.seller?.shop && sellerInfo.seller.shop.image
                   ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
                   : undefined,
               }}
@@ -171,6 +221,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
               accessoryLeft={<ThemedIcon name="message-square-outline" status="primary" />}
               size="small"
               style={styles(theme).messageBtn}
+              onPress={handleChatWithSeller}
             />
           </View>
         </View>
@@ -194,38 +245,46 @@ export const VandorDetailScreen = ({route, navigation}) => {
           </View>
         </View>
         {/* Product Grid */}
-        {/* <ProductsList
-              list={parsedProducts}
-              listTitle={t('products')}
-              loading={sellerProductsLoading}
-              loadingError={sellerProductsError}
-              onLoadMore={handleLoadMore}
-              onProductDetail={product => {
-                navigation.navigate('ProductDetail', {productId: product.id});
-              }}
-              hasMore={sellerProducts?.products?.length < sellerProducts?.total_size}
-              hideViewAllBtn={true}
-              onViewAll={() => {
-                navigation.navigate('ProductsList', {
-                  sellerId,
-                  title: sellerInfo?.seller?.shop?.name || 'Products',
-                });
-              }}
-              cardWidth={(windowWidth - 56) / 2}
-              cardHeight={(windowWidth - 56) / 2.2}
-              /> */}
+        <ProductsList
+          list={parsedProducts}
+          listTitle={t('products')}
+          loading={productsLoading}
+          loadingError={productsError}
+          onLoadMore={handleLoadMore}
+          onProductDetail={product => {
+            navigation.navigate('ProductDetail', {productId: product.id});
+          }}
+          hasMore={safeProducts.length < totalSize}
+          hideViewAllBtn={true}
+          onViewAll={() => {
+            navigation.navigate('ProductsList', {
+              sellerId,
+              title: sellerInfo?.seller?.shop?.name || 'Products',
+            });
+          }}
+          cardWidth={(windowWidth - 56) / 2}
+          cardHeight={(windowWidth - 56) / 2.2}
+        />
         <View style={styles(theme).productGrid}>
-          {/* {parsedProducts.map(item => (
+          {parsedProducts.map(item => (
             <View key={item.id} style={styles(theme).productCardWrapper}>
-              <ProductCard {...item} cardWidth={(windowWidth - 56) / 2} />
-              
+              <ProductCard
+                {...item}
+                cardWidth={(windowWidth - 56) / 2}
+                onProductDetail={(id, slug) => navigation.navigate('ProductDetail', { productId: id, slug })}
+              />
             </View>
-          ))} */}
+          ))}
         </View>
-        {sellerProductsLoading && (
+        {productsLoading && (
           <View style={styles(theme).loadingMoreContainer}>
             <Spinner size="small" />
           </View>
+        )}
+        {!productsLoading && safeProducts.length < totalSize && (
+          <Button appearance="ghost" onPress={handleLoadMore} style={{margin: 16}}>
+            {loadingMore ? <Spinner size="small" /> : t('Load More')}
+          </Button>
         )}
       </ScrollView>
     </Layout>

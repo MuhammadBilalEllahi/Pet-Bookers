@@ -291,5 +291,17 @@
     "uploadImageError": "Failed to upload image",
     "permissionDenied": "Storage permission is required to upload images",
     "imagePickerError": "Failed to pick image"
-  }
+  },
+  "Transactions": "Transactions",
+  "Request Withdrawal": "Request Withdrawal",
+  "No transactions found": "No transactions found",
+  "Withdrawal": "Withdrawal",
+  "Cancel": "Cancel",
+  "Submit Request": "Submit Request",
+  "Select Withdrawal Method": "Select Withdrawal Method",
+  "Amount": "Amount",
+  "RequestWithdrawal": "Request Withdrawal",
+  "Product Reviews": "Product Reviews",
+  "No reviews found": "No reviews found",
+  "No product reviews yet": "No product reviews yet"
 }

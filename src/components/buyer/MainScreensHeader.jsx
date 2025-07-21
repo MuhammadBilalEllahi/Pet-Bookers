@@ -62,7 +62,7 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
               resizeMode="contain"
             />
           )}
-          {title && (
+          {(title && false) && (
             <Text style={[styles.titleText, { color: isDark ? '#ffffff' : '#09090b' }]}>{title}</Text>
           )}
         </View>

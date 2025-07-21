@@ -30,6 +30,7 @@ import ProductDetailShimmer from './components/ProductDetailShimmer';
 import { smartBuyerClient, handleAuthError, setAuthModalHandlers } from '../../../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
 import { ChatRoutes } from '../../../navigators/ChatNavigator';
+import { AppScreens } from '../../../navigators/AppNavigator';
 
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
@@ -68,7 +69,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
 
   const navigateToVandorDetail = vandorId => {
     console.log("[navigateToVandorDetail]", vandorId);
-    navigation.navigate('VandorDetail', {sellerId: vandorId});
+    navigation.navigate(AppScreens.VANDOR_DETAIL, {sellerId: vandorId});
   };
 
   const dispatch = useDispatch();
@@ -80,7 +81,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
-        image: `${baseUrls['product_thumbnail_url']}/${productItem.thumbnail}`,
+        image: baseUrls && baseUrls['product_thumbnail_url'] && productItem.thumbnail
+          ? `${baseUrls['product_thumbnail_url']}/${productItem.thumbnail}`
+          : '',
         price:
           productItem.discount > 0
             ? calculateDiscountedPrice(
@@ -150,7 +153,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     return (<ProductDetailShimmer />);
   }
 
-  const addToCart = async (product) => {
+  const addToCart = async (product, onSuccess) => {
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
       // Show informative alert based on current auth state
@@ -188,9 +191,13 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         text2: 'Product added to cart successfully!'
       });
       
-      setTimeout(() => {
-        setAddedToCart(false);
-      }, 2000);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        setTimeout(() => {
+          setAddedToCart(false);
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error adding to cart:', error || error?.message || error?.response?.data?.message);
       
@@ -269,7 +276,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         roomId: product.seller.id,
         recipient: {
           name: product.seller.shop.name,
-          profile: `${baseUrls['shop_image_url']}/${product?.seller?.shop?.image ?? ""}`,
+          profile: baseUrls && baseUrls['shop_image_url'] && product?.seller?.shop?.image
+            ? `${baseUrls['shop_image_url']}/${product?.seller?.shop?.image}`
+            : '',
         },
       }),
     );
@@ -277,7 +286,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     // Navigate to Messages screen with seller info
     navigation.navigate(ChatRoutes.MESSAGES, {
       roomId: product.seller.id, // seller_id for buyer chat
-      recipientProfile: `${baseUrls['shop_image_url']}/${product.seller.shop.image}`,
+      recipientProfile: baseUrls && baseUrls['shop_image_url'] && product.seller.shop.image
+        ? `${baseUrls['shop_image_url']}/${product.seller.shop.image}`
+        : '',
       recipientName: product.seller.shop.name,
       chatType: 'buyer', // buyer chatting with seller
       // Add product information for initial message context
@@ -285,9 +296,13 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         id: product.id,
         name: product.name,
         price: product.unit_price,
-        image: `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`,
+        image: baseUrls && baseUrls['product_thumbnail_url'] && product.thumbnail
+          ? `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`
+          : '',
         slug: product.slug,
-        url: `${baseUrls['product_url']}/${product.slug}`,
+        url: baseUrls && baseUrls['product_url'] && product.slug
+          ? `${baseUrls['product_url']}/${product.slug}`
+          : '',
         seller: {
           id: product.seller.id,
           name: product.seller.shop.name,
@@ -304,23 +319,31 @@ export const ProductDetailScreen = ({ route, navigation }) => {
 
   console.log('Rendering shimmer', ProductDetailShimmer);
 
-  const productImages = product.images.map(image => ({
-    id: image,
-    image: `${baseUrls['product_image_url']}/${image}`
-  }));
+  const productImages = Array.isArray(product.images)
+    ? product.images.map(image => ({
+        id: image,
+        image: baseUrls && baseUrls['product_image_url'] && image
+          ? `${baseUrls['product_image_url']}/${image}`
+          : '',
+      }))
+    : [];
 
-  const parsedRelatedProducts = relatedProducts.map(item => ({
-    id: item.id,
-    name: item.name,
-    image: `${baseUrls['product_thumbnail_url']}/${item.thumbnail}`,
-    price: item.unit_price,
-    oldPrice: item.discount > 0 ? item.unit_price : 0,
-    isSoldOut: item.current_stock === 0,
-    discountType: item.discount_type,
-    discount: item.discount,
-    rating: item.average_review || 0,
-    slug: item.slug,
-  }));
+  const parsedRelatedProducts = Array.isArray(relatedProducts)
+    ? relatedProducts.map(item => ({
+        id: item.id,
+        name: item.name,
+        image: baseUrls && baseUrls['product_thumbnail_url'] && item.thumbnail
+          ? `${baseUrls['product_thumbnail_url']}/${item.thumbnail}`
+          : '',
+        price: item.unit_price,
+        oldPrice: item.discount > 0 ? item.unit_price : 0,
+        isSoldOut: item.current_stock === 0,
+        discountType: item.discount_type,
+        discount: item.discount,
+        rating: item.average_review || 0,
+        slug: item.slug,
+      }))
+    : [];
 
   return (
     <Layout level="3" style={{ flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
@@ -389,7 +412,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           
           <Layout style={{ flexDirection: 'row', marginTop: 18, marginBottom: 8, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16 }}>
             <Button
-              onClick={() => { }}
+              onPress={() => addToCart(product, () => navigation.navigate(AppScreens.CART))}
               style={{ 
                 flex: 1, 
                 backgroundColor: theme['color-shadcn-primary'], 
@@ -399,7 +422,14 @@ export const ProductDetailScreen = ({ route, navigation }) => {
                 height: 45 
               }}
               textStyle={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold' }}
-              appearance="filled">Buy Now</Button>
+              appearance="filled"
+              disabled={addingToCart}
+              accessoryLeft={
+                addingToCart ? () => <ActivityIndicator size="small" color={theme['color-shadcn-primary-foreground']} /> : undefined
+              }
+            >
+              {addingToCart ? '' : 'Buy Now'}
+            </Button>
 
             <Button
               onPress={() => addToCart(product)}
@@ -632,7 +662,9 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Image
-              source={{ uri: `${baseUrls['shop_image_url']}/${product.seller.shop.image}` }}
+              source={{ uri: baseUrls && baseUrls['shop_image_url'] && product.seller && product.seller.shop && product.seller.shop.image
+                ? `${baseUrls['shop_image_url']}/${product.seller.shop.image}`
+                : undefined }}
               style={{ 
                 width: 48, 
                 height: 48, 
@@ -740,14 +772,25 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               listTitle="Related Products"
               loading={sellerProductsLoading}
               list={parsedProducts(relatedProducts.filter(p => p.id !== product.id))}
-              onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
+              onProductDetail={navigateToProductDetail}
+              onViewAll={() => navigation.navigate('AllProductsScreen', {
+                productType: 'related',
+                title: 'Related Products',
+                // Optionally pass a list of related product IDs or a filter
+              })}
             />
 
             <ProductsList
               listTitle="From Seller"
               loading={sellerProductsLoading}
               list={parsedProducts(sellerProducts.products.filter(p => p.id !== product.id))}
-              onProductPress={(item) => navigateToProductDetail(item.id, item.slug)}
+              onProductPress={navigateToProductDetail}
+              onProductDetail={navigateToProductDetail}
+              onViewAll={() => navigation.navigate('AllProductsScreen', {
+                productType: 'seller',
+                sellerId: product.seller.id,
+                title: product.seller.shop.name || 'From Seller',
+              })}
             />
           </View>
         </Layout>

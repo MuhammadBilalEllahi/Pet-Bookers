@@ -26,6 +26,10 @@ import { useSelector } from 'react-redux';
 import { ImagePicker } from '../../../../components/form';
 import { ProfileActionButton } from '../../../../components/profile';
 import { AppScreens } from '../../../../navigators/AppNavigator';
+import { ThemedIcon } from '../../../../components/Icon';
+
+import { getShopInfo, updateShopInfo } from '../../../../services/sellerApi';
+
 
 // Permission request helper for gallery access
 const requestGalleryPermission = async () => {
@@ -50,6 +54,16 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [showDeliveryManagement, setShowDeliveryManagement] = useState(false);
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+  const [showTransactionsModal, setShowTransactionsModal] = useState(false);
+  const [showShopSettingsModal, setShowShopSettingsModal] = useState(false);
+  const [selectedDeliveryMan, setSelectedDeliveryMan] = useState(null);
+
+  const navigateToEarnings = (deliveryMan = null) => {
+    navigation.navigate(AppScreens.EARNINGS_STATS, { deliveryMan });
+  };
 
   // Shop Info State
   const [shopInfo, setShopInfo] = useState({
@@ -66,7 +80,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axiosSellerClient.get('/shop-info');
+      const response = await getShopInfo();
 
       if (response.data) {
         setShopInfo({
@@ -127,9 +141,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
 
       console.log("shopFormData", shopFormData);
 
-      await axiosSellerClient.put('shop-update', shopFormData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await updateShopInfo(shopFormData);
 
       Alert.alert('Success', 'Farm details updated successfully');
       // navigation.goBack();
@@ -141,40 +153,38 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
     }
   };
 
-  const navigateToSellerForgotPassword = () => {
-    navigation.navigate('SellerForgotPassword');
-  };
-
-  const navigateToSellerResetPassword = () => {
-    navigation.navigate('SellerResetPassword');
-  };
-
-  const navigateToRefundHandle = () => {
-    navigation.navigate(AppScreens.REFUND_HANDLE);
-  };
-
-  const navigateToCouponHandling = () => {
-    navigation.navigate(AppScreens.COUPON_HANDLING);
-  };
-
-  const navigateToPOS = () => {
-    navigation.navigate(AppScreens.POS);
-  };
-
-  const navigateToOrder = () => {
-    navigation.navigate(AppScreens.ORDER);
-  };
-
-  const navigateToShipping = () => {
-    navigation.navigate(AppScreens.SHIPPING);
-  };
-
-  const navigateToShippingMethod = () => {
-    navigation.navigate(AppScreens.SHIPPING_METHOD);
-  };
+  
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
+  };
+
+  const navigateToDeliveryManagement = () => {
+    navigation.navigate(AppScreens.DELIVERY);
+  };
+
+  const navigateToOrders = (deliveryMan = null) => {
+    navigation.navigate(AppScreens.ORDERS_STATS, { deliveryMan });
+  };
+
+  const navigateToReviews = (deliveryMan = null) => {
+    navigation.navigate(AppScreens.REVIEWS_STATS, { deliveryMan });
+  };
+
+  const navigateToTransactions = () => {
+    navigation.navigate(AppScreens.TRANSACTIONS_STATS);
+  };
+
+  const navigateToShopSettings = () => {
+      navigation.navigate(AppScreens.SHOP_SETTINGS);
+  };
+
+  const closeAllModals = () => {
+    setShowOrdersModal(false);
+    setShowReviewsModal(false);
+    setShowTransactionsModal(false);
+    setShowShopSettingsModal(false);
+    setSelectedDeliveryMan(null);
   };
 
   if (loading) {
@@ -189,81 +199,127 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
     <Layout style={[styles.container, { 
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
-      <ScrollView style={styles.scrollView}>
-        {/* Password Management Section */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <ProfileActionButton
-            title="Forgot Password"
-            subtitle="Reset your password via email/SMS"
-            iconName="info-outline"
-            onPress={navigateToSellerForgotPassword}
-          />
-          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
-          <ProfileActionButton
-            title="Change Password"
-            subtitle="Update your current password"
-            iconName="info-outline"
-            onPress={navigateToSellerResetPassword}
-          />
-          <ProfileActionButton
-            title="Refund Handle"
-            subtitle="Handle refund requests"
-            iconName="info-outline"
-            onPress={navigateToRefundHandle}
-          />
-          <ProfileActionButton
-            title="Coupon Handling"
-            subtitle="Handle coupon requests"
-            iconName="info-outline"
-            onPress={navigateToCouponHandling}
-          />
-          <ProfileActionButton
-            title="POS"
-            subtitle="Handle POS requests"
-            iconName="info-outline"
-            onPress={navigateToPOS}
-          />
-          <ProfileActionButton
-            title="Order"
-            subtitle="Handle order requests"
-            iconName="info-outline"
-            onPress={navigateToOrder}
-          />
-          <ProfileActionButton
-            title="Shipping"
-            subtitle="Handle shipping requests"
-            iconName="info-outline"
-            onPress={navigateToShipping}
-          />
-          <ProfileActionButton
-            title="Shipping Method"
-            subtitle="Handle shipping method requests"
-            iconName="info-outline"
-            onPress={navigateToShippingMethod}
-          />
-        </Layout>
-
-        {/* Farm Details Section */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
+      {showDeliveryManagement ? (
+        <Delivery onBack={() => setShowDeliveryManagement(false)} />
+      ) : (
+        <ScrollView style={styles.scrollView}>
+          {/* Header with Back Button */}
           <View style={styles.headerRow}>
             <Text style={[styles.sectionTitle, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Farm Details</Text>
+            }]}>Farm Management</Text>
             <Button
               appearance="ghost"
               size="small"
-              onPress={toggleEditMode}
-              style={styles.editButton}
+              onPress={navigateToDeliveryManagement}
+              style={styles.navButton}
             >
-              {isEditMode ? 'Cancel' : 'Edit'}
+              Delivery Management
             </Button>
           </View>
+
+          {/* Farm Management Options */}
+          <Layout style={[styles.section, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+            borderRadius: 12 
+          }]}>
+            <Text style={[styles.sectionTitle, { 
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>Management Options</Text>
+            
+            <View style={styles.managementGrid}>
+              <Button
+                appearance="outline"
+                style={styles.managementButton}
+                onPress={navigateToDeliveryManagement}
+              >
+                <View style={styles.buttonContent}>
+                  <ThemedIcon name="car-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
+                  <Text style={styles.buttonText}>Delivery Management</Text>
+                  <Text style={styles.buttonSubtext}>Manage delivery men, orders, and earnings</Text>
+                </View>
+              </Button>
+              
+              <Button
+                appearance="outline"
+                style={styles.managementButton}
+                onPress={() => navigateToEarnings()}
+              >
+                <View style={styles.buttonContent}>
+                  <ThemedIcon name="trending-up-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
+                  <Text style={styles.buttonText}>Earnings</Text>
+                  <Text style={styles.buttonSubtext}>View earnings and financial reports</Text>
+                </View>
+              </Button>
+              
+              <Button
+                appearance="outline"
+                style={styles.managementButton}
+                onPress={() => navigateToOrders()}
+              >
+                <View style={styles.buttonContent}>
+                  <ThemedIcon name="list-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
+                  <Text style={styles.buttonText}>Orders</Text>
+                  <Text style={styles.buttonSubtext}>Manage and track all orders</Text>
+                </View>
+              </Button>
+              
+              <Button
+                appearance="outline"
+                style={styles.managementButton}
+                onPress={() => navigateToReviews()}
+              >
+                <View style={styles.buttonContent}>
+                  <ThemedIcon name="star-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
+                  <Text style={styles.buttonText}>Reviews</Text>
+                  <Text style={styles.buttonSubtext}>View and manage customer reviews</Text>
+                </View>
+              </Button>
+              
+              <Button
+                appearance="outline"
+                style={styles.managementButton}
+                onPress={() => navigateToTransactions()}
+              >
+                <View style={styles.buttonContent}>
+                  <ThemedIcon name="credit-card-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
+                  <Text style={styles.buttonText}>Transactions</Text>
+                  <Text style={styles.buttonSubtext}>View and manage financial transactions</Text>
+                </View>
+              </Button>
+              
+              <Button
+                appearance="outline"
+                style={styles.managementButton}
+                onPress={() => navigateToShopSettings()}
+              >
+                <View style={styles.buttonContent}>
+                  <ThemedIcon name="settings-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
+                  <Text style={styles.buttonText}>Shop Settings</Text>
+                  <Text style={styles.buttonSubtext}>Manage shop information and settings</Text>
+                </View>
+              </Button>
+            </View>
+          </Layout>
+
+          {/* Farm Details Section */}
+          {/* <Layout style={[styles.section, { 
+            backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+            borderRadius: 12 
+          }]}>
+            <View style={styles.headerRow}>
+              <Text style={[styles.sectionTitle, { 
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>Farm Details</Text>
+              <Button
+                appearance="ghost"
+                size="small"
+                onPress={toggleEditMode}
+                style={styles.editButton}
+              >
+                {isEditMode ? 'Cancel' : 'Edit'}
+              </Button>
+            </View>
 
           <View style={styles.imageContainer}>
             <Text style={[styles.label, { 
@@ -351,8 +407,13 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
               </View>
             </View>
           )}
-        </Layout>
-      </ScrollView>
+        </Layout> */}
+        </ScrollView>
+      )}
+
+        
+
+  
     </Layout>
   );
 };
@@ -387,6 +448,37 @@ const styles = StyleSheet.create({
   },
   editButton: {
     marginLeft: 8,
+  },
+  navButton: {
+    marginLeft: 8,
+  },
+  managementGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  managementButton: {
+    width: '48%',
+    marginBottom: 12,
+    height: 110,
+  },
+  buttonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  buttonText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  buttonSubtext: {
+    fontSize: 9,
+    textAlign: 'center',
+    opacity: 0.7,
+    lineHeight: 12,
   },
   imageContainer: {
     alignItems: 'center',
