@@ -39,6 +39,9 @@ import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { RefundHandle } from '../screens/seller/profile/farmdetails/pages/RefundHandle';
 import CouponHandling from '../screens/seller/profile/farmdetails/pages/CouponHandling';
 import POS from '../screens/seller/profile/farmdetails/pages/POS';
+import Order from '../screens/seller/profile/farmdetails/pages/Order';
+import ShippingMethod from '../screens/seller/profile/farmdetails/pages/ShippingMethod';
+import Shipping from '../screens/seller/profile/farmdetails/pages/Shipping';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -74,6 +77,9 @@ export const AppScreens = Object.freeze({
   REFUND_HANDLE: 'RefundHandle',
   COUPON_HANDLING: 'CouponHandling',  
   POS: 'POS',
+  ORDER: 'Order',
+  SHIPPING: 'Shipping',
+  SHIPPING_METHOD: 'ShippingMethod',
 });
 
 export const AppNavigator = () => {
@@ -224,7 +230,7 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.FARM_DETAILS_EDIT} component={FarmDetailsEditScreen} options={{
               headerShown: true,
               header: props => (
-                <MainScreensHeader {...props} hideSearch={true} key="header-FarmDetailsEditScreen" />
+                <MainScreensHeader {...props} activateGoBack={true} hideSearch={true} key="header-FarmDetailsEditScreen" />
               ),
             }} />
                 <Screen
@@ -257,6 +263,30 @@ export const AppNavigator = () => {
           <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-POS" />
         ),
       }}
+    />
+    <Screen name={AppScreens.ORDER} component={Order}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-Order" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.SHIPPING_METHOD} component={ShippingMethod}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-Shipping" />
+      ),
+    }}
+    />
+    <Screen name={AppScreens.SHIPPING} component={Shipping}
+    options={{
+      headerShown: true,
+      header: props => (
+        <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-Shipping" />
+      ),
+    }}
     />
         <Screen name={AppScreens.SELLER_INFO} component={SellerInfoScreen}
   options={{

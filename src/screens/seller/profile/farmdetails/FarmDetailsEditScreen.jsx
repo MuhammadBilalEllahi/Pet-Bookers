@@ -161,6 +161,18 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
     navigation.navigate(AppScreens.POS);
   };
 
+  const navigateToOrder = () => {
+    navigation.navigate(AppScreens.ORDER);
+  };
+
+  const navigateToShipping = () => {
+    navigation.navigate(AppScreens.SHIPPING);
+  };
+
+  const navigateToShippingMethod = () => {
+    navigation.navigate(AppScreens.SHIPPING_METHOD);
+  };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
@@ -213,6 +225,24 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
             subtitle="Handle POS requests"
             iconName="info-outline"
             onPress={navigateToPOS}
+          />
+          <ProfileActionButton
+            title="Order"
+            subtitle="Handle order requests"
+            iconName="info-outline"
+            onPress={navigateToOrder}
+          />
+          <ProfileActionButton
+            title="Shipping"
+            subtitle="Handle shipping requests"
+            iconName="info-outline"
+            onPress={navigateToShipping}
+          />
+          <ProfileActionButton
+            title="Shipping Method"
+            subtitle="Handle shipping method requests"
+            iconName="info-outline"
+            onPress={navigateToShippingMethod}
           />
         </Layout>
 
