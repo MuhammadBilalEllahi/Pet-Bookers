@@ -419,16 +419,17 @@ export const ProductDetailScreen = ({ route, navigation }) => {
                 borderRadius: 6, 
                 marginRight: 8, 
                 borderWidth: 0, 
-                height: 45 
+                height: 45, 
+                opacity: product.current_stock === 0 ? 0.5 : 1,
               }}
               textStyle={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold' }}
               appearance="filled"
-              disabled={addingToCart}
+              disabled={addingToCart || product.current_stock === 0}
               accessoryLeft={
                 addingToCart ? () => <ActivityIndicator size="small" color={theme['color-shadcn-primary-foreground']} /> : undefined
               }
             >
-              {addingToCart ? '' : 'Buy Now'}
+              {product.current_stock === 0 ? 'Out of Stock' : (addingToCart ? '' : 'Buy Now')}
             </Button>
 
             <Button
@@ -439,16 +440,17 @@ export const ProductDetailScreen = ({ route, navigation }) => {
                 borderRadius: 6, 
                 marginRight: 8, 
                 borderWidth: 0, 
-                height: 45 
+                height: 45, 
+                opacity: product.current_stock === 0 ? 0.5 : 1,
               }}
               textStyle={{ color: theme['color-shadcn-primary-foreground'], fontWeight: 'bold' }}
               appearance="filled"
-              disabled={addingToCart}
+              disabled={addingToCart || product.current_stock === 0}
               accessoryLeft={
                 addingToCart ? () => <ActivityIndicator size="small" color={theme['color-shadcn-primary-foreground']} /> : undefined
               }
             >
-              {addingToCart ? '' : addedToCart ? 'Added to Cart' : 'Add to Cart'}
+              {product.current_stock === 0 ? 'Out of Stock' : (addingToCart ? '' : addedToCart ? 'Added to Cart' : 'Add to Cart')}
             </Button>
 
             <Button
