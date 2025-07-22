@@ -27,6 +27,10 @@ export const SellerPostedProductsStack = () => {
               {...props}
               title="MyPostedAds"
               hideSearch={true}
+              // hideCart={true}
+              // hideNotification={true}
+              // hideSettings={true}
+              // hideWishlist
             />
           ),
         }}

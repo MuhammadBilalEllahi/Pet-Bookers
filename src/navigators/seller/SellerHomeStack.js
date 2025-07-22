@@ -18,11 +18,13 @@ import { UserType } from '../../store/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ProductDetailScreen } from '../../screens/buyer/product/ProductDetailScreen';
 import { MainScreensHeader } from '../../components/buyer';
+import { useTranslation } from 'react-i18next';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const SellerHomeStack = () => {
   const [userType, setUserType]= useState(false);
+  const { t } = useTranslation();
    useEffect(() => {
     const fetchUserType = async () => {
       const type = await AsyncStorage.getItem('user-type');
@@ -50,8 +52,7 @@ export const SellerHomeStack = () => {
               hideWishlist={false}
               hideCart={false}
               // title="HomeMainScreen"
-              title={UserType.SELLER === userType ? 'Seller': UserType.BUYER === userType   ? 'Customer' : 'Guest'}
-
+              title={UserType.SELLER === userType ? t('seller') : UserType.BUYER === userType   ? t('buyer') : t('guest')}
             />
           ),
         }}
@@ -61,15 +62,14 @@ export const SellerHomeStack = () => {
         name="CategoriesList"
         component={CategoriesListScreen}
         options={{
-          title: 'CategoriesList',
-          
+          title: t('pagesTitles.CategoriesList'),
         }}
       />
       <Screen
         name="SubCategoryProducts"
         component={SubCategoryProductsScreen}
         options={{
-          title: 'SubCategoryProducts',
+          title: t('pagesTitles.SubCategoryProducts'),
           header: props=>(<MainScreensHeader {...props }  
             activateGoBack={true}
             />)
@@ -93,12 +93,12 @@ export const SellerHomeStack = () => {
         name="VandorsList"
         component={VandorsListScreen}
         options={{
-          title: 'VandorsList',
+          title: t('pagesTitles.VandorsList'),
           header: props => (
             <MainScreensHeader
               {...props}
               hideSearch={false}
-              title="VandorsList"
+              title={t('pagesTitles.VandorsList')}
             />
           ),
         }}
@@ -107,12 +107,12 @@ export const SellerHomeStack = () => {
         name="VandorDetail"
         component={VandorDetailScreen}
         options={{
-          title: 'VandorDetail',
+          title: t('pagesTitles.VandorDetail'),
           header: props => (
             <MainScreensHeader
               {...props}
               hideSearch={false}
-              title="VandorDetail"
+              title={t('pagesTitles.VandorDetail')}
             />
           ),
         }}
@@ -121,13 +121,13 @@ export const SellerHomeStack = () => {
         name="Notifications"
         component={NotificationsScreen}
         options={{
-          title: 'Notifications',
+          title: t('pagesTitles.Notifications'),
           header: props => (
             <MainScreensHeader
               {...props}
               hideSearch={false}
               hideNotification={false}
-              title="Notifications"
+              title={t('pagesTitles.Notifications')}
             />
           ),
         }}
@@ -136,12 +136,12 @@ export const SellerHomeStack = () => {
         name="AppSettings"
         component={AppSettingsScreen}
         options={{
-          title: 'Settings',
+          title: t('pagesTitles.Settings'),
           header: props => (
             <MainScreensHeader
               {...props}
               hideSearch={false}
-              title="Settings"
+              title={t('pagesTitles.Settings')}
             />
           ),
         }}

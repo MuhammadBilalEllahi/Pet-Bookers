@@ -179,7 +179,7 @@ export const AppNavigator = () => {
 {/* <Screen name={SellerTabRoutes.MY_POSTED_ADS} component={SellerPostedProductsStack} /> */}
         <Screen name={AppScreens.MY_POSTED_ADS} component={SellerPostedProductsStack} 
         options={{
-          headerShown: true,
+          // headerShown: true,
           header: props => (
             <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-MyPostedAdsScreen" />
           ),
