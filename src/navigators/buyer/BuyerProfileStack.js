@@ -3,12 +3,14 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {MainScreensHeader} from '../../components/buyer';
 
 // Screens
-import {BuyerProfileScreen} from '../../screens/buyer/BuyerProfileScreen';
+import {UnifiedProfileScreen} from '../../screens/profile/UnifiedProfileScreen';
 import {UpdatePasswordScreen} from '../../screens/profile/UpdatePasswordScreen';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {UpdateProfileScreen} from '../../screens/profile/UpdateProfileScreen';
 import {MyOrders} from '../../screens/buyer/product/MyOrders';
 import {AddressListScreen} from '../../screens/profile/AddressListScreen';
+import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
+import {SellerOptionsScreen} from '../../screens/buyer/SellerOptionsScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -22,7 +24,7 @@ export const BuyerProfileStack = () => {
       initialRouteName="BuyerProfileMain">
       <Screen
         name="BuyerProfileMain"
-        component={BuyerProfileScreen}
+        component={UnifiedProfileScreen}
         options={{
           header: props => (
             <MainScreensHeader {...props} title="Profile" hideSearch={true} />
@@ -84,6 +86,44 @@ export const BuyerProfileStack = () => {
                         title="Manage Addresses"
                       />
                     ),
+        }}
+      />
+      <Screen
+        name="AppSettings"
+        component={AppSettingsScreen}
+        options={{
+          title: 'Settings',
+          header: props => (
+            <MainScreensHeader 
+              {...props} 
+              title="App Settings" 
+              hideSearch={true} 
+              activateGoBack={true} 
+              hideCart={true} 
+              hideWishlist={true} 
+              hideNotification={true} 
+              hideSettings={true} 
+            />
+          ),
+        }}
+      />
+      <Screen
+        name="SellerOptions"
+        component={SellerOptionsScreen}
+        options={{
+          title: 'Seller Options',
+          header: props => (
+            <MainScreensHeader 
+              {...props} 
+              title="Seller Options" 
+              hideSearch={true} 
+              activateGoBack={true} 
+              hideCart={true} 
+              hideWishlist={true} 
+              hideNotification={true} 
+              hideSettings={true} 
+            />
+          ),
         }}
       />
     </Navigator>

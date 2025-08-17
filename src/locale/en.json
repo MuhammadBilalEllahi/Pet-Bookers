@@ -157,6 +157,10 @@
     "messages": {}
   },
   "addProduct": {
+    "thumbnailSelected": "Thumbnail Selected",
+    "uploadThumbnail": "Upload Thumbnail",
+    "imagesSelected": "Images Selected",
+    "uploadProductImages": "Upload Product Images",
     "generalInfo": "General Info",
     "category": "Category",
     "subCategory": "Sub Category",
@@ -202,6 +206,11 @@
     "addAnother": "Add Another Product"
   },
   "profile": {
+    "buyerOptions": "Buyer Options",
+    "buyerOptionsSubtitle": "Buyer options for seller",
+    "errorLoadingProfile": "Error loading profile",
+    "tapToRetry": "Tap to retry",
+    "farmManagementSubtitle": "Manage your farm and products",
     "viewAndEditProfile": "View and edit profile",
     "storeFullName": "Store Full Name",
     "myAds": "My Ads",
@@ -216,9 +225,29 @@
     "helpSupportSubtitle": "Get help and contact support",
     "logout": "Logout",
     "logoutSubtitle": "Sign out from your account",
+    "logoutBothAccountsMessage": "You are logged in with both Seller and Buyer accounts. Which account would you like to log out from?",
+    "logoutConfirmMessage": "Are you sure you want to log out?",
+    "logoutBuyer": "Logout Buyer",
+    "logoutSeller": "Logout Seller",
+    "logoutBoth": "Logout Both",
+    "sellerOptions": "Seller Options",
+    "sellerOptionsSubtitle": "Manage your selling activities",
+    "buyerAuthRequired": "Sign in as buyer to access buyer features",
+    "sellerAuthRequired": "Sign in as seller to access seller features",
     "ourServices": "Our Services",
     "termsConditions": "Terms & Conditions",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "farmManagement": "Farm Management",
+    "cart": "Cart",
+    "cartSubtitle": "Your shopping cart",
+    "myWishlist": "My Wishlist",
+    "myWishlistSubtitle": "Your saved items",
+    "myOrders": "My Orders",
+    "myOrdersSubtitle": "Your order history",
+    "manageAddresses": "Manage Addresses",
+    "manageAddressesSubtitle": "Add and edit delivery addresses",
+    "settingsSubtitleGeneric": "Settings are here now",
+    "logoutSubtitleGeneric": "You can log out here"
   },
   "myAds": {
     "header": "My Ads",
@@ -303,5 +332,649 @@
   "RequestWithdrawal": "Request Withdrawal",
   "Product Reviews": "Product Reviews",
   "No reviews found": "No reviews found",
-  "No product reviews yet": "No product reviews yet"
+  "No product reviews yet": "No product reviews yet",
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "emptyDesc": "Add some products to get started",
+    "browseProducts": "Browse Products",
+    "continueShopping": "Continue Shopping",
+    "checkout": "Checkout",
+    "removeItem": "Remove Item",
+    "removeConfirm": "Are you sure you want to remove \"{productName}\" from your cart?",
+    "removeFarmProducts": "Remove All Farm Products",
+    "removeFarmConfirm": "Are you sure you want to remove all {itemsCount} product(s) from \"{farmName}\"?",
+    "removeAll": "Remove All",
+    "farmLabel": "Farm:",
+    "productDetails": "Product Details",
+    "orderSummary": "Order Summary",
+    "subTotal": "Sub Total",
+    "tax": "Tax",
+    "shipping": "Shipping",
+    "productShipping": "Product Shipping",
+    "discount": "Discount",
+    "coupon": "Coupon",
+    "couponCode": "Coupon Code",
+    "applyCoupon": "Apply Code",
+    "total": "Total",
+    "orderNote": "Order Note (Optional)",
+    "chooseShippingMethod": "Choose Shipping Method",
+    "farmSubtotal": "Farm Subtotal",
+    "farmShipping": "Farm Shipping",
+    "features": {
+      "freeDelivery": "3 Days Free Delivery",
+      "originalProducts": "100% Original Products",
+      "moneyBack": "Money Back Guarantee",
+      "safePayments": "Safe Payments"
+    },
+    "couponApplied": "Coupon \"{code}\" applied! You saved Rs {amount}",
+    "invalidCoupon": "Invalid coupon code",
+    "applyCouponFailed": "Failed to apply coupon",
+    "removeItemFailed": "Failed to remove item from cart",
+    "updateQuantityFailed": "Failed to update quantity",
+    "cartEmpty": "Cart Empty",
+    "addItemsFirst": "Please add items to cart before checkout",
+    "selectShippingFirst": "Please select a shipping method first",
+    "removeFarmSuccess": "All products from {farmName} have been removed from your cart",
+    "removeFarmFailed": "Failed to remove farm products",
+    "authRequired": "Please sign in to view your cart",
+    "buyerAuthRequired": "Please sign in as a buyer to view your cart",
+    "sellerToBuyerAuth": "You are signed in as a seller. Please also sign in as a buyer to view your cart",
+    "minQuantityError": "Minimum order quantity is {minQuantity}",
+    "maxQuantityError": "Only {maxQuantity} items available in stock",
+    "physicalProductsEasypaisaOnly": "Cart contains physical products. Only EasyPaisa payment is available."
+  },
+  "wishlist": {
+    "title": "My Wishlist",
+    "empty": "Your Wishlist is Empty",
+    "emptyDesc": "Save items you love for later. Start browsing and add products to your wishlist!",
+    "browseProducts": "Browse Products",
+    "itemRemoved": "Item removed from wishlist",
+    "loadingWishlist": "Loading your wishlist...",
+    "authRequired": "Please sign in to view your wishlist",
+    "buyerAuthRequired": "Please sign in as a buyer to view your wishlist",
+    "sellerToBuyerAuth": "You are currently signed in as a seller. To view your wishlist, please also sign in as a buyer.",
+    "managementAuthRequired": "You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.",
+    "addToWishlistAuthRequired": "Please sign in as a buyer to add items to wishlist.",
+    "somethingWentWrong": "Something went wrong",
+    "tryAgain": "Try Again",
+    "items": "items",
+    "item": "item",
+    "removeTitle": "Remove from Wishlist",
+    "removeMessage": "Are you sure you want to remove this item from your wishlist?",
+    "remove": "Remove",
+    "addedOn": "Added {{date}}"
+  },
+  "vendor": {
+    "orders": "Orders",
+    "noAddressProvided": "No address provided",
+    "noContactProvided": "No contact provided",
+    "unknownStore": "Unknown Store",
+    "failedToLoadSeller": "Failed to load seller information",
+    "failedToLoadProducts": "Failed to load products",
+    "searchInStore": "Search in Store",
+    "loadMore": "Load More",
+    "sellerToSellerChat": "Seller to Seller Chat",
+    "sellerChatMessage": "You are signed in as a seller and are about to message another seller. Do you want to continue?",
+    "buyerAuthRequired": "Buyer Authentication Required",
+    "buyerAuthMessage": "Please sign in as a buyer to chat with sellers.",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "searching": "Searching...",
+    "searchResults": "Found {{count}} results for \"{{query}}\"",
+    "noProductsFound": "No products found for \"{{query}}\"",
+    "clearSearch": "Clear Search"
+  },
+  "product": {
+    "overview": "Overview",
+    "reviews": "Reviews",
+    "review": "review",
+    "description": "Description",
+    "productDetails": "Product Details",
+    "minimumOrderQuantity": "Minimum Order Quantity:",
+    "currentStock": "Current Stock:",
+    "featured": "Featured:",
+    "productType": "Product Type:",
+    "refundable": "Refundable:",
+    "freeShipping": "Free Shipping:",
+    "sellerLocation": "Seller Location",
+    "address": "Address:",
+    "city": "City:",
+    "state": "State:",
+    "yes": "Yes",
+    "no": "No",
+    "noReviewsYet": "No reviews yet",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "buyNow": "Buy Now",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "chat": "Chat",
+    "unknownShop": "Unknown Shop",
+    "addressNotAvailable": "Address not available",
+    "cityNotAvailable": "City not available",
+    "stateNotAvailable": "State not available",
+    "products": "Products",
+    "visitStore": "Visit Store",
+    "relatedProducts": "Related Products",
+    "fromSeller": "From Seller",
+    "sellerInfo": "Seller Info",
+    "addedToCartSuccess": "Product added to cart successfully!",
+    "addToCartFailed": "Failed to add to cart",
+    "buyerAuthRequired": "Buyer Authentication Required",
+    "sellerToBuyerAuth": "You are signed in as a seller. Please also sign in as a buyer to add items to cart.",
+    "addItemsAuth": "Please sign in as a buyer to add items to cart.",
+    "wishlistAuth": "You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.",
+    "addToWishlistAuth": "Please sign in as a buyer to add items to wishlist.",
+    "chatAuth": "You are signed in as a seller. Please also sign in as a buyer to chat with other sellers.",
+    "chatRequiredAuth": "Please sign in as a buyer to chat with sellers.",
+    "signInAsBuyer": "Sign in as Buyer",
+    "sellerToSellerChat": "Seller to Seller Chat",
+    "sellerChatConfirm": "You are signed in as a seller and are about to message another seller. Do you want to continue?",
+    "shareProduct": "Share Product",
+    "shareTitle": "Check out this product: {{productName}}",
+    "shareMessage": "I found this amazing product on PetBookie!\n\n{{productName}}\nPrice: Rs {{price}}\n\nCheck it out: {{link}}",
+    "shareError": "Failed to share product. Please try again.",
+    "shareInfoNotAvailable": "Product information not available for sharing"
+  },
+  "allProducts": {
+    "searchResults": "Search Results",
+    "products": "Products",
+    "results": "results",
+    "searchProducts": "Search products...",
+    "clear": "Clear",
+    "search": "Search",
+    "noProductsFound": "No products found"
+  },
+  "search": {
+    "searchProducts": "Search products...",
+    "noResults": "No products found",
+    "searching": "Searching...",
+    "typeToSearch": "Type to search products",
+    "selectProduct": "Select a product",
+    "viewProduct": "View Product"
+  },
+  "auth": {
+    "signInAsBuyer": "Sign in as Buyer",
+    "signInToBuyer": "Sign In as Buyer",
+    "pleaseSignInAsBuyer": "Please sign in as a buyer to add items to cart and make purchases.",
+    "enterYourEmail": "Enter your email",
+    "enterYourPhone": "Enter your phone number",
+    "enterYourPassword": "Enter your password",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "signInSuccessBuyer": "Successfully signed in as buyer!",
+    "signInAsSeller": "Sign in as Seller",
+    "sellerAuthRequired": "Seller Authentication Required",
+    "signInAsSellerToAddProducts": "Please sign in as a seller to add products to your store.",
+    "loginFailed": "Login Failed",
+    "tapToRetry": "Tap to retry",
+    "enterEmailOrPhoneToReset": "Enter your email or phone number to reset your password",
+    "emailOrPhone": "Email or Phone",
+    "preferredVerificationMethod": "Preferred Verification Method",
+    "sendResetCode": "Send Reset Code",
+    "enterNewPasswordFor": "Enter new password for",
+    "newPassword": "New Password",
+    "enterNewPassword": "Enter your new password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordRequirements": "Password Requirements",
+    "atLeast8Characters": "At least 8 characters",
+    "oneUppercaseLetter": "One uppercase letter",
+    "oneLowercaseLetter": "One lowercase letter",
+    "oneNumber": "One number",
+    "resetPassword": "Reset Password",
+    "backToLogin": "Back to Login"
+  },
+  "chats": {
+    "loadingChats": "Loading chats..."
+  },
+  "common": {
+    "item": "Item",
+    "items": "Items",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "removed": "Removed",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "retry": "Retry",
+    "close": "Close",
+    "goBack": "Go Back",
+    "all": "All",
+    "buying": "Buying",
+    "selling": "Selling",
+    "important": "Important",
+    "unreadChats": "Unread Chats",
+    "shop": "Shop",
+    "customer": "Customer",
+    "you": "You",
+    "unknownCustomer": "Unknown Customer",
+    "user": "User",
+    "notification": "Notification"
+  },
+  "chatScreen": {
+    "tabs": {
+      "all": "All",
+      "buying": "Buying",
+      "selling": "Selling"
+    },
+    "chips": {
+      "all": "All",
+      "unreadChats": "Unread Chats",
+      "important": "Important"
+    },
+    "authRequired": {
+      "buyerTitle": "Buyer Authentication Required",
+      "sellerTitle": "Seller Authentication Required",
+      "buyerMessageSeller": "You are signed in as a seller. Please also sign in as a buyer to view your buying conversations.",
+      "buyerMessage": "Please sign in as a buyer to view your buying conversations.",
+      "sellerMessageBuyer": "You are signed in as a buyer. Please also sign in as a seller to view your selling conversations.",
+      "sellerMessage": "Please sign in as a seller to view your selling conversations.",
+      "signInAsBuyer": "Sign in as Buyer",
+      "signInAsSeller": "Sign in as Seller"
+    },
+    "emptyState": {
+      "noChatsFound": "No chats found",
+      "signInToViewChats": "Sign in to view chats",
+      "signInMessage": "Sign in as a buyer or seller to view your conversations",
+      "startConversation": "Start a conversation by messaging a seller or customer"
+    },
+    "authPrompt": {
+      "buyerTitle": "Sign in as Buyer",
+      "sellerTitle": "Sign in as Seller",
+      "buyerMessage": "Sign in as a buyer to view your conversations with sellers",
+      "sellerMessage": "Sign in as a seller to view your conversations with customers"
+    }
+  },
+  "messagesScreen": {
+    "authRequired": {
+      "title": "Authentication Required",
+      "message": "Please sign in as {chatType} to continue this conversation.",
+      "goBack": "Go Back"
+    },
+    "chatStatus": {
+      "youAreChatting": "You are Chatting as \"{role}\"",
+      "youAreChattingAsSeller": "You are Chatting as Seller",
+      "youAreChattingAsBuyer": "You are Chatting as Buyer",
+      "seller": "Seller",
+      "buyer": "Buyer"
+    },
+    "productInfo": {
+      "chattingAbout": "Chatting about this product",
+      "from": "From"
+    },
+    "messages": {
+      "loading": "Loading messages...",
+      "placeholder": "Message as {chatType}...",
+      "sending": "Sending...",
+      "send": "Send",
+      "messageSent": "Message sent",
+      "messageDelivered": "Your message has been delivered",
+      "failedToSend": "Failed to send message",
+      "pleaseRetry": "Please try again",
+      "failedToLoad": "Failed to load messages",
+      "unknownError": "Unknown error"
+    }
+  },
+  "notificationsScreen": {
+    "noNotifications": "No notifications yet",
+    "defaultTitle": "Notification"
+  },
+  "luckyDrawListScreen": {
+    "title": "Lucky Draw",
+    "applyNow": "Apply Now",
+    "noLuckyDraws": "No lucky draws available at the moment."
+  },
+  "luckyDrawInstance": {
+    "title": "Lucky Draw",
+    "welcomeMessage": "Enter your details to be a\npart of our lucky draw",
+    "infoLabels": {
+      "title": "Title: ",
+      "description": "Description: ",
+      "date": "Date: "
+    },
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Write your name here",
+      "cityLabel": "City",
+      "cityPlaceholder": "What is your city?",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "What is the best number to contact you?",
+      "submitting": "Submitting...",
+      "submit": "Submit",
+      "nameRequired": "Name is required",
+      "cityRequired": "City is required",
+      "phoneRequired": "Phone number is required",
+      "submitError": "Failed to submit. Please try again.",
+      "dataPreFilled": "Your profile data has been filled automatically. You can edit any field if needed."
+    }
+  },
+  "farmManagement": {
+    "title": "Farm Management",
+    "actions": {
+      "forgotPassword": {
+        "title": "Forgot Password",
+        "subtitle": "Reset your password via email/SMS"
+      },
+      "changePassword": {
+        "title": "Change Password",
+        "subtitle": "Update your current password"
+      },
+      "refundHandle": {
+        "title": "Refund Handle",
+        "subtitle": "Handle refund requests"
+      },
+      "couponHandling": {
+        "title": "Coupon Handling",
+        "subtitle": "Handle coupon requests"
+      },
+      "pos": {
+        "title": "POS",
+        "subtitle": "Handle POS requests"
+      },
+      "order": {
+        "title": "Order",
+        "subtitle": "Handle order requests"
+      },
+      "shipping": {
+        "title": "Shipping",
+        "subtitle": "Handle shipping requests"
+      },
+      "shippingMethod": {
+        "title": "Shipping Method",
+        "subtitle": "Handle shipping method requests"
+      }
+    }
+  },
+  "farmDetailsEditScreen": {
+    "title": "Farm Management",
+    "deliveryManagement": "Delivery Management",
+    "managementOptions": "Management Options",
+    "managementButtons": {
+      "deliveryManagement": {
+        "title": "Delivery Management",
+        "subtitle": "Manage delivery men, orders, and earnings"
+      },
+      "earnings": {
+        "title": "Earnings",
+        "subtitle": "View earnings and financial reports"
+      },
+      "orders": {
+        "title": "Orders",
+        "subtitle": "Manage and track all orders"
+      },
+      "reviews": {
+        "title": "Reviews",
+        "subtitle": "View and manage customer reviews"
+      },
+      "transactions": {
+        "title": "Transactions",
+        "subtitle": "View and manage financial transactions"
+      },
+      "shopSettings": {
+        "title": "Shop Settings",
+        "subtitle": "Manage shop information and settings"
+      }
+    },
+    "farmDetails": {
+      "title": "Farm Details",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "farmImage": "Farm Image",
+      "chooseFarmImage": "Choose Image",
+      "imageSelected": "Image selected",
+      "farmName": "Farm Name",
+      "address": "Address",
+      "contact": "Contact",
+      "saveChanges": "Save Changes",
+      "notSpecified": "Not specified"
+    },
+    "alerts": {
+      "errorTitle": "Error",
+      "successTitle": "Success",
+      "fetchError": "Failed to fetch shop data",
+      "updateSuccess": "Farm details updated successfully",
+      "updateError": "Failed to update farm details",
+      "permissionDenied": "Permission Denied",
+      "storagePermission": "Storage permission is required to upload images"
+    }
+  },
+  "transactionsPage": {
+    "title": "Transactions",
+    "filters": {
+      "filterByStatus": "Filter by Status",
+      "allStatus": "All Status",
+      "pending": "Pending",
+      "approved": "Approved",
+      "denied": "Denied"
+    },
+    "requestWithdrawal": "Request Withdrawal",
+    "noTransactionsFound": "No transactions found",
+    "withdrawal": "Withdrawal",
+    "cancel": "Cancel",
+    "submitRequest": "Submit Request",
+    "selectWithdrawalMethod": "Select Withdrawal Method",
+    "amount": "Amount",
+    "requestWithdrawalTitle": "Request Withdrawal",
+    "alerts": {
+      "errorTitle": "Error",
+      "successTitle": "Success",
+      "fetchError": "Failed to fetch transactions",
+      "withdrawalSuccess": "Withdrawal request submitted successfully",
+      "withdrawalError": "Failed to submit withdrawal request",
+      "closeSuccess": "Withdrawal request closed successfully",
+      "closeError": "Failed to close withdrawal request"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "denied": "Denied",
+      "unknown": "Unknown"
+    }
+  },
+  "shopSettingsPage": {
+    "title": "Shop Settings",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "update": "Update",
+    "save": "Save",
+    "sections": {
+      "shopAvailability": {
+        "title": "Shop Availability",
+        "vacationMode": {
+          "title": "Vacation Mode",
+          "on": "On",
+          "off": "Off",
+          "startDate": "Start Date (YYYY-MM-DD)",
+          "endDate": "End Date (YYYY-MM-DD)",
+          "note": "Vacation Note"
+        },
+        "temporaryClose": {
+          "title": "Temporarily Close Shop",
+          "closed": "Closed",
+          "open": "Open"
+        }
+      },
+      "shopInformation": {
+        "title": "Shop Information",
+        "shopImage": "Shop Image",
+        "chooseShopImage": "Choose Shop Image",
+        "shopName": "Shop Name",
+        "address": "Address",
+        "contact": "Contact"
+      },
+      "sellerInformation": {
+        "title": "Seller Information",
+        "profileImage": "Profile Image",
+        "chooseProfileImage": "Choose Profile Image",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "phone": "Phone",
+        "email": "Email"
+      },
+      "bankInformation": {
+        "title": "Bank Information",
+        "bankName": "Bank Name",
+        "branch": "Branch",
+        "accountNumber": "Account Number",
+        "accountHolderName": "Account Holder Name"
+      }
+    },
+    "alerts": {
+      "errorTitle": "Error",
+      "successTitle": "Success",
+      "permissionDenied": "Permission Denied",
+      "storagePermission": "Storage permission is required to upload images",
+      "fetchError": "Failed to fetch shop and seller data",
+      "settingsSuccess": "Settings updated successfully",
+      "settingsError": "Failed to update settings",
+      "shopInfoSuccess": "Shop info updated successfully",
+      "shopInfoError": "Failed to update shop info",
+      "sellerInfoSuccess": "Seller info updated successfully",
+      "sellerInfoError": "Failed to update seller info",
+      "vacationSuccess": "Vacation settings updated",
+      "vacationError": "Failed to update vacation settings",
+      "temporaryCloseSuccess": "Temporary close status updated",
+      "temporaryCloseError": "Failed to update temporary close status",
+      "bankSuccess": "Bank details updated successfully",
+      "bankError": "Failed to update bank details"
+    }
+  },
+  "addressListScreen": {
+    "title": "Manage Addresses",
+    "subtitle": "Add and manage your delivery addresses",
+    "addNewAddress": "Add New Address",
+    "loading": "Loading addresses...",
+    "addressTypes": {
+      "home": "Home",
+      "office": "Office",
+      "billing": "Billing"
+    },
+    "emptyState": {
+      "title": "No Addresses",
+      "message": "You haven't added any addresses yet. Add your first address to get started.",
+      "addButton": "Add Address"
+    },
+    "alerts": {
+      "deleteTitle": "Delete Address",
+      "deleteMessage": "Are you sure you want to delete this address?",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleteSuccessTitle": "Address Deleted",
+      "deleteSuccessMessage": "Address deleted successfully",
+      "deleteFailedTitle": "Delete failed",
+      "deleteFailedMessage": "Failed to delete address",
+      "loadFailedTitle": "Failed to load addresses",
+      "loadFailedMessage": "Something went wrong"
+    }
+  },
+  "shippingDetails": {
+    "title": "Shipping Details",
+    "chooseShippingAddress": "Choose Shipping Address",
+    "noAddresses": "No addresses found. Please add a new address.",
+    "addNewAddress": "Add New Address",
+    "contactPersonName": "Contact Person Name",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "zipCode": "Zip Code",
+    "country": "Country",
+    "gpsCoordinates": "GPS Coordinates",
+    "noGpsCoordinates": "No GPS coordinates set. Use \"Current Location\" button above.",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "saveAddress": "Save Address",
+    "chooseBillingAddress": "Choose Billing Address",
+    "sameAsShipping": "Same as shipping address",
+    "orderSummary": "Order Summary",
+    "paymentMethod": "Payment Method",
+    "duration": "Duration",
+    "easyPaisaMobileAccount": "EasyPaisa Mobile Account",
+    "easyPaisaPlaceholder": "03XXXXXXXXX (Your EasyPaisa mobile number)",
+    "easyPaisaHelperText": "💳 Mobile wallet payment will be processed instantly via EasyPaisa API",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "shipping": "Shipping",
+    "discount": "Discount",
+    "coupon": "Coupon",
+    "total": "Total",
+    "farmCart": "Farm Cart",
+    "placeOrder": "Place Order",
+    "payViaEasyPaisa": "Pay via EasyPaisa",
+    "payment": "Payment",
+    "processingPayment": "Processing Payment...",
+    "features": {
+      "freeDelivery": "3 Days Free Delivery",
+      "originalProducts": "100% Original Products",
+      "moneyBack": "Money Back Guarantee",
+      "safePayments": "Safe Payments"
+    }
+  },
+  "supportTickets": {
+    "title": "Support Tickets",
+    "subtitle": "Get help and track your support requests",
+    "createTicket": "Create New Ticket",
+    "noTickets": "No Support Tickets",
+    "noTicketsMessage": "You haven't created any support tickets yet. Create a ticket to get help with any issues.",
+    "loading": "Loading support tickets...",
+    "status": {
+      "pending": "Pending",
+      "open": "Open",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "types": {
+      "general": "General Inquiry",
+      "technical": "Technical Issue",
+      "billing": "Billing",
+      "order": "Order Related",
+      "account": "Account Issue",
+      "feature": "Feature Request",
+      "bug": "Bug Report",
+      "other": "Other"
+    },
+    "createForm": {
+      "title": "Create Support Ticket",
+      "subject": "Subject",
+      "subjectPlaceholder": "Brief description of your issue",
+      "type": "Issue Type",
+      "selectType": "Select issue type",
+      "description": "Description",
+      "descriptionPlaceholder": "Please provide detailed information about your issue",
+      "priority": "Priority",
+      "submit": "Create Ticket",
+      "submitting": "Creating ticket...",
+      "success": "Support ticket created successfully",
+      "error": "Failed to create support ticket"
+    },
+    "detail": {
+      "title": "Ticket #{{ticketId}}",
+      "conversation": "Conversation",
+      "reply": "Reply",
+      "replyPlaceholder": "Type your reply here...",
+      "send": "Send Reply",
+      "sending": "Sending...",
+      "noMessages": "No messages yet",
+      "loadingMessages": "Loading conversation...",
+      "replySuccess": "Reply sent successfully",
+      "replyError": "Failed to send reply",
+      "createdAt": "Created: {{date}}",
+      "lastUpdated": "Last updated: {{date}}"
+    },
+    "alerts": {
+      "loadError": "Failed to load support tickets",
+      "createError": "Failed to create support ticket",
+      "replyError": "Failed to send reply"
+    }
+  }
 }

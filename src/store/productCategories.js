@@ -19,11 +19,11 @@ export const loadProductsByCategory = createAsyncThunk(
   'products/loadByCategory',
   async ({categoryId, limit = 10, offset = 0}) => {
     try {
-      console.log("STARTING CALL ", categoryId, "limit:", limit, "offset:", offset);
+      // console.log("STARTING CALL ", categoryId, "limit:", limit, "offset:", offset);
       const response = await axiosBuyerClient.get(
         `products/category/${categoryId}?limit=${limit}&offset=${offset}`,
       );
-      console.log("RESPONSE product ", response.data);
+      // console.log("RESPONSE product ", response.data);
       return response.data;
     } catch (error) {
       console.error("ERROR IN loadByCategory", error?.response?.message, error, error?.message, error?.data);

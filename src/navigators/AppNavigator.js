@@ -49,6 +49,15 @@ import SellerOrdersPage from '../screens/seller/profile/farmdetails/pages/Orders
 import SellerReviewsPage from '../screens/seller/profile/farmdetails/pages/ReviewsPage';
 import SellerTransactionsPage from '../screens/seller/profile/farmdetails/pages/TransactionsPage';
 import SellerShopSettingsPage from '../screens/seller/profile/farmdetails/pages/ShopSettingsModal';
+import { BuyerProfileScreen } from '../screens/buyer/BuyerProfileScreen';
+import { SellerProfileScreen } from '../screens/seller/profile/SellerProfileScreen';
+import BuyerOptionInSellerPRofile from '../screens/seller/profile/buyerOptionsInSellerProfile/BuyerOptionInSellerPRofile';
+import { AppSettingsScreen } from '../screens/AppSettingsScreen';
+import { ResetPasswordScreen } from '../screens/auth/ResetPassword';
+import { ForgotPasswordScreen } from '../screens/auth/ForgotPassword';
+import { SupportTicketsScreen } from '../screens/support/SupportTicketsScreen';
+import { CreateSupportTicketScreen } from '../screens/support/CreateSupportTicketScreen';
+import { SupportTicketDetailScreen } from '../screens/support/SupportTicketDetailScreen';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
@@ -94,6 +103,16 @@ export const AppScreens = Object.freeze({
   ORDERS_STATS: 'OrdersStats',
   TRANSACTIONS_STATS: 'TransactionsStats',
   SHOP_SETTINGS: 'ShopSettings',
+  BUYER_PROFILE: 'BuyerProfileScreen',
+  SELLER_PROFILE: 'SellerProfileScreen',
+  BUYER_OPTIONS_IN_SELLER_PROFILE: 'BuyerOptionsInSellerProfile',
+  APP_SETTINGS: 'AppSettings',
+  RESET_PASSWORD: 'ResetPassword',
+  FORGOT_PASSWORD: 'ForgotPassword',
+  SUPPORT_TICKETS: 'SupportTickets',
+  CREATE_SUPPORT_TICKET: 'CreateSupportTicket',
+  SUPPORT_TICKET_DETAIL: 'SupportTicketDetail',
+  // SELLER_ADD_PRODUCT: 'AddProductScreen',
     });
 
 export const AppNavigator = () => {
@@ -126,7 +145,60 @@ export const AppNavigator = () => {
         <Screen name={AppScreens.SELLER_HOME_MAIN} component={SellerMainNavigator} />
         <Screen name={AppScreens.BUYER_HOME_MAIN} component={BuyerMainNavigator} />
         <Screen name={AppScreens.SELLER_ADD_PRODUCT} component={AddProductScreen} />
-
+        <Screen name={AppScreens.SELLER_PROFILE} component={SellerProfileScreen} />
+        <Screen name={AppScreens.BUYER_PROFILE} component={BuyerProfileScreen} />
+        <Screen name={AppScreens.BUYER_OPTIONS_IN_SELLER_PROFILE} component={BuyerOptionInSellerPRofile}
+        options={
+          {
+            headerShown: true,
+            header: props => (
+              <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-BuyerOptionsInSellerProfile" />
+            ),
+          }
+        } />
+        <Screen name={AppScreens.APP_SETTINGS} component={AppSettingsScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-AppSettingsScreen" />
+          ),
+        }} />
+        <Screen name={AppScreens.RESET_PASSWORD} 
+        component={ResetPasswordScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ResetPasswordScreen" />
+          ),
+        }} />
+        <Screen name={AppScreens.FORGOT_PASSWORD} component={ForgotPasswordScreen} 
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-ForgotPasswordScreen" />
+          )
+        }} />
+        <Screen name={AppScreens.SUPPORT_TICKETS} component={SupportTicketsScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-SupportTicketsScreen" />
+          ),
+        }} />
+        <Screen name={AppScreens.CREATE_SUPPORT_TICKET} component={CreateSupportTicketScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-CreateSupportTicketScreen" />
+          ),
+        }} />
+        <Screen name={AppScreens.SUPPORT_TICKET_DETAIL} component={SupportTicketDetailScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-SupportTicketDetailScreen" />
+          ),
+        }} />
         {/* <Screen name={AppScreens.NOTIFICATIONS} component={NotificationsScreen} 
         options={{
           headerShown: true,
@@ -230,7 +302,7 @@ export const AppNavigator = () => {
             }}
           />
 
-        <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreen}
+        <Screen name={AppScreens.PRODUCT_DETAIL} component={ProductDetailScreenBuyer}
         options={{
               headerShown: true,
               header: props => (

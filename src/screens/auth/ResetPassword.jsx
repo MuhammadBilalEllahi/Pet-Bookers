@@ -112,12 +112,12 @@ export const ResetPasswordScreen = ({navigation}) => {
         }) => (
           <Layout style={styles.inputContainer}>
             <Text category="p2" style={styles.description}>
-              {t('enterNewPasswordFor')} {identity}
+              {t('auth.enterNewPasswordFor')} {identity}
             </Text>
             
             <Input
-              label={t('newPassword')}
-              placeholder={t('enterNewPassword')}
+              label={t('auth.newPassword')}
+              placeholder={t('auth.enterNewPassword')}
               secureTextEntry={!showPassword}
               style={styles.input}
               onChangeText={handleChange('password')}
@@ -129,8 +129,8 @@ export const ResetPasswordScreen = ({navigation}) => {
             />
             
             <Input
-              label={t('confirmNewPassword')}
-              placeholder={t('confirmNewPassword')}
+              label={t('auth.confirmNewPassword')}
+              placeholder={t('auth.confirmNewPassword')}
               secureTextEntry={!showConfirmPassword}
               style={styles.input}
               onChangeText={handleChange('confirm_password')}
@@ -142,17 +142,17 @@ export const ResetPasswordScreen = ({navigation}) => {
             />
 
             <Text category="p2" style={styles.requirements}>
-              {t('passwordRequirements')}:
+              {t('auth.passwordRequirements')}:
             </Text>
             <Text category="c1" style={styles.requirementsList}>
-              • {t('atLeast8Characters')}{'\n'}
-              • {t('oneUppercaseLetter')}{'\n'}
-              • {t('oneLowercaseLetter')}{'\n'}
-              • {t('oneNumber')}
+              • {t('auth.atLeast8Characters')}{'\n'}
+              • {t('auth.oneUppercaseLetter')}{'\n'}
+              • {t('auth.oneLowercaseLetter')}{'\n'}
+              • {t('auth.oneNumber')}
             </Text>
             
             <SubmitButton
-              btnText={t('resetPassword')}
+              btnText={t('auth.resetPassword')}
               disabled={isBtnDisable}
               onPress={handleSubmit}
             />
@@ -161,7 +161,7 @@ export const ResetPasswordScreen = ({navigation}) => {
       </Formik>
       
       <Layout style={[flexeStyles.row, flexeStyles.contentBetween]}>
-        <Text category="p1">{t('backToLogin')}</Text>
+        <Text category="p1">{t('auth.backToLogin')}</Text>
         <Text
           category="p1"
           status="primary"

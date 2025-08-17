@@ -78,7 +78,7 @@ export default function Order() {
       };
       
       const response = await axiosSellerClient.get('/orders/list', { params });
-      console.log("orders", response.data);
+      // console.log("orders", response.data);
       
       const newOrders = response.data.orders || [];
       
@@ -102,7 +102,7 @@ export default function Order() {
   const fetchOrderDetails = async (orderId) => {
     try {
       const response = await axiosSellerClient.get(`/orders/${orderId}`);
-      console.log("order details", response.data);
+      // console.log("order details", response.data);
       setOrderDetails(response.data || []);
     } catch (error) {
       console.error('Error fetching order details:', error);
@@ -115,7 +115,7 @@ export default function Order() {
       const response = await axiosSellerClient.put(`/orders/order-detail-status/${selectedOrder.id}`, {
         order_status: statusForm.order_status,
       });
-      console.log("status updated", response.data);
+      // console.log("status updated", response.data);
       
       if (response.data.success) {
         Alert.alert('Success', response.data.message || 'Order status updated successfully');
@@ -136,7 +136,7 @@ export default function Order() {
         order_id: selectedOrder.id,
         delivery_man_id: deliveryForm.delivery_man_id,
       });
-      console.log("delivery assigned", response.data);
+      // console.log("delivery assigned", response.data);
       
       if (response.data.success) {
         Alert.alert('Success', response.data.message || 'Delivery man assigned successfully');
@@ -158,7 +158,7 @@ export default function Order() {
         delivery_service_name: deliveryForm.delivery_service_name,
         third_party_delivery_tracking_id: deliveryForm.third_party_delivery_tracking_id,
       });
-      console.log("third party delivery assigned", response.data);
+      // console.log("third party delivery assigned", response.data);
       
       if (response.data.success) {
         Alert.alert('Success', response.data.message || 'Third party delivery assigned successfully');
@@ -179,7 +179,7 @@ export default function Order() {
         order_id: selectedOrder.id,
         payment_status: paymentForm.payment_status,
       });
-      console.log("payment status updated", response.data);
+      // console.log("payment status updated", response.data);
       
       Alert.alert('Success', response.data.message || 'Payment status updated successfully');
       setShowPaymentModal(false);

@@ -105,15 +105,18 @@ export const ProductsList = ({
           horizontal={true}
           data={list}
           keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <ProductCard 
-              {...item} 
-              onProductDetail={onProductDetail} 
-              cardWidth={SMALL_CARD_WIDTH}
-              isDark={isDark}
-              theme={theme}
-            />
-          )}
+          renderItem={({ item }) =>{
+            // console.log('item----', item);
+            return (
+              <ProductCard 
+                {...item} 
+                onProductDetail={onProductDetail} 
+                cardWidth={SMALL_CARD_WIDTH}
+                isDark={isDark}
+                theme={theme}
+              />
+            )
+          }}
           onEndReachedThreshold={0.5}
           onEndReached={() => {
             if (hasMore && !loading) {
@@ -121,6 +124,7 @@ export const ProductsList = ({
             }
           }}
           ListFooterComponent={renderFooter}
+          getItemLayout={(data, index) => ({ length: SMALL_CARD_WIDTH, offset: SMALL_CARD_WIDTH * index, index })}
         />
       )}
     </View>

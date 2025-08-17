@@ -56,7 +56,7 @@ export default function SellerEarningsPage({ navigation }) {
     try {
       setLoading(true);
       const response = await axiosSellerClient.get(`/earnings?page=${page}`);
-      console.log("/earnings?", response.data);
+      // console.log("/earnings?", response.data);
       if (page === 1) {
         setEarnings({
           total_earn: response.data.total_earn || 0,

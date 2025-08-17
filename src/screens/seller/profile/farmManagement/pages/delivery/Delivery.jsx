@@ -94,7 +94,7 @@ export default function Delivery() {
           search: searchQuery,
         }
       });
-      console.log("delivery men", response.data);
+      // console.log("delivery men", response.data);
       
       if (currentPage === 1) {
         setDeliveryMen(response.data.delivery_man || []);
@@ -126,7 +126,7 @@ export default function Delivery() {
       }
 
       const response = await axiosSellerClient.post('/delivery-man/store', addForm);
-      console.log("delivery man added", response.data);
+      // console.log("delivery man added", response.data);
       
       Alert.alert('Success', response.data.message || 'Delivery man added successfully');
       setShowAddModal(false);
@@ -145,7 +145,7 @@ export default function Delivery() {
       setCurrentPage(1);
       fetchDeliveryMen();
     } catch (error) {
-      console.error('Error adding delivery man:', error);
+      console.error('Error adding delivery man:', error.response?.data?.message || error.message || error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to add delivery man');
     }
   };
@@ -163,7 +163,7 @@ export default function Delivery() {
       }
 
       const response = await axiosSellerClient.put(`/delivery-man/update/${selectedDeliveryMan.id}`, editForm);
-      console.log("delivery man updated", response.data);
+      // console.log("delivery man updated", response.data);
       
       Alert.alert('Success', response.data.message || 'Delivery man updated successfully');
       setShowEditModal(false);
@@ -193,7 +193,7 @@ export default function Delivery() {
         id: deliveryManId,
         status: newStatus ? 1 : 0,
       });
-      console.log("status updated", response.data);
+      // console.log("status updated", response.data);
       
       Alert.alert('Success', response.data.message || 'Status updated successfully');
       fetchDeliveryMen();
@@ -206,7 +206,7 @@ export default function Delivery() {
   const deleteDeliveryMan = async (deliveryManId) => {
     try {
       const response = await axiosSellerClient.get(`/delivery-man/delete/${deliveryManId}`);
-      console.log("delivery man deleted", response.data);
+      // console.log("delivery man deleted", response.data);
       
       Alert.alert('Success', response.data.message || 'Delivery man deleted successfully');
       fetchDeliveryMen();
@@ -219,7 +219,7 @@ export default function Delivery() {
   const openEditModal = async (deliveryMan) => {
     try {
       const response = await axiosSellerClient.get(`/delivery-man/details/${deliveryMan.id}`);
-      console.log("delivery man details", response.data);
+      // console.log("delivery man details", response.data);
       
       if (response.data && response.data.delivery_man) {
         setSelectedDeliveryMan(response.data.delivery_man);
@@ -248,7 +248,7 @@ export default function Delivery() {
   const openDetailsModal = async (deliveryMan) => {
     try {
       const response = await axiosSellerClient.get(`/delivery-man/details/${deliveryMan.id}`);
-      console.log("delivery man details", response.data);
+      // console.log("delivery man details", response.data);
       
       if (response.data && response.data.delivery_man) {
         setSelectedDeliveryMan(response.data.delivery_man);
@@ -294,7 +294,7 @@ export default function Delivery() {
         deliveryman_id: selectedDeliveryMan.id,
         amount: parseFloat(cashForm.amount),
       });
-      console.log("cash collected", response.data);
+      // console.log("cash collected", response.data);
       
       Alert.alert('Success', response.data.message || 'Cash collected successfully');
       setShowCashModal(false);
@@ -367,7 +367,9 @@ export default function Delivery() {
 
       {/* Delivery Men List */}
       <ScrollView 
-        style={styles.deliveryList}
+        style={[styles.deliveryList, {
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

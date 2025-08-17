@@ -9,7 +9,8 @@ export const SubmitButton = ({btnText, disabled, onPress}) => (
     style={styles.actionBtn}
     onPress={onPress}
     disabled={disabled}
-    accessoryRight={disabled && BtnIndicator}>
+    accessoryRight={disabled && BtnIndicator}
+    textStyle={styles.buttonText}>
     {btnText}
   </Button>
 );
@@ -31,6 +32,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderColor: '#27AE60',
     marginTop: 30,
-    
+  },
+  
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });

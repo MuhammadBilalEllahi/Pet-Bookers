@@ -13,9 +13,9 @@ const initialState = {
 export const loadSellerInfo = createAsyncThunk(
   'sellerDetails/loadSellerInfo',
   async (sellerId) => {
-    console.log("[sellerDetails/loadSellerInfo]", sellerId);
+    // console.log("[sellerDetails/loadSellerInfo]", sellerId);
     const {data} = await axiosBuyerClient.get(`seller/?seller_id=${sellerId}`);
-    console.log("[sellerDetails/loadSellerInfo]", data);
+    // console.log("[sellerDetails/loadSellerInfo]", data);
     return data;
   },
 );
@@ -26,7 +26,7 @@ export const loadSellerProducts = createAsyncThunk(
     const {data} = await axiosBuyerClient.get(
       `seller/${sellerId}/products/?limit=${limit}&offset=${offset}`,
     );
-    console.log("[loadSellerProducts]", JSON.stringify(data,null,2))
+    // console.log("[loadSellerProducts]", JSON.stringify(data,null,2))
     return data;
   },
 );

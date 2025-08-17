@@ -28,7 +28,7 @@ export const SellerHomeStack = () => {
    useEffect(() => {
     const fetchUserType = async () => {
       const type = await AsyncStorage.getItem('user-type');
-      console.log("USER TYPE", type)
+      // console.log("USER TYPE", type)
       setUserType(type);
     };
     fetchUserType();

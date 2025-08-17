@@ -96,7 +96,7 @@ export const UpdateProfileScreen = ({ navigation }) => {
         },
       });
 
-      console.log('Profile updated:', response.data);
+      // console.log('Profile updated:', response.data);
       
       // Refresh customer info after successful update
       dispatch(fetchCustomerInfo());
@@ -148,7 +148,7 @@ export const UpdateProfileScreen = ({ navigation }) => {
               setLoading(true);
       
               const response = await smartBuyerClient.get(`customer/account-delete/${customerInfo.id}`);
-              console.log('Account deletion response:', response.data);
+              // console.log('Account deletion response:', response.data);
               
               // Logout buyer after account deletion
               dispatch(logoutBuyer());

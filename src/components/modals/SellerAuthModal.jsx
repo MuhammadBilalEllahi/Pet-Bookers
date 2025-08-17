@@ -162,15 +162,15 @@ export const SellerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in 
                 
                 {/* Tab Buttons */}
                 <View style={styles.tabContainer}>
-                  {renderTabButton('email', t('Email'))}
-                  {renderTabButton('phone', t('Phone'))}
+                  {renderTabButton('email', t('auth.email'))}
+                  {renderTabButton('phone', t('auth.phone'))}
                 </View>
 
                 {/* Input Fields */}
                 {selectedTab === 'email' ? (
                   <View style={styles.inputContainer}>
                     <Input
-                      placeholder={t('Enter your email')}
+                      placeholder={t('auth.enterYourEmail')}
                       value={values.email}
                       onChangeText={handleChange('email')}
                       onBlur={handleBlur('email')}
@@ -185,7 +185,7 @@ export const SellerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in 
                 ) : (
                   <View style={styles.inputContainer}>
                     <Input
-                      placeholder={t('Enter your phone number')}
+                      placeholder={t('auth.enterYourPhone')}
                       value={values.phone}
                       onChangeText={handleChange('phone')}
                       onBlur={handleBlur('phone')}
@@ -200,7 +200,7 @@ export const SellerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in 
 
                 <View style={styles.inputContainer}>
                   <Input
-                    placeholder={t('Enter your password')}
+                    placeholder={t('auth.enterYourPassword')}
                     value={values.password}
                     onChangeText={handleChange('password')}
                     onBlur={handleBlur('password')}
@@ -216,8 +216,7 @@ export const SellerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in 
                 <SubmitButton
                   onPress={handleSubmit}
                   disabled={isBtnDisabled || isSubmitting}
-                  title={t('Sign In as Seller')}
-                  style={styles.submitButton}
+                  btnText={t('auth.signInAsSeller')}
                 />
 
               </View>
@@ -287,8 +286,5 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: 8,
   },
-  submitButton: {
-    marginTop: 8,
-    borderRadius: 8,
-  },
+
 }); 

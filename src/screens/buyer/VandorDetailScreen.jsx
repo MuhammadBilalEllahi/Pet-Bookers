@@ -1,11 +1,11 @@
-import {Button, Input, Layout, Text, useTheme, Spinner} from '@ui-kitten/components';
+import {Button, Input, Layout, Text,  Spinner} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {Dimensions, Image, ScrollView, View, StyleSheet, Alert} from 'react-native';
+import {Dimensions, Image, ScrollView, View, StyleSheet, Alert, Linking} from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
 import {ProductCard} from '../../components/product/ProductCard';
 import {ThemedIcon} from '../../components/Icon';
 import {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
 import { axiosBuyerClient } from '../../utils/axiosClient';
@@ -14,12 +14,18 @@ import { setActiveRoom } from '../../store/chat';
 import { setBottomTabBarVisibility } from '../../store/configs';
 import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from '../../store/user';
 import { ChatRoutes } from '../../navigators/ChatNavigator';
+import { AppScreens } from '../../navigators/AppNavigator';
+import { useTheme } from '../../theme/ThemeContext';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
 export const VandorDetailScreen = ({route, navigation}) => {
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const dispatch = useDispatch();
+
   const {t} = useTranslation();
-  const theme = useTheme();
+  const {theme, isDark} = useTheme();
   const baseUrls = useSelector(selectBaseUrls);
   const [searchQuery, setSearchQuery] = useState('');
   const [sellerInfo, setSellerInfo] = useState(null);
@@ -37,8 +43,18 @@ export const VandorDetailScreen = ({route, navigation}) => {
 
   useEffect(() => {
     fetchSellerInfo();
-    fetchProducts(0, searchQuery);
+    fetchProducts(0, ''); // Start with empty search
   }, [sellerId]);
+
+  // Add effect to handle search query changes with debouncing
+  useEffect(() => {
+    if (searchQuery.length === 0) {
+      // If search is cleared, reload all products
+      setOffset(0);
+      setProducts([]);
+      fetchProducts(0, '');
+    }
+  }, [searchQuery]);
 
   const fetchSellerInfo = async () => {
     setSellerInfoLoading(true);
@@ -47,7 +63,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
       const res = await axiosBuyerClient.get(`/seller`, { params: { seller_id: sellerId } });
       setSellerInfo(res.data);
     } catch (err) {
-      setSellerInfoError('Failed to load seller information');
+      setSellerInfoError(t('vendor.failedToLoadSeller'));
     } finally {
       setSellerInfoLoading(false);
     }
@@ -57,18 +73,27 @@ export const VandorDetailScreen = ({route, navigation}) => {
     if (newOffset === 0) setProductsLoading(true);
     setProductsError(null);
     try {
+      console.log('Searching with params:', { limit, offset: newOffset, search, sellerId });
       const res = await axiosBuyerClient.get(`/seller/${sellerId}/all-products`, {
         params: { limit, offset: newOffset, search }
       });
+      console.log('Search response:', res.data);
+      // Defensive: ensure products is always an array
+      const productsArr = Array.isArray(res.data.products) ? res.data.products : (res.data.products ? [res.data.products] : []);
+      const total = typeof res.data.total_size === 'number' ? res.data.total_size : (parseInt(res.data.total_size) || 0);
+      console.log('Processed products:', productsArr.length, 'Total:', total);
+      
       if (newOffset === 0) {
-        setProducts(res.data.products);
+        setProducts(productsArr);
+        setOffset(limit); // Reset offset properly for new search
       } else {
-        setProducts(prev => [...prev, ...res.data.products]);
+        setProducts(prev => [...prev, ...productsArr]);
+        setOffset(newOffset + limit);
       }
-      setTotalSize(res.data.total_size);
-      setOffset(newOffset + limit);
+      setTotalSize(total);
     } catch (err) {
-      setProductsError('Failed to load products');
+      console.error('Error fetching products:', err);
+      setProductsError(t('vendor.failedToLoadProducts'));
     } finally {
       setProductsLoading(false);
       setLoadingMore(false);
@@ -76,32 +101,54 @@ export const VandorDetailScreen = ({route, navigation}) => {
   };
 
   const handleLoadMore = () => {
-    const safeProducts = Array.isArray(products) ? products : [];
-    if (safeProducts.length < totalSize && !loadingMore) {
+    if (products.length < totalSize && !loadingMore) {
       setLoadingMore(true);
       fetchProducts(offset, searchQuery);
     }
   };
 
   const handleSearch = () => {
+    setOffset(0); // Reset pagination
+    setProducts([]); // Clear existing products
     fetchProducts(0, searchQuery);
+  };
+
+  const handlePhoneCall = (phoneNumber) => {
+    if (phoneNumber) {
+      Linking.openURL(`tel:${phoneNumber}`);
+    }
   };
 
   const handleChatWithSeller = () => {
     if (!isBuyerAuthenticated) {
-      const message = isSellerAuthenticated
-        ? 'You are signed in as a seller. Please also sign in as a buyer to chat with other sellers.'
-        : 'Please sign in as a buyer to chat with sellers.';
-      Alert.alert(
-        'Buyer Authentication Required',
-        message,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          // You may want to add a sign-in action here
-        ]
-      );
+      if (isSellerAuthenticated) {
+        Alert.alert(
+          t('vendor.sellerToSellerChat'),
+          t('vendor.sellerChatMessage'),
+          [
+            { text: t('vendor.cancel'), style: 'cancel' },
+            { 
+              text: t('vendor.continue'), 
+              onPress: () => navigateToChat()
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          t('vendor.buyerAuthRequired'),
+          t('vendor.buyerAuthMessage'),
+          [
+            { text: t('vendor.cancel'), style: 'cancel' },
+            // You may want to add a sign-in action here
+          ]
+        );
+      }
       return;
     }
+    navigateToChat();
+  };
+
+  const navigateToChat = () => {
     dispatch(setBottomTabBarVisibility(false));
     dispatch(
       setActiveRoom({
@@ -120,31 +167,38 @@ export const VandorDetailScreen = ({route, navigation}) => {
         ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
         : '',
       recipientName: sellerInfo?.seller?.shop?.name,
-      chatType: 'buyer',
+      chatType: isSellerAuthenticated ? 'seller' : 'buyer',
       // Optionally add more context here
     });
   };
 
   if (sellerInfoLoading) {
     return (
-      <Layout level="3" style={styles(theme).loadingContainer}>
-        <Spinner size="large" />
-      </Layout>
+          <Layout level="3" style={[styles(theme).loadingContainer, {
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]}>
+      <Spinner size="large" />
+    </Layout>
     );
   }
 
   if (sellerInfoError || !sellerInfo) {
     return (
-      <Layout level="3" style={styles(theme).errorContainer}>
-        <Text status="danger">{sellerInfoError || 'Failed to load seller information'}</Text>
-      </Layout>
+          <Layout level="3" style={[styles(theme).errorContainer, {
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }]}>
+      <Text status="danger">{sellerInfoError || t('vendor.failedToLoadSeller')}</Text>
+    </Layout>
     );
   }
 
-  const safeProducts = Array.isArray(products) ? products : [];
-  const parsedProducts = safeProducts.map(product => ({
+  const parsedProducts = products.map(product =>
+    { 
+      console.log('product----p', product.slug);
+      return ({
     id: product.id,
-    title: product.name,
+    name: product.name,
+    slug: product.slug,
     rating: product.rating?.[0]?.average || 0,
     discountPercentage: product.discount,
     isSoldOut: product.current_stock === 0,
@@ -160,18 +214,25 @@ export const VandorDetailScreen = ({route, navigation}) => {
       baseUrls && baseUrls['product_thumbnail_url'] && product.thumbnail
         ? `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`
         : '',
-  }));
+  })});
 
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: theme['background-basic-color-2']}}>
+    <Layout level="3" style={{
+      flex: 1, 
+      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+    }}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        style={{
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }}
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'flex-start',
           paddingTop: 10,
           paddingBottom: 90,
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
         }}>
         {/* Banner */}
         <View style={styles(theme).bannerShadow}>
@@ -198,7 +259,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
               defaultSource={require('../../../assets/new/lion.png')}
             />
             <View style={{flex: 1}}>
-              <Text style={styles(theme).storeName}>{sellerInfo?.seller?.shop?.name || 'Unknown Store'}</Text>
+              <Text style={styles(theme).storeName}>{sellerInfo?.seller?.shop?.name || t('vendor.unknownStore')}</Text>
               <View style={styles(theme).ratingRow}>
                 <AirbnbRating
                   count={5}
@@ -212,9 +273,14 @@ export const VandorDetailScreen = ({route, navigation}) => {
                 <Text style={styles(theme).ratingValue}>{sellerInfo?.avg_rating || 0}</Text>
                 <Text style={styles(theme).ratingCount}>({sellerInfo?.total_review || 0})</Text>
               </View>
-              <Text style={styles(theme).orderCount}>{sellerInfo?.total_order || 0} Orders</Text>
-              <Text style={styles(theme).addressText}>{sellerInfo?.seller?.shop?.address || 'No address provided'}</Text>
-              <Text style={styles(theme).contactText}>{sellerInfo?.seller?.shop?.contact || 'No contact provided'}</Text>
+              <Text style={styles(theme).orderCount}>{sellerInfo?.total_order || 0} {t('vendor.orders')}</Text>
+              <Text style={styles(theme).addressText}>{sellerInfo?.seller?.shop?.address || t('vendor.noAddressProvided')}</Text>
+              <Text 
+                style={[styles(theme).contactText, sellerInfo?.seller?.shop?.contact && styles(theme).clickableText]} 
+                onPress={() => handlePhoneCall(sellerInfo?.seller?.shop?.contact)}
+              >
+                {sellerInfo?.seller?.shop?.contact || t('vendor.noContactProvided')}
+              </Text>
             </View>
             <Button
               appearance="ghost"
@@ -229,61 +295,80 @@ export const VandorDetailScreen = ({route, navigation}) => {
         <View style={styles(theme).searchBarShadow}>
           <View style={styles(theme).searchBarRow}>
             <Input
-              placeholder="Search in Store"
+              placeholder={t('vendor.searchInStore')}
               style={styles(theme).searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
               onSubmitEditing={handleSearch}
-              accessoryRight={<ThemedIcon name="search-outline" />}
-            />
-            <Button
-              appearance="ghost"
-              accessoryLeft={<ThemedIcon name="funnel-outline" />}
-              size="small"
-              style={styles(theme).filterBtn}
+              returnKeyType="search"
+              accessoryRight={() => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {searchQuery.length > 0 && (
+                    <ThemedIcon 
+                      name="close-outline" 
+                      style={{ marginRight: 8 }}
+                      onPress={() => setSearchQuery('')}
+                    />
+                  )}
+                  <ThemedIcon 
+                    name="search-outline" 
+                    onPress={handleSearch}
+                  />
+                </View>
+              )}
             />
           </View>
         </View>
         {/* Product Grid */}
-        <ProductsList
-          list={parsedProducts}
-          listTitle={t('products')}
-          loading={productsLoading}
-          loadingError={productsError}
-          onLoadMore={handleLoadMore}
-          onProductDetail={product => {
-            navigation.navigate('ProductDetail', {productId: product.id});
-          }}
-          hasMore={safeProducts.length < totalSize}
-          hideViewAllBtn={true}
-          onViewAll={() => {
-            navigation.navigate('ProductsList', {
-              sellerId,
-              title: sellerInfo?.seller?.shop?.name || 'Products',
-            });
-          }}
-          cardWidth={(windowWidth - 56) / 2}
-          cardHeight={(windowWidth - 56) / 2.2}
-        />
+        {searchQuery.length > 0 && (
+          <View style={styles(theme).searchInfo}>
+            <Text style={styles(theme).searchInfoText}>
+              {productsLoading 
+                ? t('vendor.searching', 'Searching...') 
+                : t('vendor.searchResults', 'Found {{count}} results for "{{query}}"', 
+                    { count: products.length, query: searchQuery })
+              }
+            </Text>
+          </View>
+        )}
         <View style={styles(theme).productGrid}>
           {parsedProducts.map(item => (
             <View key={item.id} style={styles(theme).productCardWrapper}>
               <ProductCard
+                isDark={isDark}
                 {...item}
+                name={item.name}
                 cardWidth={(windowWidth - 56) / 2}
-                onProductDetail={(id, slug) => navigation.navigate('ProductDetail', { productId: id, slug })}
+                theme={theme}
+                onProductDetail={(id, slug) => navigation.navigate(AppScreens.PRODUCT_DETAIL, { productId: id, slug })}
               />
             </View>
           ))}
         </View>
+        {/* No products found message */}
+        {!productsLoading && searchQuery.length > 0 && products.length === 0 && (
+          <View style={styles(theme).noResultsContainer}>
+            <ThemedIcon name="search-outline" style={styles(theme).noResultsIcon} />
+            <Text style={styles(theme).noResultsText}>
+              {t('vendor.noProductsFound', 'No products found for "{{query}}"', { query: searchQuery })}
+            </Text>
+            <Button 
+              appearance="ghost" 
+              onPress={() => setSearchQuery('')}
+              style={styles(theme).clearSearchBtn}
+            >
+              {t('vendor.clearSearch', 'Clear Search')}
+            </Button>
+          </View>
+        )}
         {productsLoading && (
           <View style={styles(theme).loadingMoreContainer}>
             <Spinner size="small" />
           </View>
         )}
-        {!productsLoading && safeProducts.length < totalSize && (
+        {!productsLoading && products.length < totalSize && (
           <Button appearance="ghost" onPress={handleLoadMore} style={{margin: 16}}>
-            {loadingMore ? <Spinner size="small" /> : t('Load More')}
+            {loadingMore ? <Spinner size="small" /> : t('vendor.loadMore')}
           </Button>
         )}
       </ScrollView>
@@ -298,10 +383,10 @@ const styles = (theme) => StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 12,
     // shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: {width: 0, height: 2},
-    elevation: 2,
+    // shadowOpacity: 0.08,
+    // shadowRadius: 8,
+    // shadowOffset: {width: 0, height: 2},
+    // elevation: 2,
   },
   banner: {
     width: '100%',
@@ -311,15 +396,17 @@ const styles = (theme) => StyleSheet.create({
   },
   storeInfoCard: {
     backgroundColor: theme['background-basic-color-1'],
+    borderColor: theme['color-basic-600'],
+    borderWidth: 0.5,
     borderRadius: 14,
     marginHorizontal: 16,
     marginBottom: 16,
     padding: 16,
-    shadowColor: theme['text-basic-color'],
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 2},
-    elevation: 1,
+    // shadowColor: theme['text-basic-color'],
+    // shadowOpacity: 0.06,
+    // shadowRadius: 6,
+    // shadowOffset: {width: 0, height: 2},
+    // elevation: 1,
   },
   storeInfoRow: {
     flexDirection: 'row',
@@ -368,11 +455,13 @@ const styles = (theme) => StyleSheet.create({
   searchBarShadow: {
     marginHorizontal: 16,
     marginBottom: 16,
-    shadowColor: theme['text-basic-color'],
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 2},
-    elevation: 1,
+    borderColor: theme['color-basic-600'],
+    borderWidth: 0.5,
+    // shadowColor: theme['text-basic-color'],
+    // shadowOpacity: 0.06,
+    // shadowRadius: 6,
+    // shadowOffset: {width: 0, height: 2},
+    // elevation: 1,
     borderRadius: 10,
     backgroundColor: theme['background-basic-color-1'],
     padding: 2,
@@ -423,12 +512,49 @@ const styles = (theme) => StyleSheet.create({
   },
   addressText: {
     fontSize: 14,
-    color: theme['color-basic-700'],
+    color: theme['color-basic-300'],
     marginTop: 4,
   },
   contactText: {
     fontSize: 14,
-    color: theme['color-basic-700'],
+    color: theme['color-basic-400'],
     marginTop: 2,
+  },
+  clickableText: {
+    textDecorationLine: 'underline',
+    color: theme['color-primary-default'],
+  },
+  searchInfo: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  searchInfoText: {
+    fontSize: 14,
+    color: theme['color-basic-600'],
+    fontStyle: 'italic',
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  noResultsIcon: {
+    width: 48,
+    height: 48,
+    marginBottom: 16,
+    tintColor: theme['color-basic-400'],
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: theme['color-basic-600'],
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 24,
+  },
+  clearSearchBtn: {
+    marginTop: 8,
   },
 });

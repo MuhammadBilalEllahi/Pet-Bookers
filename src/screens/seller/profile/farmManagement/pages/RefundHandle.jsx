@@ -47,7 +47,7 @@ export const RefundHandle = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await axiosSellerClient.get('/refund/list');
-      console.log("refunds list",response.data);
+      // console.log("refunds list",response.data);
       setRefunds(response.data || []);
     } catch (error) {
       console.error('Error fetching refunds:', error);
@@ -59,13 +59,13 @@ export const RefundHandle = ({ navigation }) => {
 
   const fetchRefundDetails = async (orderDetailsId) => {
     try {
-      console.log("Fetching refund details for order_details_id:", orderDetailsId);
+      // console.log("Fetching refund details for order_details_id:", orderDetailsId);
       const response = await axiosSellerClient.get('/refund/refund-details', {
         params: { order_details_id: orderDetailsId }
       });
-      console.log("refund details",response.data);
+      // console.log("refund details",response.data);
       setRefundDetails(response.data);
-      console.log("refundDetails state set to:", response.data);
+      // console.log("refundDetails state set to:", response.data);
     } catch (error) {
       console.error('Error fetching refund details:', error);
       Alert.alert('Error', 'Failed to fetch refund details');
@@ -73,7 +73,7 @@ export const RefundHandle = ({ navigation }) => {
   };
 
   const handleRefundPress = async (refund) => {
-    console.log("Selected refund:", refund);
+    // console.log("Selected refund:", refund);
     setSelectedRefund(refund);
     await fetchRefundDetails(refund.order_details_id);
     // setShowDetailModal(true);
@@ -96,7 +96,7 @@ export const RefundHandle = ({ navigation }) => {
         note: statusNote
       });
 
-      console.log("refund status updated successfully", response.data);
+      // console.log("refund status updated successfully", response.data);
       Alert.alert('Success', 'Refund status updated successfully');
       setShowStatusModal(false);
       setShowDetailModal(false);

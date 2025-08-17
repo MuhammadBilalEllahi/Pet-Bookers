@@ -48,6 +48,7 @@ export default function TransactionsPage({ navigation }) {
     withdraw_method_id: '',
     method_fields: {}
   });
+  const [selectedMethod, setSelectedMethod] = useState(null);
 
   useEffect(() => {
     fetchTransactions();
@@ -75,7 +76,7 @@ export default function TransactionsPage({ navigation }) {
       setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      Alert.alert('Error', 'Failed to fetch transactions');
+      Alert.alert(t('transactionsPage.alerts.errorTitle'), t('transactionsPage.alerts.fetchError'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -105,15 +106,46 @@ export default function TransactionsPage({ navigation }) {
 
   const handleWithdrawRequest = async () => {
     try {
+      // Validation
+      if (!withdrawForm.amount || parseFloat(withdrawForm.amount) < 1) {
+        Alert.alert(t('transactionsPage.alerts.errorTitle'), 'Amount must be at least $1');
+        return;
+      }
+      
+      if (!withdrawForm.withdraw_method_id) {
+        Alert.alert(t('transactionsPage.alerts.errorTitle'), 'Please select a withdrawal method');
+        return;
+      }
+
+      // Validate method-specific fields
+      if (selectedMethod && selectedMethod.method_fields && selectedMethod.method_fields.length > 0) {
+        for (const field of selectedMethod.method_fields) {
+          if (!withdrawForm.method_fields[field.input_name]) {
+            Alert.alert(t('transactionsPage.alerts.errorTitle'), `Please enter ${field.input_name}`);
+            return;
+          }
+        }
+      }
+
       setLoading(true);
-      await submitWithdrawRequest(withdrawForm);
-      Alert.alert('Success', 'Withdrawal request submitted successfully');
+      
+      // Prepare request data with method fields
+      const requestData = {
+        amount: withdrawForm.amount,
+        withdraw_method_id: withdrawForm.withdraw_method_id,
+        ...withdrawForm.method_fields // Spread method-specific fields
+      };
+
+      await submitWithdrawRequest(requestData);
+      Alert.alert(t('transactionsPage.alerts.successTitle'), t('transactionsPage.alerts.withdrawalSuccess'));
       setShowWithdrawModal(false);
       setWithdrawForm({ amount: '', withdraw_method_id: '', method_fields: {} });
+      setSelectedMethod(null);
       fetchTransactions(1);
     } catch (error) {
-      console.error('Error submitting withdrawal request:', error);
-      Alert.alert('Error', 'Failed to submit withdrawal request');
+      console.error('Error submitting withdrawal request:', error?.response?.data?.message || error?.message || error);
+      const errorMessage = error?.response?.data?.message || error?.message || t('transactionsPage.alerts.withdrawalError');
+      Alert.alert(t('transactionsPage.alerts.errorTitle'), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -122,11 +154,11 @@ export default function TransactionsPage({ navigation }) {
   const handleCloseWithdrawRequest = async (requestId) => {
     try {
       await closeWithdrawRequest(requestId);
-      Alert.alert('Success', 'Withdrawal request closed successfully');
+      Alert.alert(t('transactionsPage.alerts.successTitle'), t('transactionsPage.alerts.closeSuccess'));
       fetchTransactions(1);
     } catch (error) {
       console.error('Error closing withdrawal request:', error);
-      Alert.alert('Error', 'Failed to close withdrawal request');
+      Alert.alert(t('transactionsPage.alerts.errorTitle'), t('transactionsPage.alerts.closeError'));
     }
   };
 
@@ -141,10 +173,10 @@ export default function TransactionsPage({ navigation }) {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 0: return 'Pending';
-      case 1: return 'Approved';
-      case 2: return 'Denied';
-      default: return 'Unknown';
+      case 0: return t('transactionsPage.status.pending');
+      case 1: return t('transactionsPage.status.approved');
+      case 2: return t('transactionsPage.status.denied');
+      default: return t('transactionsPage.status.unknown');
     }
   };
 
@@ -174,14 +206,14 @@ export default function TransactionsPage({ navigation }) {
           <ThemedIcon name="arrow-back-outline" iconStyle={{ width: 24, height: 24 }} />
         </Button>
         <Text style={[styles.pageTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-          {t('Transactions')}
+          {t('transactionsPage.title')}
         </Text>
       </View>
 
       {/* Filters */}
       <View style={styles.filtersContainer}>
         <Select
-          placeholder="Filter by Status"
+          placeholder={t('transactionsPage.filters.filterByStatus')}
           value={statusFilter}
           onSelect={(index) => {
             const statuses = ['', 'pending', 'approve', 'deny'];
@@ -189,10 +221,10 @@ export default function TransactionsPage({ navigation }) {
           }}
           style={styles.filterSelect}
         >
-          <SelectItem title="All Status" />
-          <SelectItem title="Pending" />
-          <SelectItem title="Approved" />
-          <SelectItem title="Denied" />
+          <SelectItem title={t('transactionsPage.filters.allStatus')} />
+          <SelectItem title={t('transactionsPage.filters.pending')} />
+          <SelectItem title={t('transactionsPage.filters.approved')} />
+          <SelectItem title={t('transactionsPage.filters.denied')} />
         </Select>
       </View>
 
@@ -201,13 +233,9 @@ export default function TransactionsPage({ navigation }) {
         onPress={() => setShowWithdrawModal(true)}
         style={styles.withdrawButton}
         appearance="filled"
+        accessoryLeft={(props) => <ThemedIcon name="info-outline" iconStyle={{ width: 16, height: 16 }} />}
       >
-        {() => (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <ThemedIcon name="info-outline" iconStyle={{ width: 16, height: 16, marginRight: 8 }} />
-            <Text>{t('Request Withdrawal')}</Text>
-          </View>
-        )}
+        {t('transactionsPage.requestWithdrawal')}
       </Button>
 
       {/* Transactions List */}
@@ -236,7 +264,7 @@ export default function TransactionsPage({ navigation }) {
             <ThemedIcon name="info-outline" iconStyle={{ width: 48, height: 48, marginBottom: 16, opacity: 0.5 }} />
             <Text style={[styles.emptyText, {
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>{t('No transactions found')}</Text>
+            }]}>{t('transactionsPage.noTransactionsFound')}</Text>
           </View>
         ) : (
           transactions.map((transaction, index) => (
@@ -247,21 +275,23 @@ export default function TransactionsPage({ navigation }) {
                 <View style={styles.transactionInfo}>
                   <Text style={[styles.transactionAmount, {
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }]}> {formatAmount(transaction.amount)} </Text>
+                  }]}>{formatAmount(transaction.amount)}</Text>
                   <Text style={[styles.transactionMethod, {
                     color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                  }]}> {transaction.method_name || t('Withdrawal')} </Text>
+                  }]}>{transaction.method_name || t('transactionsPage.withdrawal')}</Text>
                 </View>
                 <View style={[styles.statusBadge, {
                   backgroundColor: getStatusColor(transaction.approved) + '20'
-                }]}> <Text style={[styles.statusText, {
-                  color: getStatusColor(transaction.approved)
-                }]}> {getStatusText(transaction.approved)} </Text> </View>
+                }]}>
+                  <Text style={[styles.statusText, {
+                    color: getStatusColor(transaction.approved)
+                  }]}>{getStatusText(transaction.approved)}</Text>
+                </View>
               </View>
               <View style={styles.transactionDetails}>
                 <Text style={[styles.transactionDate, {
                   color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                }]}> {formatDate(transaction.created_at)} </Text>
+                }]}>{formatDate(transaction.created_at)}</Text>
                 {transaction.approved === 0 && (
                   <Button
                     size="tiny"
@@ -269,7 +299,7 @@ export default function TransactionsPage({ navigation }) {
                     status="danger"
                     onPress={() => handleCloseWithdrawRequest(transaction.id)}
                   >
-                    {t('Cancel')}
+                    {t('transactionsPage.cancel')}
                   </Button>
                 )}
               </View>
@@ -288,25 +318,27 @@ export default function TransactionsPage({ navigation }) {
         <View style={styles.withdrawSheetOverlay}>
           <View style={[styles.withdrawSheet, { backgroundColor: isDark ? theme['color-shadcn-card'] : 'white' }]}> 
             <View style={styles.sheetHeader}>
-              <Text style={[styles.sheetTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}> 
-                {t('RequestWithdrawal')}
+              <Text style={[styles.sheetTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                {t('transactionsPage.requestWithdrawalTitle')}
               </Text>
-              {/* <Button
+              <Button
                 appearance="ghost"
                 size="small"
                 onPress={() => setShowWithdrawModal(false)}
-              >
-                {() => <ThemedIcon name="close-outline" />}
-              </Button> */}
+                accessoryLeft={(props) => <ThemedIcon name="close-outline" iconStyle={{ width: 20, height: 20 }} />}
+              />
             </View>
             <View style={styles.withdrawForm}>
               <Select
-                placeholder={t('Select Withdrawal Method')}
-                value={withdrawForm.withdraw_method_id}
+                placeholder={t('transactionsPage.selectWithdrawalMethod')}
+                value={selectedMethod ? selectedMethod.method_name : ''}
                 onSelect={(index) => {
+                  const method = withdrawMethods[index.row];
+                  setSelectedMethod(method);
                   setWithdrawForm(prev => ({
                     ...prev,
-                    withdraw_method_id: withdrawMethods[index.row]?.id
+                    withdraw_method_id: method?.id,
+                    method_fields: {} // Reset method fields when changing method
                   }));
                 }}
                 style={styles.formInput}
@@ -316,28 +348,49 @@ export default function TransactionsPage({ navigation }) {
                 ))}
               </Select>
               <Input
-                placeholder={t('Amount')}
+                placeholder={t('transactionsPage.amount')}
                 value={withdrawForm.amount}
                 onChangeText={(text) => setWithdrawForm(prev => ({ ...prev, amount: text }))}
                 keyboardType="numeric"
                 style={styles.formInput}
               />
+              
+              {/* Dynamic method fields */}
+              {selectedMethod && selectedMethod.method_fields && selectedMethod.method_fields.length > 0 && (
+                <>
+                  {selectedMethod.method_fields.map((field, index) => (
+                    <Input
+                      key={index}
+                      placeholder={field.input_name || field.placeholder || `Enter ${field.input_name}`}
+                      value={withdrawForm.method_fields[field.input_name] || ''}
+                      onChangeText={(text) => setWithdrawForm(prev => ({
+                        ...prev,
+                        method_fields: {
+                          ...prev.method_fields,
+                          [field.input_name]: text
+                        }
+                      }))}
+                      style={styles.formInput}
+                      keyboardType={field.input_type === 'number' ? 'numeric' : 'default'}
+                    />
+                  ))}
+                </>
+              )}
               <View style={styles.withdrawActions}>
                 <Button
                   appearance="outline"
                   onPress={() => setShowWithdrawModal(false)}
                   style={styles.withdrawActionButton}
                 >
-                  {() => <Text>{t('Cancel')}</Text>}
+                  {t('transactionsPage.cancel')}
                 </Button>
                 <Button
                   onPress={handleWithdrawRequest}
                   disabled={loading || !withdrawForm.amount || !withdrawForm.withdraw_method_id}
                   style={styles.withdrawActionButton}
+                  accessoryRight={loading ? () => <Spinner size='small' /> : undefined}
                 >
-                  {() => (
-                    loading ? <Spinner size='small' /> : <Text>{t('Submit Request')}</Text>
-                  )}
+                  {t('transactionsPage.submitRequest')}
                 </Button>
               </View>
             </View>

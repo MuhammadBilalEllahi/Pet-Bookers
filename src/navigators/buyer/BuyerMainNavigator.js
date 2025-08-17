@@ -13,7 +13,14 @@ import { useTheme } from '../../theme/ThemeContext';
 import { ThemedIcon } from '../../components/Icon';
 import { selectShowBottomTabBar } from '../../store/configs';
 import { MainScreensHeader } from '../../components/buyer';
-import { selectIfAnonymous, selectIsSeller, selectUserType } from '../../store/user';
+import { 
+  selectIfAnonymous, 
+  selectIsSeller, 
+  selectUserType,
+  selectIsSellerAuthenticated,
+  selectIsBuyerAuthenticated,
+  selectIsAnyAuthenticated
+} from '../../store/user';
 
 // Screens and Navigation Stacks
 import { BuyerHomeStack } from './BuyerHomeStack';
@@ -271,12 +278,31 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
 };
 
 export const BuyerMainNavigator = () => {
+  // Use new dual authentication system
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isAnyAuthenticated = useSelector(selectIsAnyAuthenticated);
+  
+  // Legacy selectors for backward compatibility (can be removed later)
   const isAnonymous = useSelector(selectIfAnonymous);
-  const { theme, isDark } = useTheme();
   const isSeller = useSelector(selectIsSeller);
+  
+  const { theme, isDark } = useTheme();
+  
+  // Determine if user is essentially anonymous (no authentication in either system)
+  const isEffectivelyAnonymous = isAnonymous && !isAnyAuthenticated;
+  
+  console.log("BuyerMainNavigator - Auth States:", {
+    isSellerAuthenticated,
+    isBuyerAuthenticated,
+    isAnyAuthenticated,
+    isAnonymous,
+    isSeller,
+    isEffectivelyAnonymous
+  });
   return (
     <Navigator
-      tabBar={props => <BottomTabBar {...props} isAnonymous={isAnonymous} key="bottomTabBar" />}
+      tabBar={props => <BottomTabBar {...props} isAnonymous={isEffectivelyAnonymous} key="bottomTabBar" />}
       screenOptions={{ headerShown: false }}
     >
       <Screen
@@ -284,7 +310,7 @@ export const BuyerMainNavigator = () => {
         component={BuyerHomeStack}
         key="screen-BuyerHome"
       />
-      {isAnonymous
+      {isEffectivelyAnonymous
         ? [
           <Screen
             key="screen-BuyerChat-anon"
@@ -397,12 +423,12 @@ export const BuyerMainNavigator = () => {
           // />,
           <Screen
             name={SellerTabRoutes.POST_AD}
-            component={isSeller ? SellerNewProductStack : AuthRestrictedError}
+            component={isSellerAuthenticated ? SellerNewProductStack : AuthRestrictedError}
             initialParams={{
-              isItSeller: isSeller,
+              isItSeller: isSellerAuthenticated,
               subTitle: "messages.sellerLoginRequired"
             }}
-            key="authError-SellerPostAd-anon"
+            key="screen-SellerPostAd"
             options={{
               unmountOnBlur: true,
             }}

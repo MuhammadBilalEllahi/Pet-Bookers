@@ -126,7 +126,7 @@ const CollapsibleAddress = ({ address, isDark, theme }) => {
 
 // Product Details Component
 const ProductDetails = ({ product, isDark, theme }) => {
-  console.log("product in productdetails", JSON.stringify(product, null, 2));
+  // console.log("product in productdetails", JSON.stringify(product, null, 2));
   return (
     <View style={styles.productDetailsContainer}>
       <View style={styles.productInfo}>
@@ -182,7 +182,7 @@ export const MyOrders = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await smartBuyerClient.get('customer/order/list');
-      // console.log("response in customerlist", JSON.stringify(response.data, null, 2));
+      // // console.log("response in customerlist", JSON.stringify(response.data, null, 2));
       setOrders((response.data || []).slice().reverse());
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -200,13 +200,13 @@ export const MyOrders = ({ navigation }) => {
 
   const fetchRefunds = async () => {
     setRefundsLoading(true);
-    console.log("fetchRefunds");
+    // console.log("fetchRefunds");
     try {
       const response = await smartBuyerClient.get('customer/order/all-refunds');
-      console.log("response", JSON.stringify(response.data, null, 2));
+      // console.log("response", JSON.stringify(response.data, null, 2));
       setRefunds(response.data);
     } catch (e) {
-      console.log("error", e.response.data || e.message);
+      // console.log("error", e.response.data || e.message);
       setRefunds([]);
     }
     setRefundsLoading(false);
@@ -283,9 +283,9 @@ export const MyOrders = ({ navigation }) => {
     }
 
     try {
-      console.log("reviewModal.order.id", reviewModal.order.id);
-      console.log("reviewRating", reviewRating);
-      console.log("reviewText", reviewText);
+      // console.log("reviewModal.order.id", reviewModal.order.id);
+      // console.log("reviewRating", reviewRating);
+      // console.log("reviewText", reviewText);
       const response = await smartBuyerClient.post('customer/order/deliveryman-reviews/submit', {
         order_id: reviewModal.order.id,
         rating: reviewRating,
@@ -304,7 +304,7 @@ export const MyOrders = ({ navigation }) => {
         fetchOrders(); // Refresh orders to update UI
       }
     } catch (error) {
-      console.log("error", error);
+      // console.log("error", error);
       Toast.show({
         type: 'error',
         text1: 'Error',

@@ -8,6 +8,7 @@ import { BackButton } from '../BackButton';
 import { BuyerMainRoutes } from '../../navigators/buyer/BuyerMainNavigator';
 import { AppScreens } from '../../navigators/AppNavigator';
 import { useTheme } from '../../theme/ThemeContext';
+import { SearchDropdown } from '../search/SearchDropdown';
 
 export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBack = false, hideNotification = true,
   hideSettings = true, hideCart = true, hideWishlist = false }) => {
@@ -15,9 +16,7 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
   const { theme, isDark } = useTheme();
-  const [searchValue, setSearchValue] = useState('');
 
-  const renderIcon = props => <ThemedIcon {...props} name="search-outline" />;
   const cartIcon = props => <ThemedIcon {...props} name="shopping-bag-outline" />;
   const wishlistIcon = props => <ThemedIcon {...props} name="heart-outline" />;
   const NotifIcon = props => <ThemedIcon {...props} name="bell-outline" />;
@@ -120,22 +119,10 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
       </Layout>
       {!hideSearch && (
         <View style={styles.searchBarWrapper}>
-          <Input
-            value={searchValue}
-            onChangeText={setSearchValue}
+          <SearchDropdown
+            navigation={navigation}
+            style={styles.searchDropdown}
             placeholder={t('search')}
-            accessoryRight={renderIcon}
-            style={[
-              styles.searchBar,
-              { 
-                direction: i18n.dir(),
-                backgroundColor: isDark ? '#27272a' : '#ffffff',
-                borderColor: isDark ? '#3f3f46' : '#e4e4e7'
-              }
-            ]}
-            textStyle={[styles.searchBarText, { color: isDark ? '#ffffff' : '#09090b' }]}
-            placeholderTextColor={isDark ? '#a1a1aa' : '#71717a'}
-            size="medium"
           />
           {!hideWishlist && <Button 
             appearance="ghost" 
@@ -187,19 +174,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  searchBar: {
+  searchDropdown: {
     flex: 1,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingLeft: 4,
-    paddingRight: 4,
-    minHeight: 32,
-    elevation: 1,
-    shadowColor: '#000',
-  },
-  searchBarText: {
-    fontSize: 15,
-    paddingVertical: 1,
   },
   logoTitleWrapper: {
     flexDirection: 'row',

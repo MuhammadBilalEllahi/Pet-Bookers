@@ -53,12 +53,12 @@ export const HomeMainScreen = ({navigation}) => {
     useSelector(selectPopularProducts);
 
   const navigateToProductDetail = (productId, slug) => {
-    console.log("[navigateToProductDetail]", productId, slug);
+    // console.log("[navigateToProductDetail]", productId, slug);
     navigation.navigate(AppScreens.PRODUCT_DETAIL_BUYER, {productId: productId, slug: slug});
   };
 
   const navigateToVandorDetail = vandorId => {
-    console.log("[navigateToVandorDetail]", vandorId);
+    // console.log("[navigateToVandorDetail]", vandorId);
     navigation.navigate('VandorDetail', {sellerId: vandorId});
   };
 
@@ -68,7 +68,14 @@ export const HomeMainScreen = ({navigation}) => {
 
   const navigateToAllCategoriesScreen = () =>
     navigation.navigate('CategoriesList');
-  const navigateToAllVandorsScreen = () => navigation.navigate('VandorsList');
+  const navigateToAllVandorsScreen = () => {
+    console.log('Navigating to VandorsList...');
+    try {
+      navigation.navigate('VandorsList');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
   
   const navigateToCategory = (categoryId) => {
     // Find the category by ID
@@ -98,7 +105,7 @@ export const HomeMainScreen = ({navigation}) => {
   const parsedProducts = useCallback(
     list => {
       if (!Array.isArray(list)) return [];
-      // console.log('list', list, "baseUrls", baseUrls['product_thumbnail_url']);
+      // // console.log('list', list, "baseUrls", baseUrls['product_thumbnail_url']);
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
@@ -137,12 +144,12 @@ export const HomeMainScreen = ({navigation}) => {
   };
 
   const handleLoadMoreCategory = useCallback((categoryName) => {
-    console.log('handleLoadMoreCategory called for:', categoryName);
+    // console.log('handleLoadMoreCategory called for:', categoryName);
     
     // Find the category by name
     const category = categories.find(cat => cat.name === categoryName);
     if (!category) {
-      console.log('Category not found:', categoryName);
+      // console.log('Category not found:', categoryName);
       return;
     }
 
@@ -150,17 +157,17 @@ export const HomeMainScreen = ({navigation}) => {
     const isLoading = categoryLoaders[categoryName];
     const totalSize = categoryTotals[categoryName] || 0;
     
-    console.log('Load more check:', {
-      categoryName,
-      existingProducts: existingProducts.length,
-      totalSize,
-      isLoading,
-      shouldLoad: existingProducts.length < totalSize && !isLoading
-    });
+    // console.log('Load more check:', {
+      // categoryName,
+      // existingProducts: existingProducts.length,
+      // totalSize,
+      // isLoading,
+      // shouldLoad: existingProducts.length < totalSize && !isLoading
+    // });
     
     // Check if we need to load more
     if (existingProducts.length < totalSize && !isLoading) {
-      console.log('Loading more products for:', categoryName, 'offset:', existingProducts.length);
+      // console.log('Loading more products for:', categoryName, 'offset:', existingProducts.length);
       setCategoryLoaders(prev => ({...prev, [categoryName]: true}));
       
       dispatch(
@@ -170,11 +177,11 @@ export const HomeMainScreen = ({navigation}) => {
           offset: existingProducts.length,
         }),
       ).then((action) => {
-        console.log('Load more response:', action.payload);
+        // console.log('Load more response:', action.payload);
         const newData = action.payload;
         if (newData?.products) {
           const newProducts = parsedProducts(newData.products);
-          console.log('New products count:', newProducts.length);
+          // console.log('New products count:', newProducts.length);
           setCategorizedProducts(prev => ({
             ...prev,
             [categoryName]: [...(prev[categoryName] || []), ...newProducts],
@@ -186,7 +193,7 @@ export const HomeMainScreen = ({navigation}) => {
         setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
       });
     } else {
-      console.log('Not loading more - conditions not met');
+      // console.log('Not loading more - conditions not met');
     }
   }, [categorizedProducts, categoryLoaders, categoryTotals, categories, dispatch, parsedProducts]);
 
@@ -263,7 +270,7 @@ const loadCategoryProducts = useCallback((categoryId, categoryName) => {
 //   const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
 
 //     sortedCategories.forEach(category => {
-//       console.log("-ID ", category.id, " -Name ", category.name)
+//       // console.log("-ID ", category.id, " -Name ", category.name)
 //       loadCategoryProducts(category.id, category.name);
 //     });
 //   }
@@ -304,11 +311,11 @@ useEffect(() => {
         results.forEach(result => {
           if (result.error) {
             errors[result.name] = result.error;
-            console.log('Category error:', result.name, result.error);
+            // console.log('Category error:', result.name, result.error);
           } else {
             newData[result.name] = result.products;
             totals[result.name] = result.total_size;
-            console.log('Category loaded:', result.name, 'products:', result.products.length, 'total:', result.total_size);
+            // console.log('Category loaded:', result.name, 'products:', result.products.length, 'total:', result.total_size);
           }
           loaders[result.name] = false;
         });
@@ -330,7 +337,7 @@ useEffect(() => {
 
   const parsedSellers = useMemo(() => {
     if (!Array.isArray(sellers)) return [];
-    // console.log('sellers', sellers);
+    // // console.log('sellers', sellers);
     return sellers.map(seller => ({
       id: seller.id,
       name: seller.name,
@@ -567,13 +574,13 @@ export const CategoryWiseProductsList = ({
         // Check if there are more products to load
         const hasMore = products.length < totalSize && !isLoading;
         
-        console.log('CategoryWiseProductsList:', {
-          categoryName,
-          productsCount: products.length,
-          totalSize,
-          isLoading,
-          hasMore
-        });
+        // console.log('CategoryWiseProductsList:', {
+        //   categoryName,
+        //   productsCount: products.length,
+        //   totalSize,
+        //   isLoading,
+        //   hasMore
+        // });
         
         return (
           <ProductsList

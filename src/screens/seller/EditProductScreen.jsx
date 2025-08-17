@@ -122,7 +122,7 @@ export const EditProductScreen = ({ route, navigation }) => {
           tax: productData.tax?.toString() || '',
         });
         setThumbnail(`${baseUrls['product_thumbnail_url']}/${productData.thumbnail}`);
-        // console.log('thumbnailll', `${baseUrls['product_thumbnail_url']}/${productData.thumbnail}`, "thumbnail", productData.thumbnail);
+        // // console.log('thumbnailll', `${baseUrls['product_thumbnail_url']}/${productData.thumbnail}`, "thumbnail", productData.thumbnail);
         setSelectedImages(productData.images.map(image => `${baseUrls['product_image_url']}/${image.replace('product/', '')}`));
       }
     } catch (error) {
@@ -213,9 +213,9 @@ export const EditProductScreen = ({ route, navigation }) => {
 
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        // console.log('User cancelled image picker');
       } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
+        // console.log('ImagePicker Error: ', response.error);
         Alert.alert('Error', 'Failed to pick image');
       } else if (response.assets && response.assets[0]) {
         const source = response.assets[0];
@@ -481,7 +481,7 @@ export const EditProductScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.imageSection}>
-            {console.log('selectedImages', selectedImages)}
+            
             <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
               {t('editProduct.images')}
             </Text>

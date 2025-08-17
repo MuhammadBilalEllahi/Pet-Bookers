@@ -85,7 +85,7 @@ export const POS = ({ navigation }) => {
   const fetchCategories = async () => {
     try {
       const response = await axiosSellerClient.get('/pos/get-categories');
-      console.log("categories", response.data);
+      // console.log("categories", response.data);
       setCategories(response.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -95,7 +95,7 @@ export const POS = ({ navigation }) => {
   const fetchCustomers = async () => {
     try {
       const response = await axiosSellerClient.get('/pos/customers');
-      console.log("customers", response.data);
+      // console.log("customers", response.data);
       setCustomers(response.data.customers || []);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -114,13 +114,13 @@ export const POS = ({ navigation }) => {
         name: searchQuery || '',
       };
       const response = await axiosSellerClient.get('/pos/product-list', { params });
-      console.log("products", response.data);
+      // console.log("products", response.data);
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
       // Show user-friendly error message
       if (error.response?.status === 500) {
-        console.log('Server error occurred while fetching products');
+        // console.log('Server error occurred while fetching products');
       }
     } finally {
       setProductsLoading(false);
@@ -132,7 +132,7 @@ export const POS = ({ navigation }) => {
       const response = await axiosSellerClient.get('/pos/products', {
         params: { code }
       });
-      console.log("barcode product", response.data);
+      // console.log("barcode product", response.data);
       if (response.data && response.data.id) {
         addToCart(response.data);
         setBarcodeInput('');
@@ -183,7 +183,7 @@ export const POS = ({ navigation }) => {
   const createCustomer = async () => {
     try {
       const response = await axiosSellerClient.post('/pos/customer-store', customerForm);
-      console.log("customer created", response.data);
+      // console.log("customer created", response.data);
       Alert.alert('Success', 'Customer created successfully');
       setShowCustomerModal(false);
       setCustomerForm({
@@ -226,7 +226,7 @@ export const POS = ({ navigation }) => {
       };
 
       const response = await axiosSellerClient.post('/pos/place-order', orderData);
-      console.log("order placed", response.data);
+      // console.log("order placed", response.data);
       Alert.alert('Success', `Order placed successfully! Order ID: ${response.data.order_id}`);
       
       // Clear cart and reset
@@ -250,7 +250,7 @@ export const POS = ({ navigation }) => {
       const response = await axiosSellerClient.get('/pos/get-invoice', {
         params: { id: orderId }
       });
-      console.log("invoice", response.data);
+      // console.log("invoice", response.data);
       setSelectedInvoice(response.data);
       setShowInvoiceModal(true);
     } catch (error) {

@@ -7,7 +7,7 @@ import { useTheme } from '../../../../theme/ThemeContext';
 
 export default function SubCategoryGrid({ subcategories: initialSubcategories, onBack, categoryId, categoryName, baseUrl, t, navigation }) {
   const { theme, isDark } = useTheme();
-  console.log("SUB CAt id", categoryId);
+  // console.log("SUB CAt id", categoryId);
   const itemSize = 150;
   const [subcategories, setSubcategories] = useState(initialSubcategories || []);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);

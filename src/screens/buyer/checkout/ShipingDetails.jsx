@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, PermissionsAndroid, Platform } from "react-native";
 import { Layout, Text, Button, Icon, CheckBox, Input, Select, SelectItem, IndexPath } from "@ui-kitten/components";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 import { AppScreens } from "../../../navigators/AppNavigator";
 import { axiosBuyerClient } from "../../../utils/axiosClient";
 import { useTheme } from "../../../theme/ThemeContext";
@@ -10,6 +11,7 @@ import Geolocation from '@react-native-community/geolocation';
 export default function ShipingDetails({ route }) {
   const navigation = useNavigation();
   const { theme, isDark } = useTheme();
+  const { t } = useTranslation();
   
   // Get checkout data from previous screen
   const checkoutData = route?.params?.checkoutData || null;
@@ -107,7 +109,7 @@ export default function ShipingDetails({ route }) {
     Geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        console.log('Current position:', latitude, longitude);
+        // console.log('Current position:', latitude, longitude);
         
         // Update coordinates
         setNewAddress(prev => ({
@@ -149,7 +151,7 @@ export default function ShipingDetails({ route }) {
         }
       });
       
-      console.log('Geocode response:', response.data);
+      // console.log('Geocode response:', response.data);
       
       if (response.data && response.data.results && response.data.results.length > 0) {
         const addressComponents = response.data.results[0].address_components;
@@ -194,7 +196,7 @@ export default function ShipingDetails({ route }) {
     try {
       setLoading(true);
       const response = await axiosBuyerClient.get('customer/address/list');
-      console.log('Addresses Response:', response.data);
+      // console.log('Addresses Response:', response.data);
       setAddresses(response.data || []);
       
       // If addresses exist, select the first one by default
@@ -258,7 +260,7 @@ export default function ShipingDetails({ route }) {
       }
 
       const response = await axiosBuyerClient.post('customer/address/add', newAddress);
-      console.log('Add Address Response:', response.data);
+      // console.log('Add Address Response:', response.data);
       
       Alert.alert('Success', 'Address added successfully');
       setShowAddAddress(false);
@@ -339,7 +341,7 @@ export default function ShipingDetails({ route }) {
       const response = await axiosBuyerClient.get('customer/order/place', {
         params: orderData
       });
-      console.log('COD Order response:', response.data);
+      // console.log('COD Order response:', response.data);
       
       Alert.alert(
         'Order Placed Successfully!',
@@ -371,13 +373,13 @@ export default function ShipingDetails({ route }) {
       setPlacingOrder(true);
       
       // Step 1: Initiate payment to validate data
-      console.log('Initiating EasyPaisa payment...');
+      // console.log('Initiating EasyPaisa payment...');
       const initiateResponse = await axiosBuyerClient.post('payment/easypaisa/initiate', {
         mobile_number: easyPaisaNumber,
         billing_address_id: billingAddressId
       });
       
-      console.log('EasyPaisa initiate response:', initiateResponse.data);
+      // console.log('EasyPaisa initiate response:', initiateResponse.data);
       
       if (initiateResponse.data.status !== 'success') {
         Alert.alert('Error', initiateResponse.data.message || 'Failed to initiate payment');
@@ -403,7 +405,7 @@ export default function ShipingDetails({ route }) {
       }
       
       // Step 2: Complete payment processing
-      console.log('Completing EasyPaisa payment...');
+      // console.log('Completing EasyPaisa payment...');
       const completeResponse = await axiosBuyerClient.post('payment/easypaisa/complete', {
         mobile_number: easyPaisaNumber,
         amount: paymentData.total_amount,
@@ -411,7 +413,7 @@ export default function ShipingDetails({ route }) {
         order_note: checkoutData?.orderNote || ""
       });
       
-      console.log('EasyPaisa complete response:', completeResponse.data);
+      // console.log('EasyPaisa complete response:', completeResponse.data);
       
       if (completeResponse.data.status === 'success') {
         const orderData = completeResponse.data.data;
@@ -549,7 +551,7 @@ export default function ShipingDetails({ route }) {
         }]}>
           <Text style={[styles.sectionTitle, {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Choose Shipping Address</Text>
+          }]}>{t('shippingDetails.chooseShippingAddress')}</Text>
           
           {addresses.length > 0 ? (
             <>
@@ -602,18 +604,18 @@ export default function ShipingDetails({ route }) {
           ) : (
             <Text style={[styles.noAddressText, {
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>No addresses found. Please add a new address.</Text>
+            }]}>{t('shippingDetails.noAddresses')}</Text>
           )}
           
           {/* GPS Location Button - Always Visible */}
           <View style={styles.gpsContainer}>
-            <Text style={[styles.gpsHelperText, {
+            {/* <Text style={[styles.gpsHelperText, {
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
             }]}>
               Get your current location to auto-fill address details
-            </Text>
+            </Text> */}
             
-            <Button
+            {/* <Button
               style={[styles.gpsButton, {
                 backgroundColor: fetchingLocation ? theme['color-shadcn-secondary'] : theme['color-success-default']
               }]}
@@ -625,7 +627,7 @@ export default function ShipingDetails({ route }) {
               }
             >
               {fetchingLocation ? 'Getting Location...' : 'Use Current Location'}
-            </Button>
+            </Button> */}
             
             {(newAddress.latitude !== "0" && newAddress.longitude !== "0") && (
               <Text style={[styles.coordinatesText, {
@@ -645,7 +647,7 @@ export default function ShipingDetails({ route }) {
             <Text style={[styles.addAddressText, {
               color: showAddAddress ? theme['color-basic-100'] : (isDark ? theme['color-basic-100'] : '#388e3c')
             }]}>
-              {showAddAddress ? '- Cancel' : '+ Add New Address'}
+              {showAddAddress ? `- ${t('buttons.cancel')}` : `+ ${t('shippingDetails.addNewAddress')}`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -658,42 +660,42 @@ export default function ShipingDetails({ route }) {
           }]}>
             <Text style={[styles.sectionTitle, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Add New Address</Text>
+            }]}>{t('shippingDetails.addNewAddress')}</Text>
             
             <Input
-              label="Contact Person Name *"
+              label={t('shippingDetails.contactPersonName') + ' *'}
               value={newAddress.contact_person_name}
               onChangeText={val => setNewAddress({ ...newAddress, contact_person_name: val })}
               style={styles.input}
             />
             <Input
-              label="Phone *"
+              label={t('shippingDetails.phone') + ' *'}
               value={newAddress.phone}
               onChangeText={val => setNewAddress({ ...newAddress, phone: val })}
               style={styles.input}
               keyboardType="phone-pad"
             />
             <Input
-              label="Address *"
+              label={t('shippingDetails.address') + ' *'}
               value={newAddress.address}
               onChangeText={val => setNewAddress({ ...newAddress, address: val })}
               style={styles.input}
               multiline
             />
             <Input
-              label="City *"
+              label={t('shippingDetails.city') + ' *'}
               value={newAddress.city}
               onChangeText={val => setNewAddress({ ...newAddress, city: val })}
               style={styles.input}
             />
             <Input
-              label="Zip Code"
+              label={t('shippingDetails.zipCode')}
               value={newAddress.zip}
               onChangeText={val => setNewAddress({ ...newAddress, zip: val })}
               style={styles.input}
             />
             <Input
-              label="Country"
+              label={t('shippingDetails.country')}
               value={newAddress.country}
               onChangeText={val => setNewAddress({ ...newAddress, country: val })}
               style={styles.input}
@@ -707,7 +709,7 @@ export default function ShipingDetails({ route }) {
               <View style={styles.coordinatesHeader}>
                 <Text style={[styles.coordinatesLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>GPS Coordinates</Text>
+                }]}>{t('shippingDetails.gpsCoordinates')}</Text>
                 
                 {(newAddress.latitude !== "0" && newAddress.longitude !== "0") && (
                   <TouchableOpacity 
@@ -738,7 +740,7 @@ export default function ShipingDetails({ route }) {
                       <View style={styles.coordinateItem}>
                         <Text style={[styles.coordinateLabel, {
                           color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                        }]}>Latitude:</Text>
+                        }]}>{t('shippingDetails.latitude')}:</Text>
                         <Text style={[styles.coordinateValue, {
                           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800']
                         }]}>{parseFloat(newAddress.latitude).toFixed(6)}</Text>
@@ -746,7 +748,7 @@ export default function ShipingDetails({ route }) {
                       <View style={styles.coordinateItem}>
                         <Text style={[styles.coordinateLabel, {
                           color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                        }]}>Longitude:</Text>
+                        }]}>{t('shippingDetails.longitude')}:</Text>
                         <Text style={[styles.coordinateValue, {
                           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800']
                         }]}>{parseFloat(newAddress.longitude).toFixed(6)}</Text>
@@ -756,7 +758,7 @@ export default function ShipingDetails({ route }) {
                     <Text style={[styles.noCoordinatesText, {
                       color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-500']
                     }]}>
-                      No GPS coordinates set. Use "Current Location" button above.
+                      {t('shippingDetails.noGpsCoordinates')}
           </Text>
                   )}
                 </View>
@@ -764,7 +766,7 @@ export default function ShipingDetails({ route }) {
                 // Edit Mode
                 <View style={styles.coordinatesRow}>
                   <Input
-                    label="Latitude"
+                    label={t('shippingDetails.latitude')}
                     value={newAddress.latitude}
                     onChangeText={val => setNewAddress({ ...newAddress, latitude: val })}
                     style={[styles.input, styles.coordinateInput]}
@@ -772,7 +774,7 @@ export default function ShipingDetails({ route }) {
                     placeholder="0.000000"
                   />
                   <Input
-                    label="Longitude"
+                    label={t('shippingDetails.longitude')}
                     value={newAddress.longitude}
                     onChangeText={val => setNewAddress({ ...newAddress, longitude: val })}
                     style={[styles.input, styles.coordinateInput]}
@@ -798,7 +800,7 @@ export default function ShipingDetails({ route }) {
               }]}
               onPress={handleAddAddress}
             >
-              Save Address
+              {t('shippingDetails.saveAddress')}
             </Button>
       </View>
         )}
@@ -810,7 +812,7 @@ export default function ShipingDetails({ route }) {
         }]}>
           <Text style={[styles.sectionTitle, {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Choose Billing Address</Text>
+          }]}>{t('shippingDetails.chooseBillingAddress')}</Text>
           
         <CheckBox
           checked={sameAsShipping}
@@ -821,7 +823,7 @@ export default function ShipingDetails({ route }) {
               <Text {...evaProps} style={[styles.checkboxText, {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>
-                Same as shipping address
+                {t('shippingDetails.sameAsShipping')}
             </Text>
           )}
         </CheckBox>
@@ -829,39 +831,39 @@ export default function ShipingDetails({ route }) {
         {!sameAsShipping && (
           <View>
             <Input
-              label="Contact Person Name"
+              label={t('shippingDetails.contactPersonName')}
                 value={billingAddress.contact_person_name}
                 onChangeText={val => setBillingAddress({ ...billingAddress, contact_person_name: val })}
               style={styles.input}
             />
             <Input
-              label="Phone"
+              label={t('shippingDetails.phone')}
                 value={billingAddress.phone}
                 onChangeText={val => setBillingAddress({ ...billingAddress, phone: val })}
               style={styles.input}
                 keyboardType="phone-pad"
             />
             <Input
-              label="Address"
+              label={t('shippingDetails.address')}
                 value={billingAddress.address}
                 onChangeText={val => setBillingAddress({ ...billingAddress, address: val })}
               style={styles.input}
               multiline
             />
               <Input
-                label="City"
+                label={t('shippingDetails.city')}
                 value={billingAddress.city}
                 onChangeText={val => setBillingAddress({ ...billingAddress, city: val })}
                 style={styles.input}
               />
               <Input
-                label="Zip Code"
+                label={t('shippingDetails.zipCode')}
                 value={billingAddress.zip}
                 onChangeText={val => setBillingAddress({ ...billingAddress, zip: val })}
                 style={styles.input}
               />
               <Input
-                label="Country"
+                label={t('shippingDetails.country')}
                 value={billingAddress.country}
                 onChangeText={val => setBillingAddress({ ...billingAddress, country: val })}
                 style={styles.input}
@@ -878,7 +880,7 @@ export default function ShipingDetails({ route }) {
           }]}>
             <Text style={[styles.sectionTitle, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Order Summary</Text>
+            }]}>{t('shippingDetails.orderSummary')}</Text>
             
             {/* Payment Method Info */}
             <View style={[styles.paymentMethodBox, {
@@ -887,10 +889,10 @@ export default function ShipingDetails({ route }) {
             }]}>
               <Text style={[styles.paymentMethodTitle, {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>Payment Method: {checkoutData.selectedPaymentMethod.title}</Text>
+              }]}>{t('shippingDetails.paymentMethod')}: {checkoutData.selectedPaymentMethod.title}</Text>
               <Text style={[styles.paymentMethodDesc, {
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>Duration: {checkoutData.selectedPaymentMethod.duration}</Text>
+              }]}>{t('shippingDetails.duration')}: {checkoutData.selectedPaymentMethod.duration}</Text>
             </View>
 
             {/* EasyPaisa Input - Only show for EasyPaisa payment */}
@@ -898,9 +900,9 @@ export default function ShipingDetails({ route }) {
               <View style={styles.paymentInputSection}>
                 <Text style={[styles.paymentInputLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>EasyPaisa Mobile Account *</Text>
+                }]}>{t('shippingDetails.easyPaisaMobileAccount')} *</Text>
                 <Input
-                  placeholder="03XXXXXXXXX (Your EasyPaisa mobile number)"
+                  placeholder={t('shippingDetails.easyPaisaPlaceholder')}
                   value={easyPaisaNumber}
                   onChangeText={setEasyPaisaNumber}
                   keyboardType="phone-pad"
@@ -909,7 +911,7 @@ export default function ShipingDetails({ route }) {
                 <Text style={[styles.paymentHelperText, {
                   color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
                 }]}>
-                  💳 Mobile wallet payment will be processed instantly via EasyPaisa API
+                  {t('shippingDetails.easyPaisaHelperText')}
                 </Text>
               </View>
             )}
@@ -919,7 +921,7 @@ export default function ShipingDetails({ route }) {
         <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>Subtotal</Text>
+                }]}>{t('shippingDetails.subtotal')}</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Rs {cartSummary.subtotal.toLocaleString()}</Text>
@@ -927,7 +929,7 @@ export default function ShipingDetails({ route }) {
         <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>Tax</Text>
+                }]}>{t('shippingDetails.tax')}</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Rs {cartSummary.tax.toLocaleString()}</Text>
@@ -935,7 +937,7 @@ export default function ShipingDetails({ route }) {
         <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>Shipping</Text>
+                }]}>{t('shippingDetails.shipping')}</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>Rs {cartSummary.shipping.toLocaleString()}</Text>
@@ -943,7 +945,7 @@ export default function ShipingDetails({ route }) {
         <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>Discount</Text>
+                }]}>{t('shippingDetails.discount')}</Text>
                 <Text style={[styles.summaryValue, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                 }]}>- Rs {cartSummary.discount.toLocaleString()}</Text>
@@ -952,7 +954,7 @@ export default function ShipingDetails({ route }) {
         <View style={styles.summaryRow}>
                   <Text style={[styles.summaryLabel, {
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }]}>Coupon ({checkoutData.couponCode})</Text>
+                  }]}>{t('shippingDetails.coupon')} ({checkoutData.couponCode})</Text>
                   <Text style={[styles.summaryValue, {
                     color: theme['color-success-default']
                   }]}>- Rs {checkoutData.couponDiscount.toLocaleString()}</Text>
@@ -963,7 +965,7 @@ export default function ShipingDetails({ route }) {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
                   fontWeight: 'bold',
                   fontSize: 18
-                }]}>Total</Text>
+                }]}>{t('shippingDetails.total')}</Text>
                 <Text style={[styles.summaryValue, {
                   color: theme['color-shadcn-primary'],
                   fontWeight: 'bold',
@@ -980,25 +982,25 @@ export default function ShipingDetails({ route }) {
             <Icon name="car-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>3 Days Free Delivery</Text>
+            }]}>{t('shippingDetails.features.freeDelivery')}</Text>
         </View>
         <View style={styles.feature}>
             <Icon name="award-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>100% Original Products</Text>
+            }]}>{t('shippingDetails.features.originalProducts')}</Text>
         </View>
         <View style={styles.feature}>
             <Icon name="credit-card-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Money Back Guarantee</Text>
+            }]}>{t('shippingDetails.features.moneyBack')}</Text>
         </View>
         <View style={styles.feature}>
             <Icon name="shield-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.featureIcon} />
             <Text style={[styles.featureText, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Safe Payments</Text>
+            }]}>{t('shippingDetails.features.safePayments')}</Text>
         </View>
       </View>
 
@@ -1015,7 +1017,7 @@ export default function ShipingDetails({ route }) {
             <Text style={{ 
               color: isDark ? theme['color-shadcn-foreground'] : '#d35400', 
               fontWeight: "bold" 
-            }}>« Farm Cart</Text>
+            }}>« {t('shippingDetails.farmCart')}</Text>
         </Button>
         <Button
             style={[styles.checkoutBtn, {
@@ -1028,10 +1030,10 @@ export default function ShipingDetails({ route }) {
               null
             }
         >
-            {placingOrder ? 'Processing Payment...' : 
-             checkoutData?.selectedPaymentMethod?.title?.toLowerCase().includes('cod') ? 'Place Order' :
-             checkoutData?.selectedPaymentMethod?.title?.toLowerCase().includes('easypaisa') ? 'Pay via EasyPaisa' :
-             'Payment »'}
+            {placingOrder ? t('shippingDetails.processingPayment') : 
+             checkoutData?.selectedPaymentMethod?.title?.toLowerCase().includes('cod') ? t('shippingDetails.placeOrder') :
+             checkoutData?.selectedPaymentMethod?.title?.toLowerCase().includes('easypaisa') ? t('shippingDetails.payViaEasyPaisa') :
+             t('shippingDetails.payment') + ' »'}
         </Button>
       </View>
     </Layout>

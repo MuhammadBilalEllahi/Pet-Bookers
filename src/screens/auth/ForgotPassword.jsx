@@ -103,11 +103,11 @@ export const ForgotPasswordScreen = ({navigation}) => {
         }) => (
           <Layout style={styles.inputContainer}>
             <Text category="p2" style={styles.description}>
-              {t('enterEmailOrPhoneToReset')}
+              {t('auth.enterEmailOrPhoneToReset')}
             </Text>
             
             <Input
-              label={t('emailOrPhone')}
+              label={t('auth.emailOrPhone')}
               placeholder="abc@gmail.com or 03001234567"
               textContentType="emailAddress"
               keyboardType="default"
@@ -120,7 +120,7 @@ export const ForgotPasswordScreen = ({navigation}) => {
             />
             
             <Text category="p2" style={styles.methodLabel}>
-              {t('preferredVerificationMethod')}
+              {t('auth.preferredVerificationMethod')}
             </Text>
             <RadioGroup
               selectedIndex={verificationMethod}
@@ -132,12 +132,12 @@ export const ForgotPasswordScreen = ({navigation}) => {
                   flexWrap: 'wrap',
                 },
               ]}>
-              <Radio>{t('email')}</Radio>
-              <Radio>{t('phone')}</Radio>
+              <Radio>{t('auth.email')}</Radio>
+              <Radio>{t('auth.phone')}</Radio>
             </RadioGroup>
             
             <SubmitButton
-              btnText={t('sendResetCode')}
+              btnText={t('auth.sendResetCode')}
               disabled={isBtnDisable}
               onPress={handleSubmit}
             />

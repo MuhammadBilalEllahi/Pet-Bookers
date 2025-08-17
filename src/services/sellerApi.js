@@ -7,7 +7,7 @@ export const getShopInfo = () => {
 };
 
 export const updateShopInfo = (formData) => {
-  return axiosSellerClient.post('/shop-update', formData, {
+  return axiosSellerClient.put('/shop-update', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
@@ -18,14 +18,14 @@ export const getSellerInfo = () => {
 };
 
 export const updateSellerInfo = (formData) => {
-  return axiosSellerClient.post('/seller-update', formData, {
+  return axiosSellerClient.put('/seller-update', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
 
 // Update only seller bank details
 export const updateSellerBankDetails = (bankDetails) => {
-  return axiosSellerClient.post('/seller-update', bankDetails);
+  return axiosSellerClient.put('/seller-update', bankDetails);
 };
 
 // Delivery Men Management

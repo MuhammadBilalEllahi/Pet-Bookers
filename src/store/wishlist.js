@@ -1,5 +1,6 @@
 import {createSelector, createSlice} from '@reduxjs/toolkit';
 import {smartBuyerClient, handleAuthError} from '../utils/authAxiosClient';
+import { selectIsBuyerAuthenticated } from './user';
 
 const initialState = {
   wishlist: [],
@@ -8,11 +9,14 @@ const initialState = {
 };
 
 // ASYNC THUNK ACTIONS
-export const loadWishlist = () => async (dispatch) => {
+export const loadWishlist = () => async (dispatch, getState) => {
   try {
+    if(!selectIsBuyerAuthenticated(getState())) {
+      return;
+    }
     dispatch(setWishlistLoading(true));
     const {data} = await smartBuyerClient.get('customer/wish-list/');
-    // console.log('[loadWishlist] success:', data);
+    // // console.log('[loadWishlist] success:', data);
     dispatch(setWishlist(data || []));
     } catch (error) {
     console.error('[loadWishlist] error:', error);
@@ -26,13 +30,13 @@ export const loadWishlist = () => async (dispatch) => {
 export const addToWishlist = ({productId, productData}) => async (dispatch) => {
   try {
     dispatch(setWishlistLoading(true));
-    console.log('[addToWishlist] Adding product:', {productId, productData});
+    // console.log('[addToWishlist] Adding product:', {productId, productData});
     
     const response = await smartBuyerClient.post('customer/wish-list/add', {
         product_id: productId,
       });
     
-    console.log('[addToWishlist] success:', response.data);
+    // console.log('[addToWishlist] success:', response.data);
     
     // Add to local state only on successful response
     dispatch(addWishlistItem({
@@ -65,13 +69,13 @@ export const addToWishlist = ({productId, productData}) => async (dispatch) => {
 export const removeFromWishlist = ({productId}) => async (dispatch) => {
   try {
     dispatch(setWishlistLoading(true));
-    console.log('[removeFromWishlist] Removing product:', productId);
+    // console.log('[removeFromWishlist] Removing product:', productId);
     
     const response = await smartBuyerClient.delete('customer/wish-list/remove', {
       data: { product_id: productId }
     });
     
-    console.log('[removeFromWishlist] success:', response.data);
+    // console.log('[removeFromWishlist] success:', response.data);
     
     // Remove from local state immediately for better UX
     dispatch(removeWishlistItem(productId));
@@ -137,6 +141,7 @@ export const {
 const selectWishlistData = (state) => state.wishlist;
 
 export const selectWishlist = createSelector(selectWishlistData, (wishlistData) => {
+  // console.log("wishlistData", JSON.stringify(wishlistData.wishlist, null,2));
   return wishlistData.wishlist;
 });
 
@@ -152,7 +157,7 @@ export const selectIsInWishlist = createSelector(
   [selectWishlist, (state, productId) => productId],
   (wishlist, productId) => {
     const isInWishlist = wishlist.some(item => item.id === productId);
-    // console.log(`[selectIsInWishlist] Product ${productId} - isInWishlist: ${isInWishlist}, wishlist items:`, wishlist.map(item => item.id));
+    // // console.log(`[selectIsInWishlist] Product ${productId} - isInWishlist: ${isInWishlist}, wishlist items:`, wishlist.map(item => item.id));
     return isInWishlist;
   }
 );

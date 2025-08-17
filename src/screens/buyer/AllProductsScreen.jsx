@@ -18,6 +18,7 @@ import {
 import { loadProductsByCategory } from '../../store/productCategories';
 import { createSmartBuyerClient } from '../../utils/authAxiosClient';
 import { ProductCardShimmer } from '../../components/ProductCardShimmer';
+import { axiosBuyerClient } from '../../utils/axiosClient';
 
 const smartBuyerClient = createSmartBuyerClient();
 
@@ -46,10 +47,28 @@ export const AllProductsScreen = ({ route, navigation }) => {
   const limit = 5; // Number of products per page
   const searchTimeoutRef = useRef(null);
 
+
+  // productItem----in-parseProducts 
+  // {"added_by": "seller", "attachment": null, "attributes": [],
+  //  "brand_id": null, "category_ids": [{"id": "21", "position": 1},
+  //  {"id": "34", "position": 2}], "choice_options": [], "code": "bq68zmo3", 
+  // "color_image": null, "colors": "[]", "colors_formatted": [],
+  //  "created_at": "2025-06-05T19:38:45.000000Z", "current_stock": 1,
+  //  "denied_note": null, "details": "Hhh", "digital_file_ready": null,
+  //  "digital_product_type": null, "discount": 0, "discount_type": "flat",
+  //  "featured": null, "featured_status": 1, "flash_deal": null, "free_shipping": 0,
+  //  "id": 89, "images": ["product/BeRgyk88swxemwnH8DpNqoaE97yw2AuJD8NF903o.jpg", 
+  // "product/tY1T7oKFQmGuJORsVe9FfhBfd6IEpEkulcQcxCnB.jpg"], "is_living": null, 
+  // "is_shipping_cost_updated": null, "meta_description": null, "meta_image": null, 
+  // "meta_title": null, "min_qty": 1, "minimum_order_qty": 1, "multiply_qty": 0, "name": "Bb", "product_type": "physical", "published": 0, "purchase_price": 699, "refundable": 1, "request_status": 0, "reviews": [], "reviews_count": 0, "shipping_cost": 0, "slug": "bb-Io5cZ7", "status": 0, "tax": 0, "tax_model": "exclude", "tax_type": null, "temp_shipping_cost": null, "thumbnail": "vijMjcLIAN3IseMqQMwr7LMAnZiyYrdqvwysjzio.jpg", "translations": [], "unit": "Kg", "unit_price": 699, "updated_at": "2025-06-05T19:38:45.000000Z", "user_id": 12, "variant_product": 0, "variation": [], "video_provider": "youtube", "video_url": null}
+ 
   // Parse products to match ProductCard expectations
   const parseProducts = useCallback((productList) => {
     if (!Array.isArray(productList)) return [];
-    return productList.map(productItem => ({
+    return productList.map(productItem =>
+      {
+        // console.log('productItem----in-parseProducts', productItem);
+        return ({
       id: productItem.id,
       name: productItem.name,
       image: `${baseUrls['product_thumbnail_url']}/${productItem.thumbnail}`,
@@ -66,7 +85,8 @@ export const AllProductsScreen = ({ route, navigation }) => {
       discount: productItem.discount,
       rating: productItem.average_review || 0,
       slug: productItem.slug,
-    }));
+      seller: {id: productItem.user_id},
+    })});
   }, [baseUrls]);
 
   // Fetch products based on type
@@ -74,35 +94,38 @@ export const AllProductsScreen = ({ route, navigation }) => {
     try {
       const currentOffset = isRefresh ? 0 : offset;
       setLoadingMore(!isRefresh);
-      console.log('fetching products', productType, categoryId, offset, currentOffset, limit);
+      // console.log('fetching products', productType, categoryId, offset, currentOffset, limit);
       
       let response;
       
       if (categoryId) {
         // Fetch products by category
-        response = await smartBuyerClient.get(
+        response = await axiosBuyerClient.get(
           `products/category/${categoryId}?limit=${limit}&offset=${currentOffset}`
         );
       } else {
+        console.log('fetching products by type', productType);
         // Fetch products by type
         switch (productType) {
           case 'featured':
-            response = await smartBuyerClient.get(
+            response = await axiosBuyerClient.get(
               `products/featured/?limit=${limit}&offset=${currentOffset}`
             );
             break;
           case 'latest':
-            response = await smartBuyerClient.get(
+            response = await axiosBuyerClient.get(
               `products/latest/?limit=${limit}&offset=${currentOffset}`
             );
             break;
           case 'popular':
-            response = await smartBuyerClient.get(
+            response = await axiosBuyerClient.get(
               `products/top-rated/?limit=${limit}&offset=${currentOffset}`
             );
             break;
           default:
-            throw new Error('Invalid product type');
+            response = await axiosBuyerClient.get(
+              `products/latest/?limit=${limit}&offset=${currentOffset}`
+            );
         }
       }
       
@@ -198,7 +221,7 @@ export const AllProductsScreen = ({ route, navigation }) => {
       );
       
       // Then search from API
-      const apiResponse = await smartBuyerClient.get(
+      const apiResponse = await axiosBuyerClient.get(
         `products/search?name=${encodeURIComponent(query)}&limit=20&offset=0`
       );
       
@@ -260,14 +283,18 @@ export const AllProductsScreen = ({ route, navigation }) => {
   }, [searchQuery, performSearch]);
 
   // Render product item
-  const renderProduct = useCallback(({ item }) => (
-    <ProductCard 
-      {...item} 
-      cardWidth={(Dimensions.get('window').width - 48) / 2}
-      onProductDetail={onProductDetail}
-      isDark={isDark}
-    />
-  ), [onProductDetail, isDark]);
+  // item----in-renderProduct {"discount": 0, "discountType": "flat", "id": 89, "image": "https://petbookers.com.pk/storage/app/public/product/thumbnail/vijMjcLIAN3IseMqQMwr7LMAnZiyYrdqvwysjzio.jpg", "isSoldOut": false, "name": "Bb", "oldPrice": 0, "price": 699, "rating": 0, "slug": "bb-Io5cZ7"}
+  const renderProduct = useCallback(({ item }) => {
+    // console.log('item----in-renderProduct', item);
+    return (
+      <ProductCard 
+        {...item} 
+        cardWidth={(Dimensions.get('window').width - 48) / 2}
+        onProductDetail={onProductDetail}
+        isDark={isDark}
+      />
+    )
+  }, [onProductDetail, isDark]);
 
   // Render footer for loading more
   const renderFooter = useCallback(() => {
@@ -312,7 +339,7 @@ export const AllProductsScreen = ({ route, navigation }) => {
           fontSize: 16,
           textAlign: 'center'
         }}>
-          {t('No products found')}
+          {t('allProducts.noProductsFound')}
         </Text>
       </View>
     );
@@ -335,14 +362,14 @@ export const AllProductsScreen = ({ route, navigation }) => {
             fontWeight: 'bold',
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
           }}>
-            {isSearchMode ? t('Search Results') : (title || t('Products'))}
+            {isSearchMode ? t('allProducts.searchResults') : (title || t('allProducts.products'))}
           </Text>
           {isSearchMode && (
             <Text style={{ 
               fontSize: 14,
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
             }}>
-              {products.length} {t('results')}
+              {products.length} {t('allProducts.results')}
             </Text>
           )}
         </View>
@@ -350,7 +377,7 @@ export const AllProductsScreen = ({ route, navigation }) => {
         {/* Search Bar */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Input
-            placeholder={t('Search products...')}
+            placeholder={t('allProducts.searchProducts')}
             value={searchQuery}
             onChangeText={handleSearchInputChange}
             style={{ 
@@ -383,7 +410,7 @@ export const AllProductsScreen = ({ route, navigation }) => {
                 marginRight: 8
               }}
             >
-              {t('Clear')}
+              {t('allProducts.clear')}
             </Button>
           ) : null}
           <Button
@@ -395,7 +422,7 @@ export const AllProductsScreen = ({ route, navigation }) => {
             {searchLoading ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              t('Search')
+              t('allProducts.search')
             )}
           </Button>
         </View>
@@ -406,7 +433,8 @@ export const AllProductsScreen = ({ route, navigation }) => {
         <View style={{ 
           flex: 1, 
           paddingHorizontal: 16,
-          paddingVertical: 16
+          paddingVertical: 16,
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
         }}>
           {/* Shimmer loading for initial load */}
           <View style={{ 
@@ -464,15 +492,21 @@ export const AllProductsScreen = ({ route, navigation }) => {
             justifyContent: 'space-between', 
             paddingHorizontal: 16 
           }}
+          style={{
+            backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+          }}
           contentContainerStyle={{ 
             paddingVertical: 16,
-            flexGrow: 1
+            flexGrow: 1,
+            backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
           }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
               colors={[theme['color-shadcn-primary']]}
+              tintColor={theme['color-shadcn-primary']}
+              progressBackgroundColor={isDark ? theme['color-shadcn-card'] : theme['color-basic-100']}
             />
           }
           onEndReached={onLoadMore}

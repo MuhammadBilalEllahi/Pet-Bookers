@@ -67,8 +67,8 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
         dispatch(handleBuyerLogin(response.data.token));
         Toast.show({
           type: 'success',
-          text1: 'Success',
-          text2: 'Successfully signed in as buyer!'
+          text1: t('common.success'),
+          text2: t('auth.signInSuccessBuyer')
         });
         onSuccess && onSuccess();
         onClose();
@@ -79,7 +79,7 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
       const errorMessage = error?.response?.data?.message || error?.message || 'Login failed';
       Toast.show({
         type: 'error',
-        text1: 'Login Failed',
+        text1: t('auth.loginFailed'),
         text2: errorMessage
       });
     } finally {
@@ -123,9 +123,13 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
+      <View style={[styles.modalOverlay, {
+        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)'
+      }]}>
         <Layout style={[styles.modalContainer, { 
-          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+          borderWidth: isDark ? 1 : 0,
         }]}>
           
           {/* Header */}
@@ -148,7 +152,7 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
           <Text category="p2" style={[styles.subtitle, { 
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
           }]}>
-            {t('Please sign in as a buyer to add items to cart and make purchases.')}
+            {t('auth.pleaseSignInAsBuyer')}
           </Text>
 
           {/* Login Form */}
@@ -162,21 +166,28 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
                 
                 {/* Tab Buttons */}
                 <View style={styles.tabContainer}>
-                  {renderTabButton('email', t('Email'))}
-                  {renderTabButton('phone', t('Phone'))}
+                  {renderTabButton('email', t('auth.email'))}
+                  {renderTabButton('phone', t('auth.phone'))}
                 </View>
 
                 {/* Input Fields */}
                 {selectedTab === 'email' ? (
                   <View style={styles.inputContainer}>
                     <Input
-                      placeholder={t('Enter your email')}
+                      placeholder={t('auth.enterYourEmail')}
                       value={values.email}
                       onChangeText={handleChange('email')}
                       onBlur={handleBlur('email')}
                       keyboardType="email-address"
                       autoCapitalize="none"
-                      style={styles.input}
+                      style={[styles.input, {
+                        backgroundColor: isDark ? theme['color-shadcn-input'] : theme['color-basic-100'],
+                        borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+                      }]}
+                      textStyle={{
+                        color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                      }}
+                      placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                     />
                     {touched.email && errors.email && (
                       <InputError error={errors.email} />
@@ -185,12 +196,19 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
                 ) : (
                   <View style={styles.inputContainer}>
                     <Input
-                      placeholder={t('Enter your phone number')}
+                      placeholder={t('auth.enterYourPhone')}
                       value={values.phone}
                       onChangeText={handleChange('phone')}
                       onBlur={handleBlur('phone')}
                       keyboardType="phone-pad"
-                      style={styles.input}
+                      style={[styles.input, {
+                        backgroundColor: isDark ? theme['color-shadcn-input'] : theme['color-basic-100'],
+                        borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+                      }]}
+                      textStyle={{
+                        color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                      }}
+                      placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                     />
                     {touched.phone && errors.phone && (
                       <InputError error={errors.phone} />
@@ -200,12 +218,19 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
 
                 <View style={styles.inputContainer}>
                   <Input
-                    placeholder={t('Enter your password')}
+                    placeholder={t('auth.enterYourPassword')}
                     value={values.password}
                     onChangeText={handleChange('password')}
                     onBlur={handleBlur('password')}
                     secureTextEntry={true}
-                    style={styles.input}
+                    style={[styles.input, {
+                      backgroundColor: isDark ? theme['color-shadcn-input'] : theme['color-basic-100'],
+                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+                    }]}
+                    textStyle={{
+                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                    }}
+                    placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
                   />
                   {touched.password && errors.password && (
                     <InputError error={errors.password} />
@@ -216,8 +241,7 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
                 <SubmitButton
                   onPress={handleSubmit}
                   disabled={isBtnDisabled || isSubmitting}
-                  title={t('Sign In as Buyer')}
-                  style={styles.submitButton}
+                  btnText={t('auth.signInToBuyer')}
                 />
 
               </View>
@@ -233,7 +257,6 @@ export const BuyerAuthModal = ({ visible, onClose, onSuccess, title = 'Sign in a
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -287,8 +310,5 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: 8,
   },
-  submitButton: {
-    marginTop: 8,
-    borderRadius: 8,
-  },
+
 }); 

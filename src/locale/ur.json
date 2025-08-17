@@ -155,6 +155,10 @@
     "messages": {}
   },
   "addProduct": {
+    "thumbnailSelected": "تھمب نیل منتخب ہوئی",
+    "uploadThumbnail": "تھمب نیل اپلوڈ کریں",
+    "imagesSelected": "تصاویر منتخب ہوئی",
+    "uploadProductImages": "مصنوعات کی تصاویر اپلوڈ کریں",
     "--choose--": "--منتخب کریں--",
     "--pc--": "--پیسی--",
     "generalInfo": "عمومی معلومات",
@@ -200,6 +204,11 @@
     "addAnother": "ایک اور مصنوع شامل کریں"
   },
   "profile": {
+    "buyerOptions": "خریداری کے خیالات",
+    "buyerOptionsSubtitle": "فروخت کنندہ کے لیے خریداری کے خیالات",
+    "errorLoadingProfile": "پروفائل لوڈ کرنے میں خرابی ہوئی ہے",
+    "tapToRetry": "دوبارہ کوشش کے لیے ٹیپ کریں",
+    "farmManagementSubtitle": "اپنی فارم اور مصنوعات کا مینیجمنٹ کریں",
     "viewAndEditProfile": "پروفائل دیکھیں اور ترمیم کریں",
     "storeFullName": "دکان کا مکمل نام",
     "myAds": "میرے اشتہارات",
@@ -214,9 +223,29 @@
     "helpSupportSubtitle": "مدد حاصل کریں اور سپورٹ سے رابطہ کریں",
     "logout": "لاگ آؤٹ",
     "logoutSubtitle": "اپنے اکاؤنٹ سے سائن آؤٹ کریں",
+    "logoutBothAccountsMessage": "آپ بائع اور خریدار دونوں اکاؤنٹس میں لاگ ان ہیں۔ آپ کس اکاؤنٹ سے لاگ آؤٹ کرنا چاہتے ہیں؟",
+    "logoutConfirmMessage": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+    "logoutBuyer": "خریدار سے لاگ آؤٹ",
+    "logoutSeller": "بائع سے لاگ آؤٹ",
+    "logoutBoth": "دونوں سے لاگ آؤٹ",
+    "sellerOptions": "بائع کے اختیارات",
+    "sellerOptionsSubtitle": "اپنی فروخت کی سرگرمیوں کا انتظام کریں",
+    "buyerAuthRequired": "خریدار کی خصوصیات تک رسائی کے لیے خریدار کے طور پر سائن ان کریں",
+    "sellerAuthRequired": "بائع کی خصوصیات تک رسائی کے لیے بائع کے طور پر سائن ان کریں",
     "ourServices": "ہماری خدمات",
     "termsConditions": "شرائط و ضوابط",
-    "contactUs": "ہم سے رابطہ کریں"
+    "contactUs": "ہم سے رابطہ کریں",
+    "farmManagement": "فارم مینیجمنٹ",
+    "cart": "ٹوکری",
+    "cartSubtitle": "آپ کی خریداری کی ٹوکری",
+    "myWishlist": "میری پسندیدہ",
+    "myWishlistSubtitle": "آپ کی محفوظ شدہ اشیاء",
+    "myOrders": "میرے آرڈرز",
+    "myOrdersSubtitle": "آپ کی آرڈر کی تاریخ",
+    "manageAddresses": "پتے کا انتظام",
+    "manageAddressesSubtitle": "ترسیل کے پتے شامل کریں اور ترمیم کریں",
+    "settingsSubtitleGeneric": "ترتیبات یہاں موجود ہیں",
+    "logoutSubtitleGeneric": "آپ یہاں سے لاگ آؤٹ کر سکتے ہیں"
   },
   "myAds": {
     "header": "میرے اشتہارات",
@@ -301,5 +330,649 @@
   "RequestWithdrawal": "رقم نکالنے کی درخواست",
   "Product Reviews": "مصنوعات کے تبصرے",
   "No reviews found": "کوئی تبصرہ نہیں ملا",
-  "No product reviews yet": "ابھی تک کوئی مصنوعات کے تبصرے نہیں ہیں"
+  "No product reviews yet": "ابھی تک کوئی مصنوعات کے تبصرے نہیں ہیں",
+  "cart": {
+    "title": "خریداری کی ٹوکری",
+    "empty": "آپ کی ٹوکری خالی ہے",
+    "emptyDesc": "شروعات کے لیے کچھ مصنوعات شامل کریں",
+    "browseProducts": "مصنوعات دیکھیں",
+    "continueShopping": "خریداری جاری رکھیں",
+    "checkout": "چیک آؤٹ",
+    "removeItem": "آئٹم ہٹائیں",
+    "removeConfirm": "کیا آپ واقعی \"{productName}\" کو اپنی ٹوکری سے ہٹانا چاہتے ہیں؟",
+    "removeFarmProducts": "تمام فارم کی مصنوعات ہٹائیں",
+    "removeFarmConfirm": "کیا آپ واقعی \"{farmName}\" سے تمام {itemsCount} مصنوع(ات) ہٹانا چاہتے ہیں؟",
+    "removeAll": "سب ہٹائیں",
+    "farmLabel": "فارم:",
+    "productDetails": "مصنوع کی تفصیلات",
+    "orderSummary": "آرڈر کا خلاصہ",
+    "subTotal": "ذیلی کل",
+    "tax": "ٹیکس",
+    "shipping": "ترسیل",
+    "productShipping": "مصنوع کی ترسیل",
+    "discount": "رعایت",
+    "coupon": "کوپن",
+    "couponCode": "کوپن کوڈ",
+    "applyCoupon": "کوڈ لگائیں",
+    "total": "کل",
+    "orderNote": "آرڈر کا نوٹ (اختیاری)",
+    "chooseShippingMethod": "ترسیل کا طریقہ منتخب کریں",
+    "farmSubtotal": "فارم کا ذیلی کل",
+    "farmShipping": "فارم کی ترسیل",
+    "features": {
+      "freeDelivery": "3 دن مفت ڈیلیوری",
+      "originalProducts": "100% اصل مصنوعات",
+      "moneyBack": "پیسے واپس کی ضمانت",
+      "safePayments": "محفوظ ادائیگی"
+    },
+    "couponApplied": "کوپن \"{code}\" لگایا گیا! آپ نے {amount} روپے بچائے",
+    "invalidCoupon": "غلط کوپن کوڈ",
+    "applyCouponFailed": "کوپن لگانے میں ناکام",
+    "removeItemFailed": "ٹوکری سے آئٹم ہٹانے میں ناکام",
+    "updateQuantityFailed": "مقدار اپ ڈیٹ کرنے میں ناکام",
+    "cartEmpty": "ٹوکری خالی",
+    "addItemsFirst": "چیک آؤٹ سے پہلے ٹوکری میں آئٹمز شامل کریں",
+    "selectShippingFirst": "پہلے ترسیل کا طریقہ منتخب کریں",
+    "removeFarmSuccess": "{farmName} سے تمام مصنوعات آپ کی ٹوکری سے ہٹا دی گئی ہیں",
+    "removeFarmFailed": "فارم کی مصنوعات ہٹانے میں ناکام",
+    "authRequired": "اپنی ٹوکری دیکھنے کے لیے سائن ان کریں",
+    "buyerAuthRequired": "اپنی ٹوکری دیکھنے کے لیے خریدار کے طور پر سائن ان کریں",
+    "sellerToBuyerAuth": "آپ بائع کے طور پر سائن ان ہیں۔ اپنی ٹوکری دیکھنے کے لیے خریدار کے طور پر بھی سائن ان کریں",
+    "minQuantityError": "کم سے کم آرڈر کی مقدار {minQuantity} ہے",
+    "maxQuantityError": "صرف {maxQuantity} آئٹمز اسٹاک میں دستیاب ہیں",
+    "physicalProductsEasypaisaOnly": "ٹوکری میں فزیکل پروڈکٹس ہیں۔ صرف ایزی پیسہ ادائیگی دستیاب ہے۔"
+  },
+  "wishlist": {
+    "title": "میری پسندیدہ فہرست",
+    "empty": "آپ کی پسندیدہ فہرست خالی ہے",
+    "emptyDesc": "بعد کے لیے اپنی پسندیدہ اشیاء محفوظ کریں۔ دیکھنا شروع کریں اور اپنی پسندیدہ فہرست میں مصنوعات شامل کریں!",
+    "browseProducts": "مصنوعات دیکھیں",
+    "itemRemoved": "آئٹم پسندیدہ فہرست سے ہٹا دیا گیا",
+    "loadingWishlist": "آپ کی پسندیدہ فہرست لوڈ ہو رہی ہے...",
+    "authRequired": "اپنی پسندیدہ فہرست دیکھنے کے لیے سائن ان کریں",
+    "buyerAuthRequired": "اپنی پسندیدہ فہرست دیکھنے کے لیے خریدار کے طور پر سائن ان کریں",
+    "sellerToBuyerAuth": "آپ فی الوقت بائع کے طور پر سائن ان ہیں۔ اپنی پسندیدہ فہرست دیکھنے کے لیے، خریدار کے طور پر بھی سائن ان کریں۔",
+    "managementAuthRequired": "آپ بائع کے طور پر سائن ان ہیں۔ اپنی پسندیدہ فہرست کا انتظام کرنے کے لیے خریدار کے طور پر بھی سائن ان کریں۔",
+    "addToWishlistAuthRequired": "پسندیدہ فہرست میں آئٹمز شامل کرنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+    "somethingWentWrong": "کچھ غلط ہو گیا",
+    "tryAgain": "دوبارہ کوشش کریں",
+    "items": "آئٹمز",
+    "item": "آئٹم",
+    "removeTitle": "پسندیدہ فہرست سے ہٹائیں",
+    "removeMessage": "کیا آپ واقعی اس آئٹم کو اپنی پسندیدہ فہرست سے ہٹانا چاہتے ہیں؟",
+    "remove": "ہٹائیں",
+    "addedOn": "{{date}} کو شامل کیا گیا"
+  },
+  "vendor": {
+    "orders": "آرڈرز",
+    "noAddressProvided": "کوئی پتہ فراہم نہیں کیا گیا",
+    "noContactProvided": "کوئی رابطہ فراہم نہیں کیا گیا",
+    "unknownStore": "نامعلوم دکان",
+    "failedToLoadSeller": "فروخت کنندہ کی معلومات لوڈ کرنے میں ناکام",
+    "failedToLoadProducts": "مصنوعات لوڈ کرنے میں ناکام",
+    "searchInStore": "دکان میں تلاش کریں",
+    "loadMore": "مزید لوڈ کریں",
+    "sellerToSellerChat": "بائع سے بائع چیٹ",
+    "sellerChatMessage": "آپ بائع کے طور پر سائن ان ہیں اور دوسرے بائع کو پیغام بھیجنے والے ہیں۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
+    "buyerAuthRequired": "خریدار کی تصدیق درکار",
+    "buyerAuthMessage": "فروخت کندگان سے چیٹ کرنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+    "continue": "جاری رکھیں",
+    "cancel": "منسوخ کریں",
+    "searching": "تلاش کر رہے ہیں...",
+    "searchResults": "\"{{query}}\" کے لیے {{count}} نتائج ملے",
+    "noProductsFound": "\"{{query}}\" کے لیے کوئی مصنوعات نہیں ملیں",
+    "clearSearch": "تلاش صاف کریں"
+  },
+  "product": {
+    "overview": "جائزہ",
+    "reviews": "تبصرے",
+    "review": "تبصرہ",
+    "description": "تفصیل",
+    "productDetails": "مصنوع کی تفصیلات",
+    "minimumOrderQuantity": "کم سے کم آرڈر کی مقدار:",
+    "currentStock": "موجودہ اسٹاک:",
+    "featured": "نمایاں:",
+    "productType": "مصنوع کی قسم:",
+    "refundable": "واپسی:",
+    "freeShipping": "مفت ترسیل:",
+    "sellerLocation": "فروخت کنندہ کا مقام",
+    "address": "پتہ:",
+    "city": "شہر:",
+    "state": "صوبہ:",
+    "yes": "ہاں",
+    "no": "نہیں",
+    "noReviewsYet": "ابھی تک کوئی تبصرہ نہیں",
+    "inStock": "اسٹاک میں",
+    "outOfStock": "اسٹاک ختم",
+    "buyNow": "ابھی خریدیں",
+    "addToCart": "ٹوکری میں شامل کریں",
+    "addedToCart": "ٹوکری میں شامل کر دیا گیا",
+    "chat": "چیٹ",
+    "unknownShop": "نامعلوم دکان",
+    "addressNotAvailable": "پتہ دستیاب نہیں",
+    "cityNotAvailable": "شہر دستیاب نہیں",
+    "stateNotAvailable": "صوبہ دستیاب نہیں",
+    "products": "مصنوعات",
+    "visitStore": "دکان کا دورہ کریں",
+    "relatedProducts": "متعلقہ مصنوعات",
+    "fromSeller": "فروخت کنندہ سے",
+    "sellerInfo": "فروخت کنندہ کی معلومات",
+    "addedToCartSuccess": "مصنوع کامیابی سے ٹوکری میں شامل ہو گئی!",
+    "addToCartFailed": "ٹوکری میں شامل کرنے میں ناکام",
+    "buyerAuthRequired": "خریدار کی تصدیق درکار",
+    "sellerToBuyerAuth": "آپ بائع کے طور پر سائن ان ہیں۔ ٹوکری میں آئٹمز شامل کرنے کے لیے خریدار کے طور پر بھی سائن ان کریں۔",
+    "addItemsAuth": "ٹوکری میں آئٹمز شامل کرنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+    "wishlistAuth": "آپ بائع کے طور پر سائن ان ہیں۔ اپنی پسندیدہ فہرست کا انتظام کرنے کے لیے خریدار کے طور پر بھی سائن ان کریں۔",
+    "addToWishlistAuth": "پسندیدہ فہرست میں آئٹمز شامل کرنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+    "chatAuth": "آپ بائع کے طور پر سائن ان ہیں۔ دوسرے فروخت کندگان سے چیٹ کرنے کے لیے خریدار کے طور پر بھی سائن ان کریں۔",
+    "chatRequiredAuth": "فروخت کندگان سے چیٹ کرنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+    "signInAsBuyer": "خریدار کے طور پر سائن ان کریں",
+    "sellerToSellerChat": "بائع سے بائع چیٹ",
+    "sellerChatConfirm": "آپ بائع کے طور پر سائن ان ہیں اور دوسرے بائع کو پیغام بھیجنے والے ہیں۔ کیا آپ جاری رکھنا چاہتے ہیں؟",
+    "shareProduct": "مصنوع شیئر کریں",
+    "shareTitle": "اس مصنوع کو دیکھیں: {{productName}}",
+    "shareMessage": "میں نے پیٹ بکی پر یہ شاندار مصنوع پائی ہے!\n\n{{productName}}\nقیمت: Rs {{price}}\n\nاسے دیکھیں: {{link}}",
+    "shareError": "مصنوع شیئر کرنے میں ناکام۔ برائے کرم دوبارہ کوشش کریں۔",
+    "shareInfoNotAvailable": "شیئر کرنے کے لیے مصنوع کی معلومات دستیاب نہیں"
+  },
+  "allProducts": {
+    "searchResults": "تلاش کے نتائج",
+    "products": "مصنوعات",
+    "results": "نتائج",
+    "searchProducts": "مصنوعات تلاش کریں...",
+    "clear": "صاف کریں",
+    "search": "تلاش کریں",
+    "noProductsFound": "کوئی مصنوعات نہیں ملیں"
+  },
+  "search": {
+    "searchProducts": "مصنوعات تلاش کریں...",
+    "noResults": "کوئی مصنوعات نہیں ملیں",
+    "searching": "تلاش کر رہے ہیں...",
+    "typeToSearch": "مصنوعات تلاش کرنے کے لیے ٹائپ کریں",
+    "selectProduct": "مصنوع منتخب کریں",
+    "viewProduct": "مصنوع دیکھیں"
+  },
+  "auth": {
+    "signInAsBuyer": "خریدار کے طور پر سائن ان کریں",
+    "signInToBuyer": "خریدار کے طور پر سائن ان کریں",
+    "pleaseSignInAsBuyer": "ٹوکری میں آئٹمز شامل کرنے اور خریداری کرنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+    "enterYourEmail": "اپنا ای میل درج کریں",
+    "enterYourPhone": "اپنا فون نمبر درج کریں",
+    "enterYourPassword": "اپنا پاس ورڈ درج کریں",
+    "email": "ای میل",
+    "phone": "فون",
+    "password": "پاس ورڈ",
+    "signInSuccessBuyer": "خریدار کے طور پر کامیابی سے سائن ان ہو گئے!",
+    "signInAsSeller": "بائع کے طور پر سائن ان کریں",
+    "sellerAuthRequired": "بائع کی تصدیق درکار",
+    "signInAsSellerToAddProducts": "اپنے اسٹور میں مصنوعات شامل کرنے کے لیے بائع کے طور پر سائن ان کریں۔",
+    "loginFailed": "لاگ ان ناکام",
+    "tapToRetry": "دوبارہ کوشش کریں",
+    "enterEmailOrPhoneToReset": "اپنا پاس ورڈ ری سیٹ کرنے کے لیے اپنا ای میل یا فون نمبر درج کریں",
+    "emailOrPhone": "ای میل یا فون",
+    "preferredVerificationMethod": "ترجیحی تصدیقی طریقہ",
+    "sendResetCode": "ری سیٹ کوڈ بھیجیں",
+    "enterNewPasswordFor": "کے لیے نیا پاس ورڈ درج کریں",
+    "newPassword": "نیا پاس ورڈ",
+    "enterNewPassword": "اپنا نیا پاس ورڈ درج کریں",
+    "confirmNewPassword": "نیا پاس ورڈ کی تصدیق",
+    "passwordRequirements": "پاس ورڈ کی ضروریات",
+    "atLeast8Characters": "کم از کم 8 حروف",
+    "oneUppercaseLetter": "ایک بڑا حرف",
+    "oneLowercaseLetter": "ایک چھوٹا حرف",
+    "oneNumber": "ایک نمبر",
+    "resetPassword": "پاس ورڈ ری سیٹ کریں",
+    "backToLogin": "لاگ ان پر واپس جائیں"
+  },
+  "chats": {
+    "loadingChats": "چیٹز لوڈ ہو رہے ہیں..."
+  },
+  "common": {
+    "item": "آئٹم",
+    "items": "آئٹمز",
+    "loading": "لوڈ ہو رہا ہے...",
+    "error": "خرابی",
+    "success": "کامیابی",
+    "removed": "ہٹا دیا گیا",
+    "cancel": "منسوخ کریں",
+    "continue": "جاری رکھیں",
+    "ok": "ٹھیک ہے",
+    "yes": "ہاں",
+    "no": "نہیں",
+    "retry": "دوبارہ کوشش کریں",
+    "close": "بند کریں",
+    "goBack": "واپس جائیں",
+    "all": "تمام",
+    "buying": "خریداری",
+    "selling": "فروخت",
+    "important": "اہم",
+    "unreadChats": "غیر پڑھے گئے چیٹس",
+    "shop": "دکان",
+    "customer": "گاہک",
+    "you": "آپ",
+    "unknownCustomer": "نامعلوم گاہک",
+    "user": "صارف",
+    "notification": "اطلاع"
+  },
+  "chatScreen": {
+    "tabs": {
+      "all": "تمام",
+      "buying": "خریداری",
+      "selling": "فروخت"
+    },
+    "chips": {
+      "all": "تمام",
+      "unreadChats": "غیر پڑھے گئے چیٹس",
+      "important": "اہم"
+    },
+    "authRequired": {
+      "buyerTitle": "خریدار کی تصدیق درکار",
+      "sellerTitle": "فروخت کنندہ کی تصدیق درکار",
+      "buyerMessageSeller": "آپ فروخت کنندہ کے طور پر سائن ان ہیں۔ اپنی خریداری کی گفتگو دیکھنے کے لیے خریدار کے طور پر بھی سائن ان کریں۔",
+      "buyerMessage": "اپنی خریداری کی گفتگو دیکھنے کے لیے خریدار کے طور پر سائن ان کریں۔",
+      "sellerMessageBuyer": "آپ خریدار کے طور پر سائن ان ہیں۔ اپنی فروخت کی گفتگو دیکھنے کے لیے فروخت کنندہ کے طور پر بھی سائن ان کریں۔",
+      "sellerMessage": "اپنی فروخت کی گفتگو دیکھنے کے لیے فروخت کنندہ کے طور پر سائن ان کریں۔",
+      "signInAsBuyer": "خریدار کے طور پر سائن ان کریں",
+      "signInAsSeller": "فروخت کنندہ کے طور پر سائن ان کریں"
+    },
+    "emptyState": {
+      "noChatsFound": "کوئی چیٹ نہیں ملا",
+      "signInToViewChats": "چیٹس دیکھنے کے لیے سائن ان کریں",
+      "signInMessage": "اپنی گفتگو دیکھنے کے لیے خریدار یا فروخت کنندہ کے طور پر سائن ان کریں",
+      "startConversation": "کسی فروخت کنندہ یا گاہک کو پیغام بھیج کر گفتگو شروع کریں"
+    },
+    "authPrompt": {
+      "buyerTitle": "خریدار کے طور پر سائن ان کریں",
+      "sellerTitle": "فروخت کنندہ کے طور پر سائن ان کریں",
+      "buyerMessage": "فروخت کندگان کے ساتھ اپنی گفتگو دیکھنے کے لیے خریدار کے طور پر سائن ان کریں",
+      "sellerMessage": "گاہکوں کے ساتھ اپنی گفتگو دیکھنے کے لیے فروخت کنندہ کے طور پر سائن ان کریں"
+    }
+  },
+  "messagesScreen": {
+    "authRequired": {
+      "title": "تصدیق درکار",
+      "message": "اس گفتگو کو جاری رکھنے کے لیے {chatType} کے طور پر سائن ان کریں۔",
+      "goBack": "واپس جائیں"
+    },
+    "chatStatus": {
+      "youAreChatting": "آپ {role} کے طور پر چیٹ کر رہے ہیں",
+      "youAreChattingAsSeller": "آپ فروخت کنندہ کے طور پر چیٹ کر رہے ہیں",
+      "youAreChattingAsBuyer": "آپ خریدار کے طور پر چیٹ کر رہے ہیں",
+      "seller": "فروخت کنندہ",
+      "buyer": "خریدار"
+    },
+    "productInfo": {
+      "chattingAbout": "اس مصنوع کے بارے میں چیٹ کر رہے ہیں",
+      "from": "سے"
+    },
+    "messages": {
+      "loading": "پیغامات لوڈ ہو رہے ہیں...",
+      "placeholder": "{chatType} کے طور پر پیغام...",
+      "sending": "بھیجا جا رہا ہے...",
+      "send": "بھیجیں",
+      "messageSent": "پیغام بھیج دیا گیا",
+      "messageDelivered": "آپ کا پیغام پہنچا دیا گیا ہے",
+      "failedToSend": "پیغام بھیجنے میں ناکام",
+      "pleaseRetry": "براہ کرم دوبارہ کوشش کریں",
+      "failedToLoad": "پیغامات لوڈ کرنے میں ناکام",
+      "unknownError": "نامعلوم خرابی"
+    }
+  },
+  "notificationsScreen": {
+    "noNotifications": "ابھی تک کوئی اطلاع نہیں",
+    "defaultTitle": "اطلاع"
+  },
+  "luckyDrawListScreen": {
+    "title": "قرعہ اندازی",
+    "applyNow": "ابھی درخواست دیں",
+    "noLuckyDraws": "فی الوقت کوئی قرعہ اندازی دستیاب نہیں۔"
+  },
+  "luckyDrawInstance": {
+    "title": "قرعہ اندازی",
+    "welcomeMessage": "ہماری قرعہ اندازی کا حصہ بننے کے لیے\nاپنی تفصیلات درج کریں",
+    "infoLabels": {
+      "title": "عنوان: ",
+      "description": "تفصیل: ",
+      "date": "تاریخ: "
+    },
+    "form": {
+      "nameLabel": "نام",
+      "namePlaceholder": "یہاں اپنا نام لکھیں",
+      "cityLabel": "شہر",
+      "cityPlaceholder": "آپ کا شہر کیا ہے؟",
+      "phoneLabel": "فون نمبر",
+      "phonePlaceholder": "آپ سے رابطے کے لیے بہترین نمبر کیا ہے؟",
+      "submitting": "جمع کرایا جا رہا ہے...",
+      "submit": "جمع کرائیں",
+      "nameRequired": "نام ضروری ہے",
+      "cityRequired": "شہر ضروری ہے",
+      "phoneRequired": "فون نمبر ضروری ہے",
+      "submitError": "جمع کرانے میں ناکام۔ براہ کرم دوبارہ کوشش کریں۔",
+      "dataPreFilled": "آپ کے پروفائل کی معلومات خودکار طور پر بھر دی گئی ہیں۔ ضرورت پڑنے پر آپ کسی بھی فیلڈ میں تبدیلی کر سکتے ہیں۔"
+    }
+  },
+  "farmManagement": {
+    "title": "فارم کا انتظام",
+    "actions": {
+      "forgotPassword": {
+        "title": "پاسورڈ بھول گئے",
+        "subtitle": "ای میل/SMS کے ذریعے پاسورڈ ری سیٹ کریں"
+      },
+      "changePassword": {
+        "title": "پاسورڈ تبدیل کریں",
+        "subtitle": "اپنا موجودہ پاسورڈ اپ ڈیٹ کریں"
+      },
+      "refundHandle": {
+        "title": "رقم کی واپسی کا انتظام",
+        "subtitle": "رقم کی واپسی کی درخواستوں کو سنبھالیں"
+      },
+      "couponHandling": {
+        "title": "کوپن کا انتظام",
+        "subtitle": "کوپن کی درخواستوں کو سنبھالیں"
+      },
+      "pos": {
+        "title": "POS",
+        "subtitle": "POS کی درخواستوں کو سنبھالیں"
+      },
+      "order": {
+        "title": "آرڈر",
+        "subtitle": "آرڈر کی درخواستوں کو سنبھالیں"
+      },
+      "shipping": {
+        "title": "شپنگ",
+        "subtitle": "شپنگ کی درخواستوں کو سنبھالیں"
+      },
+      "shippingMethod": {
+        "title": "شپنگ کا طریقہ",
+        "subtitle": "شپنگ کے طریقے کی درخواستوں کو سنبھالیں"
+      }
+    }
+  },
+  "farmDetailsEditScreen": {
+    "title": "فارم کا انتظام",
+    "deliveryManagement": "ڈیلیوری کا انتظام",
+    "managementOptions": "انتظامی اختیارات",
+    "managementButtons": {
+      "deliveryManagement": {
+        "title": "ڈیلیوری کا انتظام",
+        "subtitle": "ڈیلیوری مین، آرڈرز اور کمائی کا انتظام کریں"
+      },
+      "earnings": {
+        "title": "کمائی",
+        "subtitle": "کمائی اور مالی رپورٹس دیکھیں"
+      },
+      "orders": {
+        "title": "آرڈرز",
+        "subtitle": "تمام آرڈرز کا انتظام اور ٹریکنگ"
+      },
+      "reviews": {
+        "title": "ریویوز",
+        "subtitle": "گاہکوں کے ریویوز دیکھیں اور منظم کریں"
+      },
+      "transactions": {
+        "title": "لین دین",
+        "subtitle": "مالی لین دین دیکھیں اور منظم کریں"
+      },
+      "shopSettings": {
+        "title": "دکان کی ترتیبات",
+        "subtitle": "دکان کی معلومات اور ترتیبات کا انتظام"
+      }
+    },
+    "farmDetails": {
+      "title": "فارم کی تفصیلات",
+      "edit": "ترمیم",
+      "cancel": "منسوخ",
+      "farmImage": "فارم کی تصویر",
+      "chooseFarmImage": "تصویر منتخب کریں",
+      "imageSelected": "تصویر منتخب ہوئی",
+      "farmName": "فارم کا نام",
+      "address": "پتہ",
+      "contact": "رابطہ",
+      "saveChanges": "تبدیلیاں محفوظ کریں",
+      "notSpecified": "مخصوص نہیں"
+    },
+    "alerts": {
+      "errorTitle": "خرابی",
+      "successTitle": "کامیابی",
+      "fetchError": "دکان کا ڈیٹا لانے میں ناکام",
+      "updateSuccess": "فارم کی تفصیلات کامیابی سے اپ ڈیٹ ہو گئیں",
+      "updateError": "فارم کی تفصیلات اپ ڈیٹ کرنے میں ناکام",
+      "permissionDenied": "اجازت مسترد",
+      "storagePermission": "تصاویر اپ لوڈ کرنے کے لیے اسٹوریج کی اجازت درکار ہے"
+    }
+  },
+  "transactionsPage": {
+    "title": "لین دین",
+    "filters": {
+      "filterByStatus": "حالت کے ذریعے فلٹر کریں",
+      "allStatus": "تمام حالت",
+      "pending": "زیر التوا",
+      "approved": "منظور شدہ",
+      "denied": "مسترد"
+    },
+    "requestWithdrawal": "رقم نکالنے کی درخواست",
+    "noTransactionsFound": "کوئی لین دین نہیں ملا",
+    "withdrawal": "رقم کی واپسی",
+    "cancel": "منسوخ کریں",
+    "submitRequest": "درخواست جمع کرائیں",
+    "selectWithdrawalMethod": "رقم نکالنے کا طریقہ منتخب کریں",
+    "amount": "رقم",
+    "requestWithdrawalTitle": "رقم نکالنے کی درخواست",
+    "alerts": {
+      "errorTitle": "خرابی",
+      "successTitle": "کامیابی",
+      "fetchError": "لین دین لانے میں ناکام",
+      "withdrawalSuccess": "رقم نکالنے کی درخواست کامیابی سے جمع ہو گئی",
+      "withdrawalError": "رقم نکالنے کی درخواست جمع کرنے میں ناکام",
+      "closeSuccess": "رقم نکالنے کی درخواست کامیابی سے بند ہو گئی",
+      "closeError": "رقم نکالنے کی درخواست بند کرنے میں ناکام"
+    },
+    "status": {
+      "pending": "زیر التوا",
+      "approved": "منظور شدہ",
+      "denied": "مسترد",
+      "unknown": "نامعلوم"
+    }
+  },
+  "shopSettingsPage": {
+    "title": "دکان کی ترتیبات",
+    "edit": "ترمیم",
+    "cancel": "منسوخ",
+    "update": "اپ ڈیٹ",
+    "save": "محفوظ کریں",
+    "sections": {
+      "shopAvailability": {
+        "title": "دکان کی دستیابی",
+        "vacationMode": {
+          "title": "تعطیلات کا موڈ",
+          "on": "آن",
+          "off": "آف",
+          "startDate": "شروع کی تاریخ (YYYY-MM-DD)",
+          "endDate": "اختتام کی تاریخ (YYYY-MM-DD)",
+          "note": "تعطیلات کا نوٹ"
+        },
+        "temporaryClose": {
+          "title": "دکان عارضی طور پر بند کریں",
+          "closed": "بند",
+          "open": "کھلا"
+        }
+      },
+      "shopInformation": {
+        "title": "دکان کی معلومات",
+        "shopImage": "دکان کی تصویر",
+        "chooseShopImage": "دکان کی تصویر منتخب کریں",
+        "shopName": "دکان کا نام",
+        "address": "پتہ",
+        "contact": "رابطہ"
+      },
+      "sellerInformation": {
+        "title": "فروخت کنندہ کی معلومات",
+        "profileImage": "پروفائل کی تصویر",
+        "chooseProfileImage": "پروفائل کی تصویر منتخب کریں",
+        "firstName": "پہلا نام",
+        "lastName": "آخری نام",
+        "phone": "فون",
+        "email": "ای میل"
+      },
+      "bankInformation": {
+        "title": "بینک کی معلومات",
+        "bankName": "بینک کا نام",
+        "branch": "برانچ",
+        "accountNumber": "اکاؤنٹ نمبر",
+        "accountHolderName": "اکاؤنٹ ہولڈر کا نام"
+      }
+    },
+    "alerts": {
+      "errorTitle": "خرابی",
+      "successTitle": "کامیابی",
+      "permissionDenied": "اجازت مسترد",
+      "storagePermission": "تصاویر اپ لوڈ کرنے کے لیے اسٹوریج کی اجازت درکار ہے",
+      "fetchError": "دکان اور فروخت کنندہ کا ڈیٹا لانے میں ناکام",
+      "settingsSuccess": "ترتیبات کامیابی سے اپ ڈیٹ ہو گئیں",
+      "settingsError": "ترتیبات اپ ڈیٹ کرنے میں ناکام",
+      "shopInfoSuccess": "دکان کی معلومات کامیابی سے اپ ڈیٹ ہو گئیں",
+      "shopInfoError": "دکان کی معلومات اپ ڈیٹ کرنے میں ناکام",
+      "sellerInfoSuccess": "فروخت کنندہ کی معلومات کامیابی سے اپ ڈیٹ ہو گئیں",
+      "sellerInfoError": "فروخت کنندہ کی معلومات اپ ڈیٹ کرنے میں ناکام",
+      "vacationSuccess": "تعطیلات کی ترتیبات اپ ڈیٹ ہو گئیں",
+      "vacationError": "تعطیلات کی ترتیبات اپ ڈیٹ کرنے میں ناکام",
+      "temporaryCloseSuccess": "عارضی بندی کی حالت اپ ڈیٹ ہو گئی",
+      "temporaryCloseError": "عارضی بندی کی حالت اپ ڈیٹ کرنے میں ناکام",
+      "bankSuccess": "بینک کی تفصیلات کامیابی سے اپ ڈیٹ ہو گئیں",
+      "bankError": "بینک کی تفصیلات اپ ڈیٹ کرنے میں ناکام"
+    }
+  },
+  "addressListScreen": {
+    "title": "پتوں کا انتظام",
+    "subtitle": "اپنے ڈیلیوری کے پتے شامل کریں اور ان کا انتظام کریں",
+    "addNewAddress": "نیا پتہ شامل کریں",
+    "loading": "پتے لوڈ ہو رہے ہیں...",
+    "addressTypes": {
+      "home": "گھر",
+      "office": "دفتر",
+      "billing": "بلنگ"
+    },
+    "emptyState": {
+      "title": "کوئی پتہ نہیں",
+      "message": "آپ نے ابھی تک کوئی پتہ شامل نہیں کیا ہے۔ شروعات کے لیے اپنا پہلا پتہ شامل کریں۔",
+      "addButton": "پتہ شامل کریں"
+    },
+    "alerts": {
+      "deleteTitle": "پتہ حذف کریں",
+      "deleteMessage": "کیا آپ واقعی اس پتے کو حذف کرنا چاہتے ہیں؟",
+      "cancel": "منسوخ کریں",
+      "delete": "حذف کریں",
+      "deleteSuccessTitle": "پتہ حذف ہو گیا",
+      "deleteSuccessMessage": "پتہ کامیابی سے حذف ہو گیا",
+      "deleteFailedTitle": "حذف ناکام",
+      "deleteFailedMessage": "پتہ حذف کرنے میں ناکام",
+      "loadFailedTitle": "پتے لوڈ کرنے میں ناکام",
+      "loadFailedMessage": "کچھ غلط ہو گیا"
+    }
+  },
+  "shippingDetails": {
+    "title": "شپنگ کی تفصیلات",
+    "chooseShippingAddress": "شپنگ ایڈریس منتخب کریں",
+    "noAddresses": "کوئی پتہ نہیں ملا۔ براہ کرم نیا پتہ شامل کریں۔",
+    "addNewAddress": "نیا پتہ شامل کریں",
+    "contactPersonName": "رابطہ کرنے والے شخص کا نام",
+    "phone": "فون",
+    "address": "پتہ",
+    "city": "شہر",
+    "zipCode": "زپ کوڈ",
+    "country": "ملک",
+    "gpsCoordinates": "GPS کوآرڈینیٹس",
+    "noGpsCoordinates": "GPS کوآرڈینیٹس سیٹ نہیں ہیں۔ اوپر \"موجودہ مقام\" بٹن استعمال کریں۔",
+    "latitude": "عرض البلد",
+    "longitude": "طول البلد",
+    "saveAddress": "پتہ محفوظ کریں",
+    "chooseBillingAddress": "بلنگ ایڈریس منتخب کریں",
+    "sameAsShipping": "شپنگ ایڈریس جیسا ہی",
+    "orderSummary": "آرڈر کا خلاصہ",
+    "paymentMethod": "ادائیگی کا طریقہ",
+    "duration": "مدت",
+    "easyPaisaMobileAccount": "ایزی پیسہ موبائل اکاؤنٹ",
+    "easyPaisaPlaceholder": "03XXXXXXXXX (آپ کا ایزی پیسہ موبائل نمبر)",
+    "easyPaisaHelperText": "💳 موبائل والیٹ کی ادائیگی ایزی پیسہ API کے ذریعے فوری طور پر پروسیس ہوگی",
+    "subtotal": "ذیلی کل",
+    "tax": "ٹیکس",
+    "shipping": "شپنگ",
+    "discount": "رعایت",
+    "coupon": "کوپن",
+    "total": "کل",
+    "farmCart": "فارم کارٹ",
+    "placeOrder": "آرڈر دیں",
+    "payViaEasyPaisa": "ایزی پیسہ کے ذریعے ادائیگی",
+    "payment": "ادائیگی",
+    "processingPayment": "ادائیگی پروسیس ہو رہی ہے...",
+    "features": {
+      "freeDelivery": "3 دن مفت ڈیلیوری",
+      "originalProducts": "100% اصل مصنوعات",
+      "moneyBack": "پیسے واپس کی ضمانت",
+      "safePayments": "محفوظ ادائیگی"
+    }
+  },
+  "supportTickets": {
+    "title": "سپورٹ ٹکٹس",
+    "subtitle": "مدد حاصل کریں اور اپنی سپورٹ درخواستوں کو ٹریک کریں",
+    "createTicket": "نیا ٹکٹ بنائیں",
+    "noTickets": "کوئی سپورٹ ٹکٹ نہیں",
+    "noTicketsMessage": "آپ نے ابھی تک کوئی سپورٹ ٹکٹ نہیں بنایا۔ کسی بھی مسئلے کے لیے مدد حاصل کرنے کے لیے ٹکٹ بنائیں۔",
+    "loading": "سپورٹ ٹکٹس لوڈ ہو رہے ہیں...",
+    "status": {
+      "pending": "زیر التوا",
+      "open": "کھلا",
+      "resolved": "حل ہو گیا",
+      "closed": "بند"
+    },
+    "priority": {
+      "low": "کم",
+      "medium": "درمیانہ",
+      "high": "زیادہ",
+      "urgent": "فوری"
+    },
+    "types": {
+      "general": "عمومی استفسار",
+      "technical": "تکنیکی مسئلہ",
+      "billing": "بلنگ",
+      "order": "آرڈر سے متعلق",
+      "account": "اکاؤنٹ کا مسئلہ",
+      "feature": "فیچر کی درخواست",
+      "bug": "بگ رپورٹ",
+      "other": "دیگر"
+    },
+    "createForm": {
+      "title": "سپورٹ ٹکٹ بنائیں",
+      "subject": "موضوع",
+      "subjectPlaceholder": "اپنے مسئلے کا مختصر تذکرہ",
+      "type": "مسئلے کی قسم",
+      "selectType": "مسئلے کی قسم منتخب کریں",
+      "description": "تفصیل",
+      "descriptionPlaceholder": "براہ کرم اپنے مسئلے کے بارے میں تفصیلی معلومات فراہم کریں",
+      "priority": "ترجیح",
+      "submit": "ٹکٹ بنائیں",
+      "submitting": "ٹکٹ بنایا جا رہا ہے...",
+      "success": "سپورٹ ٹکٹ کامیابی سے بن گیا",
+      "error": "سپورٹ ٹکٹ بنانے میں ناکام"
+    },
+    "detail": {
+      "title": "ٹکٹ #{{ticketId}}",
+      "conversation": "گفتگو",
+      "reply": "جواب",
+      "replyPlaceholder": "یہاں اپنا جواب ٹائپ کریں...",
+      "send": "جواب بھیجیں",
+      "sending": "بھیجا جا رہا ہے...",
+      "noMessages": "ابھی تک کوئی پیغام نہیں",
+      "loadingMessages": "گفتگو لوڈ ہو رہی ہے...",
+      "replySuccess": "جواب کامیابی سے بھیج دیا گیا",
+      "replyError": "جواب بھیجنے میں ناکام",
+      "createdAt": "بنایا گیا: {{date}}",
+      "lastUpdated": "آخری بار اپ ڈیٹ: {{date}}"
+    },
+    "alerts": {
+      "loadError": "سپورٹ ٹکٹس لوڈ کرنے میں ناکام",
+      "createError": "سپورٹ ٹکٹ بنانے میں ناکام",
+      "replyError": "جواب بھیجنے میں ناکام"
+    }
+  }
 }

@@ -75,9 +75,9 @@ export const RefundScreen = ({ route, navigation }) => {
 
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        // console.log('User cancelled image picker');
       } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
+        // console.log('ImagePicker Error: ', response.error);
         Toast.show({
           type: 'error',
           text1: 'Error',

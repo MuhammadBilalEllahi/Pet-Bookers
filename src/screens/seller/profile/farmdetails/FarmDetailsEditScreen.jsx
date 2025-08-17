@@ -96,7 +96,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      Alert.alert('Error', 'Failed to fetch shop data');
+      Alert.alert(t('farmDetailsEditScreen.alerts.errorTitle'), t('farmDetailsEditScreen.alerts.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   const handleImagePick = async () => {
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) {
-      Alert.alert('Permission Denied', 'Storage permission is required to upload images');
+      Alert.alert(t('farmDetailsEditScreen.alerts.permissionDenied'), t('farmDetailsEditScreen.alerts.storagePermission'));
       return;
     }
 
@@ -139,15 +139,15 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
         });
       }
 
-      console.log("shopFormData", shopFormData);
+      // console.log("shopFormData", shopFormData);
 
       await updateShopInfo(shopFormData);
 
-      Alert.alert('Success', 'Farm details updated successfully');
+      Alert.alert(t('farmDetailsEditScreen.alerts.successTitle'), t('farmDetailsEditScreen.alerts.updateSuccess'));
       // navigation.goBack();
     } catch (error) {
       console.error('Error updating shop data:', error);
-      Alert.alert('Error', 'Failed to update farm details');
+      Alert.alert(t('farmDetailsEditScreen.alerts.errorTitle'), t('farmDetailsEditScreen.alerts.updateError'));
     } finally {
       setUploading(false);
     }
@@ -207,14 +207,14 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
           <View style={styles.headerRow}>
             <Text style={[styles.sectionTitle, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Farm Management</Text>
+            }]}>{t('farmDetailsEditScreen.title')}</Text>
             <Button
               appearance="ghost"
               size="small"
               onPress={navigateToDeliveryManagement}
               style={styles.navButton}
             >
-              Delivery Management
+              {t('farmDetailsEditScreen.deliveryManagement')}
             </Button>
           </View>
 
@@ -225,79 +225,61 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
           }]}>
             <Text style={[styles.sectionTitle, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Management Options</Text>
+            }]}>{t('farmDetailsEditScreen.managementOptions')}</Text>
             
             <View style={styles.managementGrid}>
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={navigateToDeliveryManagement}
+                accessoryLeft={(props) => <ThemedIcon name="car-outline" iconStyle={{ width: 22, height: 22 }} />}
               >
-                <View style={styles.buttonContent}>
-                  <ThemedIcon name="car-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
-                  <Text style={styles.buttonText}>Delivery Management</Text>
-                  <Text style={styles.buttonSubtext}>Manage delivery men, orders, and earnings</Text>
-                </View>
+                {t('farmDetailsEditScreen.managementButtons.deliveryManagement.title')}
               </Button>
               
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToEarnings()}
+                accessoryLeft={(props) => <ThemedIcon name="trending-up-outline" iconStyle={{ width: 22, height: 22 }} />}
               >
-                <View style={styles.buttonContent}>
-                  <ThemedIcon name="trending-up-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
-                  <Text style={styles.buttonText}>Earnings</Text>
-                  <Text style={styles.buttonSubtext}>View earnings and financial reports</Text>
-                </View>
+                {t('farmDetailsEditScreen.managementButtons.earnings.title')}
               </Button>
               
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToOrders()}
+                accessoryLeft={(props) => <ThemedIcon name="list-outline" iconStyle={{ width: 22, height: 22 }} />}
               >
-                <View style={styles.buttonContent}>
-                  <ThemedIcon name="list-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
-                  <Text style={styles.buttonText}>Orders</Text>
-                  <Text style={styles.buttonSubtext}>Manage and track all orders</Text>
-                </View>
+                {t('farmDetailsEditScreen.managementButtons.orders.title')}
               </Button>
               
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToReviews()}
+                accessoryLeft={(props) => <ThemedIcon name="star-outline" iconStyle={{ width: 22, height: 22 }} />}
               >
-                <View style={styles.buttonContent}>
-                  <ThemedIcon name="star-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
-                  <Text style={styles.buttonText}>Reviews</Text>
-                  <Text style={styles.buttonSubtext}>View and manage customer reviews</Text>
-                </View>
+                {t('farmDetailsEditScreen.managementButtons.reviews.title')}
               </Button>
               
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToTransactions()}
+                accessoryLeft={(props) => <ThemedIcon name="credit-card-outline" iconStyle={{ width: 22, height: 22 }} />}
               >
-                <View style={styles.buttonContent}>
-                  <ThemedIcon name="credit-card-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
-                  <Text style={styles.buttonText}>Transactions</Text>
-                  <Text style={styles.buttonSubtext}>View and manage financial transactions</Text>
-                </View>
+                {t('farmDetailsEditScreen.managementButtons.transactions.title')}
               </Button>
               
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToShopSettings()}
+                accessoryLeft={(props) => <ThemedIcon name="settings-outline" iconStyle={{ width: 22, height: 22 }} />}
               >
-                <View style={styles.buttonContent}>
-                  <ThemedIcon name="settings-outline" iconStyle={{ width: 22, height: 22, marginBottom: 6 }} />
-                  <Text style={styles.buttonText}>Shop Settings</Text>
-                  <Text style={styles.buttonSubtext}>Manage shop information and settings</Text>
-                </View>
+                {t('farmDetailsEditScreen.managementButtons.shopSettings.title')}
               </Button>
             </View>
           </Layout>

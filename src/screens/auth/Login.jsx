@@ -96,7 +96,7 @@ export const LoginScreen = ({ navigation  }) => {
       console.debug("Login Success Response", response.data);
 
       if (response?.data?.token) {
-        console.log("IN TOKEN")
+        // console.log("IN TOKEN")
         const userType = isSeller ? UserType.SELLER : UserType.BUYER;
         
         // Use new dual auth system
@@ -113,7 +113,7 @@ export const LoginScreen = ({ navigation  }) => {
       }
 
       // const v = await getAuthToken();
-      // console.log("MEOW", v)
+      // // console.log("MEOW", v)
 
     } catch (error) {
       // TODO: handle error (e.g., show error message)

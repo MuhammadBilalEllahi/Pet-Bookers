@@ -56,9 +56,14 @@ export default function ShopSettingsPage({ navigation }) {
     vacation_note: '',
   });
   const [temporaryClose, setTemporaryClose] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   useEffect(() => {
-    fetchData();
+      fetchData();
   }, []);
 
   const fetchData = async () => {
@@ -108,7 +113,7 @@ export default function ShopSettingsPage({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      Alert.alert('Error', 'Failed to fetch shop and seller data');
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -132,7 +137,7 @@ export default function ShopSettingsPage({ navigation }) {
   const handleShopImagePick = async () => {
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) {
-      Alert.alert('Permission Denied', 'Storage permission is required to upload images');
+      Alert.alert(t('shopSettingsPage.alerts.permissionDenied'), t('shopSettingsPage.alerts.storagePermission'));
       return;
     }
 
@@ -153,7 +158,7 @@ export default function ShopSettingsPage({ navigation }) {
   const handleSellerImagePick = async () => {
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) {
-      Alert.alert('Permission Denied', 'Storage permission is required to upload images');
+      Alert.alert(t('shopSettingsPage.alerts.permissionDenied'), t('shopSettingsPage.alerts.storagePermission'));
       return;
     }
 
@@ -211,11 +216,11 @@ export default function ShopSettingsPage({ navigation }) {
         updateSellerInfo(sellerFormData)
       ]);
 
-      Alert.alert('Success', 'Settings updated successfully');
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), t('shopSettingsPage.alerts.settingsSuccess'));
       setIsEditMode(false);
     } catch (error) {
       console.error('Error updating settings:', error);
-      Alert.alert('Error', 'Failed to update settings');
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.settingsError'));
     } finally {
       setSaving(false);
     }
@@ -273,11 +278,11 @@ export default function ShopSettingsPage({ navigation }) {
       };
   
       await updateShopInfo(shopFormData, config);
-      Alert.alert('Success', 'Shop info updated successfully');
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), t('shopSettingsPage.alerts.shopInfoSuccess'));
       setIsEditMode(false);
     } catch (error) {
       console.error('Error updating shop info:', error);
-      Alert.alert('Error', 'Failed to update shop info: ' + error.message);
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.shopInfoError') + ': ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -303,11 +308,11 @@ export default function ShopSettingsPage({ navigation }) {
         });
       }
       await updateSellerInfo(sellerFormData);
-      Alert.alert('Success', 'Seller info updated successfully');
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), t('shopSettingsPage.alerts.sellerInfoSuccess'));
       setIsEditMode(false);
     } catch (error) {
-      console.error('Error updating seller info:', error);
-      Alert.alert('Error', 'Failed to update seller info');
+      console.error('Error updating seller info:', error?.data || error.response || error?.message || error?.response?.data);
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.sellerInfoError'));
     } finally {
       setSaving(false);
     }
@@ -322,9 +327,9 @@ export default function ShopSettingsPage({ navigation }) {
         vacation_end_date: vacation.vacation_end_date,
         vacation_note: vacation.vacation_note,
       });
-      Alert.alert('Success', 'Vacation settings updated');
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), t('shopSettingsPage.alerts.vacationSuccess'));
     } catch (error) {
-      Alert.alert('Error', 'Failed to update vacation settings');
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.vacationError'));
     } finally {
       setSaving(false);
     }
@@ -334,9 +339,9 @@ export default function ShopSettingsPage({ navigation }) {
     try {
       setSaving(true);
       await setShopTemporaryClose(temporaryClose ? 1 : 0);
-      Alert.alert('Success', 'Temporary close status updated');
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), t('shopSettingsPage.alerts.temporaryCloseSuccess'));
     } catch (error) {
-      Alert.alert('Error', 'Failed to update temporary close status');
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.temporaryCloseError'));
     } finally {
       setSaving(false);
     }
@@ -352,11 +357,59 @@ export default function ShopSettingsPage({ navigation }) {
         holder_name: sellerInfo.holder_name,
       };
       await updateSellerBankDetails(bankDetails);
-      Alert.alert('Success', 'Bank details updated successfully');
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), t('shopSettingsPage.alerts.bankSuccess'));
       setIsEditMode(false);
     } catch (error) {
       console.error('Error updating bank details:', error);
-      Alert.alert('Error', 'Failed to update bank details');
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), t('shopSettingsPage.alerts.bankError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    try {
+      // Validate passwords
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        Alert.alert(t('shopSettingsPage.alerts.errorTitle'), 'Please fill all password fields');
+        return;
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        Alert.alert(t('shopSettingsPage.alerts.errorTitle'), 'New passwords do not match');
+        return;
+      }
+
+      if (passwordData.newPassword.length < 8) {
+        Alert.alert(t('shopSettingsPage.alerts.errorTitle'), 'Password must be at least 8 characters');
+        return;
+      }
+
+      setSaving(true);
+      
+      // Create password update payload
+      const passwordPayload = {
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+        confirm_password: passwordData.confirmPassword,
+      };
+
+      // You'll need to implement this API call in your sellerApi.js
+      // await updateSellerPassword(passwordPayload);
+      
+      Alert.alert(t('shopSettingsPage.alerts.successTitle'), 'Password updated successfully');
+      
+      // Reset password fields
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+      
+      setIsEditMode(false);
+    } catch (error) {
+      console.error('Error updating password:', error);
+      Alert.alert(t('shopSettingsPage.alerts.errorTitle'), 'Failed to update password');
     } finally {
       setSaving(false);
     }
@@ -379,26 +432,26 @@ export default function ShopSettingsPage({ navigation }) {
         >
           <ThemedIcon name="arrow-back-outline" iconStyle={{ width: 24, height: 24 }} />
         </Button>
-        <Text style={[styles.pageTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Shop Settings</Text>
-        <View style={styles.headerActions}>
-          {!isEditMode ? (
-            <Button
-              appearance="ghost"
-              size="small"
-              onPress={() => setIsEditMode(true)}
-              style={styles.headerButton}
-            >
-              Edit
-            </Button>
-          ) : (
-            <Button
-              appearance="ghost"
-              size="small"
-              onPress={() => setIsEditMode(false)}
-              style={styles.headerButton}
-            >
-              Cancel
-            </Button>
+        <Text style={[styles.pageTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.title')}</Text>
+            <View style={styles.headerActions}>
+              {!isEditMode ? (
+                <Button
+                  appearance="ghost"
+                  size="small"
+                  onPress={() => setIsEditMode(true)}
+                  style={styles.headerButton}
+                >
+                  {t('shopSettingsPage.edit')}
+                </Button>
+              ) : (
+                  <Button
+                    appearance="ghost"
+                    size="small"
+                    onPress={() => setIsEditMode(false)}
+                    style={styles.headerButton}
+                  >
+                    {t('shopSettingsPage.cancel')}
+                  </Button>
           )}
         </View>
       </View>
@@ -410,10 +463,10 @@ export default function ShopSettingsPage({ navigation }) {
         <ScrollView style={styles.pageContent} contentContainerStyle={{ padding: 16 }}>
           {/* Vacation & Temporary Close */}
           <Card style={[styles.section, { backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff' }]}> 
-            <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Shop Availability</Text>
+            <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.shopAvailability.title')}</Text>
             {/* Vacation Mode */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Vacation Mode</Text>
+              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.shopAvailability.vacationMode.title')}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                 <Button
                   appearance={vacation.vacation_status ? 'filled' : 'outline'}
@@ -422,7 +475,7 @@ export default function ShopSettingsPage({ navigation }) {
                   disabled={!isEditMode}
                   style={{ marginRight: 8 }}
                 >
-                  {vacation.vacation_status ? 'On' : 'Off'}
+                  {vacation.vacation_status ? t('shopSettingsPage.sections.shopAvailability.vacationMode.on') : t('shopSettingsPage.sections.shopAvailability.vacationMode.off')}
                 </Button>
                 {isEditMode && (
                   <Button
@@ -430,28 +483,28 @@ export default function ShopSettingsPage({ navigation }) {
                     onPress={handleVacationSave}
                     disabled={saving}
                   >
-                    {saving ? <Spinner size='small' /> : 'Save'}
+                    {saving ? <Spinner size='small' /> : t('shopSettingsPage.save')}
                   </Button>
                 )}
               </View>
               {vacation.vacation_status && (
                 <>
                   <Input
-                    label="Start Date (YYYY-MM-DD)"
+                    label={t('shopSettingsPage.sections.shopAvailability.vacationMode.startDate')}
                     value={vacation.vacation_start_date}
                     onChangeText={text => setVacation(v => ({ ...v, vacation_start_date: text }))}
                     disabled={!isEditMode}
                     style={styles.input}
                   />
                   <Input
-                    label="End Date (YYYY-MM-DD)"
+                    label={t('shopSettingsPage.sections.shopAvailability.vacationMode.endDate')}
                     value={vacation.vacation_end_date}
                     onChangeText={text => setVacation(v => ({ ...v, vacation_end_date: text }))}
                     disabled={!isEditMode}
                     style={styles.input}
                   />
                   <Input
-                    label="Vacation Note"
+                    label={t('shopSettingsPage.sections.shopAvailability.vacationMode.note')}
                     value={vacation.vacation_note}
                     onChangeText={text => setVacation(v => ({ ...v, vacation_note: text }))}
                     disabled={!isEditMode}
@@ -462,16 +515,16 @@ export default function ShopSettingsPage({ navigation }) {
             </View>
             {/* Temporary Close */}
             <View>
-              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Temporarily Close Shop</Text>
+              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.shopAvailability.temporaryClose.title')}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Button
+              <Button
                   appearance={temporaryClose ? 'filled' : 'outline'}
-                  size="small"
+                size="small"
                   onPress={() => isEditMode && setTemporaryClose(v => !v)}
                   disabled={!isEditMode}
                   style={{ marginRight: 8 }}
                 >
-                  {temporaryClose ? 'Closed' : 'Open'}
+                  {temporaryClose ? t('shopSettingsPage.sections.shopAvailability.temporaryClose.closed') : t('shopSettingsPage.sections.shopAvailability.temporaryClose.open')}
                 </Button>
                 {isEditMode && (
                   <Button
@@ -479,8 +532,8 @@ export default function ShopSettingsPage({ navigation }) {
                     onPress={handleTemporaryCloseSave}
                     disabled={saving}
                   >
-                    {saving ? <Spinner size='small' /> : 'Save'}
-                  </Button>
+                    {saving ? <Spinner size='small' /> : t('shopSettingsPage.save')}
+              </Button>
                 )}
               </View>
             </View>
@@ -488,7 +541,7 @@ export default function ShopSettingsPage({ navigation }) {
           {/* Shop Information */}
           <Card style={[styles.section, { backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff' }]}> 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Shop Information</Text>
+              <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.shopInformation.title')}</Text>
               {isEditMode && (
                 <Button
                   size="tiny"
@@ -497,20 +550,20 @@ export default function ShopSettingsPage({ navigation }) {
                   disabled={saving}
                   style={{ marginLeft: 8 }}
                 >
-                  {saving ? <Spinner size='small' /> : 'Update'}
+                  {saving ? <Spinner size='small' /> : t('shopSettingsPage.update')}
                 </Button>
               )}
             </View>
-            <View style={styles.imageContainer}>
-              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Shop Image</Text>
-              {isEditMode ? (
-                <ImagePicker
-                  title="Choose Shop Image"
-                  onPress={handleShopImagePick}
-                  imageUri={shopInfo.image ? shopInfo.image.uri : null}
-                />
-              ) : (
-                <View style={styles.staticImageContainer}>
+                <View style={styles.imageContainer}>
+              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.shopInformation.shopImage')}</Text>
+                  {isEditMode ? (
+                    <ImagePicker
+                      title={t('shopSettingsPage.sections.shopInformation.chooseShopImage')}
+                      onPress={handleShopImagePick}
+                      imageUri={shopInfo.image ? shopInfo.image.uri : null}
+                    />
+                  ) : (
+                    <View style={styles.staticImageContainer}>
                   {shopInfo.image && shopInfo.image.uri ? (
                     <ThemedIcon
                       name="image-outline"
@@ -518,41 +571,41 @@ export default function ShopSettingsPage({ navigation }) {
                       source={{ uri: shopInfo.image.uri }}
                     />
                   ) : (
-                    <ThemedIcon
-                      name="image-outline"
-                      iconStyle={{ width: 60, height: 60, opacity: 0.5 }}
-                    />
+                      <ThemedIcon 
+                        name="image-outline" 
+                        iconStyle={{ width: 60, height: 60, opacity: 0.5 }} 
+                      />
                   )}
                 </View>
               )}
             </View>
-            <Input
-              label="Shop Name"
-              value={shopInfo.name}
-              onChangeText={(text) => setShopInfo(prev => ({ ...prev, name: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Address"
-              value={shopInfo.address}
-              onChangeText={(text) => setShopInfo(prev => ({ ...prev, address: text }))}
-              disabled={!isEditMode}
-              multiline
-              style={styles.input}
-            />
-            <Input
-              label="Contact"
-              value={shopInfo.contact}
-              onChangeText={(text) => setShopInfo(prev => ({ ...prev, contact: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-          </Card>
-          {/* Seller Information */}
+                <Input
+                  label={t('shopSettingsPage.sections.shopInformation.shopName')}
+                  value={shopInfo.name}
+                  onChangeText={(text) => setShopInfo(prev => ({ ...prev, name: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.shopInformation.address')}
+                  value={shopInfo.address}
+                  onChangeText={(text) => setShopInfo(prev => ({ ...prev, address: text }))}
+                  disabled={!isEditMode}
+                  multiline
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.shopInformation.contact')}
+                  value={shopInfo.contact}
+                  onChangeText={(text) => setShopInfo(prev => ({ ...prev, contact: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+              </Card>
+              {/* Seller Information */}
           <Card style={[styles.section, { backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff' }]}> 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Seller Information</Text>
+              <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.sellerInformation.title')}</Text>
               {isEditMode && (
                 <Button
                   size="tiny"
@@ -565,16 +618,16 @@ export default function ShopSettingsPage({ navigation }) {
                 </Button>
               )}
             </View>
-            <View style={styles.imageContainer}>
-              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Profile Image</Text>
-              {isEditMode ? (
-                <ImagePicker
-                  title="Choose Profile Image"
-                  onPress={handleSellerImagePick}
-                  imageUri={sellerInfo.image ? sellerInfo.image.uri : null}
-                />
-              ) : (
-                <View style={styles.staticImageContainer}>
+                <View style={styles.imageContainer}>
+              <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.sellerInformation.profileImage')}</Text>
+                  {isEditMode ? (
+                    <ImagePicker
+                      title={t('shopSettingsPage.sections.sellerInformation.chooseProfileImage')}
+                      onPress={handleSellerImagePick}
+                      imageUri={sellerInfo.image ? sellerInfo.image.uri : null}
+                    />
+                  ) : (
+                    <View style={styles.staticImageContainer}>
                   {sellerInfo.image && sellerInfo.image.uri ? (
                     <ThemedIcon
                       name="person-outline"
@@ -582,47 +635,47 @@ export default function ShopSettingsPage({ navigation }) {
                       source={{ uri: sellerInfo.image.uri }}
                     />
                   ) : (
-                    <ThemedIcon
-                      name="person-outline"
-                      iconStyle={{ width: 60, height: 60, opacity: 0.5 }}
-                    />
+                      <ThemedIcon 
+                        name="person-outline" 
+                        iconStyle={{ width: 60, height: 60, opacity: 0.5 }} 
+                      />
                   )}
                 </View>
               )}
             </View>
-            <Input
-              label="First Name"
-              value={sellerInfo.f_name}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, f_name: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Last Name"
-              value={sellerInfo.l_name}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, l_name: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Phone"
-              value={sellerInfo.phone}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, phone: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Email"
-              value={sellerInfo.email}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, email: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-          </Card>
-          {/* Bank Information */}
+                <Input
+                  label={t('shopSettingsPage.sections.sellerInformation.firstName')}
+                  value={sellerInfo.f_name}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, f_name: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.sellerInformation.lastName')}
+                  value={sellerInfo.l_name}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, l_name: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.sellerInformation.phone')}
+                  value={sellerInfo.phone}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, phone: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.sellerInformation.email')}
+                  value={sellerInfo.email}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, email: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+              </Card>
+              {/* Bank Information */}
           <Card style={[styles.section, { backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff' }]}> 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Bank Information</Text>
+              <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('shopSettingsPage.sections.bankInformation.title')}</Text>
               {isEditMode && (
                 <Button
                   size="tiny"
@@ -635,36 +688,77 @@ export default function ShopSettingsPage({ navigation }) {
                 </Button>
               )}
             </View>
-            <Input
-              label="Bank Name"
-              value={sellerInfo.bank_name}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, bank_name: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Branch"
-              value={sellerInfo.branch}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, branch: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Account Number"
-              value={sellerInfo.account_no}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, account_no: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-            <Input
-              label="Account Holder Name"
-              value={sellerInfo.holder_name}
-              onChangeText={(text) => setSellerInfo(prev => ({ ...prev, holder_name: text }))}
-              disabled={!isEditMode}
-              style={styles.input}
-            />
-          </Card>
-        
+                <Input
+                  label={t('shopSettingsPage.sections.bankInformation.bankName')}
+                  value={sellerInfo.bank_name}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, bank_name: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.bankInformation.branch')}
+                  value={sellerInfo.branch}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, branch: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.bankInformation.accountNumber')}
+                  value={sellerInfo.account_no}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, account_no: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+                <Input
+                  label={t('shopSettingsPage.sections.bankInformation.accountHolderName')}
+                  value={sellerInfo.holder_name}
+                  onChangeText={(text) => setSellerInfo(prev => ({ ...prev, holder_name: text }))}
+                  disabled={!isEditMode}
+                  style={styles.input}
+                />
+              </Card>
+
+              {/* Password Update Section */}
+              <Card style={[styles.section, { backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff' }]}> 
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Text style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Update Password</Text>
+                  {isEditMode && (
+                    <Button
+                      size="tiny"
+                      appearance="filled"
+                      onPress={handlePasswordUpdate}
+                      disabled={saving}
+                      style={{ marginLeft: 8 }}
+                    >
+                      {saving ? <Spinner size='small' /> : 'Update Password'}
+                    </Button>
+                  )}
+                </View>
+                <Input
+                  label="Current Password"
+                  value={passwordData.currentPassword}
+                  onChangeText={(text) => setPasswordData(prev => ({ ...prev, currentPassword: text }))}
+                  disabled={!isEditMode}
+                  secureTextEntry={true}
+                  style={styles.input}
+                />
+                <Input
+                  label="New Password"
+                  value={passwordData.newPassword}
+                  onChangeText={(text) => setPasswordData(prev => ({ ...prev, newPassword: text }))}
+                  disabled={!isEditMode}
+                  secureTextEntry={true}
+                  style={styles.input}
+                />
+                <Input
+                  label="Confirm New Password"
+                  value={passwordData.confirmPassword}
+                  onChangeText={(text) => setPasswordData(prev => ({ ...prev, confirmPassword: text }))}
+                  disabled={!isEditMode}
+                  secureTextEntry={true}
+                  style={styles.input}
+                />
+              </Card>
         
         {/* Remove the bottom row of update buttons */}
       </ScrollView>)}

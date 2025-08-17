@@ -6,6 +6,10 @@ import {LanguageSwitcher} from '../components/modals';
 import {ProfileActionButton} from '../components/profile';
 import {spacingStyles} from '../utils/globalStyles';
 import { useTheme } from '../theme/ThemeContext';
+import { Linking } from 'react-native';
+import { BASE_URL } from '../utils/constants';
+import { AuthRoutes } from '../navigators/AuthNavigator';
+import { AppScreens } from '../navigators/AppNavigator';
 
 export const AppSettingsScreen = ({navigation}) => {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
@@ -14,6 +18,13 @@ export const AppSettingsScreen = ({navigation}) => {
 
   const toggleLanguageModal = show => {
     setShowLanguageModal(show);
+  };
+
+  const navigateToForgotPassword = () => {
+    navigation.navigate(AuthRoutes.FORGOT_PASSWORD.name);
+  };
+  const navigateToChangePassword = () => {
+    navigation.navigate(AuthRoutes.RESET_PASSWORD.name);
   };
 
   return (
@@ -44,35 +55,62 @@ export const AppSettingsScreen = ({navigation}) => {
           />
         </Layout>
 
+        {/* Password Management Section */}
+        <Layout level="1" style={[ {marginVertical: 4}]}>
+          <ProfileActionButton
+            title={t('farmManagement.actions.forgotPassword.title')}
+            subtitle={t('farmManagement.actions.forgotPassword.subtitle')}
+            iconName="person-outline"
+            onPress={() => navigation.navigate(AppScreens.FORGOT_PASSWORD)}
+          />
+          <Divider />
+          <ProfileActionButton
+            title={t('farmManagement.actions.changePassword.title')}
+            subtitle={t('farmManagement.actions.changePassword.subtitle')}
+            iconName="lock-outline"
+            onPress={() => navigation.navigate(AppScreens.RESET_PASSWORD)}
+          />
+        </Layout>
+
         <Layout level="1" style={[ {marginVertical: 4}]}>
           <ProfileActionButton
             title={t('pagesTitles.AboutUs')}
             iconName="info-outline"
-            onPress={() => {}}
+            onPress={() => {
+              Linking.openURL(`${BASE_URL}about-us`);
+            }}
           />
           <Divider />
           <ProfileActionButton
             title={t('pagesTitles.TermsConditions')}
             iconName="file-text-outline"
-            onPress={() => {}}
+            onPress={() => {
+              Linking.openURL(`${BASE_URL}terms`);
+            }}
           />
           <Divider />
           <ProfileActionButton
             title={t('pagesTitles.PrivacyPolicy')}
             iconName="shield-outline"
-            onPress={() => {}}
+            onPress={() => {
+              Linking.openURL(`${BASE_URL}privacy-policy`);
+            }}
           />
           <Divider />
           <ProfileActionButton
             title={t('pagesTitles.FAQ')}
             iconName="info-outline"
-            onPress={() => {}}
+            onPress={() => {
+              Linking.openURL(`${BASE_URL}helpTopic`);
+            }}
           />
           <Divider />
           <ProfileActionButton
             title={t('pagesTitles.HelpSupport')}
             iconName="question-mark-circle-outline"
-            onPress={() => {}}
+            onPress={() => {
+              Linking.openURL(`${BASE_URL}account-tickets`);
+            }}
           />
         </Layout>
         <LanguageSwitcher

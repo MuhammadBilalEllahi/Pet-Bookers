@@ -13,6 +13,7 @@ import { setNotifications, removeNotification } from '../store/notifications';
 const {width: windowWidth} = Dimensions.get('window');
 
 export const NotificationsScreen = ({navigation}) => {
+  const {t} = useTranslation();
   const dispatch = useDispatch();
   const notifications = useSelector(state => state.notifications.notifications);
 
@@ -20,11 +21,11 @@ export const NotificationsScreen = ({navigation}) => {
     const fetchNotifications = async () => {
       try {
       const response = await axiosBuyerClient.get('/notifications');
-      console.log("notifications",response.data);
+      // console.log("notifications",response.data);
         // Map backend notifications to expected shape if needed
         const mapped = (response.data || []).map((notif, idx) => ({
           id: notif.id ?? idx,
-          title: notif.title || 'Notification',
+          title: notif.title || t('notificationsScreen.defaultTitle'),
           description: notif.description || notif.body || '',
           timestamp: notif.created_at || notif.timestamp || new Date().toISOString(),
           isUnread: notif.is_unread ?? true,
@@ -57,7 +58,7 @@ export const NotificationsScreen = ({navigation}) => {
     <Layout level="3" style={{flex: 1}}>
       {notifications.length === 0 ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text category="h6">No notifications yet</Text>
+          <Text category="h6">{t('notificationsScreen.noNotifications')}</Text>
         </View>
       ) : (
       <SwipeListView

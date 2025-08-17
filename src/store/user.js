@@ -295,7 +295,7 @@ export const fetchSellerProfileData = () => async (dispatch, getState) => {
     const diffInMinutes = (now - lastUpdated) / (1000 * 60);
     
     if (diffInMinutes < 5) {
-      console.log('Using cached seller profile data');
+      // console.log('Using cached seller profile data');
       return;
     }
   }

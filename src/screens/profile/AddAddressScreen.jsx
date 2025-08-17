@@ -124,7 +124,7 @@ export const AddAddressScreen = ({ navigation, route }) => {
         navigation.goBack();
       }
     } catch (error) {
-      console.error('Add address error:', error);
+      console.error('Add address error:', error?.response?.data?.message || error?.data?.response || error || error?.message);
       Toast.show({
         type: 'error',
         text1: 'Add Address Failed',

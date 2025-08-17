@@ -2,16 +2,94 @@ import {Text} from '@ui-kitten/components';
 import {View, StyleSheet} from 'react-native';
 import {flexeStyles} from '../utils/globalStyles';
 
-export const Price = ({amount, cross, color, fontSize}) => {
-  // Default colors
-  const crossedColor = color || '#afafaf'; // Muted gray for crossed price
-  const normalColor = color || '#888'; // Default color for normal price
+// export const Price = ({amount, cross, color, fontSize}) => {
+//   // Default colors
+//   const crossedColor = color || '#afafaf'; // Muted gray for crossed price
+//   const normalColor = color || '#888'; // Default color for normal price
 
-  // Define font sizes for consistency
+//   // Define font sizes for consistency
+//   const PKR_FONT_SIZE = fontSize || 15;
+//   const AMOUNT_FONT_SIZE = fontSize || 15;
+
+//   // Margin between PKR and price
+//   const PKR_MARGIN_RIGHT = 4;
+//   const AMOUNT_MARGIN_LEFT = 2;
+
+//   if (cross) {
+//     return (
+//       <View style={styles.rowAlign}>
+//         <Text
+//           style={{
+//             color: crossedColor,
+//             fontSize: PKR_FONT_SIZE,
+//             fontWeight: '500',
+//             marginRight: PKR_MARGIN_RIGHT,
+//             textDecorationLine: 'line-through',
+//           }}
+//         >
+//           PKR
+//         </Text>
+//         <Text
+//           style={{
+//             color: crossedColor,
+//             fontSize: AMOUNT_FONT_SIZE,
+//             fontWeight: '500',
+//             marginLeft: AMOUNT_MARGIN_LEFT,
+//             textDecorationLine: 'line-through',
+//           }}
+//         >
+//           {amount}
+//         </Text>
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <View style={styles.rowAlign}>
+//       <Text
+//         style={{
+//           color: normalColor,
+//           fontSize: PKR_FONT_SIZE,
+//           fontWeight: '700',
+//           marginRight: PKR_MARGIN_RIGHT,
+//         }}
+//       >
+//         PKR
+//       </Text>
+//       <Text
+//         style={{
+//           color: normalColor,
+//           fontSize: AMOUNT_FONT_SIZE,
+//           fontWeight: '700',
+//           marginLeft: AMOUNT_MARGIN_LEFT,
+//         }}
+//       >
+//         {amount}
+//       </Text>
+//     </View>
+//   );
+// };
+
+const styles = StyleSheet.create({
+  rowAlign: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+});
+export const Price = ({amount, cross, color, fontSize}) => {
+  // Convert amount to number and format it safely
+  const numAmount = Number(amount || 0);
+  const formattedAmount = isNaN(numAmount) ? '0' : numAmount.toString();
+  
+  // Default colors
+  const crossedColor = color || '#afafaf';
+  const normalColor = color || '#888';
+
+  // Define font sizes
   const PKR_FONT_SIZE = fontSize || 15;
   const AMOUNT_FONT_SIZE = fontSize || 15;
 
-  // Margin between PKR and price
+  // Margins
   const PKR_MARGIN_RIGHT = 4;
   const AMOUNT_MARGIN_LEFT = 2;
 
@@ -38,7 +116,7 @@ export const Price = ({amount, cross, color, fontSize}) => {
             textDecorationLine: 'line-through',
           }}
         >
-          {amount}
+          {formattedAmount}
         </Text>
       </View>
     );
@@ -64,15 +142,8 @@ export const Price = ({amount, cross, color, fontSize}) => {
           marginLeft: AMOUNT_MARGIN_LEFT,
         }}
       >
-        {amount}
+        {formattedAmount}
       </Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  rowAlign: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-});

@@ -108,7 +108,7 @@ export const RegisterScreen = ({ navigation }) => {
 
   // Helper to pick image and set in Formik, with permission check
   const handleImagePick = async (field, setFieldValue) => {
-    console.log("IMAGE PICKING", field)
+    // console.log("IMAGE PICKING", field)
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) {
       // Optionally show a message to the user
@@ -153,23 +153,23 @@ export const RegisterScreen = ({ navigation }) => {
       const headers = {
         'Content-Type': 'multipart/form-data',
       };
-      console.log("DATA", formData)
+      // console.log("DATA", formData)
       let response;
       if (isItSeller) {
-        console.log("IN seller")
+        // console.log("IN seller")
         response = await axiosSellerClient.post('registration', formData, { headers });
         if (response.status >= 200 && response.status < 300) {
-          console.log("IN FORM")
+          // console.log("IN FORM")
           // const formData = new FormData();
           // formData.append('email', values.email.trim());
           // formData.append('password', values.password);
-          // console.log("FORM NEW DATA ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", formData)
+          // // console.log("FORM NEW DATA ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", formData)
           // try {
           //   const responseToLogin = await axiosSellerClient.post('auth/login', formData, {headers});
           //   console.debug("RESPONSE", responseToLogin)
           //   if(responseToLogin.status >= 200 && responseToLogin.status < 300){
           //     if (response?.data?.token) {
-          //       console.log("IN TOKEN")
+          //       // console.log("IN TOKEN")
           //       dispatch(setUserType(UserType.SELLER))
           //       dispatch(setAuthToken(response.data.token))
           //       navigateToPage(AppScreens.SELLER_HOME_MAIN)
@@ -183,7 +183,7 @@ export const RegisterScreen = ({ navigation }) => {
           // }
         }
       } else {
-        console.log("IN buyer")
+        // console.log("IN buyer")
         response = await axiosBuyerClient.post('auth/register', formData, { headers });
       }
       // TODO: handle registration success (e.g., navigation, token storage, etc.)
@@ -191,7 +191,7 @@ export const RegisterScreen = ({ navigation }) => {
       console.debug('\nRegister Success Response', response.data);
 
       if(response.data.token){
-        console.log("IN TOKEN")
+        // console.log("IN TOKEN")
         dispatch(setUserType(isItSeller ? UserType.SELLER : UserType.BUYER))
         dispatch(setAuthToken(response.data.token))
         navigateToPage( isItSeller ?  AppScreens.SELLER_HOME_MAIN: AppScreens.BUYER_HOME_MAIN)

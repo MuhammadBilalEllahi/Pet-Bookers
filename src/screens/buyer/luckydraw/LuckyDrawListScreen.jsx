@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Text, Card, Layout, Spinner } from "@ui-kitten/components";
 import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { useTranslation } from "react-i18next";
 import { axiosBuyerClient } from "../../../utils/axiosClient";
 import { selectLuckyDraws, loadLuckyDraws } from "../../../store/buyersHome";
 import LinearGradient from "react-native-linear-gradient";
@@ -90,6 +91,7 @@ const styles = StyleSheet.create({
 });
 
 export default function LuckyDrawListScreen() {
+  const {t} = useTranslation();
   const dispatch = useDispatch();
   const { luckyDraws, luckyDrawsLoading, luckyDrawsError } = useSelector(selectLuckyDraws);
   const navigation = useNavigation();
@@ -120,7 +122,7 @@ export default function LuckyDrawListScreen() {
       <View style={styles.header}>
         <Text style={[styles.headerText, { 
           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>Lucky Draw</Text>
+        }]}>{t('luckyDrawListScreen.title')}</Text>
       </View>
       <FlatList
         data={displayLuckyDraws}
@@ -153,7 +155,7 @@ export default function LuckyDrawListScreen() {
                   style={{ width: '100%' }}
                 >
                   <Text style={styles.buttonText}>
-                    Apply Now
+                    {t('luckyDrawListScreen.applyNow')}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -163,7 +165,7 @@ export default function LuckyDrawListScreen() {
         ListEmptyComponent={
           <Text style={[styles.emptyText, { 
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-          }]}>No lucky draws available at the moment.</Text>
+          }]}>{t('luckyDrawListScreen.noLuckyDraws')}</Text>
         }
       />
     </Layout>

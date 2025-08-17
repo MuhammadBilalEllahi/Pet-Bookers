@@ -40,7 +40,7 @@ export const AuthNavigator = () => {
   // For now, just log for debugging (remove in production).
   if (__DEV__ && typeof isItSeller !== 'undefined') {
     // eslint-disable-next-line no-console
-    console.log('[AuthNavigator] isItSeller param:', isItSeller);
+    // console.log('[AuthNavigator] isItSeller param:', isItSeller);
   }
 
   return (

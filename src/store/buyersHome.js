@@ -30,7 +30,7 @@ export const loadHomeBanners = createAsyncThunk(
     const {data} = await axiosBuyerClient.get(
       `banners/?banner_type=${bannerType}`,
     );
-    console.log("[buyersHome/loadBanners]", data);
+    // console.log("[buyersHome/loadBanners]", data);
     return data;
   },
 );
@@ -73,7 +73,7 @@ export const loadLuckyDraws = createAsyncThunk(
       console.error("Error fetching lucky draws:", error, error?.response);
       throw error;
     });
-    // console.log("[buyersHome/loadLuckyDraws]", data);
+    // // console.log("[buyersHome/loadLuckyDraws]", data);
     return data.events || data;
   }
 );
@@ -82,7 +82,7 @@ export const loadSellers = createAsyncThunk(
   'buyersHome/loadSellers',
   async () => {
     const {data} = await axiosBuyerClient.get('seller/all');
-    // console.log("[buyersHome/loadSellers]", data);
+    // // console.log("[buyersHome/loadSellers]", data);
     return data;
   },
 );

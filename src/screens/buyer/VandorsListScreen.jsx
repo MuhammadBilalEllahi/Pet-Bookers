@@ -1,116 +1,154 @@
-import {Layout, Text, Spinner} from '@ui-kitten/components';
-import {Dimensions, Image, ScrollView, View, StyleSheet, TouchableOpacity} from 'react-native';
-import {useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {loadSellers, selectSellers} from '../../store/buyersHome';
-import {selectBaseUrls} from '../../store/configs';
+import React, { useEffect, useState } from 'react';
+import { Layout, Text } from '@ui-kitten/components';
+import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import { FlatList, TouchableOpacity, Image, View, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { loadSellers, selectSellers } from '../../store/buyersHome';
+import { selectBaseUrls } from '../../store/configs';
 
-const {width: windowWidth} = Dimensions.get('screen');
+const { width: windowWidth } = Dimensions.get('screen');
 
-export const VandorsListScreen = ({navigation}) => {
-  const dispatch = useDispatch();
-  const baseUrls = useSelector(selectBaseUrls);
-  const {sellers, sellersLoading, sellersError} = useSelector(selectSellers);
+export const VandorsListScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const { theme, isDark } = useTheme();
+  const dispatch = useDispatch();
+  
+  const baseUrls = useSelector(selectBaseUrls);
+  const { sellers, sellersLoading, sellersError } = useSelector(selectSellers);
 
   useEffect(() => {
     dispatch(loadSellers());
-  }, []);
+  }, [dispatch]);
 
-  const navigateToVandorDetail = vandorId => {
-    navigation.navigate('VandorDetail', {sellerId: vandorId});
+  const navigateToVandorDetail = (sellerId) => {
+    navigation.navigate('VandorDetail', { sellerId });
   };
 
-  if (sellersLoading) {
+  const renderSellerItem = ({ item }) => {
+    const sellerImageUrl = `${baseUrls['shop_image_url']}/${item.image}`;
+    
     return (
-      <Layout level="3" style={styles.loadingContainer}>
-        <Spinner size="large" />
-      </Layout>
+      <TouchableOpacity
+        style={[styles.sellerCard, {
+          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300']
+        }]}
+        onPress={() => navigateToVandorDetail(item.id)}
+        activeOpacity={0.7}
+      >
+        <Image
+          source={{ uri: sellerImageUrl }}
+          style={styles.sellerImage}
+          resizeMode="cover"
+        />
+        <View style={styles.sellerInfo}>
+          <Text
+            style={[styles.sellerName, {
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}
+            numberOfLines={2}
+          >
+            {item.name || 'Unknown Seller'}
+          </Text>
+          <Text
+            style={[styles.sellerLocation, {
+              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+            }]}
+            numberOfLines={1}
+          >
+            {item.location || 'Location not specified'}
+          </Text>
+        </View>
+      </TouchableOpacity>
     );
-  }
+  };
 
-  if (sellersError) {
-    return (
-      <Layout level="3" style={styles.errorContainer}>
-        <Text status="danger">{sellersError}</Text>
-      </Layout>
-    );
-  }
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Text
+        style={[styles.emptyText, {
+          color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+        }]}
+      >
+        {t('sellers.noSellersFound') || 'No sellers found'}
+      </Text>
+    </View>
+  );
 
   return (
-    <Layout level="3" style={{flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['background-basic-color-1']}}>
-      <ScrollView
-        showsHorizontalScrollIndicator={false}
+    <Layout 
+      level="3" 
+      style={[styles.container, {
+        backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+      }]}
+    >
+      <FlatList
+        data={sellers || []}
+        renderItem={renderSellerItem}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: 'flex-start',
-          paddingTop: 10,
-          paddingBottom: 90,
-          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['background-basic-color-1'],
-        }}>
-        <Text style={[styles.header, { color: isDark ? theme['color-shadcn-foreground'] : theme['text-basic-color'] }]}>All Sellers</Text>
-        <View style={styles.grid}>
-          {sellers.map(item => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.sellerItem}
-              onPress={() => navigateToVandorDetail(item.id)}>
-              <Image
-                source={{uri: `${baseUrls['shop_image_url']}/${item.image}`}}
-                style={[styles.sellerImage, { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-300'] }]}
-              />
-              <Text style={[styles.sellerName, { color: isDark ? theme['color-shadcn-foreground'] : theme['text-basic-color'] }]}>{item.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+        ListEmptyComponent={!sellersLoading ? renderEmptyState : null}
+        refreshing={sellersLoading}
+        onRefresh={() => dispatch(loadSellers())}
+      />
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
-  header: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 18,
-    marginLeft: 12,
-    marginTop: 8,
+  container: {
+    flex: 1,
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    paddingHorizontal: 8,
+  listContent: {
+    padding: 16,
+    paddingBottom: 100,
   },
-  sellerItem: {
-    width: windowWidth * 0.46,
-    alignItems: 'center',
-    marginBottom: 24,
+  row: {
+    justifyContent: 'space-between',
+  },
+  sellerCard: {
+    width: (windowWidth - 48) / 2, // Account for padding and gap
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   sellerImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: '100%',
+    height: 80,
+    borderRadius: 8,
     marginBottom: 8,
   },
+  sellerInfo: {
+    flex: 1,
+  },
   sellerName: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
     textAlign: 'center',
-    fontSize: 15,
-    fontWeight: '500',
-    marginTop: 2,
-    textTransform: 'capitalize',
   },
-  loadingContainer: {
+  sellerLocation: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 100,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+  emptyText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

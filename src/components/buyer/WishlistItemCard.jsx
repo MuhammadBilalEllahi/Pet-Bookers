@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {Text, Button, Layout} from '@ui-kitten/components';
 import {useSelector} from 'react-redux';
+import {useTranslation} from 'react-i18next';
 import {ThemedIcon} from '../Icon';
 import {Price} from '../Price';
 import {flexeStyles} from '../../utils/globalStyles';
@@ -24,19 +25,20 @@ export const WishlistItemCard = ({
   isRemoving = false,
 }) => {
   const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
   const baseUrls = useSelector(selectBaseUrls);
 
   const handleRemove = () => {
     Alert.alert(
-      'Remove from Wishlist',
-      'Are you sure you want to remove this item from your wishlist?',
+      t('wishlist.removeTitle', 'Remove from Wishlist'),
+      t('wishlist.removeMessage', 'Are you sure you want to remove this item from your wishlist?'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Remove',
+          text: t('wishlist.remove', 'Remove'),
           style: 'destructive',
           onPress: () => onRemove(item),
         },
@@ -62,7 +64,7 @@ export const WishlistItemCard = ({
   if (!item.product) {
     return null;
   }
-
+console.log("item.product", item.product);
   const product = item.product;
 
   return (
@@ -85,14 +87,14 @@ export const WishlistItemCard = ({
         <View style={styles.imageContainer}>
           <Image
             source={{
-              uri: product.thumbnail 
-                ? (product.thumbnail.startsWith('http') 
-                   ? product.thumbnail 
-                   : `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`)
-                : product.image
-                ? (product.image.startsWith('http')
-                   ? product.image
-                   : `${baseUrls['product_image_url']}/${product.image}`)
+              uri: product?.thumbnail 
+                ? (product?.thumbnail?.startsWith('http') 
+                   ? product?.thumbnail 
+                   : `${baseUrls['product_thumbnail_url']}/${product?.thumbnail}`)
+                : product?.image
+                ? (product?.image?.startsWith('http')
+                   ? product?.image
+                   : `${baseUrls['product_image_url']}/${product?.image}`)
                 : 'https://via.placeholder.com/120x120?text=No+Image',
             }}
             style={[
@@ -174,7 +176,7 @@ export const WishlistItemCard = ({
                     : theme['color-danger-default'],
                 },
               ]}>
-              {product.current_stock > 0 ? 'In Stock' : 'Out of Stock'}
+              {product.current_stock > 0 ? t('product.inStock', 'In Stock') : t('product.outOfStock')}
             </Text>
           )}
 
@@ -189,7 +191,7 @@ export const WishlistItemCard = ({
                     : theme['color-basic-500'],
                 },
               ]}>
-              {product.reviews_count} {product.reviews_count === 1 ? 'review' : 'reviews'}
+              {product.reviews_count} {product.reviews_count === 1 ? t('product.review', 'review') : t('product.reviews')}
             </Text>
           )}
 
@@ -203,7 +205,7 @@ export const WishlistItemCard = ({
                   : theme['color-basic-500'],
               },
             ]}>
-            Added {new Date(item.created_at).toLocaleDateString()}
+            {t('wishlist.addedOn', 'Added {{date}}', {date: new Date(item.created_at).toLocaleDateString()})}
           </Text>
         </View>
       </TouchableOpacity>
@@ -215,7 +217,7 @@ export const WishlistItemCard = ({
           onPress={handleRemove}
           disabled={isRemoving}
           style={styles.removeButton}>
-          {isRemoving ? 'Removing...' : ''}
+          {isRemoving ? t('common.loading') : ''}
         </Button>
       </View>
     </Layout>
@@ -225,20 +227,20 @@ export const WishlistItemCard = ({
 const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
-    marginVertical: 6,
+    marginVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    minHeight: 140, // Ensure minimum height for proper card display
+    // Remove elevation for shadcn style
+    elevation: 0,
+    shadowOpacity: 0,
   },
   contentContainer: {
     flexDirection: 'row',
-    padding: 12,
+    padding: 16,
     flex: 1,
+    minHeight: 120, // Ensure minimum content height
   },
   imageContainer: {
     width: 100,

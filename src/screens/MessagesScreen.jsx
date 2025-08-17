@@ -1,3 +1,4 @@
+import React from 'react';
 import {Avatar, Input, Layout, Text} from '@ui-kitten/components';
 import {Button, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View, Alert, Image} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
@@ -16,9 +17,11 @@ import {
 } from '../store/user';
 import { smartBuyerClient, smartSellerClient, handleAuthError } from '../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 export const MessagesScreen = ({navigation}) => {
   const {theme, isDark} = useTheme();
+  const {t} = useTranslation(); 
   const dispatch = useDispatch();
   const route = useRoute();
   const {roomId, recipientProfile, recipientName, chatType, productInfo} = route.params;
@@ -32,19 +35,22 @@ export const MessagesScreen = ({navigation}) => {
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log('Chat params:', { roomId, recipientProfile, recipientName, chatType, productInfo });
+  // console.log('Chat params:', { roomId, recipientProfile, recipientName, chatType, productInfo });
 
   // Check authentication based on chat type
   const isAuthenticated = chatType === 'buyer' ? isBuyerAuthenticated : isSellerAuthenticated;
   const client = chatType === 'buyer' ? smartBuyerClient : smartSellerClient;
 
   useEffect(() => {
+    // Hide bottom tab bar when entering MessagesScreen
+    dispatch(setBottomTabBarVisibility(false));
+    
     if (!isAuthenticated) {
       Alert.alert(
-        'Authentication Required',
-        `Please sign in as ${chatType} to continue this conversation.`,
+        t('messagesScreen.authRequired.title'),
+        t('messagesScreen.authRequired.message', { chatType }),
         [
-          { text: 'Go Back', onPress: () => navigation.goBack() }
+          { text: t('messagesScreen.authRequired.goBack'), onPress: () => navigation.goBack() }
         ]
       );
       return;
@@ -52,6 +58,14 @@ export const MessagesScreen = ({navigation}) => {
 
     fetchMessages();
   }, [roomId, chatType, isAuthenticated]);
+
+  // Cleanup effect to ensure bottom tab bar is shown when leaving
+  useEffect(() => {
+    return () => {
+      // Show bottom tab bar when component unmounts
+      dispatch(setBottomTabBarVisibility(true));
+    };
+  }, [dispatch]);
 
   const fetchMessages = async () => {
     if (!isAuthenticated) return;
@@ -68,7 +82,7 @@ export const MessagesScreen = ({navigation}) => {
         response = await smartSellerClient.get(`messages/get-message/customer/${roomId}?limit=50&offset=0`);
       }
 
-      console.log(`${chatType} chat response:`, JSON.stringify(response.data, null, 2));
+      // console.log(`${chatType} chat response:`, JSON.stringify(response.data, null, 2));
       
       if (response.data) {
         let messagesData = [];
@@ -113,8 +127,8 @@ export const MessagesScreen = ({navigation}) => {
       handleAuthError(error, (err) => {
         Toast.show({
           type: 'error',
-          text1: 'Error',
-          text2: `Failed to load messages: ${err?.message || 'Unknown error'}`
+          text1: t('common.error'),
+          text2: `${t('messagesScreen.messages.failedToLoad')}: ${err?.message || t('messagesScreen.messages.unknownError')}`
         });
       });
     } finally {
@@ -145,7 +159,7 @@ export const MessagesScreen = ({navigation}) => {
         });
       }
 
-      console.log(`${chatType} send message response:`, JSON.stringify(response.data, null, 2));
+      // console.log(`${chatType} send message response:`, JSON.stringify(response.data, null, 2));
 
       if (response.status === 200) {
         // Create optimistic message update
@@ -163,11 +177,11 @@ export const MessagesScreen = ({navigation}) => {
         setMessages(prevMessages => [newMsg, ...prevMessages]);
         setNewMessage('');
         
-        Toast.show({
-          type: 'success',
-          text1: 'Message sent',
-          text2: 'Your message has been delivered'
-        });
+        // Toast.show({
+        //   type: 'success',
+        //   text1: 'Message sent',
+        //   text2: 'Your message has been delivered'
+        // });
         
         // Optionally refresh messages to get the real message with server ID
         // setTimeout(() => fetchMessages(), 1000);
@@ -177,8 +191,8 @@ export const MessagesScreen = ({navigation}) => {
       handleAuthError(error, (err) => {
         Toast.show({
           type: 'error',
-          text1: 'Failed to send message',
-          text2: err?.response?.data?.message || err?.message || 'Please try again'
+          text1: t('messagesScreen.messages.failedToSend'),
+          text2: err?.response?.data?.message || err?.message || t('messagesScreen.messages.pleaseRetry')
         });
       });
     } finally {
@@ -203,9 +217,14 @@ export const MessagesScreen = ({navigation}) => {
   );
 
   const onGoBack = () => {
+    // Ensure bottom tab bar is visible before going back
     dispatch(setBottomTabBarVisibility(true));
     dispatch(resetActiveRoom());
-    navigation.goBack();
+    
+    // Small delay to ensure Redux state is updated before navigation
+    setTimeout(() => {
+      navigation.goBack();
+    }, 10);
   };
 
   // Show authentication prompt if not authenticated
@@ -222,19 +241,19 @@ export const MessagesScreen = ({navigation}) => {
           <Text style={[styles.authTitle, {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
-            Authentication Required
+            {t('messagesScreen.authRequired.title')}
           </Text>
           <Text style={[styles.authMessage, {
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
           }]}>
-            Please sign in as {chatType} to continue this conversation.
+            {t('messagesScreen.authRequired.message', { chatType })}
           </Text>
           <TouchableOpacity 
             style={[styles.authButton, { backgroundColor: theme['color-shadcn-primary'] }]}
             onPress={() => navigation.goBack()}
           >
             <Text style={[styles.authButtonText, { color: theme['color-shadcn-primary-foreground'] }]}>
-              Go Back
+              {t('messagesScreen.authRequired.goBack')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -281,7 +300,7 @@ export const MessagesScreen = ({navigation}) => {
                   fontWeight: '600',
                 }}
               >
-                {recipientName || 'User'}
+                {recipientName || t('common.user')}
               </Text>
               <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
                 <View 
@@ -297,7 +316,10 @@ export const MessagesScreen = ({navigation}) => {
                     marginLeft: 4,
                   }}
                 >
-                  {chatType === 'buyer' ?   'You are Chatting as Seller': 'You are Chatting as Buyer'}
+                  {chatType === 'buyer' 
+                    ? t('messagesScreen.chatStatus.youAreChattingAsSeller')
+                    : t('messagesScreen.chatStatus.youAreChattingAsBuyer')
+                  }
                 </Text>
               </View>
             </View>
@@ -309,7 +331,7 @@ export const MessagesScreen = ({navigation}) => {
                 ? theme['color-info-default'] 
                 : theme['color-warning-default']
             }]}>
-              {chatType === 'buyer' ?   'Seller': 'Buyer'}
+              {chatType === 'buyer' ? t('messagesScreen.chatStatus.seller') : t('messagesScreen.chatStatus.buyer')}
             </Text>
           </View>
         </Layout>
@@ -333,7 +355,7 @@ export const MessagesScreen = ({navigation}) => {
               <Text style={[styles.productInfoTitle, {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>
-                Chatting about this product
+                {t('messagesScreen.productInfo.chattingAbout')}
               </Text>
             </View>
             <View style={styles.productInfoContent}>
@@ -355,7 +377,7 @@ export const MessagesScreen = ({navigation}) => {
                 <Text style={[styles.productShop, {
                   color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
                 }]}>
-                  From: {productInfo.seller?.shopName || 'Shop'}
+                  {t('messagesScreen.productInfo.from')}: {productInfo.seller?.shopName || t('common.shop')}
                 </Text>
               </View>
             </View>
@@ -373,7 +395,7 @@ export const MessagesScreen = ({navigation}) => {
             <Text style={[styles.loadingText, {
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
             }]}>
-              Loading messages...
+              {t('messagesScreen.messages.loading')}
             </Text>
           </View>
         ) : (
@@ -399,7 +421,7 @@ export const MessagesScreen = ({navigation}) => {
           <Input
             value={newMessage}
             onChangeText={setNewMessage}
-            placeholder={`Message as ${chatType}...`}
+            placeholder={t('messagesScreen.messages.placeholder', { chatType })}
             style={[
               styles.input,
               { 
@@ -433,7 +455,7 @@ export const MessagesScreen = ({navigation}) => {
                 fontWeight: '600'
               }}
             >
-              {isSending ? 'Sending...' : 'Send'}
+              {isSending ? t('messagesScreen.messages.sending') : t('messagesScreen.messages.send')}
             </Text>
           </TouchableOpacity>
         </View>

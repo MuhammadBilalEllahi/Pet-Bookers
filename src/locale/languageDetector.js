@@ -7,9 +7,9 @@ export const LANGUAGE_DETECTOR = {
     AsyncStorage.getItem('user-language', (err, language) => {
       if (err || !language) {
         if (err) {
-          console.log('Error fetching Languages from asyncstorage ', err);
+          // console.log('Error fetching Languages from asyncstorage ', err);
         } else {
-          console.log('No language is set, choosing English as fallback');
+          // console.log('No language is set, choosing English as fallback');
         }
         callback('en');
         return;

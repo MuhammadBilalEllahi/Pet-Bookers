@@ -6,6 +6,7 @@ import {
   Text,
   Dimensions,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import {flexeStyles} from '../../utils/globalStyles';
 
@@ -14,7 +15,7 @@ const height = (windowWidth - 16) / 1.77;
 
 let slideChangRef = null;
 
-export const ProductImagesSlider = ({slideList}) => {
+export const ProductImagesSlider = ({slideList, onImagePress}) => {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const carouselRef = useRef();
 
@@ -67,13 +68,21 @@ export const ProductImagesSlider = ({slideList}) => {
       <FlatList
         ref={carouselRef}
         data={slideList}
-        renderItem={({item}) => {
-          return <ProductImageSlide data={item} />;
+        renderItem={({item, index}) => {
+          return <ProductImageSlide data={item} index={index} onImagePress={onImagePress} />;
         }}
         pagingEnabled={true}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
+        getItemLayout={(data, index) => ({
+          length: windowWidth,
+          offset: windowWidth * index,
+          index,
+        })}
+        onScrollToIndexFailed={(info) => {
+          console.warn('ScrollToIndex failed:', info);
+        }}
       />
       <View
         style={[
@@ -91,7 +100,7 @@ export const ProductImagesSlider = ({slideList}) => {
   );
 };
 
-const ProductImageSlide = ({data}) => {
+const ProductImageSlide = ({data, index, onImagePress}) => {
   return (
     <View
       style={{
@@ -100,9 +109,15 @@ const ProductImageSlide = ({data}) => {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Image
-        source={{uri: data.image}}
-        style={{width: windowWidth - 16, height: height}}></Image>
+      <TouchableOpacity
+        onPress={() => onImagePress && onImagePress(index)}
+        style={{width: windowWidth - 16, height: height}}
+      >
+        <Image
+          source={{uri: data.image}}
+          style={{width: windowWidth - 16, height: height}}
+        />
+      </TouchableOpacity>
     </View>
   );
 };

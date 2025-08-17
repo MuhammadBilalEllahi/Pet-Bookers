@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Image, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView, Alert, RefreshControl } from "react-native";
 import { Layout, Text, Button, Select, SelectItem, IndexPath, Icon } from "@ui-kitten/components";
+import { useTranslation } from 'react-i18next';
 import { AppScreens } from "../../../navigators/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 import { axiosBuyerClient } from "../../../utils/axiosClient";
@@ -212,7 +213,15 @@ const CartShimmer = ({ isDark, theme }) => {
     <Layout style={[styles.container, {
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 160 }} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={{
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }}
+        contentContainerStyle={{ 
+          paddingBottom: 160,
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }} 
+        showsVerticalScrollIndicator={false}>
         {/* Header */}
         <ShimmerPlaceHolder
           style={{ width: 200, height: 24, borderRadius: 6, marginBottom: 16 }}
@@ -376,6 +385,7 @@ const CartShimmer = ({ isDark, theme }) => {
 
 
 export const MyCartScreen = () => {
+  const { t } = useTranslation();
   const [selectedPayment, setSelectedPayment] = useState(new IndexPath(0));
   const [selectedShipping, setSelectedShipping] = useState(new IndexPath(0));
   const [orderNote, setOrderNote] = useState("");
@@ -394,7 +404,9 @@ export const MyCartScreen = () => {
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
   const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
   const dispatch = useDispatch();
-
+  const wishlist = useSelector(state => state.wishlist.wishlist);
+  const wishlistLoading = useSelector(selectWishlistLoading);
+  
   // COD and EasyPaisa
   const getPaymentMethods = async () => {
       try {
@@ -404,6 +416,22 @@ export const MyCartScreen = () => {
       } catch (error) {
         console.error('Error getting shipping method:', error);
       }
+  };
+
+  // Filter payment methods based on cart contents
+  const getFilteredPaymentMethods = () => {
+    // Check if cart contains any living products (is_living = 1)
+    const hasLivingProducts = cartData.some(item => item.product?.is_living === 1);
+    
+    if (hasLivingProducts) {
+      // If cart has living products, only show EasyPaisa
+      return paymentMethods.filter(method => 
+        method.title.toLowerCase().includes('easypaisa')
+      );
+    }
+    
+    // If no physical products, show all payment methods
+    return paymentMethods;
   };
   useEffect(() => {
     getPaymentMethods();
@@ -440,8 +468,9 @@ export const MyCartScreen = () => {
   const tax = cartData.reduce((sum, item) => sum + (item.tax * item.quantity), 0);
   const cartShippingPrice = cartData.reduce((sum, item) => sum + (item.shipping_cost || 0), 0);
   
-  // Add selected shipping method cost
-  const selectedShippingMethod = paymentMethods[selectedShipping.row] || {};
+  // Add selected shipping method cost from filtered methods
+  const filteredPaymentMethods = getFilteredPaymentMethods();
+  const selectedShippingMethod = filteredPaymentMethods[selectedShipping.row] || {};
   const shippingMethodCost = selectedShippingMethod.cost || 0;
   const totalShippingPrice = cartShippingPrice + shippingMethodCost;
   
@@ -456,9 +485,9 @@ export const MyCartScreen = () => {
         console.log('Cart Response:', JSON.stringify(response.data, null, 2));
       setCartData(response.data || []);
       } catch (error) {
-      console.log('Cart Error:', error.toString() || error.response?.data || error.message);
+      // console.log('Cart Error:', error.toString() || error.response?.data || error.message);
         if (error.response?.status === 401) {
-          console.log('Authentication required');
+          // console.log('Authentication required');
       }
       setCartData([]);
     } finally {
@@ -468,7 +497,7 @@ export const MyCartScreen = () => {
 
   const handleApplyCoupon = async () => {
     if (!coupon.trim()) {
-      Alert.alert('Error', 'Please enter a coupon code');
+      Alert.alert(t('common.error'), t('cart.couponCode'));
       return;
     }
 
@@ -479,20 +508,20 @@ export const MyCartScreen = () => {
         }
       });
 
-      console.log('Coupon response:', response.data);
+      // console.log('Coupon response:', response.data);
       // Coupon response: {"coupon_discount": 508}
       
       if (response.data && response.data.coupon_discount) {
         setCouponDiscount(response.data.coupon_discount);
         setAppliedCouponCode(coupon);
-        Alert.alert('Success', `Coupon "${coupon}" applied! You saved Rs ${response.data.coupon_discount}`);
+        Alert.alert(t('common.success'), t('cart.couponApplied', { code: coupon, amount: response.data.coupon_discount }));
       } else {
-        Alert.alert('Error', 'Invalid coupon code');
+        Alert.alert(t('common.error'), t('cart.invalidCoupon'));
       }
       
     } catch (error) {
       console.error('Error applying coupon:', error?.response?.data?.message || error?.message || error);
-      Alert.alert('Error', error?.response?.data?.message || 'Failed to apply coupon');
+      Alert.alert(t('common.error'), error?.response?.data?.message || t('cart.applyCouponFailed'));
     }
   };
 
@@ -510,21 +539,34 @@ export const MyCartScreen = () => {
         data: { key: cartItemId }
       });
       
-      console.log('Remove response:', response.data);
+      // console.log('Remove response:', response.data);
       
       // Remove item from local state
       setCartData(prevData => prevData.filter(item => item.id !== cartItemId));
       
     } catch (error) {
       console.error('Error removing from cart:', error);
-      Alert.alert('Error', 'Failed to remove item from cart');
+      Alert.alert(t('common.error'), t('cart.removeItemFailed'));
     } finally {
       setRemoving(prev => ({ ...prev, [cartItemId]: false }));
     }
   };
 
-  const updateQuantity = async (cartItemId, newQuantity) => {
-    if (newQuantity < 1) return;
+  const updateQuantity = async (cartItemId, newQuantity, item) => {
+    const minQuantity = item.product.minimum_order_qty || 1;
+    const maxQuantity = item.product.current_stock || item.product.total_current_stock;
+    
+    // Check minimum quantity
+    if (newQuantity < minQuantity) {
+      Alert.alert(t('common.error'), t('cart.minQuantityError', { minQuantity }));
+      return;
+    }
+    
+    // Check maximum quantity (current stock)
+    if (newQuantity > maxQuantity) {
+      Alert.alert(t('common.error'), t('cart.maxQuantityError', { maxQuantity }));
+      return;
+    }
     
     try {
       const response = await axiosBuyerClient.put('cart/update', {
@@ -532,20 +574,20 @@ export const MyCartScreen = () => {
         quantity: newQuantity
       });
       
-      console.log('Update response:', response.data);
+      // console.log('Update response:', response.data);
       
       // Update local state
       setCartData(prevData => 
-        prevData.map(item => 
-          item.id === cartItemId 
-            ? { ...item, quantity: newQuantity }
-            : item
+        prevData.map(cartItem => 
+          cartItem.id === cartItemId 
+            ? { ...cartItem, quantity: newQuantity }
+            : cartItem
         )
       );
       
     } catch (error) {
       console.error('Error updating quantity:', error);
-      Alert.alert('Error', 'Failed to update quantity');
+      Alert.alert(t('common.error'), t('cart.updateQuantityFailed'));
     }
   };
 
@@ -558,14 +600,14 @@ export const MyCartScreen = () => {
 
   const handleCheckout = () => {
     if (cartData.length === 0) {
-      Alert.alert('Cart Empty', 'Please add items to cart before checkout');
+      Alert.alert(t('cart.cartEmpty'), t('cart.addItemsFirst'));
       return;
     }
 
-    const selectedMethod = paymentMethods[selectedShipping.row];
+    const selectedMethod = filteredPaymentMethods[selectedShipping.row];
     
     if (!selectedMethod) {
-      Alert.alert('Error', 'Please select a shipping method first');
+      Alert.alert(t('common.error'), t('cart.selectShippingFirst'));
       return;
     }
 
@@ -596,19 +638,19 @@ export const MyCartScreen = () => {
         data: { seller_id: sellerId }
       });
       
-      console.log('Remove farm response:', response.data);
+      // console.log('Remove farm response:', response.data);
       
       if (response.data.status === 1) {
         // Remove all items from this farm from local state
         setCartData(prevData => prevData.filter(item => item.seller_id !== sellerId));
-        Alert.alert('Success', `All products from ${farmName} have been removed from your cart`);
+        Alert.alert(t('common.success'), t('cart.removeFarmSuccess', { farmName }));
       } else {
-        Alert.alert('Error', response.data.message || 'Failed to remove farm products');
+        Alert.alert(t('common.error'), response.data.message || t('cart.removeFarmFailed'));
       }
       
     } catch (error) {
       console.error('Error removing farm from cart:', error);
-      Alert.alert('Error', 'Failed to remove farm products');
+      Alert.alert(t('common.error'), t('cart.removeFarmFailed'));
     } finally {
       setRemoving(prev => ({ ...prev, [`farm_${sellerId}`]: false }));
     }
@@ -616,22 +658,22 @@ export const MyCartScreen = () => {
 
   const confirmRemove = (cartItemId, productName) => {
     Alert.alert(
-      'Remove Item',
-      `Are you sure you want to remove "${productName}" from your cart?`,
+      t('cart.removeItem'),
+      t('cart.removeConfirm', { productName }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: () => removeFromCart(cartItemId) }
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.removed'), style: 'destructive', onPress: () => removeFromCart(cartItemId) }
       ]
     );
   };
 
   const confirmRemoveFarm = (sellerId, farmName, itemsCount) => {
     Alert.alert(
-      'Remove All Farm Products',
-      `Are you sure you want to remove all ${itemsCount} product(s) from "${farmName}"?`,
+      t('cart.removeFarmProducts'),
+      t('cart.removeFarmConfirm', { itemsCount, farmName }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove All', style: 'destructive', onPress: () => removeFarmFromCart(sellerId, farmName) }
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('cart.removeAll'), style: 'destructive', onPress: () => removeFarmFromCart(sellerId, farmName) }
       ]
     );
   };
@@ -650,6 +692,14 @@ export const MyCartScreen = () => {
     fetchCartData();
   }, []);
 
+  // Reset selected shipping when filtered methods change
+  useEffect(() => {
+    const filteredMethods = getFilteredPaymentMethods();
+    if (filteredMethods.length > 0 && selectedShipping.row >= filteredMethods.length) {
+      setSelectedShipping(new IndexPath(0));
+    }
+  }, [cartData, paymentMethods]);
+
   // Buyer auth modal success handler
   const handleAuthSuccess = () => {
     setShowBuyerAuthModal(false);
@@ -662,20 +712,20 @@ export const MyCartScreen = () => {
       <Layout style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}> 
         <Text style={[styles.emptyTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], textAlign: 'center', marginBottom: 24 }]}> 
           {isSellerAuthenticated 
-            ? 'Please sign in as a buyer to view your cart' 
-            : 'Please sign in to view your cart'}
+            ? t('cart.sellerToBuyerAuth') 
+            : t('cart.authRequired')}
         </Text>
         <Button
           onPress={() => setShowBuyerAuthModal(true)}
           style={[styles.browseBtn, { backgroundColor: theme['color-shadcn-primary'], minWidth: 200 }]}
         >
-          Sign in as Buyer
+          {t('auth.signInAsBuyer')}
         </Button>
         <BuyerAuthModal
           visible={showBuyerAuthModal}
           onClose={() => setShowBuyerAuthModal(false)}
           onSuccess={handleAuthSuccess}
-          title="Sign in as Buyer"
+          title={t('auth.signInAsBuyer')}
         />
       </Layout>
     );
@@ -683,8 +733,7 @@ export const MyCartScreen = () => {
 
   const renderCartItem = (item, index) => {
     // Get wishlist status for this product
-    const isInWishlist = useSelector(state => selectIsInWishlist(state, item.product_id));
-    const wishlistLoading = useSelector(selectWishlistLoading);
+    const isInWishlist = wishlist.some(w => w.product_id === item.product_id);
     
     // Handle wishlist toggle
     const handleWishlistToggle = (e) => {
@@ -692,14 +741,14 @@ export const MyCartScreen = () => {
       
       // Check if user is authenticated as buyer
       if (!isBuyerAuthenticated) {
-        const message = isSellerAuthenticated 
-          ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
-          : 'Please sign in as a buyer to add items to wishlist.';
+              const message = isSellerAuthenticated 
+        ? t('wishlist.managementAuthRequired')
+        : t('wishlist.addToWishlistAuthRequired');
         
         Alert.alert(
-          'Buyer Authentication Required',
+          t('product.buyerAuthRequired'),
           message,
-          [{ text: 'OK', style: 'default' }]
+          [{ text: t('common.ok'), style: 'default' }]
         );
         return;
       }
@@ -750,23 +799,27 @@ export const MyCartScreen = () => {
             <View style={styles.quantityRow}>
               <TouchableOpacity 
                 style={[styles.quantityBtn, {
-                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                  opacity: item.quantity <= (item.product.minimum_order_qty || 1) ? 0.5 : 1
                 }]}
-                onPress={() => updateQuantity(item.id, item.quantity - 1)}
+                onPress={() => updateQuantity(item.id, item.quantity - 1, item)}
+                disabled={item.quantity <= (item.product.minimum_order_qty || 1)}
               >
                 <Icon name="minus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
               </TouchableOpacity>
               <Text style={[styles.quantityText, {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>{item.quantity}</Text>
-              <TouchableOpacity 
-                style={[styles.quantityBtn, {
-                  backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-                }]}
-                onPress={() => updateQuantity(item.id, item.quantity + 1)}
-              >
-                <Icon name="plus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
-              </TouchableOpacity>
+              {item.quantity < (item.product.current_stock || item.product.total_current_stock) && (
+                <TouchableOpacity 
+                  style={[styles.quantityBtn, {
+                    backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+                  }]}
+                  onPress={() => updateQuantity(item.id, item.quantity + 1, item)}
+                >
+                  <Icon name="plus" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.quantityIcon} />
+                </TouchableOpacity>
+              )}
             </View>
             <Text style={[styles.productPrice, {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
@@ -821,11 +874,11 @@ export const MyCartScreen = () => {
         }]}
       >
         <View style={styles.farmHeader}>
-          <Text style={[styles.farmName, {
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>
-            <Text style={{ fontWeight: "bold" }}>Farm:</Text> {group.shop_info}
-        </Text>
+                      <Text style={[styles.farmName, {
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>
+              <Text style={{ fontWeight: "bold" }}>{t('cart.farmLabel')}</Text> {group.shop_info}
+          </Text>
           <TouchableOpacity 
             style={[styles.removeFarmBtn, {
               // backgroundColor: isDark ? theme['color-shadcn-destructive'] : theme['color-danger-default']
@@ -842,7 +895,7 @@ export const MyCartScreen = () => {
             } */}
             <Text style={[styles.removeFarmText, {
               color: isDark ? theme['color-shadcn-destructive'] : theme['color-danger-default']
-            }]}>Remove All</Text>
+            }]}>{t('cart.removeAll')}</Text>
           </TouchableOpacity>
         </View>
         
@@ -854,7 +907,7 @@ export const MyCartScreen = () => {
             }]}>Sr#</Text>
             <Text style={[styles.productHeader, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Product Details</Text>
+            }]}>{t('cart.productDetails')}</Text>
           </View>
         
         {group.items.map((item, index) => renderCartItem(item, index))}
@@ -867,7 +920,7 @@ export const MyCartScreen = () => {
           <View style={styles.summaryRow}>
             <Text style={[styles.summaryLabel, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Farm Subtotal</Text>
+            }]}>{t('cart.farmSubtotal')}</Text>
             <Text style={[styles.summaryValue, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>Rs {groupSubtotal.toLocaleString()}</Text>
@@ -876,7 +929,7 @@ export const MyCartScreen = () => {
             <View style={styles.summaryRow}>
               <Text style={[styles.summaryLabel, {
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>Farm Shipping</Text>
+              }]}>{t('cart.farmShipping')}</Text>
               <Text style={[styles.summaryValue, {
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}>Rs {groupTotalShipping.toLocaleString()}</Text>
@@ -913,10 +966,10 @@ export const MyCartScreen = () => {
         <Icon name="shopping-cart-outline" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 80, height: 80, marginBottom: 16 }} />
         <Text style={[styles.emptyTitle, {
           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>Your cart is empty</Text>
+        }]}>{t('cart.empty')}</Text>
         <Text style={[styles.emptyDesc, {
           color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-        }]}>Add some products to get started</Text>
+        }]}>{t('cart.emptyDesc')}</Text>
         <Button
           style={[styles.browseBtn, {
             backgroundColor: theme['color-shadcn-primary']
@@ -926,7 +979,7 @@ export const MyCartScreen = () => {
             routes: [{ name: AppScreens.BUYER_HOME_MAIN }],
           })}
         >
-          Browse Products
+          {t('cart.browseProducts')}
         </Button>
       </Layout>
     );
@@ -937,30 +990,57 @@ export const MyCartScreen = () => {
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 160 }}
+        style={{
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }}
+        contentContainerStyle={{ 
+          paddingBottom: 160,
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            colors={[theme['color-primary-500']]}
+            tintColor={theme['color-primary-500']}
+            progressBackgroundColor={isDark ? theme['color-shadcn-card'] : theme['color-basic-100']}
+          />
         }
       >
         <Text style={[styles.header, {
           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>Shopping Cart ({cartData.length})</Text>
+        }]}>{t('cart.title')} ({cartData.length})</Text>
 
         {/* Render cart boxes grouped by farm */}
         {cartGroups.map((group, index) => renderFarmCartBox(group, index))}
+
+        {/* Show payment method restriction notice for physical products */}
+        {cartData.some(item => item.is_living === 1) && (
+          <View style={[styles.paymentNotice, {
+            backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+          }]}>
+            <Icon name="info-outline" fill={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']} style={styles.paymentNoticeIcon} />
+            <Text style={[styles.paymentNoticeText, {
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}>
+              {t('cart.physicalProductsEasypaisaOnly')}
+            </Text>
+          </View>
+        )}
 
         <Select
           style={[styles.select, {
             backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
             borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
           }]}
-          value={paymentMethods[selectedShipping.row]?.title || 'Choose Shipping Method'}
+          value={filteredPaymentMethods[selectedShipping.row]?.title || 'Choose Shipping Method'}
           selectedIndex={selectedShipping}
           onSelect={index => setSelectedShipping(index)}
-          placeholder="Choose Shipping Method"
+          placeholder={t('cart.chooseShippingMethod')}
         >
-          {paymentMethods.map((method, i) => (
+          {filteredPaymentMethods.map((method, i) => (
             <SelectItem 
               key={i} 
               title={`${method.title} - Rs ${method.cost} (${method.duration})`} 
@@ -976,7 +1056,7 @@ export const MyCartScreen = () => {
             borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}
-          placeholder="Order Note (Optional)"
+          placeholder={t('cart.orderNote')}
           placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
           value={orderNote}
           onChangeText={setOrderNote}
@@ -989,12 +1069,12 @@ export const MyCartScreen = () => {
         }]}>
           <Text style={[styles.summaryTitle, {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Order Summary</Text>
+          }]}>{t('cart.orderSummary')}</Text>
           
           <View style={styles.summaryRow}>
             <Text style={[styles.summaryLabel, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Sub Total</Text>
+            }]}>{t('cart.subTotal')}</Text>
             <Text style={[styles.summaryValue, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>Rs {subtotal.toLocaleString()}</Text>
@@ -1002,7 +1082,7 @@ export const MyCartScreen = () => {
           <View style={styles.summaryRow}>
             <Text style={[styles.summaryLabel, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Tax</Text>
+            }]}>{t('cart.tax')}</Text>
             <Text style={[styles.summaryValue, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>Rs {tax.toLocaleString()}</Text>
@@ -1010,7 +1090,7 @@ export const MyCartScreen = () => {
           <View style={styles.summaryRow}>
             <Text style={[styles.summaryLabel, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Shipping</Text>
+            }]}>{t('cart.shipping')}</Text>
             <Text style={[styles.summaryValue, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>Rs {totalShippingPrice.toLocaleString()}</Text>
@@ -1021,7 +1101,7 @@ export const MyCartScreen = () => {
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
                 fontSize: 12,
                 paddingLeft: 16
-              }]}>└ Product Shipping</Text>
+              }]}>└ {t('cart.productShipping')}</Text>
               <Text style={[styles.summaryValue, {
                 color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
                 fontSize: 12
@@ -1044,7 +1124,7 @@ export const MyCartScreen = () => {
           <View style={styles.summaryRow}>
             <Text style={[styles.summaryLabel, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Discount</Text>
+            }]}>{t('cart.discount')}</Text>
             <Text style={[styles.summaryValue, {
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>- Rs {discount.toLocaleString()}</Text>
@@ -1056,7 +1136,7 @@ export const MyCartScreen = () => {
               <View style={styles.couponDiscountRow}>
                 <Text style={[styles.summaryLabel, {
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>Coupon ({appliedCouponCode})</Text>
+                }]}>{t('cart.coupon')} ({appliedCouponCode})</Text>
                 <TouchableOpacity onPress={removeCoupon} style={styles.removeCouponBtn}>
                   <Icon name="close-circle-outline" fill={theme['color-shadcn-destructive']} style={styles.removeCouponIcon} />
                 </TouchableOpacity>
@@ -1075,7 +1155,7 @@ export const MyCartScreen = () => {
                 borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
               }]}
-              placeholder="Coupon Code"
+              placeholder={t('cart.couponCode')}
               placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
               value={coupon}
               onChangeText={setCoupon}
@@ -1086,7 +1166,7 @@ export const MyCartScreen = () => {
                 backgroundColor: theme['color-shadcn-primary']
               }]}
             >
-              Apply Code
+              {t('cart.applyCoupon')}
             </Button>
           </View>
           )}
@@ -1094,7 +1174,7 @@ export const MyCartScreen = () => {
             <Text style={[styles.summaryLabel, {
               fontWeight: "bold",
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>Total</Text>
+            }]}>{t('cart.total')}</Text>
             <View style={styles.totalPriceContainer}>
               {couponDiscount > 0 ? (
                 <>
@@ -1169,7 +1249,7 @@ export const MyCartScreen = () => {
               fontWeight: 'bold',
               fontSize: 11
             }}>
-              « Continue Shopping
+              « {t('cart.continueShopping')}
           </Text>
         </Button>
           <Button
@@ -1178,7 +1258,7 @@ export const MyCartScreen = () => {
               backgroundColor: theme['color-shadcn-primary']
             }]}
           >
-          Checkout »
+          {t('cart.checkout')} »
         </Button>
       </View>
       </ScrollView>
@@ -1467,5 +1547,23 @@ const styles = StyleSheet.create({
   discountedTotal: {
     fontSize: 16,
     fontWeight: 'bold'
+  },
+  paymentNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 16,
+    gap: 8
+  },
+  paymentNoticeIcon: {
+    width: 20,
+    height: 20
+  },
+  paymentNoticeText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500'
   }
 });

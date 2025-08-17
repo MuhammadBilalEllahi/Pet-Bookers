@@ -5,8 +5,9 @@ import {
   Icon,
   Layout,
   Text,
+  Modal,
 } from '@ui-kitten/components';
-import {Dimensions, Image, ScrollView, StyleSheet, View} from 'react-native';
+import {Dimensions, Image, ScrollView, StyleSheet, TouchableOpacity, View, Alert, Linking} from 'react-native';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
@@ -19,20 +20,27 @@ import {
   selectCustomerLoading,
   selectCustomerError,
   selectIsBuyer,
-  selectAuthToken
+  selectAuthToken,
+  selectIsBuyerAuthenticated,
+  selectIsSellerAuthenticated,
+  logoutBuyer,
+  logoutSeller
 } from '../../store/user';
 import { delAsyncAuthToken, delAsyncUserType, setAsyncAuthToken, setAsyncUserType } from '../../utils/localstorage';
-import { ProfileActionButton } from '../../components/profile';
-import { useEffect } from 'react';
+import { ProfileActionButton, ProfileToggler } from '../../components/profile';
+import { SellerAuthModal } from '../../components/modals';
+import { useEffect, useState } from 'react';
 import { useTheme } from '../../theme/ThemeContext';
 import { AppScreens } from '../../navigators/AppNavigator';
+import { useTranslation } from 'react-i18next';
+import { BASE_URL } from '../../utils/constants';
 
 const { width, height} = Dimensions.get('window')
 
-export const BuyerProfileScreen = ({navigation}) => {
+export const BuyerProfileScreen = ({navigation, onProfileSwitch, currentProfileType = 'buyer'}) => {
   const dispatch = useDispatch();
   const { theme, isDark } = useTheme();
-  
+  const { t } = useTranslation();
   // Redux selectors
   const customerInfo = useSelector(selectCustomerInfo);
   const customerLoading = useSelector(selectCustomerLoading);
@@ -40,6 +48,13 @@ export const BuyerProfileScreen = ({navigation}) => {
   const isBuyer = useSelector(selectIsBuyer);
   const authToken = useSelector(selectAuthToken);
   
+  // Get authentication states
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  
+  // Modal states
+  const [showSellerAuthModal, setShowSellerAuthModal] = useState(false);
+
   const EditIcon = props => <Icon {...props} name="edit-2-outline" />;
   const LockIcon = props => <Icon {...props} name="lock-outline" />;
 
@@ -79,6 +94,106 @@ export const BuyerProfileScreen = ({navigation}) => {
   };
   const navigateToMyOrderList = () => {
     navigation.navigate(AppScreens.MY_ORDER_LIST);
+  };
+
+  const handleProfileSwitch = (newProfileType) => {
+    if (onProfileSwitch) {
+      onProfileSwitch(newProfileType);
+    }
+  };
+
+  const handleSellerAuthSuccess = () => {
+    setShowSellerAuthModal(false);
+    // Optionally switch to seller profile after successful login
+    if (onProfileSwitch) {
+      onProfileSwitch('seller');
+    }
+  };
+
+  const renderSignInButton = (accountType) => (
+    <Button
+      size="small"
+      appearance="outline"
+      style={{
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        borderColor: isDark ? theme['color-primary-500'] : theme['color-primary-600'],
+      }}
+      textStyle={{
+        fontSize: 12,
+        color: isDark ? theme['color-primary-400'] : theme['color-primary-600'],
+      }}
+      onPress={() => {
+        if (accountType === 'seller') {
+          setShowSellerAuthModal(true);
+        }
+      }}
+    >
+      {t('auth.signInAsSeller', 'Sign in as Seller')}
+    </Button>
+  );
+
+  const handleLogout = () => {
+    // Check if user is authenticated with both accounts
+    if (isBuyerAuthenticated && isSellerAuthenticated) {
+      Alert.alert(
+        t('profile.logout'),
+        t('profile.logoutBothAccountsMessage', 'You are logged in with both Seller and Buyer accounts. Which account would you like to log out from?'),
+        [
+          {
+            text: t('common.cancel'),
+            style: 'cancel',
+          },
+          {
+            text: t('profile.logoutBuyer', 'Logout Buyer'),
+            onPress: () => {
+              dispatch(logoutBuyer());
+              // If only seller remains, switch to seller profile
+              if (onProfileSwitch) {
+                onProfileSwitch('seller');
+              }
+            },
+          },
+          {
+            text: t('profile.logoutSeller', 'Logout Seller'),
+            onPress: () => {
+              dispatch(logoutSeller());
+            },
+          },
+          {
+            text: t('profile.logoutBoth', 'Logout Both'),
+            style: 'destructive',
+            onPress: () => {
+              dispatch(logout());
+            },
+          },
+        ]
+      );
+    } else {
+      // Single account logout
+      Alert.alert(
+        t('profile.logout'),
+        t('profile.logoutConfirmMessage', 'Are you sure you want to log out?'),
+        [
+          {
+            text: t('common.cancel'),
+            style: 'cancel',
+          },
+          {
+            text: t('profile.logout'),
+            style: 'destructive',
+            onPress: () => {
+              if (isBuyerAuthenticated) {
+                dispatch(logoutBuyer());
+              } else {
+                dispatch(logout());
+              }
+            },
+          },
+        ]
+      );
+    }
   };
 
   return (
@@ -138,7 +253,7 @@ export const BuyerProfileScreen = ({navigation}) => {
                       fontWeight: 'bold', 
                       fontSize: 20, 
                       color: isDark ? theme['color-danger-500'] : theme['color-danger-600']
-                    }}>Error loading profile</Text>
+                    }}>{t('profile.errorLoadingProfile')}</Text>
                     <Text
                       style={{ 
                         color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'], 
@@ -148,7 +263,7 @@ export const BuyerProfileScreen = ({navigation}) => {
                       }}
                       onPress={() => dispatch(fetchCustomerInfo())}
                     >
-                      Tap to retry
+                      {t('auth.tapToRetry')}
                     </Text>
                   </>
                 ) : (
@@ -169,7 +284,7 @@ export const BuyerProfileScreen = ({navigation}) => {
                       }}
                       onPress={navigateToProfileUpdate}
                     >
-                      View and edit profile
+                      {t('profile.viewAndEditProfile')}
                     </Text>
                     {customerInfo?.email && (
                       <Text style={{ 
@@ -180,6 +295,15 @@ export const BuyerProfileScreen = ({navigation}) => {
                         {customerInfo.email}
                       </Text>
                     )}
+                    
+                    {/* Profile Toggler - only shows when both profiles are authenticated */}
+                    <View style={{ marginTop: 8 }}>
+                      <ProfileToggler
+                        currentProfileType={currentProfileType}
+                        onProfileSwitch={handleProfileSwitch}
+                        style={{ alignSelf: 'flex-start' }}
+                      />
+                    </View>
                   </>
                 )}
               </View>
@@ -187,80 +311,111 @@ export const BuyerProfileScreen = ({navigation}) => {
           </Layout>
 
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
-        
-          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          
+        <Layout level="1" style={{ backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)' }}>
+        <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          
+          {/* Seller Options */}
           <ProfileActionButton
-            title="Cart"
-            subtitle="Settings are here now"
+            title={t('profile.sellerOptions', 'Seller Options')}
+            subtitle={isSellerAuthenticated ? t('profile.sellerOptionsSubtitle', 'Manage your selling activities') : t('profile.sellerAuthRequired', 'Sign in as seller to access seller features')}
+            iconName="person-outline"
+            onPress={isSellerAuthenticated ? () => navigation.navigate('SellerOptions') : undefined}
+            disabled={!isSellerAuthenticated}
+            rightButton={!isSellerAuthenticated ? renderSignInButton('seller') : null}
+          />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          
+          <ProfileActionButton
+            title={t('profile.cart')}
+            subtitle={t('profile.cartSubtitle')}
             iconName="shopping-cart-outline"
             onPress={navigateToOrdersList}
           />
-        <Layout level="1" style={{ backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)' }}>
           <ProfileActionButton
-            title="My Wishlist"
-            subtitle="Your saved items"
+            title={t('profile.myWishlist')}
+            subtitle={t('profile.myWishlistSubtitle')}
             iconName="heart-outline"
             onPress={navigateToMyWishlist}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="My Orders"
-            subtitle="Your saved items"
+            title={t('profile.myOrders')}
+            subtitle={t('profile.myOrdersSubtitle')}
             iconName="map-outline"
             onPress={navigateToMyOrderList}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Manage Addresses"
-            subtitle="Add and edit delivery addresses"
+            title={t('profile.manageAddresses')}
+            subtitle={t('profile.manageAddressesSubtitle')}
             iconName="map-outline"
             onPress={navigateToAddressList}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Settings"
-            subtitle="Settings are here now"
+            title={t('profile.settings')}
+            subtitle={t('profile.settingsSubtitleGeneric')}
             iconName="settings-2-outline"
             onPress={navigateToAppSettings}
           />
-          
+                       <ProfileActionButton
+              title={t('profile.helpSupport')}
+              subtitle={t('profile.helpSupportSubtitle')}
+              iconName="question-mark-circle-outline"
+              onPress={() => navigation.navigate(AppScreens.SUPPORT_TICKETS)}
+            />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Logout"
-            subtitle="You can log out here"
+            title={t('profile.logout')}
+            subtitle={t('profile.logoutSubtitleGeneric')}
             iconName="power"
-            onPress={() => {
-              dispatch(logout())
-            }}
+            onPress={handleLogout}
           />
         </Layout>
         <View style={styles.bottomBar}>
-          <View style={[styles.pillButton, { 
-            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-          }]}>
+          <TouchableOpacity 
+            style={[styles.pillButton, { 
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}
+            onPress={() => Linking.openURL(`${BASE_URL}about-us`)}
+          >
             <Text style={[styles.pillButtonText, { 
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>Our Services</Text>
-          </View>
-          <View style={[styles.pillButton, { 
-            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-          }]}>
+            }]}>{t('profile.ourServices')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.pillButton, { 
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}
+            onPress={() => Linking.openURL(`${BASE_URL}terms`)}
+          >
             <Text style={[styles.pillButtonText, { 
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>Term & Conditions</Text>
-          </View>
-          <View style={[styles.pillButton, { 
-            borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-          }]}>
+            }]}>{t('profile.termsConditions')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.pillButton, { 
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }]}
+            onPress={() => Linking.openURL(`${BASE_URL}account-tickets`)}
+          >
             <Text style={[styles.pillButtonText, { 
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>Contact us</Text>
-          </View>
+            }]}>{t('profile.contactUs')}</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+      
+      {/* Auth Modals */}
+      <SellerAuthModal
+        visible={showSellerAuthModal}
+        onClose={() => setShowSellerAuthModal(false)}
+        onSuccess={handleSellerAuthSuccess}
+      />
     </Layout>
   );
 };

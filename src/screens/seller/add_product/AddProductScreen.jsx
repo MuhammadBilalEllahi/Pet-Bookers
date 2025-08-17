@@ -9,12 +9,14 @@ import {
   SelectItem,
   Spinner,
   Icon,
+  Button,
 } from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {Formik} from 'formik';
 import {spacingStyles} from '../../../utils/globalStyles';
 import { useSelector, useDispatch } from 'react-redux';
 import { loadProductCategories, selectProductCategories } from '../../../store/productCategories';
+import { selectIsSellerAuthenticated, selectSellerAuth } from '../../../store/user';
 import { axiosSellerClient } from '../../../utils/axiosClient';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
@@ -64,11 +66,32 @@ export const AddProductScreen = ({navigation}) => {
 
   const dispatch = useDispatch();
   const { categories, categoriesLoading } = useSelector(selectProductCategories);
-  // console.log("categories", JSON.stringify(categories, null, 2));
+  
+  // Authentication state
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const sellerAuth = useSelector(selectSellerAuth);
+  
+  // // console.log("categories", JSON.stringify(categories, null, 2));
+  console.log("AddProductScreen - isSellerAuthenticated:", isSellerAuthenticated);
+  console.log("AddProductScreen - sellerAuth:", sellerAuth);
 
   useEffect(() => {
     dispatch(loadProductCategories());
   }, [dispatch]);
+
+  // Effect to monitor authentication state changes
+  useEffect(() => {
+    console.log("AddProductScreen - Authentication state changed:", {
+      isSellerAuthenticated,
+      token: sellerAuth.token,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (isSellerAuthenticated) {
+      // Re-load categories when authenticated to ensure fresh data
+      dispatch(loadProductCategories());
+    }
+  }, [isSellerAuthenticated, sellerAuth.token, dispatch]);
 
   const categoryOptions = categories.map(cat => cat.name);
   const selectedCategory = categories[categoryIndex?.row];
@@ -161,7 +184,7 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
   }
 
   // Debug what's being sent
-  console.log('FormData contents:', [...formData._parts]);
+  // console.log('FormData contents:', [...formData._parts]);
   // Tags
   // formData.append('tags', JSON.stringify(tags));
   tags?.forEach((tag, index) => {
@@ -356,6 +379,52 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
       </Modal>
     );
   };
+
+  // Show authentication required screen if not authenticated
+  if (!isSellerAuthenticated) {
+    return (
+      <Layout level="3" style={{
+        flex: 1, 
+        backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20
+      }}>
+        <Icon
+          name="person-outline"
+          fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+          style={{ width: 64, height: 64, marginBottom: 16 }}
+        />
+        <Text 
+          category="h5" 
+          style={{ 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+            textAlign: 'center',
+            marginBottom: 8
+          }}
+        >
+          {t('auth.sellerAuthRequired', 'Seller Authentication Required')}
+        </Text>
+        <Text 
+          category="p1" 
+          style={{ 
+            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
+            textAlign: 'center',
+            marginBottom: 24
+          }}
+        >
+          {t('auth.signInAsSellerToAddProducts', 'Please sign in as a seller to add products to your store.')}
+        </Text>
+        <Button
+          onPress={() => navigation.goBack()}
+          appearance="outline"
+          style={{ marginTop: 16 }}
+        >
+          {t('common.goBack', 'Go Back')}
+        </Button>
+      </Layout>
+    );
+  }
 
   return (
     <Layout level="3" style={{flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']}}>
@@ -619,7 +688,7 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
                 <Layout style={styles.fieldGroup}>
                   <Text style={[styles.fieldLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('addProduct.totalQuantity')}</Text>
                   <Input
-                    style={[styles.input, { 
+                    style={[styles.input, {  
                       backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
                       borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
                     }]}
@@ -689,7 +758,7 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
     />
     <View style={[styles.uploadTextBox, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-700'] }]}>
       <Text style={[styles.uploadText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-        {thumbnail ? 'Thumbnail Selected' : 'Upload Thumbnail'}
+        {thumbnail ? t('addProduct.thumbnailSelected') : t('addProduct.uploadThumbnail')}
       </Text>
     </View>
   </TouchableOpacity>
@@ -720,8 +789,8 @@ const [showCongratsDialog, setShowCongratsDialog] = useState(false);
     <View style={[styles.uploadTextBox, { borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-700'] }]}>
       <Text style={[styles.uploadText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
         {images.length > 0 
-          ? `${images.length} Images Selected` 
-          : 'Upload Product Images'}
+            ? `${images.length} ${t('addProduct.imagesSelected')}` 
+          : t('addProduct.uploadProductImages')}
       </Text>
     </View>
   </TouchableOpacity>

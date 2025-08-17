@@ -57,7 +57,7 @@ export default function Shipping() {
     try {
       setShippingTypeLoading(true);
       const response = await axiosSellerClient.get('/shipping/get-shipping-method');
-      console.log("shipping type", response.data);
+      // console.log("shipping type", response.data);
       setShippingType(response.data.type || 'order_wise');
     } catch (error) {
       console.error('Error fetching shipping type:', error);
@@ -71,7 +71,7 @@ export default function Shipping() {
     try {
       setCategoryCostsLoading(true);
       const response = await axiosSellerClient.get('/shipping/all-category-cost');
-      console.log("category costs", response.data);
+      // console.log("category costs", response.data);
       setCategoryCosts(response.data.all_category_shipping_cost || []);
     } catch (error) {
       console.error('Error fetching category costs:', error);
@@ -87,7 +87,7 @@ export default function Shipping() {
       const response = await axiosSellerClient.get('/shipping/selected-shipping-method', {
         params: { shipping_type: newType }
       });
-      console.log("shipping type updated", response.data);
+      // console.log("shipping type updated", response.data);
       
       Alert.alert('Success', response.data.message || 'Shipping type updated successfully');
       setShippingType(newType);
@@ -110,7 +110,7 @@ export default function Shipping() {
         cost: costs,
         multiply_qty: multiplyQty,
       });
-      console.log("category costs updated", response.data);
+      // console.log("category costs updated", response.data);
       
       Alert.alert('Success', response.data.success || 'Category costs updated successfully');
       setShowCategoryCostsModal(false);

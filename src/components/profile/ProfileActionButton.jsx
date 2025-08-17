@@ -11,6 +11,8 @@ export const ProfileActionButton = ({
   iconName,
   rightIconName,
   onPress,
+  disabled = false,
+  rightButton = null,
 }) => {
   const {theme, isDark} = useTheme();
   const {i18n} = useTranslation();
@@ -20,10 +22,12 @@ export const ProfileActionButton = ({
         styles.actionRow,
         spacingStyles.px32,
         { 
-          borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300']
+          borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300'],
+          opacity: disabled ? 0.5 : 1
         }
       ]} 
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
     >
       <View style={[
         styles.actionIconCircle,
@@ -57,22 +61,26 @@ export const ProfileActionButton = ({
           </Text>
         ) : null}
       </View>
-      <View style={[
-        styles.actionArrowBox,
-        { 
-          backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-        }
-      ]}>
-        <Icon
-          name={rightIconName
-            ? rightIconName
-            : i18n.dir() === 'rtl'
-            ? 'arrow-ios-back-outline'
-            : 'arrow-ios-forward'}
-          fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-          style={{ width: 18, height: 18 }}
-        />
-      </View>
+      {rightButton ? (
+        rightButton
+      ) : (
+        <View style={[
+          styles.actionArrowBox,
+          { 
+            backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+          }
+        ]}>
+          <Icon
+            name={rightIconName
+              ? rightIconName
+              : i18n.dir() === 'rtl'
+              ? 'arrow-ios-back-outline'
+              : 'arrow-ios-forward'}
+            fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+            style={{ width: 18, height: 18 }}
+          />
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

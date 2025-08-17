@@ -1,3 +1,4 @@
+import React from 'react';
 import {Icon, Input, Layout, Text, Button} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {FlatList, StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
@@ -31,8 +32,8 @@ export const ChatScreen = ({navigation}) => {
   const currentSellerId = useSelector(selectSellerId);
   const currentCustomerId = useSelector(selectCustomerId);
   
-  const [selectedTab, setSelectedTab] = useState('All');
-  const [selectedChip, setSelectedChip] = useState('All');
+  const [selectedTab, setSelectedTab] = useState(t('chatScreen.tabs.all'));
+  const [selectedChip, setSelectedChip] = useState(t('chatScreen.chips.all'));
   const [buyerChatList, setBuyerChatList] = useState([]);
   const [sellerChatList, setSellerChatList] = useState([]);
   const [buyerLoading, setBuyerLoading] = useState(false);
@@ -40,10 +41,10 @@ export const ChatScreen = ({navigation}) => {
   const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
   const [showSellerAuthModal, setShowSellerAuthModal] = useState(false);
   
-  const tabs = ['All', 'Buying', 'Selling'];
-  const chips = ['All', 'Unread Chats', 'Important'];
+  const tabs = [t('chatScreen.tabs.all'), t('chatScreen.tabs.buying'), t('chatScreen.tabs.selling')];
+  const chips = [t('chatScreen.chips.all'), t('chatScreen.chips.unreadChats'), t('chatScreen.chips.important')];
 
-  const renderIcon = props => <Icon {...props} name="search-outline" />;
+  const renderIcon = (props) => <Icon {...props} name="search-outline" />;
 
   // Set up auth modal handlers
   useEffect(() => {
@@ -52,6 +53,11 @@ export const ChatScreen = ({navigation}) => {
       showSellerAuthModal: () => setShowSellerAuthModal(true),
     });
   }, []);
+
+  // Ensure bottom tab bar is visible when ChatScreen is focused
+  useEffect(() => {
+    dispatch(setBottomTabBarVisibility(true));
+  }, [dispatch]);
 
   const fetchBuyerChats = async () => {
     if (!isBuyerAuthenticated) {
@@ -63,7 +69,7 @@ export const ChatScreen = ({navigation}) => {
       setBuyerLoading(true);
       const response = await smartBuyerClient.get('customer/chat/list/seller?limit=100&offset=0');
       
-      console.log('Buyer chat response:', JSON.stringify(response.data, null, 2));
+      // console.log('Buyer chat response:', JSON.stringify(response.data, null, 2));
       
         if (response.data && response.data.chat) {
           const formattedChats = response.data.chat.map(chat => {
@@ -72,7 +78,7 @@ export const ChatScreen = ({navigation}) => {
           
           // Get seller info (from seller_info field in buyer chat response)
           const seller = chat?.seller_info;
-          const shopName = seller?.shops?.[0]?.name || 'Shop';
+          const shopName = seller?.shops?.[0]?.name || t('common.shop');
           const isOwnAccount = currentSellerId && seller?.id === currentSellerId;
           
           let sellerName;
@@ -81,10 +87,10 @@ export const ChatScreen = ({navigation}) => {
           if (isOwnAccount) {
             // If it's the user's own seller account
             if (seller?.f_name && seller?.l_name) {
-              sellerName = `${seller.f_name} ${seller.l_name} (You)`;
+              sellerName = `${seller.f_name} ${seller.l_name} (${t('common.you')})`;
               subtitle = shopName;
             } else {
-              sellerName = `${shopName} (You)`;
+              sellerName = `${shopName} (${t('common.you')})`;
             }
           } else {
             // If it's another seller
@@ -115,7 +121,7 @@ export const ChatScreen = ({navigation}) => {
                 ? `https://petbookers.com.pk/storage/app/public/seller/${seller.image}`
                   : 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png',
               isImportant: false,
-            type: 'Buying',
+            type: t('common.buying'),
             chatType: 'buyer',
               messageStatus: {
                 isSentByUs,
@@ -144,7 +150,7 @@ export const ChatScreen = ({navigation}) => {
       setSellerLoading(true);
       const response = await smartSellerClient.get('messages/list/customer?limit=100&offset=0');
       
-      console.log('Seller chat response:', JSON.stringify(response.data, null, 2));
+      // console.log('Seller chat response:', JSON.stringify(response.data, null, 2));
       
       if (response.data && response.data.chat) {
         const formattedChats = response.data.chat.map(chat => {
@@ -157,11 +163,11 @@ export const ChatScreen = ({navigation}) => {
           
           let customerName;
           if (customer) {
-            const baseName = `${customer.f_name} ${customer.l_name}`.trim() || customer.name || 'Customer';
-            customerName = isOwnBuyerAccount ? `${baseName} (You)` : baseName;
+            const baseName = `${customer.f_name} ${customer.l_name}`.trim() || customer.name || t('common.customer');
+            customerName = isOwnBuyerAccount ? `${baseName} (${t('common.you')})` : baseName;
           } else {
             // For null customer, check if user_id matches current customer ID
-            customerName = isOwnBuyerAccount ? 'You' : 'Unknown Customer';
+            customerName = isOwnBuyerAccount ? t('common.you') : t('common.unknownCustomer');
           }
           
           return {
@@ -180,7 +186,7 @@ export const ChatScreen = ({navigation}) => {
               ? 'https://petbookers.com.pk/storage/app/public/profile/2024-03-26-6602afcca8664.png'
               : `https://petbookers.com.pk/storage/app/public/profile/${customer.image}`,
             isImportant: false,
-            type: 'Selling',
+            type: t('common.selling'),
             chatType: 'seller',
             messageStatus: {
               isSentByUs,
@@ -210,13 +216,13 @@ export const ChatScreen = ({navigation}) => {
     let chatList = [];
     
     switch (selectedTab) {
-      case 'All':
+      case t('chatScreen.tabs.all'):
         chatList = allChats;
         break;
-      case 'Buying':
+      case t('chatScreen.tabs.buying'):
         chatList = buyerChatList;
         break;
-      case 'Selling':
+      case t('chatScreen.tabs.selling'):
         chatList = sellerChatList;
         break;
       default:
@@ -225,10 +231,10 @@ export const ChatScreen = ({navigation}) => {
 
     return chatList.filter(chat => {
       // Chip filtering
-      if (selectedChip === 'Unread Chats' && chat.unreadMessages === 0) {
+      if (selectedChip === t('chatScreen.chips.unreadChats') && chat.unreadMessages === 0) {
         return false;
       }
-      if (selectedChip === 'Important' && !chat.isImportant) {
+      if (selectedChip === t('chatScreen.chips.important') && !chat.isImportant) {
         return false;
       }
       
@@ -237,33 +243,33 @@ export const ChatScreen = ({navigation}) => {
   }, [allChats, buyerChatList, sellerChatList, selectedTab, selectedChip]);
 
   const handleTabPress = (tab) => {
-    if (tab === 'Buying' && !isBuyerAuthenticated) {
+    if (tab === t('chatScreen.tabs.buying') && !isBuyerAuthenticated) {
       const message = isSellerAuthenticated 
-        ? 'You are signed in as a seller. Please also sign in as a buyer to view your buying conversations.'
-        : 'Please sign in as a buyer to view your buying conversations.';
+        ? t('chatScreen.authRequired.buyerMessageSeller')
+        : t('chatScreen.authRequired.buyerMessage');
       
       Alert.alert(
-        'Buyer Authentication Required',
+        t('chatScreen.authRequired.buyerTitle'),
         message,
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('chatScreen.authRequired.signInAsBuyer'), onPress: () => setShowBuyerAuthModal(true) }
         ]
       );
       return;
     }
     
-    if (tab === 'Selling' && !isSellerAuthenticated) {
+    if (tab === t('chatScreen.tabs.selling') && !isSellerAuthenticated) {
       const message = isBuyerAuthenticated 
-        ? 'You are signed in as a buyer. Please also sign in as a seller to view your selling conversations.'
-        : 'Please sign in as a seller to view your selling conversations.';
+        ? t('chatScreen.authRequired.sellerMessageBuyer')
+        : t('chatScreen.authRequired.sellerMessage');
       
       Alert.alert(
-        'Seller Authentication Required',
+        t('chatScreen.authRequired.sellerTitle'),
         message,
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Sign in as Seller', onPress: () => setShowSellerAuthModal(true) }
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('chatScreen.authRequired.signInAsSeller'), onPress: () => setShowSellerAuthModal(true) }
         ]
       );
       return;
@@ -274,13 +280,13 @@ export const ChatScreen = ({navigation}) => {
 
   const handleBuyerAuthSuccess = () => {
     setShowBuyerAuthModal(false);
-    setSelectedTab('Buying');
+    setSelectedTab(t('chatScreen.tabs.buying'));
     fetchBuyerChats();
   };
 
   const handleSellerAuthSuccess = () => {
     setShowSellerAuthModal(false);
-    setSelectedTab('Selling');
+    setSelectedTab(t('chatScreen.tabs.selling'));
     fetchSellerChats();
   };
 
@@ -331,21 +337,21 @@ export const ChatScreen = ({navigation}) => {
       <Text style={[styles.authPromptTitle, {
         color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
       }]}>
-        {type === 'buyer' ? 'Sign in as Buyer' : 'Sign in as Seller'}
+        {type === 'buyer' ? t('chatScreen.authPrompt.buyerTitle') : t('chatScreen.authPrompt.sellerTitle')}
       </Text>
       <Text style={[styles.authPromptText, {
         color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
       }]}>
         {type === 'buyer' 
-          ? 'Sign in as a buyer to view your conversations with sellers'
-          : 'Sign in as a seller to view your conversations with customers'
+          ? t('chatScreen.authPrompt.buyerMessage')
+          : t('chatScreen.authPrompt.sellerMessage')
         }
       </Text>
       <Button
         style={styles.authPromptButton}
         onPress={() => type === 'buyer' ? setShowBuyerAuthModal(true) : setShowSellerAuthModal(true)}
       >
-        {type === 'buyer' ? 'Sign in as Buyer' : 'Sign in as Seller'}
+        {type === 'buyer' ? t('chatScreen.authPrompt.buyerTitle') : t('chatScreen.authPrompt.sellerTitle')}
       </Button>
     </View>
   );
@@ -353,15 +359,15 @@ export const ChatScreen = ({navigation}) => {
   const isLoading = buyerLoading || sellerLoading;
 
   const renderEmptyState = () => {
-    if (selectedTab === 'Buying' && !isBuyerAuthenticated) {
+    if (selectedTab === t('chatScreen.tabs.buying') && !isBuyerAuthenticated) {
       return renderAuthPrompt('buyer');
     }
     
-    if (selectedTab === 'Selling' && !isSellerAuthenticated) {
+    if (selectedTab === t('chatScreen.tabs.selling') && !isSellerAuthenticated) {
       return renderAuthPrompt('seller');
     }
     
-    if (selectedTab === 'All' && !isBuyerAuthenticated && !isSellerAuthenticated) {
+    if (selectedTab === t('chatScreen.tabs.all') && !isBuyerAuthenticated && !isSellerAuthenticated) {
       return (
         <View style={styles.authPromptContainer}>
           <Icon
@@ -373,26 +379,26 @@ export const ChatScreen = ({navigation}) => {
           <Text style={[styles.authPromptTitle, {
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
-            Sign in to view chats
+            {t('chatScreen.emptyState.signInToViewChats')}
           </Text>
           <Text style={[styles.authPromptText, {
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
           }]}>
-            Sign in as a buyer or seller to view your conversations
+            {t('chatScreen.emptyState.signInMessage')}
           </Text>
-          <View style={styles.authButtonsRow}>
+          <View style={styles.authButtonsColumn}>
             <Button
-              style={[styles.authPromptButton, { flex: 1, marginRight: 8 }]}
-              appearance="outline"
+              style={[styles.authPromptButton, { marginBottom: 12 }]}
               onPress={() => setShowBuyerAuthModal(true)}
             >
-              Sign in as Buyer
+              {t('chatScreen.authRequired.signInAsBuyer')}
             </Button>
             <Button
-              style={[styles.authPromptButton, { flex: 1, marginLeft: 8 }]}
+              style={styles.authPromptButton}
+              appearance="outline"
               onPress={() => setShowSellerAuthModal(true)}
             >
-              Sign in as Seller
+              {t('chatScreen.authRequired.signInAsSeller')}
             </Button>
           </View>
         </View>
@@ -410,13 +416,13 @@ export const ChatScreen = ({navigation}) => {
         <Text style={[styles.emptyText, { 
           color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] 
         }]}>
-          No chats found
+          {t('chatScreen.emptyState.noChatsFound')}
         </Text>
-        {selectedTab === 'All' && (
+        {selectedTab === t('chatScreen.tabs.all') && (
           <Text style={[styles.emptySubText, { 
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] 
           }]}>
-            Start a conversation by messaging a seller or customer
+            {t('chatScreen.emptyState.startConversation')}
           </Text>
         )}
       </View>
@@ -431,7 +437,7 @@ export const ChatScreen = ({navigation}) => {
           color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
           marginTop: 16
         }]}>
-          Loading chats...
+          {t('chats.loadingChats')}
         </Text>
       </Layout>
     );
@@ -460,7 +466,7 @@ export const ChatScreen = ({navigation}) => {
               {tab}
             </Text>
               {/* Show badge for tabs that require authentication */}
-              {((tab === 'Buying' && !isBuyerAuthenticated) || (tab === 'Selling' && !isSellerAuthenticated)) && (
+              {((tab === t('chatScreen.tabs.buying') && !isBuyerAuthenticated) || (tab === t('chatScreen.tabs.selling') && !isSellerAuthenticated)) && (
                 <Icon
                   name="lock-outline"
                   style={[styles.lockIcon, { 
@@ -469,21 +475,21 @@ export const ChatScreen = ({navigation}) => {
                 />
               )}
               {/* Show unread count */}
-              {tab === 'Buying' && buyerChatList.some(chat => chat.unreadMessages > 0) && (
+              {tab === t('chatScreen.tabs.buying') && buyerChatList.some(chat => chat.unreadMessages > 0) && (
                 <View style={[styles.unreadBadge, { backgroundColor: theme['color-danger-default'] }]}>
                   <Text style={styles.unreadBadgeText}>
                     {buyerChatList.filter(chat => chat.unreadMessages > 0).length}
                   </Text>
                 </View>
               )}
-              {tab === 'Selling' && sellerChatList.some(chat => chat.unreadMessages > 0) && (
+              {tab === t('chatScreen.tabs.selling') && sellerChatList.some(chat => chat.unreadMessages > 0) && (
                 <View style={[styles.unreadBadge, { backgroundColor: theme['color-danger-default'] }]}>
                   <Text style={styles.unreadBadgeText}>
                     {sellerChatList.filter(chat => chat.unreadMessages > 0).length}
                   </Text>
                 </View>
               )}
-              {tab === 'All' && allChats.some(chat => chat.unreadMessages > 0) && (
+              {tab === t('chatScreen.tabs.all') && allChats.some(chat => chat.unreadMessages > 0) && (
                 <View style={[styles.unreadBadge, { backgroundColor: theme['color-danger-default'] }]}>
                   <Text style={styles.unreadBadgeText}>
                     {allChats.filter(chat => chat.unreadMessages > 0).length}
@@ -568,14 +574,14 @@ export const ChatScreen = ({navigation}) => {
         visible={showBuyerAuthModal}
         onClose={() => setShowBuyerAuthModal(false)}
         onSuccess={handleBuyerAuthSuccess}
-        title="Sign in as Buyer"
+        title={t('chatScreen.authRequired.signInAsBuyer')}
       />
       
       <SellerAuthModal
         visible={showSellerAuthModal}
         onClose={() => setShowSellerAuthModal(false)}
         onSuccess={handleSellerAuthSuccess}
-        title="Sign in as Seller"
+        title={t('chatScreen.authRequired.signInAsSeller')}
       />
     </Layout>
   );
@@ -706,9 +712,10 @@ const styles = StyleSheet.create({
   authPromptButton: {
     minWidth: 200,
   },
-  authButtonsRow: {
-    flexDirection: 'row',
+  authButtonsColumn: {
+    flexDirection: 'column',
     width: '100%',
+    alignItems: 'center',
   },
   loadingText: {
     fontSize: 16,

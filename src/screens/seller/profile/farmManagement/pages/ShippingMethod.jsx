@@ -59,7 +59,7 @@ export default function ShippingMethod() {
     try {
       setLoading(true);
       const response = await axiosSellerClient.get('/shipping-method/list');
-      console.log("shipping methods", response.data);
+      // console.log("shipping methods", response.data);
       setShippingMethods(response.data || []);
     } catch (error) {
       console.error('Error fetching shipping methods:', error);
@@ -85,7 +85,7 @@ export default function ShippingMethod() {
       }
 
       const response = await axiosSellerClient.post('/shipping-method/add', addForm);
-      console.log("shipping method added", response.data);
+      // console.log("shipping method added", response.data);
       
       Alert.alert('Success', response.data.message || 'Shipping method added successfully');
       setShowAddModal(false);
@@ -112,7 +112,7 @@ export default function ShippingMethod() {
       }
 
       const response = await axiosSellerClient.put(`/shipping-method/update/${selectedMethod.id}`, editForm);
-      console.log("shipping method updated", response.data);
+      // console.log("shipping method updated", response.data);
       
       Alert.alert('Success', response.data.message || 'Shipping method updated successfully');
       setShowEditModal(false);
@@ -131,7 +131,7 @@ export default function ShippingMethod() {
         id: methodId,
         status: newStatus ? 1 : 0,
       });
-      console.log("status updated", response.data);
+      // console.log("status updated", response.data);
       
       Alert.alert('Success', response.data.message || 'Status updated successfully');
       fetchShippingMethods();
@@ -144,7 +144,7 @@ export default function ShippingMethod() {
   const deleteShippingMethod = async () => {
     try {
       const response = await axiosSellerClient.delete(`/shipping-method/delete/${selectedMethod.id}`);
-      console.log("shipping method deleted", response.data);
+      // console.log("shipping method deleted", response.data);
       
       Alert.alert('Success', response.data.message || 'Shipping method deleted successfully');
       setShowDeleteModal(false);
@@ -159,7 +159,7 @@ export default function ShippingMethod() {
   const openEditModal = async (method) => {
     try {
       const response = await axiosSellerClient.get(`/shipping-method/edit/${method.id}`);
-      console.log("method details", response.data);
+      // console.log("method details", response.data);
       
       if (response.data && response.data.id) {
         setSelectedMethod(response.data);

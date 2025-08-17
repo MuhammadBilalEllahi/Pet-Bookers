@@ -1,25 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
-  View,
   StyleSheet,
   ScrollView,
-  Image,
-  Alert,
-  Platform,
-  PermissionsAndroid,
 } from 'react-native';
 import {
   Layout,
   Text,
-  Input,
-  Button,
-  Spinner,
   Divider,
 } from '@ui-kitten/components';
 import { useTheme } from '../../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { ProfileActionButton } from '../../../../components/profile';
 import { AppScreens } from '../../../../navigators/AppNavigator';
+
+
 
 
 
@@ -33,12 +27,31 @@ export const FarmManagement = ({ navigation }) => {
 
 
 
-  const navigateToSellerForgotPassword = () => {
-    navigation.navigate('SellerForgotPassword');
+
+
+  // Management navigation functions
+  const navigateToDeliveryManagement = () => {
+    navigation.navigate(AppScreens.DELIVERY);
   };
 
-  const navigateToSellerResetPassword = () => {
-    navigation.navigate('SellerResetPassword');
+  const navigateToEarnings = (deliveryMan = null) => {
+    navigation.navigate(AppScreens.EARNINGS_STATS, { deliveryMan });
+  };
+
+  const navigateToOrders = (deliveryMan = null) => {
+    navigation.navigate(AppScreens.ORDERS_STATS, { deliveryMan });
+  };
+
+  const navigateToReviews = (deliveryMan = null) => {
+    navigation.navigate(AppScreens.REVIEWS_STATS, { deliveryMan });
+  };
+
+  const navigateToTransactions = () => {
+    navigation.navigate(AppScreens.TRANSACTIONS_STATS);
+  };
+
+  const navigateToShopSettings = () => {
+    navigation.navigate(AppScreens.SHOP_SETTINGS);
   };
 
   const navigateToRefundHandle = () => {
@@ -65,71 +78,156 @@ export const FarmManagement = ({ navigation }) => {
     navigation.navigate(AppScreens.SHIPPING_METHOD);
   };
 
-
-
-
   return (
     <Layout style={[styles.container, { 
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
       <ScrollView style={styles.scrollView}>
-        {/* Password Management Section */}
+        
+        {/* Statistics & Analytics */}
         <Layout style={[styles.section, { 
           backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
           borderRadius: 12 
         }]}>
+          <Text style={[styles.sectionTitle, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Statistics & Analytics</Text>
+
           <ProfileActionButton
-            title="Forgot Password"
-            subtitle="Reset your password via email/SMS"
-            iconName="info-outline"
-            onPress={navigateToSellerForgotPassword}
+            title={t('farmDetailsEditScreen.managementButtons.earnings.title')}
+            subtitle={t('farmDetailsEditScreen.managementButtons.earnings.subtitle')}
+            iconName="trending-up-outline"
+            onPress={() => navigateToEarnings()}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Change Password"
-            subtitle="Update your current password"
-            iconName="info-outline"
-            onPress={navigateToSellerResetPassword}
+            title={t('farmDetailsEditScreen.managementButtons.orders.title')}
+            subtitle={t('farmDetailsEditScreen.managementButtons.orders.subtitle')}
+            iconName="list-outline"
+            onPress={() => navigateToOrders()}
           />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Refund Handle"
-            subtitle="Handle refund requests"
-            iconName="info-outline"
-            onPress={navigateToRefundHandle}
+            title={t('farmDetailsEditScreen.managementButtons.reviews.title')}
+            subtitle={t('farmDetailsEditScreen.managementButtons.reviews.subtitle')}
+            iconName="star-outline"
+            onPress={() => navigateToReviews()}
           />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Coupon Handling"
-            subtitle="Handle coupon requests"
-            iconName="info-outline"
-            onPress={navigateToCouponHandling}
+            title={t('farmDetailsEditScreen.managementButtons.transactions.title')}
+            subtitle={t('farmDetailsEditScreen.managementButtons.transactions.subtitle')}
+            iconName="credit-card-outline"
+            onPress={() => navigateToTransactions()}
           />
+        </Layout>
+
+        {/* Delivery Management */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <Text style={[styles.sectionTitle, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Delivery Management</Text>
+
           <ProfileActionButton
-            title="POS"
-            subtitle="Handle POS requests"
-            iconName="info-outline"
-            onPress={navigateToPOS}
+            title={t('farmDetailsEditScreen.managementButtons.deliveryManagement.title')}
+            subtitle={t('farmDetailsEditScreen.managementButtons.deliveryManagement.subtitle')}
+            iconName="car-outline"
+            onPress={navigateToDeliveryManagement}
           />
+        </Layout>
+
+        {/* Shippings */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <Text style={[styles.sectionTitle, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Shippings</Text>
+
           <ProfileActionButton
-            title="Order"
-            subtitle="Handle order requests"
-            iconName="info-outline"
-            onPress={navigateToOrder}
-          />
-          <ProfileActionButton
-            title="Shipping"
-            subtitle="Handle shipping requests"
-            iconName="info-outline"
+            title={t('farmManagement.actions.shipping.title')}
+            subtitle={t('farmManagement.actions.shipping.subtitle')}
+            iconName="paper-plane-outline"
             onPress={navigateToShipping}
           />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton
-            title="Shipping Method"
-            subtitle="Handle shipping method requests"
-            iconName="info-outline"
+            title={t('farmManagement.actions.shippingMethod.title')}
+            subtitle={t('farmManagement.actions.shippingMethod.subtitle')}
+            iconName="options-outline"
             onPress={navigateToShippingMethod}
           />
         </Layout>
 
-       
+        {/* Financial Management */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <Text style={[styles.sectionTitle, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Financial Management</Text>
+
+          <ProfileActionButton
+            title={t('farmManagement.actions.refundHandle.title')}
+            subtitle={t('farmManagement.actions.refundHandle.subtitle')}
+            iconName="undo-outline"
+            onPress={navigateToRefundHandle}
+          />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title={t('farmManagement.actions.couponHandling.title')}
+            subtitle={t('farmManagement.actions.couponHandling.subtitle')}
+            iconName="gift-outline"
+            onPress={navigateToCouponHandling}
+          />
+        </Layout>
+
+        {/* Sales Management */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <Text style={[styles.sectionTitle, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Sales Management</Text>
+
+          <ProfileActionButton
+            title={t('farmManagement.actions.pos.title')}
+            subtitle={t('farmManagement.actions.pos.subtitle')}
+            iconName="credit-card-outline"
+            onPress={navigateToPOS}
+          />
+          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <ProfileActionButton
+            title={t('farmManagement.actions.order.title')}
+            subtitle={t('farmManagement.actions.order.subtitle')}
+            iconName="shopping-cart-outline"
+            onPress={navigateToOrder}
+          />
+        </Layout>
+
+        {/* Settings */}
+        <Layout style={[styles.section, { 
+          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
+          borderRadius: 12 
+        }]}>
+          <Text style={[styles.sectionTitle, { 
+            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          }]}>Settings</Text>
+
+          <ProfileActionButton
+            title={t('farmDetailsEditScreen.managementButtons.shopSettings.title')}
+            subtitle={t('farmDetailsEditScreen.managementButtons.shopSettings.subtitle')}
+            iconName="settings-outline"
+            onPress={() => navigateToShopSettings()}
+          />
+        </Layout>
+
       </ScrollView>
     </Layout>
   );
@@ -138,11 +236,6 @@ export const FarmManagement = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
@@ -153,61 +246,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  editButton: {
-    marginLeft: 8,
-  },
-  imageContainer: {
-    alignItems: 'center',
     marginBottom: 16,
-  },
-  staticImageContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  staticImage: {
-    width: '100%',
-    height: '100%',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  input: {
-    marginBottom: 12,
-  },
-  submitButton: {
-    marginTop: 16,
-    marginBottom: 32,
-  },
-  staticInfo: {
-    marginTop: 16,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    alignItems: 'flex-start',
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    width: 80,
-    marginRight: 8,
-  },
-  infoValue: {
-    fontSize: 14,
-    flex: 1,
   },
 }); 

@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   Layout,
   Text,
@@ -40,6 +41,7 @@ import Toast from 'react-native-toast-message';
 const {width: windowWidth, height: windowHeight} = Dimensions.get('screen');
 
 export const MyWishlistScreen = ({navigation}) => {
+  const { t } = useTranslation();
   const {theme, isDark} = useTheme();
   const uiKittenTheme = useUIKittenTheme();
   const dispatch = useDispatch();
@@ -202,7 +204,7 @@ export const MyWishlistScreen = ({navigation}) => {
               : theme['color-basic-900'],
           },
         ]}>
-        Your Wishlist is Empty
+        {t('wishlist.empty')}
       </Text>
       <Text
         category="s1"
@@ -214,31 +216,30 @@ export const MyWishlistScreen = ({navigation}) => {
               : theme['color-basic-600'],
           },
         ]}>
-        Save items you love for later. Start browsing and add products to your
-        wishlist!
+        {t('wishlist.emptyDesc')}
       </Text>
       <Button
         style={styles.browseButton}
         onPress={() => navigation?.navigate(AppScreens.BUYER_HOME_MAIN)}>
-        Browse Products
+        {t('wishlist.browseProducts')}
       </Button>
     </View>
   );
 
   const renderAuthState = () => (
     <>
-      <View style={[styles.authContainer, { backgroundColor: isDark ? theme['color-basic-800'] : theme['color-basic-100'] }]}>
-        <Text style={[styles.authMessage, { color: isDark ? theme['color-basic-100'] : theme['color-basic-900'] }]}>
+      <View style={[styles.authContainer, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
+        <Text style={[styles.authMessage, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
           {isSellerAuthenticated 
-            ? 'Please sign in as a buyer to view your wishlist'
-            : 'Please sign in to view your wishlist'
+            ? t('wishlist.sellerToBuyerAuth')
+            : t('wishlist.authRequired')
           }
         </Text>
         <Button
           onPress={() => setShowBuyerAuthModal(true)}
           style={styles.authButton}
         >
-          Sign in as Buyer
+          {t('auth.signInAsBuyer')}
         </Button>
       </View>
       
@@ -246,7 +247,7 @@ export const MyWishlistScreen = ({navigation}) => {
         visible={showBuyerAuthModal}
         onClose={() => setShowBuyerAuthModal(false)}
         onSuccess={handleAuthSuccess}
-        title="Sign in as Buyer"
+        title={t('auth.signInAsBuyer')}
       />
     </>
   );
@@ -266,7 +267,7 @@ export const MyWishlistScreen = ({navigation}) => {
           styles.errorTitle,
           {color: uiKittenTheme['color-danger-default']},
         ]}>
-        Something went wrong
+        {t('wishlist.somethingWentWrong')}
       </Text>
       <Text
         category="s1"
@@ -281,7 +282,7 @@ export const MyWishlistScreen = ({navigation}) => {
         {wishlistError}
       </Text>
       <Button appearance="outline" onPress={retryFetch} style={styles.retryButton}>
-        Try Again
+        {t('wishlist.tryAgain')}
       </Button>
     </View>
   );
@@ -299,7 +300,7 @@ export const MyWishlistScreen = ({navigation}) => {
               : theme['color-basic-600'],
           },
         ]}>
-        Loading your wishlist...
+        {t('wishlist.loadingWishlist')}
       </Text>
     </View>
   );
@@ -312,14 +313,14 @@ export const MyWishlistScreen = ({navigation}) => {
   const renderHeader = () => (
     <Layout
       level="2"
-      style={[
-        styles.headerContainer,
-        {
-          backgroundColor: isDark
-            ? theme['color-basic-800']
-            : theme['color-basic-100'],
-        },
-      ]}>
+              style={[
+          styles.headerContainer,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}>
       {wishlistItems.length > 0 && (
         <View style={styles.headerContent}>
           <Text
@@ -332,7 +333,7 @@ export const MyWishlistScreen = ({navigation}) => {
                   : theme['color-basic-900'],
               },
             ]}>
-            My Wishlist
+            {t('profile.myWishlist')}
           </Text>
           <Text
             category="s2"
@@ -344,7 +345,7 @@ export const MyWishlistScreen = ({navigation}) => {
                   : theme['color-basic-600'],
               },
             ]}>
-            {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'}
+            {wishlistItems.length} {wishlistItems.length === 1 ? t('common.item') : t('common.items')}
           </Text>
         </View>
       )}
@@ -360,7 +361,7 @@ export const MyWishlistScreen = ({navigation}) => {
           flexeStyles.flex1,
           {
             backgroundColor: isDark
-              ? theme['color-basic-800']
+              ? theme['color-shadcn-background']
               : theme['color-basic-100'],
           },
         ]}>
@@ -378,7 +379,7 @@ export const MyWishlistScreen = ({navigation}) => {
           flexeStyles.flex1,
           {
             backgroundColor: isDark
-              ? theme['color-basic-800']
+              ? theme['color-shadcn-background']
               : theme['color-basic-100'],
           },
         ]}>
@@ -394,7 +395,7 @@ export const MyWishlistScreen = ({navigation}) => {
         flexeStyles.flex1,
         {
           backgroundColor: isDark
-            ? theme['color-basic-800']
+            ? theme['color-shadcn-background']
             : theme['color-basic-100'],
         },
       ]}>
@@ -403,8 +404,19 @@ export const MyWishlistScreen = ({navigation}) => {
         keyExtractor={(item, index) => item.id?.toString() || index.toString()}
         renderItem={renderWishlistItem}
         showsVerticalScrollIndicator={false}
+        style={{
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            colors={[theme['color-primary-500']]}
+            tintColor={theme['color-primary-500']}
+            progressBackgroundColor={isDark ? theme['color-shadcn-card'] : theme['color-basic-100']}
+          />
         }
         ListHeaderComponent={wishlistItems.length > 0 ? renderHeader : null}
         ListEmptyComponent={
@@ -413,6 +425,11 @@ export const MyWishlistScreen = ({navigation}) => {
         contentContainerStyle={[
           styles.listContainer,
           wishlistItems.length === 0 && styles.emptyListContainer,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          }
         ]}
         // Add some padding for better UX
         contentInsetAdjustmentBehavior="automatic"
@@ -423,7 +440,7 @@ export const MyWishlistScreen = ({navigation}) => {
         visible={showBuyerAuthModal}
         onClose={() => setShowBuyerAuthModal(false)}
         onSuccess={handleAuthSuccess}
-        title="Sign in as Buyer"
+        title={t('auth.signInAsBuyer')}
       />
     </Layout>
   );
@@ -432,10 +449,14 @@ export const MyWishlistScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   listContainer: {
     paddingVertical: 8,
+    // Remove fixed height to allow proper card rendering
+    flex: 1,
+    height: windowHeight
   },
   emptyListContainer: {
     flexGrow: 1,
     justifyContent: 'center',
+    minHeight: windowHeight - 200, // Use minimum height instead of fixed height
   },
   headerContainer: {
     paddingHorizontal: 16,

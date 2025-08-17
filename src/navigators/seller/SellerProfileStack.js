@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {MainScreensHeader} from '../../components/buyer';
 
 // Screens
-import {SellerProfileScreen} from '../../screens/seller/profile/SellerProfileScreen';
+import {UnifiedProfileScreen} from '../../screens/profile/UnifiedProfileScreen';
 import {UpdatePasswordScreen} from '../../screens/profile/UpdatePasswordScreen';
 import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {UpdateProfileScreen} from '../../screens/profile/UpdateProfileScreen';
@@ -25,7 +25,7 @@ export const SellerProfileStack = () => {
       initialRouteName="SellerProfileMain">
       <Screen
         name="SellerProfileMain"
-        component={SellerProfileScreen}
+        component={UnifiedProfileScreen}
         options={{
           header: props => (
             <MainScreensHeader {...props} title="Profile" hideSearch={true} />
@@ -80,6 +80,9 @@ export const SellerProfileStack = () => {
         component={AppSettingsScreen}
         options={{
           title: 'Settings',
+          header: props => (
+            <MainScreensHeader {...props} title="App Settings" hideSearch={true} activateGoBack={true} hideCart={true} hideWishlist={true} hideNotification={true} hideSettings={true} />
+          ),
         }}
       />
     </Navigator>

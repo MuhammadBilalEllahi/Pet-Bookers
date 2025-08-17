@@ -14,7 +14,7 @@ export const UpdatePasswordScreen = ({navigation}) => {
       // await updatePassword(values);
       navigation.goBack();
     } catch (error) {
-      // console.log('SUBMISSION ERR:::', error);
+      // // console.log('SUBMISSION ERR:::', error);
     } finally {
       setIsBtnDisable(false);
     }

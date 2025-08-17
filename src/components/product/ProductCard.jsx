@@ -37,7 +37,7 @@ export const ProductCard = ({
   const wishlistLoading = useSelector(selectWishlistLoading);
   
   // Debug logging for wishlist state
-  // console.log(`[ProductCard] Product ${id} (${name}) - isInWishlist: ${isInWishlist}, loading: ${wishlistLoading}`);
+  // // console.log(`[ProductCard] Product ${id} (${name}) - isInWishlist: ${isInWishlist}, loading: ${wishlistLoading}`);
   
   // Get authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);

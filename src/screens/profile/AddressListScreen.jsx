@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView, View, Alert, RefreshControl, Dimensions } from 'react-native';
 import { Button, Layout, Text, Card, Icon, List, ListItem } from '@ui-kitten/components';
 import { spacingStyles } from '../../utils/globalStyles';
 import { axiosBuyerClient } from '../../utils/axiosClient';
+import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
+
+const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 
 export const AddressListScreen = ({ navigation }) => {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const { theme, isDark } = useTheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadAddresses();
@@ -19,13 +25,14 @@ export const AddressListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await axiosBuyerClient.get('customer/address/list');
+      console.log("ADDRESS LIST", response.data);
       setAddresses(response.data || []);
     } catch (error) {
       console.error('Load addresses error:', error);
       Toast.show({
         type: 'error',
-        text1: 'Failed to load addresses',
-        text2: error.response?.data?.message || 'Something went wrong',
+        text1: t('addressListScreen.alerts.loadFailedTitle'),
+        text2: error.response?.data?.message || t('addressListScreen.alerts.loadFailedMessage'),
         position: 'top',
       });
     } finally {
@@ -41,15 +48,15 @@ export const AddressListScreen = ({ navigation }) => {
 
   const handleDeleteAddress = (addressId) => {
     Alert.alert(
-      'Delete Address',
-      'Are you sure you want to delete this address?',
+      t('addressListScreen.alerts.deleteTitle'),
+      t('addressListScreen.alerts.deleteMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('addressListScreen.alerts.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Delete',
+          text: t('addressListScreen.alerts.delete'),
           style: 'destructive',
           onPress: () => confirmDeleteAddress(addressId),
         },
@@ -74,8 +81,8 @@ export const AddressListScreen = ({ navigation }) => {
       if (response.data) {
         Toast.show({
           type: 'success',
-          text1: 'Address Deleted',
-          text2: response.data.message || 'Address deleted successfully',
+          text1: t('addressListScreen.alerts.deleteSuccessTitle'),
+          text2: response.data.message || t('addressListScreen.alerts.deleteSuccessMessage'),
           position: 'top',
         });
 
@@ -86,8 +93,8 @@ export const AddressListScreen = ({ navigation }) => {
       console.error('Delete address error:', error);
       Toast.show({
         type: 'error',
-        text1: 'Delete failed',
-        text2: error.response?.data?.message || 'Failed to delete address',
+        text1: t('addressListScreen.alerts.deleteFailedTitle'),
+        text2: error.response?.data?.message || t('addressListScreen.alerts.deleteFailedMessage'),
         position: 'top',
       });
     } finally {
@@ -112,28 +119,95 @@ export const AddressListScreen = ({ navigation }) => {
     const isDeleting = deletingId === item.id;
     
     return (
-      <Card style={styles.addressCard} disabled={isDeleting}>
+      <Layout
+        style={[
+          styles.addressCard,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-card']
+              : theme['color-basic-100'],
+            borderColor: isDark
+              ? theme['color-shadcn-border']
+              : theme['color-basic-300'],
+          },
+        ]}
+        level="1"
+      >
         <View style={styles.addressHeader}>
           <View style={styles.addressTypeContainer}>
-            <Icon 
-              name={item.address_type === 'home' ? 'home-outline' : 'briefcase-outline'} 
-              style={styles.addressTypeIcon}
-            />
-            <Text category="h6" style={styles.addressType}>
-              {item.address_type?.charAt(0).toUpperCase() + item.address_type?.slice(1)}
-            </Text>
-            {item.is_billing === '1' && (
-              <View style={styles.billingBadge}>
-                <Text category="c2" style={styles.billingText}>Billing</Text>
-              </View>
-            )}
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-muted']
+                    : theme['color-basic-200'],
+                },
+              ]}
+            >
+              <Icon 
+                name={item.address_type === 'home' ? 'home-outline' : 'briefcase-outline'} 
+                style={[
+                  styles.addressTypeIcon,
+                  {
+                    tintColor: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-700'],
+                  },
+                ]}
+              />
+            </View>
+            <View style={styles.addressInfo}>
+              <Text
+                category="h6"
+                style={[
+                  styles.addressType,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}
+              >
+                {item.address_type === 'home' 
+                  ? t('addressListScreen.addressTypes.home')
+                  : t('addressListScreen.addressTypes.office')
+                }
+              </Text>
+              {item.is_billing === '1' && (
+                <View style={styles.billingBadge}>
+                  <Text category="c2" style={styles.billingText}>
+                    {t('addressListScreen.addressTypes.billing')}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
           <View style={styles.actionButtons}>
             <Button
               appearance="ghost"
               status="primary"
               size="small"
-              accessoryLeft={(props) => <Icon {...props} name="edit-outline" />}
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-secondary']
+                    : theme['color-basic-200'],
+                  marginRight: 8,
+                },
+              ]}
+              accessoryLeft={(props) => (
+                <Icon
+                  {...props}
+                  name="edit-outline"
+                  style={{
+                    tintColor: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-700'],
+                  }}
+                />
+              )}
               onPress={() => navigateToEditAddress(item)}
               disabled={isDeleting}
             />
@@ -141,7 +215,23 @@ export const AddressListScreen = ({ navigation }) => {
               appearance="ghost"
               status="danger"
               size="small"
-              accessoryLeft={(props) => <Icon {...props} name="trash-2-outline" />}
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(239, 68, 68, 0.1)'
+                    : 'rgba(239, 68, 68, 0.05)',
+                },
+              ]}
+              accessoryLeft={(props) => (
+                <Icon
+                  {...props}
+                  name="trash-2-outline"
+                  style={{
+                    tintColor: theme['color-danger-500'],
+                  }}
+                />
+              )}
               onPress={() => handleDeleteAddress(item.id)}
               disabled={isDeleting}
             />
@@ -149,75 +239,283 @@ export const AddressListScreen = ({ navigation }) => {
         </View>
         
         <View style={styles.addressDetails}>
-          <Text category="s1" style={styles.contactName}>{item.contact_person_name}</Text>
-          <Text category="p2" style={styles.addressText}>{item.address}</Text>
-          <Text category="p2" style={styles.addressText}>
+          <Text
+            category="s1"
+            style={[
+              styles.contactName,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}
+          >
+            {item.contact_person_name}
+          </Text>
+          <Text
+            category="p2"
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}
+          >
+            {item.address}
+          </Text>
+          <Text
+            category="p2"
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}
+          >
             {item.city}, {item.zip}, {item.country}
           </Text>
-          <Text category="p2" style={styles.phoneText}>{item.phone}</Text>
+          <Text
+            category="p2"
+            style={[
+              styles.phoneText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-700'],
+              },
+            ]}
+          >
+            {item.phone}
+          </Text>
         </View>
-      </Card>
+      </Layout>
     );
   };
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Icon name="map-outline" style={styles.emptyIcon} />
-      <Text category="h6" style={styles.emptyTitle}>No Addresses</Text>
-      <Text category="p2" style={styles.emptyText}>
-        You haven't added any addresses yet. Add your first address to get started.
+      <View
+        style={[
+          styles.emptyIconContainer,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-muted']
+              : theme['color-basic-200'],
+          },
+        ]}
+      >
+        <Icon
+          name="map-outline"
+          style={[
+            styles.emptyIcon,
+            {
+              tintColor: isDark
+                ? theme['color-shadcn-muted-foreground']
+                : theme['color-basic-500'],
+            },
+          ]}
+        />
+      </View>
+      <Text
+        category="h6"
+        style={[
+          styles.emptyTitle,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-900'],
+          },
+        ]}
+      >
+        {t('addressListScreen.emptyState.title')}
+      </Text>
+      <Text
+        category="p2"
+        style={[
+          styles.emptyText,
+          {
+            color: isDark
+              ? theme['color-shadcn-muted-foreground']
+              : theme['color-basic-600'],
+          },
+        ]}
+      >
+        {t('addressListScreen.emptyState.message')}
       </Text>
       <Button
-        style={styles.emptyButton}
+        style={[
+          styles.emptyButton,
+          {
+            backgroundColor: theme['color-primary-500'],
+          },
+        ]}
         onPress={navigateToAddAddress}
       >
-        Add Address
+        {t('addressListScreen.emptyState.addButton')}
       </Button>
     </View>
   );
 
   if (loading) {
     return (
-      <Layout level="3" style={styles.loadingContainer}>
-        <Text>Loading addresses...</Text>
+      <Layout
+        level="1"
+        style={[
+          styles.loadingContainer,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.loadingText,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}
+        >
+          {t('addressListScreen.loading')}
+        </Text>
+      </Layout>
+    );
+  }
+
+  const renderListHeader = () => (
+    <View style={styles.headerContainer}>
+      <Layout
+        style={[
+          styles.header,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}
+        level="1"
+      >
+        <Text
+          category="h5"
+          style={[
+            styles.headerTitle,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}
+        >
+          {t('addressListScreen.title')}
+        </Text>
+        <Text
+          category="p2"
+          style={[
+            styles.subtitle,
+            {
+              color: isDark
+                ? theme['color-shadcn-muted-foreground']
+                : theme['color-basic-600'],
+            },
+          ]}
+        >
+          {t('addressListScreen.subtitle')}
+        </Text>
+      </Layout>
+
+      <Button
+        style={[
+          styles.addButton,
+          {
+            backgroundColor: theme['color-primary-500'],
+            borderColor: theme['color-primary-500'],
+          },
+        ]}
+        accessoryLeft={(props) => (
+          <Icon
+            {...props}
+            name="plus-outline"
+            style={{ tintColor: theme['color-basic-100'] }}
+          />
+        )}
+        onPress={navigateToAddAddress}
+      >
+        {evaProps => (
+          <Text
+            {...evaProps}
+            style={[
+              evaProps.style,
+              { color: theme['color-basic-100'], fontWeight: '600' },
+            ]}
+          >
+            {t('addressListScreen.addNewAddress')}
+          </Text>
+        )}
+      </Button>
+    </View>
+  );
+
+  if (addresses.length === 0 && !loading) {
+    return (
+      <Layout
+        level="1"
+        style={[
+          styles.container,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}
+      >
+        {renderListHeader()}
+        <EmptyState />
       </Layout>
     );
   }
 
   return (
-    <Layout level="3" style={styles.container}>
-      <ScrollView
+    <Layout
+      level="1"
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}
+    >
+      <List
+        data={addresses}
+        renderItem={renderAddressItem}
+        ListHeaderComponent={renderListHeader}
+        style={[
+          styles.addressList,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}
+        contentContainerStyle={styles.listContainer}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={styles.scrollContainer}
-      >
-        <Layout style={styles.header}>
-          <Text category="h5">Manage Addresses</Text>
-          <Text category="p2" style={styles.subtitle}>
-            Add and manage your delivery addresses
-          </Text>
-        </Layout>
-
-        <Button
-          style={styles.addButton}
-          accessoryLeft={(props) => <Icon {...props} name="plus-outline" />}
-          onPress={navigateToAddAddress}
-        >
-          Add New Address
-        </Button>
-
-        {addresses.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <List
-            data={addresses}
-            renderItem={renderAddressItem}
-            style={styles.addressList}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']}
           />
-        )}
-      </ScrollView>
+        }
+        showsVerticalScrollIndicator={false}
+      />
     </Layout>
   );
 };
@@ -231,73 +529,127 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    fontSize: 16,
+  },
   scrollContainer: {
+    flexGrow: 1,
+    padding: 16,
+    minHeight: windowHeight,
+  },
+  listContainer: {
     flexGrow: 1,
     padding: 16,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 24,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    fontSize: 24,
+    marginBottom: 4,
   },
   subtitle: {
-    marginTop: 4,
-    opacity: 0.7,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   addButton: {
-    marginBottom: 20,
-    borderRadius: 100,
+    marginBottom: 24,
+    borderRadius: 12,
+    paddingVertical: 16,
+    elevation: 0,
+    shadowOpacity: 0,
+    height: 56, // Fixed height to prevent expansion
+    marginHorizontal: 0,
   },
   addressList: {
     backgroundColor: 'transparent',
   },
   addressCard: {
     marginBottom: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 0,
+    shadowOpacity: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   addressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
   addressTypeContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flex: 1,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   addressTypeIcon: {
     width: 20,
     height: 20,
-    marginRight: 8,
+  },
+  addressInfo: {
+    flex: 1,
   },
   addressType: {
-    marginRight: 8,
+    fontWeight: '600',
+    fontSize: 16,
+    marginBottom: 4,
   },
   billingBadge: {
     backgroundColor: '#FF6D1A',
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
   },
   billingText: {
     color: '#FFFFFF',
     fontWeight: '600',
+    fontSize: 10,
   },
   actionButtons: {
     flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 0,
+    elevation: 0,
+    shadowOpacity: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addressDetails: {
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingTop: 8,
   },
   contactName: {
     fontWeight: '600',
-    marginBottom: 4,
+    fontSize: 16,
   },
   addressText: {
-    opacity: 0.8,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 4,
   },
   phoneText: {
-    opacity: 0.8,
+    fontSize: 14,
     fontWeight: '500',
   },
   separator: {
@@ -307,25 +659,37 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   emptyIcon: {
-    width: 64,
-    height: 64,
-    marginBottom: 16,
-    opacity: 0.5,
+    width: 40,
+    height: 40,
   },
   emptyTitle: {
-    marginBottom: 8,
+    marginBottom: 12,
+    fontWeight: '600',
+    fontSize: 18,
   },
   emptyText: {
     textAlign: 'center',
-    marginBottom: 24,
-    opacity: 0.7,
-    paddingHorizontal: 32,
+    marginBottom: 32,
+    fontSize: 14,
+    lineHeight: 20,
   },
   emptyButton: {
-    borderRadius: 100,
+    borderRadius: 12,
     paddingHorizontal: 32,
+    paddingVertical: 16,
+    elevation: 0,
+    shadowOpacity: 0,
   },
-}); 
+});

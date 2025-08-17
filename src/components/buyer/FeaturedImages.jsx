@@ -95,6 +95,14 @@ export const FeaturedImages = ({slideList, loading, error}) => {
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           onScroll={onScroll}
+          getItemLayout={(data, index) => ({
+            length: windowWidth,
+            offset: windowWidth * index,
+            index,
+          })}
+          onScrollToIndexFailed={(info) => {
+            console.warn('ScrollToIndex failed:', info);
+          }}
         />
       )}
       {/* <View

@@ -24,9 +24,9 @@ export const SubCategoryProductsScreen = ({ route, navigation }) => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      console.log("fetching products for subcategory", subcategory.id, categoryId);
+      // console.log("fetching products for subcategory", subcategory.id, categoryId);
       const res = await smartBuyerClient.get(`categories/${categoryId}/subcategories/${subcategory.id}/products`);
-      console.log("subcategory products", JSON.stringify(res.data, null, 2));
+      // console.log("subcategory products", JSON.stringify(res.data, null, 2));
       setProducts(res.data.products || []);
     } catch (e) {
       console.error("Error fetching products:", e);

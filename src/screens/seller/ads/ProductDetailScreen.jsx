@@ -27,7 +27,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
   const baseUrls = useSelector(selectBaseUrls);
-  console.log('productId in ProductDetailScreen', productId);
+  // console.log('productId in ProductDetailScreen', productId);
 
   useEffect(() => {
     fetchProductDetails();

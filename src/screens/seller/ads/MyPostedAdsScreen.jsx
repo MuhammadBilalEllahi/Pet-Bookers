@@ -31,11 +31,11 @@ const MyPostedAdsScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await authSellerClient.get(`products/list`);
-      console.log('Seller Products:', response.data);
+      // console.log('Seller Products:', response.data);
       setProducts(response.data || []);
       
       const checking = await authSellerClient.get(`products/details/49`);
-      console.log('Product details check:', checking.data);
+      // console.log('Product details check:', checking.data);
     } catch (error) {
       console.error('Error loading products:', error);
       handleAuthError(error, (err) => {

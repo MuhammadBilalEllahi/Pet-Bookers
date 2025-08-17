@@ -75,7 +75,7 @@ export const CouponHandling = ({ navigation }) => {
       const response = await axiosSellerClient.get('/coupon/list', {
         params: { limit: 50, offset: 0 }
       });
-      console.log("coupons list", response.data);
+      // console.log("coupons list", response.data);
       setCoupons(response.data.coupons || []);
     } catch (error) {
       console.error('Error fetching coupons:', error);
@@ -88,7 +88,7 @@ export const CouponHandling = ({ navigation }) => {
   const fetchCustomers = async () => {
     try {
       const response = await axiosSellerClient.get('/coupon/customers');
-      console.log("customers", response.data);
+      // console.log("customers", response.data);
       setCustomers(response.data.customers || []);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -114,7 +114,7 @@ export const CouponHandling = ({ navigation }) => {
   const handleCreateCoupon = async () => {
     try {
       const response = await axiosSellerClient.post('/coupon/store', formData);
-      console.log("coupon created", response.data);
+      // console.log("coupon created", response.data);
       Alert.alert('Success', 'Coupon created successfully');
       setShowCreateModal(false);
       resetForm();
@@ -128,7 +128,7 @@ export const CouponHandling = ({ navigation }) => {
   const handleEditCoupon = async () => {
     try {
       const response = await axiosSellerClient.put(`/coupon/update/${selectedCoupon.id}`, formData);
-      console.log("coupon updated", response.data);
+      // console.log("coupon updated", response.data);
       Alert.alert('Success', 'Coupon updated successfully');
       setShowEditModal(false);
       resetForm();
@@ -144,7 +144,7 @@ export const CouponHandling = ({ navigation }) => {
       const response = await axiosSellerClient.put(`/coupon/status-update/${couponId}`, {
         status: newStatus
       });
-      console.log("status updated", response.data);
+      // console.log("status updated", response.data);
       Alert.alert('Success', 'Coupon status updated successfully');
       fetchCoupons();
     } catch (error) {
@@ -165,7 +165,7 @@ export const CouponHandling = ({ navigation }) => {
           onPress: async () => {
             try {
               const response = await axiosSellerClient.delete(`/coupon/delete/${couponId}`);
-              console.log("coupon deleted", response.data);
+              // console.log("coupon deleted", response.data);
               Alert.alert('Success', 'Coupon deleted successfully');
               fetchCoupons();
             } catch (error) {
@@ -182,7 +182,7 @@ export const CouponHandling = ({ navigation }) => {
     try {
       setCheckLoading(true);
       const response = await axiosSellerClient.post('/coupon/check-coupon', checkData);
-      console.log("coupon check result", response.data);
+      // console.log("coupon check result", response.data);
       setCheckResult(response.data);
     } catch (error) {
       console.error('Error checking coupon:', error);
