@@ -2,6 +2,7 @@ import React from 'react';
 import {
   StyleSheet,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {
   Layout,
@@ -63,7 +64,16 @@ export const FarmManagement = ({ navigation }) => {
   };
 
   const navigateToPOS = () => {
-    navigation.navigate(AppScreens.POS);
+    Alert.alert(
+      t('farmManagement.pos.lockedTitle', 'Access Restricted'),
+      t('farmManagement.pos.lockedMessage', 'You are not eligible yet for this access. This feature will be available soon.'),
+      [
+        {
+          text: t('common.ok', 'OK'),
+          style: 'default'
+        }
+      ]
+    );
   };
 
   const navigateToOrder = () => {
@@ -199,8 +209,10 @@ export const FarmManagement = ({ navigation }) => {
           <ProfileActionButton
             title={t('farmManagement.actions.pos.title')}
             subtitle={t('farmManagement.actions.pos.subtitle')}
-            iconName="credit-card-outline"
+            iconName="lock-outline"
             onPress={navigateToPOS}
+            disabled={true}
+            style={{ opacity: 0.6 }}
           />
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
           <ProfileActionButton

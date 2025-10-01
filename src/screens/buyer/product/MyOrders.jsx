@@ -19,8 +19,7 @@ import ReviewModal from './tabs/ReviewModal';
 const smartBuyerClient = createSmartBuyerClient();
 
 // Reusable component for status badges
-const StatusBadge = ({ status }) => {
-  const { t } = useTranslation();
+const StatusBadge = ({ status, t }) => {
 
   return (
     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(status) }]}>
@@ -32,11 +31,14 @@ const StatusBadge = ({ status }) => {
 };
 
 // Reusable component for address display
-const AddressInfo = ({ address, isDark, theme }) => {
+const AddressInfo = ({ address, isDark, theme, t }) => {
   if (!address) return null;
 
   return (
-    <View style={styles.addressContainer}>
+    <View style={[styles.addressContainer, {
+      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+    }]}>
       <Text category="s2" style={[styles.addressLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
         Billing Address:
       </Text>
@@ -60,13 +62,15 @@ const AddressInfo = ({ address, isDark, theme }) => {
 };
 
 // Collapsible Address Component
-const CollapsibleAddress = ({ address, isDark, theme }) => {
+const CollapsibleAddress = ({ address, isDark, theme, t }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <View style={styles.addressContainer}>
       <TouchableOpacity
-        style={styles.addressHeader}
+        style={[styles.addressHeader, {
+          backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+        }]}
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <View style={styles.addressHeaderContent}>
@@ -125,10 +129,12 @@ const CollapsibleAddress = ({ address, isDark, theme }) => {
 };
 
 // Product Details Component
-const ProductDetails = ({ product, isDark, theme }) => {
+const ProductDetails = ({ product, isDark, theme, t }) => {
   // console.log("product in productdetails", JSON.stringify(product, null, 2));
   return (
-    <View style={styles.productDetailsContainer}>
+    <View style={[styles.productDetailsContainer, {
+      backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
+    }]}>
       <View style={styles.productInfo}>
         <Text
           category="s1"
@@ -255,7 +261,7 @@ export const MyOrders = ({ navigation }) => {
     if (reviewedOrders.has(order.id)) {
       Toast.show({
         type: 'info',
-        text1: 'Already Reviewed',
+        text1: `Already ${t('product.reviewed', 'Reviewed')}`,
         text2: 'You have already reviewed this order',
       });
       return;
@@ -388,7 +394,7 @@ export const MyOrders = ({ navigation }) => {
                     {formatDate(order.created_at)}
                   </Text>
                 </View>
-                <View style={fixedStatusBadgeStyle}><StatusBadge status={order.order_status} /></View>
+                <View style={fixedStatusBadgeStyle}><StatusBadge status={order.order_status} t={t} /></View>
               </View>
               <View style={styles.orderDetailsRow}>
                 <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
@@ -402,36 +408,69 @@ export const MyOrders = ({ navigation }) => {
             </View>
           </View>
           {firstProduct && (
-            <ProductDetails product={firstProduct} isDark={isDark} theme={theme} />
+            <ProductDetails product={firstProduct} isDark={isDark} theme={theme} t={t} />
           )}
-          <CollapsibleAddress address={order.billing_address_data} isDark={isDark} theme={theme} />
+          <CollapsibleAddress address={order.billing_address_data} isDark={isDark} theme={theme} t={t} />
           <View style={styles.actionRow}>
-            <Button size="tiny" status="basic" style={styles.sellerInfoButton} onPress={() => navigateToSellerInfo(order.seller_id)}>View Seller Info</Button>
-            {order.order_status === 'delivered' && (
+            <Button size="tiny" status="basic" style={[styles.sellerInfoButton, {
+                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]} onPress={() => navigateToSellerInfo(order.seller_id)}>
+              <Text style={{
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }}>
+                View Seller Info
+              </Text>
+            </Button>
+            {/* {order.order_status === 'delivered' && (
               <Button size="tiny" status="danger" style={styles.actionBtn} onPress={() => handleRefundRequest(order)}>Refund</Button>
-            )}
+            )} */}
             {order.order_status === 'delivered' && !reviewedOrders.has(order.id) && (
-              <Button size="tiny" status="info" style={styles.actionBtn} onPress={() => openReviewModal(order)}>
-                Review Delivery
+              <Button 
+                size="tiny" 
+                status="info" 
+                style={[styles.actionBtn, {
+                  backgroundColor: theme['color-info-500'],
+                  borderColor: theme['color-info-600']
+                }]} 
+                onPress={() => openReviewModal(order)}
+              >
+                <Text style={{ color: '#ffffff' }}>
+                  Review Delivery
+                </Text>
               </Button>
             )}
             {reviewedOrders.has(order.id) && (
-              <View style={styles.reviewedBadge}>
+              <View style={[styles.reviewedBadge, {
+                backgroundColor: isDark ? 'rgba(46, 204, 113, 0.2)' : '#E8F5E8'
+              }]}>
                 <Icon name="checkmark-circle-2" width={16} height={16} fill={theme['color-success-500']} />
-                <Text category="c1" style={[styles.reviewedText, { color: theme['color-success-500'] }]}>Reviewed</Text>
+                <Text category="c1" style={[styles.reviewedText, { color: theme['color-success-500'] }]}>{t('product.reviewed', 'Reviewed')}</Text>
               </View>
             )}
             {order.digital_product_id && (
-              <Button size="tiny" status="primary" style={styles.actionBtn} onPress={async () => {
-                await smartBuyerClient.get(`customer/order/digital-product-download/${order.digital_product_id}`);
-                Toast.show({ type: 'success', text1: 'Download', text2: 'Digital product download started.' });
-              }}>
-                Download
+              <Button 
+                size="tiny" 
+                status="primary" 
+                style={[styles.actionBtn, {
+                  backgroundColor: theme['color-primary-500'],
+                  borderColor: theme['color-primary-600']
+                }]} 
+                onPress={async () => {
+                  await smartBuyerClient.get(`customer/order/digital-product-download/${order.digital_product_id}`);
+                  Toast.show({ type: 'success', text1: 'Download', text2: 'Digital product download started.' });
+                }}
+              >
+                <Text style={{ color: '#ffffff' }}>
+                  Download
+                </Text>
               </Button>
             )}
           </View>
-          <View style={styles.groupTotal}>
-            <Text category="s1" style={[styles.groupTotalText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Group Total: PKR {totalAmount.toFixed(2)}</Text>
+          <View style={[styles.groupTotal, {
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)'
+          }]}>
+            <Text category="s1" style={[styles.groupTotalText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.groupTotal', 'Group Total:')} PKR {totalAmount.toFixed(2)}</Text>
           </View>
         </Card>
       );
@@ -440,7 +479,7 @@ export const MyOrders = ({ navigation }) => {
     // Multiple orders in group: show all under one card
     return (
       <Card key={groupId} style={[styles.orderCard, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'], ...Platform.select({ ios: { shadowColor: isDark ? '#000' : '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: isDark ? 0.3 : 0.1, shadowRadius: 4, }, android: { elevation: 4, }, }), }]}>
-        <Text category="h6" style={[styles.groupHeader, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Order Group: {groupId}</Text>
+        <Text category="h6" style={[styles.groupHeader, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.orderGroup', 'Order Group:')} {groupId}</Text>
         {groupOrders.map((order, index) => {
           const products = order.details || [];
           const firstProduct = products[0];
@@ -458,9 +497,9 @@ export const MyOrders = ({ navigation }) => {
                 <Text category="h6" style={[styles.productName, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], marginBottom: 2 }]}>
                   {firstProduct?.product_details?.name || 'Product Name'}
                 </Text>
-                <Text category="c1" style={[styles.orderTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Order #{order.id}</Text>
+                <Text category="c1" style={[styles.orderTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.orderNumber', 'Order #')}{order.id}</Text>
                 <Text category="c1" style={[styles.orderDate, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{formatDate(order.created_at)}</Text>
-                <View style={fixedStatusBadgeStyle}><StatusBadge status={order.order_status} /></View>
+                <View style={fixedStatusBadgeStyle}><StatusBadge status={order.order_status} t={t} /></View>
                 <View style={styles.orderDetailsRow}>
                   <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{t('Payment')}: {order.payment_method}</Text>
                   <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{t('Status')}: {order.payment_status}</Text>
@@ -468,10 +507,19 @@ export const MyOrders = ({ navigation }) => {
                 </View>
                 {/* Action Buttons for each order */}
                 <View style={styles.actionRow}>
-                  <Button size="tiny" status="basic" style={styles.sellerInfoButton} onPress={() => navigateToSellerInfo(order.seller_id)}>View Seller Info</Button>
-                  {order.order_status === 'delivered' && (
+                  <Button size="tiny" status="basic" style={[styles.sellerInfoButton, {
+                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+              }]} onPress={() => navigateToSellerInfo(order.seller_id)}>
+              <Text style={{
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }}>
+                View Seller Info
+              </Text>
+            </Button>
+                  {/* {order.order_status === 'delivered' && (
                     <Button size="tiny" status="danger" style={styles.actionBtn} onPress={() => handleRefundRequest(order)}>Refund</Button>
-                  )}
+                  )} */}
                   {order.order_status === 'delivered' && !reviewedOrders.has(order.id) && (
                     <Button size="tiny" status="info" style={styles.actionBtn} onPress={() => openReviewModal(order)}>
                       Review Delivery
@@ -480,7 +528,7 @@ export const MyOrders = ({ navigation }) => {
                   {reviewedOrders.has(order.id) && (
                     <View style={styles.reviewedBadge}>
                       <Icon name="checkmark-circle-2" width={16} height={16} fill={theme['color-success-500']} />
-                      <Text category="c1" style={[styles.reviewedText, { color: theme['color-success-500'] }]}>Reviewed</Text>
+                      <Text category="c1" style={[styles.reviewedText, { color: theme['color-success-500'] }]}>{t('product.reviewed', 'Reviewed')}</Text>
                     </View>
                   )}
                   {order.digital_product_id && (
@@ -497,9 +545,9 @@ export const MyOrders = ({ navigation }) => {
           );
         })}
         {/* Billing Address for the group (from first order) */}
-        <CollapsibleAddress address={groupOrders[0].billing_address_data} isDark={isDark} theme={theme} />
+        <CollapsibleAddress address={groupOrders[0].billing_address_data} isDark={isDark} theme={theme} t={t} />
         <View style={styles.groupTotal}>
-          <Text category="s1" style={[styles.groupTotalText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Group Total: PKR {totalAmount.toFixed(2)}</Text>
+          <Text category="s1" style={[styles.groupTotalText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.groupTotal', 'Group Total:')} PKR {totalAmount.toFixed(2)}</Text>
         </View>
       </Card>
     );
@@ -509,11 +557,17 @@ export const MyOrders = ({ navigation }) => {
   const renderHeader = () => (
     <View style={{ padding: 8, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
       <Input
-        placeholder="Search orders or refunds..."
+        placeholder={t('search.searchProducts', 'Search orders or refunds...')}
         value={searchQuery}
         onChangeText={setSearchQuery}
         accessoryLeft={<Icon name="search" width={20} height={20} fill={theme['color-primary-500']} />}
-        style={{ borderRadius: 8 }}
+        style={[{ borderRadius: 8 }, {
+          backgroundColor: isDark ? theme['color-shadcn-input'] : theme['color-basic-200'],
+          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
+        }]}
+        textStyle={{
+          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+        }}
       />
     </View>
   );
@@ -522,10 +576,14 @@ export const MyOrders = ({ navigation }) => {
     <Layout style={{ flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
       {renderHeader()}
       <TabView selectedIndex={selectedTab} onSelect={setSelectedTab} style={{ flex: 1 }}>
-        <Tab title='Orders'>
+        <Tab title={t('tabs.orders', 'Orders')} style={{
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }}>
           <OrdersTab groupedOrders={groupedOrders} renderOrderGroup={renderOrderGroup} loading={loading} />
         </Tab>
-        <Tab title='Refunds'>
+        <Tab title={t('order.refunds', 'Refunds')} style={{
+          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
+        }}>
           <RefundsTab refundsLoading={refundsLoading} filteredRefunds={filteredRefunds} baseUrls={baseUrls} />
         </Tab>
       </TabView>
@@ -629,7 +687,7 @@ export const OrderDetails = ({ route, navigation }) => {
 
           <View style={styles.statusContainer}>
             <Text category="s1" style={styles.statusLabel}>{t('Status')}:</Text>
-            <StatusBadge status={order.order_status} />
+            <StatusBadge status={order.order_status} t={t} />
           </View>
 
           <Divider style={styles.divider} />
@@ -748,12 +806,17 @@ export const OrderDetails = ({ route, navigation }) => {
         {renderAddress(order.shipping_address_data, t('Shipping Address'))}
 
         <Button
-          style={styles.backButton}
+          style={[styles.backButton, {
+            backgroundColor: theme['color-primary-500'],
+            borderColor: theme['color-primary-600']
+          }]}
           status="primary"
           accessoryLeft={(props) => <Icon {...props} name='arrow-back-outline' />}
           onPress={() => navigation.goBack()}
         >
-          {t('Back to Orders')}
+          <Text style={{ color: '#ffffff' }}>
+            {t('product.back', 'Back to Orders')}
+          </Text>
         </Button>
       </ScrollView>
     </Layout>
@@ -992,7 +1055,6 @@ const styles = StyleSheet.create({
   productDetailsContainer: {
     marginTop: 8,
     padding: 8,
-    backgroundColor: '#F8F9FA',
     borderRadius: 8,
   },
   productInfo: {

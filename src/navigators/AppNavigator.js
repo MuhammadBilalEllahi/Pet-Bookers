@@ -35,6 +35,7 @@ import { VandorDetailScreen } from '../screens/buyer/VandorDetailScreen';
 import { RefundScreen } from '../screens/buyer/product/RefundScreen';
 import { AddProductScreen } from '../screens/seller/add_product/AddProductScreen';
 import { AllProductsScreen } from '../screens/buyer/AllProductsScreen';
+import { ProductsSearchScreen } from '../screens/buyer/ProductsSearchScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { RefundHandle } from '../screens/seller/profile/farmManagement/pages/RefundHandle';
   import { FarmManagement } from '../screens/seller/profile/farmManagement/FarmManagement';
@@ -112,6 +113,7 @@ export const AppScreens = Object.freeze({
   SUPPORT_TICKETS: 'SupportTickets',
   CREATE_SUPPORT_TICKET: 'CreateSupportTicket',
   SUPPORT_TICKET_DETAIL: 'SupportTicketDetail',
+  PRODUCTS_SEARCH: 'ProductsSearch',
   // SELLER_ADD_PRODUCT: 'AddProductScreen',
     });
 
@@ -212,6 +214,11 @@ export const AppNavigator = () => {
           header: props => (
             <MainScreensHeader activateGoBack={true} {...props} hideSearch={true} key="header-AllProductsScreen" />
           ),
+        }}
+        />
+        <Screen name={AppScreens.PRODUCTS_SEARCH} component={ProductsSearchScreen} 
+        options={{
+          headerShown: false,
         }}
         />
         <Screen name={AppScreens.CART} component={MyCartScreen} 

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Input, Layout } from '@ui-kitten/components';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View, Animated } from 'react-native';
 import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
 import { ThemedIcon } from '../Icon';
 import { BackButton } from '../BackButton';
@@ -16,6 +16,17 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
   const { theme, isDark } = useTheme();
+
+  // Animated placeholder text
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+  const placeholderAnim = useRef(new Animated.Value(0)).current;
+  const placeholderTexts = [
+    t('search.searchProducts', 'Search for products'),
+    t('search.searchPets', 'Search for pets'),
+    t('search.searchDoctors', 'Search for doctors'),
+    t('search.searchServices', 'Search for services'),
+    t('search.searchItems', 'Search for items')
+  ];
 
   const cartIcon = props => <ThemedIcon {...props} name="shopping-bag-outline" />;
   const wishlistIcon = props => <ThemedIcon {...props} name="heart-outline" />;
@@ -36,6 +47,61 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
 
   const onGoBack = () => {
     navigation.goBack();
+  };
+
+  // Animated placeholder effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPlaceholderIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % placeholderTexts.length;
+        
+        // Animate out current text
+        Animated.timing(placeholderAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start(() => {
+          // Animate in next text
+          Animated.timing(placeholderAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }).start();
+        });
+        
+        return nextIndex;
+      });
+    }, 2000); // Change every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [placeholderAnim, placeholderTexts.length]);
+
+  // Render animated placeholder
+  const renderAnimatedPlaceholder = () => {
+    return (
+      <View style={styles.placeholderContainer}>
+        <Animated.Text
+          style={[
+            styles.animatedPlaceholder,
+            {
+              opacity: placeholderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 0],
+              }),
+              transform: [{
+                translateY: placeholderAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -8],
+                }),
+              }],
+              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
+            }
+          ]}
+        >
+          {placeholderTexts[currentPlaceholderIndex]}
+        </Animated.Text>
+      </View>
+    );
   };
 
   return (
@@ -119,11 +185,25 @@ export const MainScreensHeader = ({ navigation, title, hideSearch, activateGoBac
       </Layout>
       {!hideSearch && (
         <View style={styles.searchBarWrapper}>
-          <SearchDropdown
-            navigation={navigation}
-            style={styles.searchDropdown}
-            placeholder={t('search')}
-          />
+          <View style={styles.searchInputWrapper}>
+            <Input
+              placeholder=""
+              onFocus={() => navigation.navigate(AppScreens.PRODUCTS_SEARCH)}
+              style={[styles.searchInput, {
+                backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300']
+              }]}
+              textStyle={{
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }}
+              placeholderTextColor="transparent"
+              accessoryRight={() => (
+                <ThemedIcon name="search-outline" />
+              )}
+              editable={false}
+            />
+            {renderAnimatedPlaceholder()}
+          </View>
           {!hideWishlist && <Button 
             appearance="ghost" 
             style={{ 
@@ -174,8 +254,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  searchDropdown: {
+  searchInputWrapper: {
     flex: 1,
+    position: 'relative',
+  },
+  searchInput: {
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  placeholderContainer: {
+    position: 'absolute',
+    left: 16,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
+  animatedPlaceholder: {
+    fontSize: 15,
+    fontWeight: '400',
   },
   logoTitleWrapper: {
     flexDirection: 'row',

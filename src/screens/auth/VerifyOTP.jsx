@@ -11,11 +11,11 @@ import {axiosBuyerClient} from '../../utils/axiosClient';
 import Toast from 'react-native-toast-message';
 import {useRoute} from '@react-navigation/native';
 
-const OTPSchema = Yup.object().shape({
+const createOTPSchema = (t) => Yup.object().shape({
   otp: Yup.string()
-    .required('OTP is required')
-    .length(4, 'OTP must be 4 digits')
-    .matches(/^[0-9]+$/, 'OTP must contain only numbers'),
+    .required(t('validation.otpRequired'))
+    .length(4, t('validation.otpLength'))
+    .matches(/^[0-9]+$/, t('validation.otpNumeric')),
 });
 
 export const VerifyOTPScreen = ({navigation}) => {
@@ -78,8 +78,8 @@ export const VerifyOTPScreen = ({navigation}) => {
       if (response.data) {
         Toast.show({
           type: 'success',
-          text1: 'OTP Verified',
-          text2: response.data.message || 'OTP verified successfully',
+          text1: t('otp.otpVerified'),
+          text2: response.data.message || t('otp.otpVerifiedSuccess'),
           position: 'top',
         });
 
@@ -92,7 +92,7 @@ export const VerifyOTPScreen = ({navigation}) => {
     } catch (error) {
       console.error('OTP verification error:', error);
       
-      let errorMessage = 'Invalid OTP';
+      let errorMessage = t('otp.invalidOTP');
       if (error.response?.data?.errors) {
         errorMessage = error.response.data.errors[0].message || errorMessage;
       } else if (error.response?.data?.message) {
@@ -101,7 +101,7 @@ export const VerifyOTPScreen = ({navigation}) => {
 
       Toast.show({
         type: 'error',
-        text1: 'Verification failed',
+        text1: t('otp.verificationFailed'),
         text2: errorMessage,
         position: 'top',
       });
@@ -126,8 +126,8 @@ export const VerifyOTPScreen = ({navigation}) => {
       if (response.data) {
         Toast.show({
           type: 'success',
-          text1: 'OTP Resent',
-          text2: 'A new OTP has been sent',
+          text1: t('otp.otpResent'),
+          text2: t('otp.newOTPSent'),
           position: 'top',
         });
 
@@ -138,8 +138,8 @@ export const VerifyOTPScreen = ({navigation}) => {
       console.error('Resend OTP error:', error);
       Toast.show({
         type: 'error',
-        text1: 'Resend failed',
-        text2: 'Failed to resend OTP',
+        text1: t('otp.resendFailed'),
+        text2: t('otp.failedToResend'),
         position: 'top',
       });
     } finally {
@@ -153,7 +153,7 @@ export const VerifyOTPScreen = ({navigation}) => {
         initialValues={{
           otp: '',
         }}
-        validationSchema={OTPSchema}
+        validationSchema={createOTPSchema(t)}
         onSubmit={submitForm}>
         {({
           handleSubmit,
@@ -164,7 +164,7 @@ export const VerifyOTPScreen = ({navigation}) => {
         }) => (
           <Layout style={styles.inputContainer}>
             <Text category="p2" style={styles.description}>
-              {t('verificationCodeSentTo')} {verificationMethod === 'email' ? t('email') : t('phone')}
+              {t('otp.verificationCodeSentTo')} {verificationMethod === 'email' ? t('email') : t('phone')}
             </Text>
             <Text category="h6" style={styles.identityText}>
               {identity}
@@ -198,17 +198,17 @@ export const VerifyOTPScreen = ({navigation}) => {
                   status="primary"
                   disabled={isResending}
                   onPress={resendOTP}>
-                  {isResending ? t('resending') : t('resendOTP')}
+                  {isResending ? t('otp.resending') : t('otp.resendOTP')}
                 </Button>
               ) : (
                 <Text category="p2" style={styles.countdownText}>
-                  {t('resendOTPIn')} {countdown}s
+                  {t('otp.resendOTPIn')} {countdown}s
                 </Text>
               )}
             </View>
             
             <SubmitButton
-              btnText={t('verifyAndContinue')}
+              btnText={t('otp.verifyAndContinue')}
               disabled={isBtnDisable || values.otp.length !== 4}
               onPress={handleSubmit}
             />
@@ -217,13 +217,13 @@ export const VerifyOTPScreen = ({navigation}) => {
       </Formik>
       
       <Layout style={[flexeStyles.row, flexeStyles.contentBetween]}>
-        <Text category="p1">{t('backToForgotPassword')}</Text>
+        <Text category="p1">{t('otp.backToForgotPassword')}</Text>
         <Text
           category="p1"
           status="primary"
           style={styles.externalLink}
           onPress={() => navigation.goBack()}>
-          {t('back')}
+          {t('product.back')}
         </Text>
       </Layout>
     </AuthContainer>

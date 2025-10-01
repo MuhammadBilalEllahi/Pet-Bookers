@@ -1,7 +1,7 @@
 import { axiosSellerClient } from '../utils/axiosClient';
 import { axiosBuyerClient } from '../utils/axiosClient';
 
-// Shop Information
+// Farm Information
 export const getShopInfo = () => {
   return axiosSellerClient.get('/shop-info');
 };
@@ -34,9 +34,12 @@ export const getDeliveryMen = (params = {}) => {
 };
 
 // Reviews Management
-export const getShopProductReviews = (params = {}) => {
+export const getFarmProductReviews = (params = {}) => {
   return axiosSellerClient.get('/shop-product-reviews', { params });
 };
+
+// Backward compatibility
+export const getShopProductReviews = getFarmProductReviews;
 
 export const updateReviewStatus = (reviewId, status) => {
   return axiosSellerClient.put('/shop-product-reviews-status', {
@@ -99,14 +102,18 @@ export const updateFirebaseToken = (token) => {
   });
 };
 
-// Shop Vacation and Temporary Close
-export const setShopVacation = (data) => {
+// Farm Vacation and Temporary Close
+export const setFarmVacation = (data) => {
   return axiosSellerClient.put('/vacation-add', data);
 };
 
-export const setShopTemporaryClose = (status) => {
+export const setFarmTemporaryClose = (status) => {
   return axiosSellerClient.put('/temporary-close', { status });
 };
+
+// Backward compatibility
+export const setShopVacation = setFarmVacation;
+export const setShopTemporaryClose = setFarmTemporaryClose;
 
 // V1 Seller APIs
 export const getSellerInfoV1 = (sellerId) => {

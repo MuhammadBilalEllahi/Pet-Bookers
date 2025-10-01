@@ -11,17 +11,17 @@ import {axiosBuyerClient} from '../../utils/axiosClient';
 import Toast from 'react-native-toast-message';
 import {useRoute} from '@react-navigation/native';
 
-const ResetPasswordSchema = Yup.object().shape({
+const createResetPasswordSchema = (t) => Yup.object().shape({
   password: Yup.string()
-    .required('New password is required')
-    .min(8, 'Password must be at least 8 characters')
+    .required(t('validation.newPasswordRequired'))
+    .min(8, t('validation.passwordMinLength'))
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      t('validation.passwordStrengthRequirements')
     ),
   confirm_password: Yup.string()
-    .required('Confirm password is required')
-    .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+    .required(t('validation.confirmPasswordRequired'))
+    .oneOf([Yup.ref('password'), null], t('validation.passwordsMustMatch')),
 });
 
 export const ResetPasswordScreen = ({navigation}) => {
@@ -52,8 +52,8 @@ export const ResetPasswordScreen = ({navigation}) => {
       if (response.data) {
         Toast.show({
           type: 'success',
-          text1: 'Password Reset Successful',
-          text2: response.data.message || 'Your password has been changed successfully',
+          text1: t('registration.passwordResetSuccessful'),
+          text2: response.data.message || t('registration.passwordChangedSuccessfully'),
           position: 'top',
         });
 
@@ -67,7 +67,7 @@ export const ResetPasswordScreen = ({navigation}) => {
     } catch (error) {
       console.error('Reset password error:', error);
       
-      let errorMessage = 'Password reset failed';
+      let errorMessage = t('registration.passwordResetFailed');
       if (error.response?.data?.errors) {
         errorMessage = error.response.data.errors[0].message || errorMessage;
       } else if (error.response?.data?.message) {
@@ -76,7 +76,7 @@ export const ResetPasswordScreen = ({navigation}) => {
 
       Toast.show({
         type: 'error',
-        text1: 'Reset failed',
+        text1: t('registration.resetFailed'),
         text2: errorMessage,
         position: 'top',
       });
@@ -100,7 +100,7 @@ export const ResetPasswordScreen = ({navigation}) => {
           password: '',
           confirm_password: '',
         }}
-        validationSchema={ResetPasswordSchema}
+        validationSchema={createResetPasswordSchema(t)}
         onSubmit={submitForm}>
         {({
           handleChange,

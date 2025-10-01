@@ -166,7 +166,7 @@ const SupportTicketsScreen = ({ navigation }) => {
     const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Icon 
-        name="headset" 
+        name="flag" 
         style={styles.emptyIcon} 
         fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-400']} 
       />

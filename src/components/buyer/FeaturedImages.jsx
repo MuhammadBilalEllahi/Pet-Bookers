@@ -2,6 +2,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {FlatList, Image, View, Dimensions, StyleSheet} from 'react-native';
 import {useSelector} from 'react-redux';
 import {Layout, Spinner, Text, useTheme} from '@ui-kitten/components';
+import {useTranslation} from 'react-i18next';
 import {selectBaseUrls} from '../../store/configs';
 import {flexeStyles} from '../../utils/globalStyles';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
@@ -13,6 +14,7 @@ const height = (windowWidth - 16) / 1.9;
 let slideChangRef = null;
 
 export const FeaturedImages = ({slideList, loading, error}) => {
+  const {t} = useTranslation();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const carouselRef = useRef();
   const baseUrls = useSelector(selectBaseUrls);
@@ -79,7 +81,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
           />}
           {error && <Text>{error}</Text>}
           {!loading && !error && (
-            <Text>No Data to display yet, please refresh later.</Text>
+            <Text>{t('common.noDataAvailable', 'No Data to display yet, please refresh later.')}</Text>
           )}
         </Layout>
       ) : (

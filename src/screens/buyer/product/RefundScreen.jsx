@@ -55,8 +55,8 @@ export const RefundScreen = ({ route, navigation }) => {
       console.error('Error fetching order details:', error);
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to fetch order details'
+        text1: t('refund.errorTitle'),
+        text2: t('refund.failedToFetchOrderDetails')
       });
     } finally {
       setLoading(false);
@@ -80,8 +80,8 @@ export const RefundScreen = ({ route, navigation }) => {
         // console.log('ImagePicker Error: ', response.error);
         Toast.show({
           type: 'error',
-          text1: 'Error',
-          text2: 'Failed to pick images'
+          text1: t('refund.errorTitle'),
+          text2: t('refund.failedToPickImages')
         });
       } else if (response.assets) {
         const newImages = response.assets.map(asset => asset.uri);
@@ -98,8 +98,8 @@ export const RefundScreen = ({ route, navigation }) => {
     if (!refundReason.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Please enter a refund reason'
+        text1: t('refund.errorTitle'),
+        text2: t('refund.pleaseEnterRefundReason')
       });
       return;
     }
@@ -128,8 +128,8 @@ export const RefundScreen = ({ route, navigation }) => {
 
       Toast.show({
         type: 'success',
-        text1: 'Success',
-        text2: 'Refund request submitted successfully'
+        text1: t('refund.successTitle'),
+        text2: t('refund.refundRequestSubmittedSuccessfully')
       }, 3000);
       
       setTimeout(()=>navigation.goBack(), 3000)
@@ -137,8 +137,8 @@ export const RefundScreen = ({ route, navigation }) => {
       console.error('Error submitting refund:', error.response.data ,"l", error.message);
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: error?.response?.data || 'Failed to submit refund request'
+        text1: t('refund.errorTitle'),
+        text2: error?.response?.data || t('refund.failedToSubmitRefundRequest')
       }, 3000);
     } finally {
       setSubmitting(false);
@@ -162,17 +162,17 @@ export const RefundScreen = ({ route, navigation }) => {
           <Text category="s1" style={[styles.productName, { 
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
-            {item.product_details?.name || 'Product Name'}
+            {item.product_details?.name || t('refund.productName')}
           </Text>
           <Text category="c1" style={[styles.productMeta, { 
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
           }]}>
-            Qty: {item.qty} | Price: PKR {item.price}
+            {t('refund.quantity', { qty: item.qty })} | {t('refund.price', { price: item.price })}
           </Text>
           <Text category="c1" style={[styles.productMeta, { 
             color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
           }]}>
-            Total: PKR {(item.qty * item.price).toFixed(2)}
+            {t('refund.totalAmount', { total: (item.qty * item.price).toFixed(2) })}
           </Text>
         </View>
       </View>
@@ -183,7 +183,9 @@ export const RefundScreen = ({ route, navigation }) => {
     return (
       <Layout style={styles.loadingContainer}>
         <Spinner size="large" />
-        <Text style={styles.loadingText}>Loading order details...</Text>
+        <Text style={[styles.loadingText, {
+          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+        }]}>{t('refund.loadingOrderDetails')}</Text>
       </Layout>
     );
   }
@@ -192,7 +194,7 @@ export const RefundScreen = ({ route, navigation }) => {
     <Layout style={[styles.container, { 
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
     }]}>
-      <MainScreensHeader navigation={navigation} title="Refund Request" />
+      <MainScreensHeader navigation={navigation} title={t('refund.title')} />
       
       <ScrollView style={styles.scrollView}>
         {/* Order Summary */}
@@ -202,28 +204,28 @@ export const RefundScreen = ({ route, navigation }) => {
           <Text category="h6" style={[styles.sectionTitle, { 
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
-            Order Summary
+            {t('refund.orderSummary')}
           </Text>
           <View style={styles.orderInfo}>
             <Text style={[styles.orderInfoText, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800']
             }]}>
-              Order ID: #{order.id}
+              {t('refund.orderID', { orderId: order.id })}
             </Text>
             <Text style={[styles.orderInfoText, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800']
             }]}>
-              Date: {new Date(order.created_at).toLocaleDateString()}
+              {t('refund.date', { date: new Date(order.created_at).toLocaleDateString() })}
             </Text>
             <Text style={[styles.orderInfoText, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800']
             }]}>
-              Total: PKR {order.order_amount}
+              {t('refund.total', { amount: order.order_amount })}
             </Text>
             <Text style={[styles.orderInfoText, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800']
             }]}>
-              Status: {order.order_status}
+              {t('refund.status', { status: order.order_status })}
             </Text>
           </View>
         </Card>
@@ -236,7 +238,7 @@ export const RefundScreen = ({ route, navigation }) => {
             <Text category="h6" style={[styles.sectionTitle, { 
               color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
             }]}>
-              Products in Order
+              {t('refund.productsInOrder')}
             </Text>
             {orderDetails.map(renderProductItem)}
           </Card>
@@ -249,31 +251,47 @@ export const RefundScreen = ({ route, navigation }) => {
           <Text category="h6" style={[styles.sectionTitle, { 
             color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
           }]}>
-            Refund Request
+            {t('refund.refundRequestForm')}
           </Text>
           
           <Input
-            label="Refund Reason"
-            placeholder="Please explain why you want a refund..."
+            label={t('refund.refundReason')}
+            placeholder={t('refund.refundReasonPlaceholder')}
             value={refundReason}
             onChangeText={setRefundReason}
             multiline
             numberOfLines={4}
-            style={styles.input}
+            style={[styles.input, {
+              backgroundColor: isDark ? theme['color-shadcn-input'] : theme['color-basic-200'],
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }]}
+            textStyle={{
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }}
           />
 
           <Button
             appearance="outline"
             onPress={pickImages}
-            style={styles.imageButton}
+            style={[styles.imageButton, {
+              borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              backgroundColor: isDark ? 'transparent' : theme['color-basic-100']
+            }]}
           >
-            Add Images (Optional)
+            <Text style={{
+              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+            }}>
+              {t('refund.addImagesOptional')}
+            </Text>
           </Button>
 
           {selectedImages.length > 0 && (
             <View style={styles.imagePreviewContainer}>
-              <Text category="s1" style={styles.imagePreviewTitle}>
-                Selected Images ({selectedImages.length}/5)
+              <Text category="s1" style={[styles.imagePreviewTitle, {
+                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+              }]}>
+                {t('refund.selectedImages', { count: selectedImages.length })}
               </Text>
               <View style={styles.imagePreviewRow}>
                 {selectedImages.map((uri, index) => (
@@ -296,9 +314,21 @@ export const RefundScreen = ({ route, navigation }) => {
           <Button
             onPress={submitRefund}
             disabled={submitting || !refundReason.trim()}
-            style={styles.submitButton}
+            style={[styles.submitButton, {
+              backgroundColor: (submitting || !refundReason.trim()) 
+                ? (isDark ? theme['color-shadcn-muted'] : theme['color-basic-400'])
+                : theme['color-primary-500']
+            }]}
           >
-            {submitting ? <Spinner size="small" /> : 'Submit Refund Request'}
+            {submitting ? (
+              <Spinner size="small" status="control" />
+            ) : (
+              <Text style={{
+                color: isDark ? theme['color-shadcn-primary-foreground'] : theme['color-basic-100']
+              }}>
+                {t('refund.submitRefundRequest')}
+              </Text>
+            )}
           </Button>
         </Card>
       </ScrollView>

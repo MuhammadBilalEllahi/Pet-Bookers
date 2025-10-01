@@ -107,23 +107,23 @@ const getSellerId = (product) => {
 /**
  * Get shop name with fallback
  * @param {Product} product - The product object
- * @returns {string} Shop name or 'Unknown Shop'
+ * @returns {string} Farm name or 'Unknown Farm'
  */
 const getShopName = (product) => {
-  return getSellerProperty(product, 'shop.name', 'Unknown Shop');
+  return getSellerProperty(product, 'shop.name', 'Unknown Farm');
 };
 
 /**
- * Get shop image with fallback
+ * Get farm image with fallback
  * @param {Product} product - The product object
- * @returns {string} Shop image path or empty string
+ * @returns {string} Farm image path or empty string
  */
 const getShopImage = (product) => {
   return getSellerProperty(product, 'shop.image', '');
 };
 
 /**
- * Get shop products count with fallback
+ * Get farm products count with fallback
  * @param {Product} product - The product object
  * @returns {number} Number of products or 0
  */
@@ -590,11 +590,17 @@ export const ProductDetailScreen = ({ route, navigation }) => {
 
       const shareOptions = {
         title: t('product.shareTitle', { productName: product.name }),
-        message: t('product.shareMessage', { 
-          productName: product.name, 
-          price: product.unit_price.toLocaleString(), 
-          link: shareLink 
-        }),
+        message: product.is_living 
+          ? t('product.shareMessagePet', { 
+              productName: product.name, 
+              price: product.unit_price.toLocaleString(), 
+              link: shareLink 
+            })
+          : t('product.shareMessage', { 
+              productName: product.name, 
+              price: product.unit_price.toLocaleString(), 
+              link: shareLink 
+            }),
         url: shareLink,
       };
 
@@ -1318,35 +1324,8 @@ export const ProductDetailScreen = ({ route, navigation }) => {
                   fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} 
                 />
               </View>
-              {/* Phone Number */}
-              {(product.seller?.phone || getSellerProperty(product, 'phone')) && (
-                <TouchableOpacity
-                  onPress={() => handlePhoneCall(product.seller?.phone || getSellerProperty(product, 'phone'))}
-                  style={{ 
-                    flexDirection: 'row', 
-                    alignItems: 'center', 
-                    marginTop: 4,
-                    backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-success-100'],
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 12,
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  <Icon
-                    name="phone"
-                    fill={isDark ? theme['color-success-500'] : theme['color-success-600']}
-                    style={{ width: 14, height: 14, marginRight: 4 }}
-                  />
-                  <Text style={{ 
-                    color: isDark ? theme['color-success-400'] : theme['color-success-600'], 
-                    fontSize: 12,
-                    fontWeight: '600'
-                  }}>
-                    {product.seller?.phone || getSellerProperty(product, 'phone')}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              
+              
             </View>
           </View>
           <Divider style={{ 

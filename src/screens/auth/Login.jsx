@@ -28,18 +28,18 @@ import { useTheme } from '../../theme/ThemeContext';
 // const SELLER_LOGIN_URL = 'https://petbookers.com.pk/api/v3/seller/auth/login';
 
 
-const LoginSchema = Yup.object().shape({
+const createLoginSchema = (t) => Yup.object().shape({
   email: Yup.string()
-    .email('Invalid email address'),
+    .email(t('validation.invalidEmail')),
   phone: Yup.string()
-    .matches(/^\d+$/, 'Phone must be numeric')
-    .min(10, 'Phone must be at least 10 digits'),
+    .matches(/^\d+$/, t('validation.phoneNumeric'))
+    .min(10, t('validation.phoneMinLength')),
   password: Yup.string()
-    .required('Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .required(t('validation.passwordRequired'))
+    .min(6, t('validation.passwordMinLength')),
 }).test(
   'emailOrPhoneRequired',
-  'Either email or phone is required',
+  t('validation.emailOrPhoneRequired'),
   function (value) {
     const { email, phone } = value;
     return !!(email || phone);
@@ -122,15 +122,15 @@ export const LoginScreen = ({ navigation  }) => {
         Toast.show({
         type: 'error',
         text1: error.response.data.errors[0].message,
-        text2: 'Login Failed',
+        text2: t('registration.loginFailed'),
         position: 'top',
       });
       } else {
         console.error("Login Error", error);
         Toast.show({
         type: 'error',
-        text1: error,
-        text2: 'Login Failed',
+        text1: t('registration.somethingWentWrong'),
+        text2: t('registration.loginFailed'),
         position: 'top',
       });
       }
@@ -280,7 +280,7 @@ export const LoginScreen = ({ navigation  }) => {
           }}
           enableReinitialize={true}
           onSubmit={submitForm}
-            validationSchema={LoginSchema}
+          validationSchema={createLoginSchema(t)}
 
         >
           {({
@@ -331,7 +331,6 @@ export const LoginScreen = ({ navigation  }) => {
                   status={errors.phone && touched.phone ? 'danger' : 'basic'}
                   accessoryLeft={<Icon name="phone" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
                   // Note: phone login is not supported by the seller endpoint, but UI is kept for consistency
-                  editable={false}
                 />
               )}
 

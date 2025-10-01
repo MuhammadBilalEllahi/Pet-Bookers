@@ -166,10 +166,12 @@ export const SearchDropdown = ({
     }
   };
 
-  // Handle focus
+  // Handle focus - navigate to search screen
   const handleFocus = () => {
-    if (searchResults.length > 0 && searchQuery.trim()) {
-      setShowDropdown(true);
+    if (navigation) {
+      navigation.navigate(AppScreens.PRODUCTS_SEARCH, {
+        initialQuery: searchQuery
+      });
     }
   };
 
@@ -298,7 +300,7 @@ export const SearchDropdown = ({
         placeholder={placeholder || t('search.searchProducts')}
         accessoryRight={renderIcon}
         onFocus={handleFocus}
-        onBlur={handleBlur}
+        editable={false}
         style={[
           styles.searchInput,
           { 

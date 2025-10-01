@@ -21,28 +21,28 @@ import { useTheme } from '../../theme/ThemeContext';
 import * as Yup from 'yup';
 
 // Shared validation schema
-const baseSchema = {
-  firstName: Yup.string().required('First name is required'),
-  lastName: Yup.string().required('Last name is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  countryCode: Yup.string().required('Country code is required'),
-  phone: Yup.string().required('Phone number is required'),
-  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+const createBaseSchema = (t) => ({
+  firstName: Yup.string().required(t('validation.firstNameRequired')),
+  lastName: Yup.string().required(t('validation.lastNameRequired')),
+  email: Yup.string().email(t('validation.invalidEmail')).required(t('validation.emailRequired')),
+  countryCode: Yup.string().required(t('validation.countryCodeRequired')),
+  phone: Yup.string().required(t('validation.phoneRequired')),
+  password: Yup.string().min(6, t('validation.passwordMinLength')).required(t('validation.passwordRequired')),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref('password'), null], 'Passwords must match')
-    .required('Confirm password is required'),
-  state: Yup.string().required('State is required'),
-  city: Yup.string().required('City is required'),
-};
+    .oneOf([Yup.ref('password'), null], t('validation.passwordsMustMatch'))
+    .required(t('validation.confirmPasswordRequired')),
+  state: Yup.string().required(t('validation.stateRequired')),
+  city: Yup.string().required(t('validation.cityRequired')),
+});
 
 // Additional fields for seller
-const sellerSchema = {
-  image: Yup.object().nullable().required('Profile image is required'),
-  shop_name: Yup.string().required('Shop name is required'),
-  shop_address: Yup.string().required('Shop address is required'),
-  logo: Yup.object().nullable().required('Shop logo is required'),
-  banner: Yup.object().nullable().required('Shop banner is required'),
-};
+const createSellerSchema = (t) => ({
+  image: Yup.object().nullable().required(t('validation.profileImageRequired')),
+  shop_name: Yup.string().required(t('validation.farmNameRequired')),
+  shop_address: Yup.string().required(t('validation.farmAddressRequired')),
+  logo: Yup.object().nullable().required(t('validation.farmLogoRequired')),
+  banner: Yup.object().nullable().required(t('validation.farmBannerRequired')),
+});
 
 // Permission request helper for gallery access
 const requestGalleryPermission = async () => {
@@ -74,10 +74,11 @@ export const RegisterScreen = ({ navigation }) => {
   const [isItSeller, setIsItSeller] = useState(initialIsSeller);
   const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
   const { isDark, theme } = useTheme();
+  const { t } = useTranslation();
 
   const validationSchema = Yup.object().shape(
-  isItSeller ? { ...baseSchema, ...sellerSchema } : baseSchema
-);
+    isItSeller ? { ...createBaseSchema(t), ...createSellerSchema(t) } : createBaseSchema(t)
+  );
 
   // Use translation keys for states and cities
   const stateKeys = [
@@ -95,7 +96,6 @@ export const RegisterScreen = ({ navigation }) => {
     Islamabad: ['Islamabad']
   };
 
-  const { t } = useTranslation();
   const [isBtnDisable, setIsBtnDisable] = useState(false);
   const dispatch= useDispatch();
 
@@ -212,16 +212,16 @@ export const RegisterScreen = ({ navigation }) => {
     messages.forEach((err, idx) => {
       Toast.show({
         type: 'error',
-        text1: err.message || 'Error',
-        text2: 'Registration Failed',
+        text1: err.message || t('common.error'),
+        text2: t('registration.registrationFailed'),
         position: 'top',
       });
     });
   } else {
     Toast.show({
       type: 'error',
-      text1: 'Something went wrong',
-      text2: 'Registration Failed',
+      text1: t('registration.somethingWentWrong'),
+      text2: t('registration.registrationFailed'),
       position: 'top',
     });
   }}
@@ -246,7 +246,7 @@ export const RegisterScreen = ({ navigation }) => {
       <View style={styles.userTypeContainer}>
         <Text style={[styles.label, { 
           color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>{t('accountType')}</Text>
+        }]}>{t('registration.accountType')}</Text>
         <TouchableOpacity
           style={[styles.userTypeButton, { 
             backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
@@ -356,30 +356,30 @@ export const RegisterScreen = ({ navigation }) => {
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.label, { 
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>{t('profileImage') || 'Profile Image'}</Text>
+                }]}>{t('registration.profileImage')}</Text>
                 <ImagePicker
-                  title={t('chooseProfileImage') || 'Choose Image'}
+                  title={t('registration.chooseProfileImage')}
                   onPress={() => handleImagePick('image', setFieldValue)}
                   imageUri={values.image ? values.image.uri : null}
                 />
                 {values.image && values.image.uri && (
-                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('imageSelected') || 'Image selected'}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('registration.imageSelected')}</Text>
                 )}
               </View>
             )}
 
-            {/* Shop Name */}
+            {/* Farm Name */}
             {isItSeller && (
               <Input
                 label={(evaProps) => (
                   <Text {...evaProps} style={[styles.label, { 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }]}>
-                    {t('shopName') || 'Shop Name'}
+                    {t('shopName')}
                   </Text>
                 )}
                 placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-                placeholder={t('enterShopName') || 'Enter shop name'}
+                placeholder={t('registration.enterShopName')}
                 style={[styles.input, { 
                   backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
                   borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
@@ -395,18 +395,18 @@ export const RegisterScreen = ({ navigation }) => {
               />
             )}
 
-            {/* Shop Address */}
+            {/* Farm Address */}
             {isItSeller && (
               <Input
                 label={(evaProps) => (
                   <Text {...evaProps} style={[styles.label, { 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                   }]}>
-                    {t('shopAddress') || 'Shop Address'}
+                    {t('shopAddress')}
                   </Text>
                 )}
                 placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-                placeholder={t('enterShopAddress') || 'Enter shop address'}
+                placeholder={t('registration.enterShopAddress')}
                 style={[styles.input, { 
                   backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
                   borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
@@ -422,36 +422,36 @@ export const RegisterScreen = ({ navigation }) => {
               />
             )}
 
-            {/* Shop Logo Picker */}
+            {/* Farm Logo Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.label, { 
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>{t('farmLogo') || 'Shop Logo'}</Text>
+                }]}>{t('farmLogo')}</Text>
                 <ImagePicker
-                  title={t('choosefarmLogo') || 'Choose Logo'}
+                  title={t('registration.choosefarmLogo')}
                   onPress={() => handleImagePick('logo', setFieldValue)}
                   imageUri={values.logo ? values.logo.uri : null}
                 />
                 {values.logo && values.logo.uri && (
-                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('logoSelected') || 'Logo selected'}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('registration.logoSelected')}</Text>
                 )}
               </View>
             )}
 
-            {/* Shop Banner Picker */}
+            {/* Farm Banner Picker */}
             {isItSeller && (
               <View style={{ marginBottom: 10 }}>
                 <Text style={[styles.label, { 
                   color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>{t('farmBanner') || 'Shop Banner'}</Text>
+                }]}>{t('farmBanner')}</Text>
                 <ImagePicker
-                  title={t('choosefarmBanner') || 'Choose Banner'}
+                  title={t('registration.choosefarmBanner')}
                   onPress={() => handleImagePick('banner', setFieldValue)}
                   imageUri={values.banner ? values.banner.uri : null}
                 />
                 {values.banner && values.banner.uri && (
-                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('bannerSelected') || 'Banner selected'}</Text>
+                  <Text style={{ color: theme['color-shadcn-primary'], fontSize: 12 }}>{t('registration.bannerSelected')}</Text>
                 )}
               </View>
             )}

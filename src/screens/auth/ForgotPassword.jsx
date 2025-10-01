@@ -10,10 +10,10 @@ import {flexeStyles} from '../../utils/globalStyles';
 import {axiosBuyerClient} from '../../utils/axiosClient';
 import Toast from 'react-native-toast-message';
 
-const ForgotPasswordSchema = Yup.object().shape({
+const createForgotPasswordSchema = (t) => Yup.object().shape({
   identity: Yup.string()
-    .required('Email or phone is required')
-    .test('valid-identity', 'Enter a valid email or phone number', function(value) {
+    .required(t('validation.emailOrPhoneRequired'))
+    .test('valid-identity', t('validation.validEmailOrPhone'), function(value) {
       if (!value) return false;
       
       // Check if it's a valid email
@@ -53,8 +53,8 @@ export const ForgotPasswordScreen = ({navigation}) => {
       if (response.data) {
         Toast.show({
           type: 'success',
-          text1: 'Reset request sent',
-          text2: response.data.message || 'Please check your email/phone for reset instructions',
+          text1: t('registration.resetRequestSent'),
+          text2: response.data.message || t('registration.checkEmailPhoneForInstructions'),
           position: 'top',
         });
 
@@ -67,7 +67,7 @@ export const ForgotPasswordScreen = ({navigation}) => {
     } catch (error) {
       console.error('Forgot password error:', error);
       
-      let errorMessage = 'Something went wrong';
+      let errorMessage = t('registration.somethingWentWrong');
       if (error.response?.data?.errors) {
         errorMessage = error.response.data.errors[0].message || errorMessage;
       } else if (error.response?.data?.message) {
@@ -76,7 +76,7 @@ export const ForgotPasswordScreen = ({navigation}) => {
 
       Toast.show({
         type: 'error',
-        text1: 'Reset failed',
+        text1: t('registration.resetFailed'),
         text2: errorMessage,
         position: 'top',
       });
@@ -91,7 +91,7 @@ export const ForgotPasswordScreen = ({navigation}) => {
         initialValues={{
           identity: '',
         }}
-        validationSchema={ForgotPasswordSchema}
+        validationSchema={createForgotPasswordSchema(t)}
         onSubmit={submitForm}>
         {({
           handleChange,

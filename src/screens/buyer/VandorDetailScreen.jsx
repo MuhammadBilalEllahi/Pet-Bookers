@@ -275,13 +275,13 @@ export const VandorDetailScreen = ({route, navigation}) => {
               </View>
               <Text style={styles(theme).orderCount}>{sellerInfo?.total_order || 0} {t('vendor.orders')}</Text>
               <Text style={styles(theme).addressText}>{sellerInfo?.seller?.shop?.address || t('vendor.noAddressProvided')}</Text>
-              <Text 
+              {/* <Text 
                 style={[styles(theme).contactText, sellerInfo?.seller?.shop?.contact && styles(theme).clickableText]} 
                 onPress={() => handlePhoneCall(sellerInfo?.seller?.shop?.contact)}
               >
                 {sellerInfo?.seller?.shop?.contact || t('vendor.noContactProvided')}
-              </Text>
-            </View>
+              </Text> */}
+            </View> 
             <Button
               appearance="ghost"
               accessoryLeft={<ThemedIcon name="message-square-outline" status="primary" />}

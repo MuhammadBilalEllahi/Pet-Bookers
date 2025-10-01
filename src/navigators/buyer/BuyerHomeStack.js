@@ -71,19 +71,8 @@ const userType = useSelector(selectUserType)
         name="ProductsSearch"
         component={ProductsSearchScreen}
         options={{
-          title: 'ProductsSearch',
-          header: props => (
-            <MainScreensHeader
-              {...props}
-              hideSearch={false}
-              title="ProductsSearch"
-              hideNotification={true}
-            />
-          ),
-            contentStyle: {
-          backgroundColor: 'white'
-          
-        }
+         headerShown: false,
+        
         }}
       />
       <Screen
