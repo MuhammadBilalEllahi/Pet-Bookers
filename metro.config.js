@@ -14,4 +14,12 @@ module.exports = {
       },
     }),
   },
+  // resolver: {
+  //   alias: {
+  //     'debugger-ui': path.resolve(
+  //       __dirname,
+  //       'node_modules/@react-native-community/cli-debugger-ui/build/ui',
+  //     ),
+  //   },
+  // },
 };

@@ -1,72 +1,87 @@
 import * as Yup from 'yup';
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { StyleSheet, View, Image, Dimensions, TouchableOpacity, Modal } from 'react-native';
-import { Layout, Text, Input, CheckBox, Icon } from '@ui-kitten/components';
-import { Formik } from 'formik';
-import { InputError, SubmitButton } from '../../components/form';
-import { AuthContainer } from '../../components/auth/AuthContainer';
-const { width } = Dimensions.get('window');
+import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {
+  StyleSheet,
+  View,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+} from 'react-native';
+import {Layout, Text, Input, CheckBox, Icon} from '@ui-kitten/components';
+import {Formik} from 'formik';
+import {InputError, SubmitButton} from '../../components/form';
+import {AuthContainer} from '../../components/auth/AuthContainer';
+const {width} = Dimensions.get('window');
 import TextButton from '../../components/form/TextButton';
-import { axiosBuyerClient, axiosSellerClient, } from '../../utils/axiosClient';
-import { 
-  setAuthToken, 
-  setUserType, 
-  UserType, 
+import {axiosBuyerClient, axiosSellerClient} from '../../utils/axiosClient';
+import {
+  setAuthToken,
+  setUserType,
+  UserType,
   handleUserLogin,
   handleBuyerLogin,
-  handleSellerLogin
+  handleSellerLogin,
 } from '../../store/user';
-import { getAuthToken } from '../../utils/localstorage';
-import { useDispatch } from 'react-redux';
-import { AppScreens } from '../../navigators/AppNavigator';
-import { useRoute } from '@react-navigation/native';
+import {getAuthToken} from '../../utils/localstorage';
+import {useDispatch} from 'react-redux';
+import {AppScreens} from '../../navigators/AppNavigator';
+import {useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { useTheme } from '../../theme/ThemeContext';
-// import axios from 'axios';
+import {useTheme} from '../../theme/ThemeContext';
+import {COUNTRY_CODES, stateKeys, citiesByState} from '../../utils/constants';
+// import axios from
+('axios');
 
 // const SELLER_LOGIN_URL = 'https://petbookers.com.pk/api/v3/seller/auth/login';
 
+const createLoginSchema = t =>
+  Yup.object()
+    .shape({
+      email: Yup.string().email(t('validation.invalidEmail')),
+      phone: Yup.string()
+        .matches(/^\d+$/, t('validation.phoneNumeric'))
+        .min(10, t('validation.phoneMinLength')),
+      countryCode: Yup.string().required(t('validation.countryCodeRequired')),
+      password: Yup.string()
+        .required(t('validation.passwordRequired'))
+        .min(6, t('validation.passwordMinLength')),
+    })
+    .test(
+      'emailOrPhoneRequired',
+      t('validation.emailOrPhoneRequired'),
+      function (value) {
+        const {email, phone} = value;
+        return !!(email || phone);
+      },
+    );
 
-const createLoginSchema = (t) => Yup.object().shape({
-  email: Yup.string()
-    .email(t('validation.invalidEmail')),
-  phone: Yup.string()
-    .matches(/^\d+$/, t('validation.phoneNumeric'))
-    .min(10, t('validation.phoneMinLength')),
-  password: Yup.string()
-    .required(t('validation.passwordRequired'))
-    .min(6, t('validation.passwordMinLength')),
-}).test(
-  'emailOrPhoneRequired',
-  t('validation.emailOrPhoneRequired'),
-  function (value) {
-    const { email, phone } = value;
-    return !!(email || phone);
-  }
-);
-
-
-
-export const LoginScreen = ({ navigation  }) => {
-  const route = useRoute()
-  const { isItSeller: initialIsSeller = true, email = '', password = '' } = route.params || {};
-  console.debug("THIS IS ", initialIsSeller, email, password)
-  const { t } = useTranslation();
+export const LoginScreen = ({navigation}) => {
+  const route = useRoute();
+  const {
+    isItSeller: initialIsSeller = true,
+    email = '',
+    password = '',
+  } = route.params || {};
+  console.debug('THIS IS ', initialIsSeller, email, password);
+  const {t} = useTranslation();
   const dispatch = useDispatch();
-  const { isDark, theme } = useTheme();
+  const {isDark, theme} = useTheme();
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [selectedTab, setSelectedTab] = useState('email');
   const [rememberMe, setRememberMe] = useState(false);
   const [isSeller, setIsSeller] = useState(initialIsSeller);
   const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
+  const [countryModalVisible, setCountryModalVisible] = useState(false);
 
   const navigateToPage = pageName => {
     navigation.navigate(pageName);
   };
 
-  const submitForm = async (values, { setSubmitting }) => {
+  const submitForm = async (values, {setSubmitting}) => {
     try {
       setIsBtnDisabled(true);
 
@@ -74,65 +89,71 @@ export const LoginScreen = ({ navigation  }) => {
       if (selectedTab === 'email' && values.email.trim() !== '') {
         formData.append('email', values.email.trim());
       } else if (selectedTab === 'phone' && values.phone.trim() !== '') {
-        formData.append('phone', values.phone.trim());
+        // formData.append('countryCode', values.countryCode || '+92');
+        // formData.append('phoneNoCC', values.phone.trim());
+        console.log('isSeller', isSeller);
+        const phoneValue =
+          (values.countryCode || '+92') + '' + values.phone.trim();
+        formData.append(isSeller ? 'phone' : 'email', phoneValue);
       }
 
       formData.append('password', values.password);
 
       const headers = {
         'Content-Type': 'multipart/form-data',
-      }
+      };
       let response;
-      isSeller ?
-        response = await axiosSellerClient.post('auth/login', formData, {
-          headers: headers,
-        })
-        : response = await axiosBuyerClient.post('auth/login', formData, {
-          headers: headers,
-        });
-
+      console.log('formdata', formData);
+      isSeller
+        ? (response = await axiosSellerClient.post('auth/login', formData, {
+            headers: headers,
+          }))
+        : (response = await axiosBuyerClient.post('auth/login', formData, {
+            headers: headers,
+          }));
 
       // TODO: handle login success (e.g., navigation, token storage, etc.)
-      console.debug("Login Success Response", response.data);
+      console.debug('Login Success Response', response.data);
 
       if (response?.data?.token) {
         // console.log("IN TOKEN")
         const userType = isSeller ? UserType.SELLER : UserType.BUYER;
-        
+
         // Use new dual auth system
         if (isSeller) {
           dispatch(handleSellerLogin(response.data.token));
         } else {
           dispatch(handleBuyerLogin(response.data.token));
         }
-        
+
         // Also maintain legacy auth for backward compatibility
         dispatch(handleUserLogin(response.data.token, userType));
-        
-        navigateToPage( isSeller ?  AppScreens.SELLER_HOME_MAIN: AppScreens.BUYER_HOME_MAIN)
+
+        navigateToPage(
+          isSeller ? AppScreens.SELLER_HOME_MAIN : AppScreens.BUYER_HOME_MAIN,
+        );
       }
 
       // const v = await getAuthToken();
       // // console.log("MEOW", v)
-
     } catch (error) {
       // TODO: handle error (e.g., show error message)
       if (error.response) {
-        console.error("Login Error Response", error.response.data);
+        console.error('Login Error Response', error.response.data);
         Toast.show({
-        type: 'error',
-        text1: error.response.data.errors[0].message,
-        text2: t('registration.loginFailed'),
-        position: 'top',
-      });
+          type: 'error',
+          text1: error.response.data.errors[0].message,
+          text2: t('registration.loginFailed'),
+          position: 'top',
+        });
       } else {
-        console.error("Login Error", error);
+        console.error('Login Error', error);
         Toast.show({
-        type: 'error',
-        text1: t('registration.somethingWentWrong'),
-        text2: t('registration.loginFailed'),
-        position: 'top',
-      });
+          type: 'error',
+          text1: t('registration.somethingWentWrong'),
+          text2: t('registration.loginFailed'),
+          position: 'top',
+        });
       }
     } finally {
       setIsBtnDisabled(false);
@@ -149,12 +170,26 @@ export const LoginScreen = ({ navigation  }) => {
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={[styles.titleText, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>{t('yourPetOurSecurity')}</Text>
-          <Text style={[styles.subtitleText, { 
-            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
-          }]}>
+          <Text
+            style={[
+              styles.titleText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('yourPetOurSecurity')}
+          </Text>
+          <Text
+            style={[
+              styles.subtitleText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-700'],
+              },
+            ]}>
             {t('theBestMarketplaceFor')}
             {'\n'}
             {t('exoticPets')}
@@ -164,46 +199,82 @@ export const LoginScreen = ({ navigation  }) => {
 
       <View style={styles.middleSection}>
         <View style={styles.toggleRow}>
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity
-            onPress={() => setSelectedTab('email')}
-            style={[styles.toggleButton, selectedTab === 'email' && styles.toggleActive]}>
-              <Text style={[selectedTab === 'email' ? styles.toggleTextActive : styles.toggleTextInactive, { 
-                color: selectedTab === 'email' ? theme['color-basic-100'] : theme['color-shadcn-primary']
-              }]}>{t('email')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSelectedTab('phone')}
-            style={[styles.toggleButton, selectedTab === 'phone' && styles.toggleActive]}>
-              <Text style={[selectedTab === 'phone' ? styles.toggleTextActive : styles.toggleTextInactive, { 
-                color: selectedTab === 'phone' ? theme['color-basic-100'] : theme['color-shadcn-primary']
-              }]}>{t('phone')}</Text>
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('email')}
+              style={[
+                styles.toggleButton,
+                selectedTab === 'email' && styles.toggleActive,
+              ]}>
+              <Text
+                style={[
+                  selectedTab === 'email'
+                    ? styles.toggleTextActive
+                    : styles.toggleTextInactive,
+                  {
+                    color:
+                      selectedTab === 'email'
+                        ? theme['color-basic-100']
+                        : theme['color-shadcn-primary'],
+                  },
+                ]}>
+                {t('email')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('phone')}
+              style={[
+                styles.toggleButton,
+                selectedTab === 'phone' && styles.toggleActive,
+              ]}>
+              <Text
+                style={[
+                  selectedTab === 'phone'
+                    ? styles.toggleTextActive
+                    : styles.toggleTextInactive,
+                  {
+                    color:
+                      selectedTab === 'phone'
+                        ? theme['color-basic-100']
+                        : theme['color-shadcn-primary'],
+                  },
+                ]}>
+                {t('phone')}
+              </Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.userTypeButton, { 
-              backgroundColor: isDark ? theme['color-shadcn-secondary'] : 'rgba(39, 174, 96, 0.1)',
-              borderColor: theme['color-shadcn-primary']
-            }]}
-            onPress={() => setUserTypeModalVisible(true)}
-          >
+            style={[
+              styles.userTypeButton,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-secondary']
+                  : 'rgba(39, 174, 96, 0.1)',
+                borderColor: theme['color-shadcn-primary'],
+              },
+            ]}
+            onPress={() => setUserTypeModalVisible(true)}>
             <View style={styles.userTypeButtonContent}>
               <Icon
-                name={isSeller ? "shopping-bag" : "person"}
+                name={isSeller ? 'shopping-bag' : 'person'}
                 fill={theme['color-shadcn-primary']}
-                style={{ width: 16, height: 16, marginRight: 8 }}
+                style={{width: 16, height: 16, marginRight: 8}}
               />
-              <Text style={[styles.userTypeButtonText, { 
-                color: theme['color-shadcn-primary']
-              }]}>
+              <Text
+                style={[
+                  styles.userTypeButtonText,
+                  {
+                    color: theme['color-shadcn-primary'],
+                  },
+                ]}>
                 {isSeller ? t('seller') : t('buyer')}
               </Text>
             </View>
             <Icon
               name="chevron-down"
               fill={theme['color-shadcn-primary']}
-              style={{ width: 16, height: 16 }}
+              style={{width: 16, height: 16}}
             />
           </TouchableOpacity>
         </View>
@@ -212,59 +283,84 @@ export const LoginScreen = ({ navigation  }) => {
           visible={userTypeModalVisible}
           transparent
           animationType="fade"
-          onRequestClose={() => setUserTypeModalVisible(false)}
-        >
+          onRequestClose={() => setUserTypeModalVisible(false)}>
           <TouchableOpacity
-            style={[styles.modalOverlay, { 
-              backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)'
-            }]}
+            style={[
+              styles.modalOverlay,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(0,0,0,0.5)'
+                  : 'rgba(0,0,0,0.25)',
+              },
+            ]}
             activeOpacity={1}
-            onPressOut={() => setUserTypeModalVisible(false)}
-          >
-            <View style={[styles.userTypeModal, { 
-              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-            }]}>
+            onPressOut={() => setUserTypeModalVisible(false)}>
+            <View
+              style={[
+                styles.userTypeModal,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-card']
+                    : theme['color-basic-100'],
+                },
+              ]}>
               <TouchableOpacity
                 style={[
                   styles.userTypeOption,
-                  isSeller && styles.userTypeOptionSelected
+                  isSeller && styles.userTypeOptionSelected,
                 ]}
                 onPress={() => {
                   setIsSeller(true);
                   setUserTypeModalVisible(false);
-                }}
-              >
+                }}>
                 <Icon
                   name="shopping-bag"
-                  fill={isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary']}
-                  style={{ width: 16, height: 16, marginRight: 8 }}
+                  fill={
+                    isSeller
+                      ? theme['color-basic-100']
+                      : theme['color-shadcn-primary']
+                  }
+                  style={{width: 16, height: 16, marginRight: 8}}
                 />
-                <Text style={[
-                  styles.userTypeOptionText,
-                  { color: isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary'] }
-                ]}>
+                <Text
+                  style={[
+                    styles.userTypeOptionText,
+                    {
+                      color: isSeller
+                        ? theme['color-basic-100']
+                        : theme['color-shadcn-primary'],
+                    },
+                  ]}>
                   {t('seller')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
                   styles.userTypeOption,
-                  !isSeller && styles.userTypeOptionSelected
+                  !isSeller && styles.userTypeOptionSelected,
                 ]}
                 onPress={() => {
                   setIsSeller(false);
                   setUserTypeModalVisible(false);
-                }}
-              >
+                }}>
                 <Icon
                   name="person"
-                  fill={!isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary']}
-                  style={{ width: 16, height: 16, marginRight: 8 }}
+                  fill={
+                    !isSeller
+                      ? theme['color-basic-100']
+                      : theme['color-shadcn-primary']
+                  }
+                  style={{width: 16, height: 16, marginRight: 8}}
                 />
-                <Text style={[
-                  styles.userTypeOptionText,
-                  { color: !isSeller ? theme['color-basic-100'] : theme['color-shadcn-primary'] }
-                ]}>
+                <Text
+                  style={[
+                    styles.userTypeOptionText,
+                    {
+                      color: !isSeller
+                        ? theme['color-basic-100']
+                        : theme['color-shadcn-primary'],
+                    },
+                  ]}>
                   {t('buyer')}
                 </Text>
               </TouchableOpacity>
@@ -277,12 +373,11 @@ export const LoginScreen = ({ navigation  }) => {
             email: route.params?.email || '',
             password: route.params?.password || '',
             phone: '',
+            countryCode: '+92',
           }}
           enableReinitialize={true}
           onSubmit={submitForm}
-          validationSchema={createLoginSchema(t)}
-
-        >
+          validationSchema={createLoginSchema(t)}>
           {({
             handleChange,
             handleBlur,
@@ -293,45 +388,197 @@ export const LoginScreen = ({ navigation  }) => {
             isSubmitting,
           }) => (
             <Layout>
+              {/* Country Code Modal */}
+              <Modal
+                visible={countryModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setCountryModalVisible(false)}>
+                <TouchableOpacity
+                  style={[
+                    styles.modalOverlay,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(0,0,0,0.5)'
+                        : 'rgba(0,0,0,0.25)',
+                    },
+                  ]}
+                  activeOpacity={1}
+                  onPressOut={() => setCountryModalVisible(false)}>
+                  <View
+                    style={[
+                      styles.countryModal,
+                      {
+                        backgroundColor: isDark
+                          ? theme['color-shadcn-card']
+                          : theme['color-basic-100'],
+                      },
+                    ]}>
+                    <FlatList
+                      data={COUNTRY_CODES}
+                      keyExtractor={item => item.code}
+                      renderItem={({item}) => (
+                        <TouchableOpacity
+                          style={[
+                            styles.countryModalItem,
+                            {
+                              borderBottomColor: isDark
+                                ? theme['color-shadcn-border']
+                                : theme['color-basic-400'],
+                            },
+                          ]}
+                          onPress={() => {
+                            handleChange('countryCode')(item.code);
+                            setCountryModalVisible(false);
+                          }}>
+                          <Text
+                            style={[
+                              styles.countryModalItemText,
+                              {
+                                color: isDark
+                                  ? theme['color-shadcn-foreground']
+                                  : theme['color-basic-900'],
+                              },
+                            ]}>
+                            {item.label}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </Modal>
               {selectedTab === 'email' ? (
                 <Input
                   placeholder={t('email')}
                   textContentType="emailAddress"
                   keyboardType="email-address"
-                  style={[styles.input, { 
-                    backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-                    borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-                  }]}
-                  textStyle={[styles.textStyle, { 
-                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }]}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: isDark
+                        ? theme['color-shadcn-card']
+                        : theme['color-basic-100'],
+                      borderColor: isDark
+                        ? theme['color-shadcn-border']
+                        : theme['color-basic-400'],
+                    },
+                  ]}
+                  textStyle={[
+                    styles.textStyle,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}
                   onChangeText={handleChange('email')}
                   onBlur={handleBlur('email')}
                   value={values.email}
                   caption={touched.email && errors.email ? errors.email : ''}
                   status={errors.email && touched.email ? 'danger' : 'basic'}
-                  accessoryLeft={<Icon name="email" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
+                  accessoryLeft={
+                    <Icon
+                      name="email"
+                      fill={
+                        isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600']
+                      }
+                      style={{width: 20, height: 20}}
+                    />
+                  }
                 />
               ) : (
-                <Input
-                  placeholder={t('phone')}
-                  keyboardType="phone-pad"
-                  value={values.phone}
-                  onChangeText={handleChange('phone')}
-                  textContentType="telephoneNumber"
-                  textStyle={[styles.textStyle, { 
-                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }]}
-                  style={[styles.input, { 
-                    backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-                    borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-                  }]}
-                  onBlur={handleBlur('phone')}
-                  caption={touched.phone && errors.phone ? errors.phone : ''}
-                  status={errors.phone && touched.phone ? 'danger' : 'basic'}
-                  accessoryLeft={<Icon name="phone" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
-                  // Note: phone login is not supported by the seller endpoint, but UI is kept for consistency
-                />
+                <View>
+                  <View
+                    style={[
+                      styles.phoneRowImproved,
+                      {
+                        backgroundColor: isDark
+                          ? theme['color-shadcn-card']
+                          : theme['color-basic-100'],
+                        borderColor: isDark
+                          ? theme['color-shadcn-border']
+                          : theme['color-basic-400'],
+                      },
+                    ]}>
+                    <TouchableOpacity
+                      style={[
+                        styles.countryCodeTouchable,
+                        {
+                          backgroundColor: isDark
+                            ? theme['color-shadcn-secondary']
+                            : theme['color-basic-200'],
+                          borderRightColor: isDark
+                            ? theme['color-shadcn-border']
+                            : theme['color-basic-400'],
+                        },
+                      ]}
+                      onPress={() => setCountryModalVisible(true)}
+                      activeOpacity={0.7}>
+                      <Text
+                        style={[
+                          styles.countryCodeText,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-foreground']
+                              : theme['color-basic-900'],
+                          },
+                        ]}>
+                        {COUNTRY_CODES.find(c => c.code === values.countryCode)
+                          ?.label || '+92'}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.countryCodeDropdownIcon,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-muted-foreground']
+                              : theme['color-basic-600'],
+                          },
+                        ]}>
+                        ▼
+                      </Text>
+                    </TouchableOpacity>
+                    <Input
+                      placeholder={t('phone')}
+                      keyboardType="phone-pad"
+                      value={values.phone}
+                      onChangeText={handleChange('phone')}
+                      textContentType="telephoneNumber"
+                      textStyle={[
+                        styles.textStyle,
+                        {
+                          color: isDark
+                            ? theme['color-shadcn-foreground']
+                            : theme['color-basic-900'],
+                        },
+                      ]}
+                      style={[
+                        styles.phoneInputImproved,
+                        {
+                          backgroundColor: isDark
+                            ? theme['color-shadcn-card']
+                            : theme['color-basic-100'],
+                        },
+                      ]}
+                      onBlur={handleBlur('phone')}
+                      maxLength={15}
+                    />
+                  </View>
+                  {touched.phone && errors.phone && (
+                    <Text
+                      style={[
+                        styles.errorText,
+                        {
+                          color: theme['color-danger-500'],
+                        },
+                      ]}>
+                      {errors.phone}
+                    </Text>
+                  )}
+                </View>
               )}
 
               {/*
@@ -344,34 +591,71 @@ export const LoginScreen = ({ navigation  }) => {
                   <Input
                     placeholder={t('password')}
                     label={evaProps => (
-                      <Text {...evaProps} style={[styles.label, { 
-                        color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                      }]}>
+                      <Text
+                        {...evaProps}
+                        style={[
+                          styles.label,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-foreground']
+                              : theme['color-basic-900'],
+                          },
+                        ]}>
                         {t('password')}
                       </Text>
                     )}
-                    textStyle={[styles.textStyle, { 
-                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                    }]}
+                    textStyle={[
+                      styles.textStyle,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}
                     secureTextEntry={!showPassword}
-                    style={[styles.input, { 
-                      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-                      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-                    }]}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: isDark
+                          ? theme['color-shadcn-card']
+                          : theme['color-basic-100'],
+                        borderColor: isDark
+                          ? theme['color-shadcn-border']
+                          : theme['color-basic-400'],
+                      },
+                    ]}
                     onChangeText={handleChange('password')}
                     onBlur={handleBlur('password')}
                     value={values.password}
                     caption={
-                      touched.password && <InputError errorText={errors.password} />
+                      touched.password && (
+                        <InputError errorText={errors.password} />
+                      )
                     }
-                    status={errors.password && touched.password ? 'danger' : 'basic'}
-                    accessoryLeft={<Icon name="lock" fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']} style={{ width: 20, height: 20 }} />}
+                    status={
+                      errors.password && touched.password ? 'danger' : 'basic'
+                    }
+                    accessoryLeft={
+                      <Icon
+                        name="lock"
+                        fill={
+                          isDark
+                            ? theme['color-shadcn-muted-foreground']
+                            : theme['color-basic-600']
+                        }
+                        style={{width: 20, height: 20}}
+                      />
+                    }
                     accessoryRight={props => (
                       <Icon
                         {...props}
-                        name={showPassword ? "eye-off" : "eye"}
-                        fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
-                        style={{ width: 26, height: 26, marginRight: 5 }}
+                        name={showPassword ? 'eye-off' : 'eye'}
+                        fill={
+                          isDark
+                            ? theme['color-shadcn-muted-foreground']
+                            : theme['color-basic-600']
+                        }
+                        style={{width: 26, height: 26, marginRight: 5}}
                         onPress={() => setShowPassword(v => !v)}
                       />
                     )}
@@ -386,17 +670,32 @@ export const LoginScreen = ({ navigation  }) => {
                     checked={rememberMe}
                     onChange={setRememberMe}
                   />
-                  <Text style={[styles.rememberMeText, { 
-                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                  }]}>{t('rememberMe')}</Text>
+                  <Text
+                    style={[
+                      styles.rememberMeText,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('rememberMe')}
+                  </Text>
                 </View>
                 <Text
                   category="p2"
                   status="primary"
-                  style={[styles.forgotPasswordLinkText, { 
-                    color: theme['color-shadcn-primary']
-                  }]}
-                  onPress={() => navigateToPage(isSeller ? 'SellerForgotPassword' : 'ForgotPassword')}>
+                  style={[
+                    styles.forgotPasswordLinkText,
+                    {
+                      color: theme['color-shadcn-primary'],
+                    },
+                  ]}
+                  onPress={() =>
+                    navigateToPage(
+                      isSeller ? 'SellerForgotPassword' : 'ForgotPassword',
+                    )
+                  }>
                   {t('forgotpassword')}
                 </Text>
               </View>
@@ -405,19 +704,31 @@ export const LoginScreen = ({ navigation  }) => {
                 disabled={isBtnDisabled || isSubmitting}
                 onPress={handleSubmit}
               />
-              <Text style={[styles.noAccountText, { 
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}> {t('noAccountSignUpNow')}</Text>
+              <Text
+                style={[
+                  styles.noAccountText,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {' '}
+                {t('noAccountSignUpNow')}
+              </Text>
             </Layout>
           )}
         </Formik>
 
         <TextButton
-          iconName={"person"}
+          iconName={'person'}
           title={t('signup')}
-          style={[styles.signupButton, { 
-            borderColor: theme['color-shadcn-primary']
-          }]}
+          style={[
+            styles.signupButton,
+            {
+              borderColor: theme['color-shadcn-primary'],
+            },
+          ]}
           onPress={() => navigateToPage('Register')}
         />
       </View>
@@ -553,7 +864,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
@@ -574,5 +885,61 @@ const styles = StyleSheet.create({
   },
   userTypeOptionTextSelected: {
     color: '#fff',
+  },
+  phoneRowImproved: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    overflow: 'hidden',
+    marginVertical: 10,
+  },
+  countryCodeTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRightWidth: 1,
+    minWidth: 90,
+    justifyContent: 'center',
+  },
+  countryCodeText: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  countryCodeDropdownIcon: {
+    fontSize: 12,
+    marginLeft: 2,
+  },
+  phoneInputImproved: {
+    flex: 1,
+    marginVertical: 0,
+    marginLeft: 0,
+    borderWidth: 0,
+    paddingLeft: 2,
+  },
+  countryModal: {
+    borderRadius: 10,
+    width: 280,
+    maxHeight: 350,
+    paddingVertical: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  countryModalItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+  },
+  countryModalItemText: {
+    fontSize: 16,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
 });

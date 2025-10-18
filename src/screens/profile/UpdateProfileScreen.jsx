@@ -1,23 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, ScrollView } from 'react-native';
-import { Layout, Text, Input, Button } from '@ui-kitten/components';
-import { Formik } from 'formik';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, Alert, ScrollView} from 'react-native';
+import {Layout, Text, Input, Button} from '@ui-kitten/components';
+import {Formik} from 'formik';
 import * as Yup from 'yup';
-import { useSelector, useDispatch } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../theme/ThemeContext';
+import {useSelector, useDispatch} from 'react-redux';
+import {useTranslation} from 'react-i18next';
+import {useTheme} from '../../theme/ThemeContext';
 import Toast from 'react-native-toast-message';
 
-import { smartBuyerClient, handleAuthError, setAuthModalHandlers } from '../../utils/authAxiosClient';
-import { BuyerAuthModal } from '../../components/modals';
-import { 
-  selectCustomerInfo, 
-  selectIsBuyerAuthenticated, 
+import {
+  smartBuyerClient,
+  handleAuthError,
+  setAuthModalHandlers,
+} from '../../utils/authAxiosClient';
+import {AppScreens} from '../../navigators/AppNavigator';
+import {
+  selectCustomerInfo,
+  selectIsBuyerAuthenticated,
   selectIsSellerAuthenticated,
   fetchCustomerInfo,
-  logoutBuyer
+  logoutBuyer,
 } from '../../store/user';
-import { InputError, SubmitButton } from '../../components/form';
+import {InputError, SubmitButton} from '../../components/form';
 
 const ProfileSchema = Yup.object().shape({
   f_name: Yup.string()
@@ -35,14 +39,13 @@ const ProfileSchema = Yup.object().shape({
     .required('Phone is required'),
 });
 
-export const UpdateProfileScreen = ({ navigation }) => {
-  const { t } = useTranslation();
-  const { theme, isDark } = useTheme();
+export const UpdateProfileScreen = ({navigation}) => {
+  const {t} = useTranslation();
+  const {theme, isDark} = useTheme();
   const dispatch = useDispatch();
-  
+
   const [loading, setLoading] = useState(false);
-  const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
-  
+
   // Get state from Redux
   const customerInfo = useSelector(selectCustomerInfo);
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
@@ -51,17 +54,18 @@ export const UpdateProfileScreen = ({ navigation }) => {
   // Set up auth modal handlers
   useEffect(() => {
     setAuthModalHandlers({
-      showBuyerAuthModal: () => setShowBuyerAuthModal(true),
+      showBuyerAuthModal: () =>
+        navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
     });
-  }, []);
+  }, [navigation]);
 
   // Check authentication and load profile on component mount
   useEffect(() => {
     if (isBuyerAuthenticated) {
       // Fetch latest customer info if not available
-    if (!customerInfo) {
-      dispatch(fetchCustomerInfo());
-    }
+      if (!customerInfo) {
+        dispatch(fetchCustomerInfo());
+      }
     } else {
       // Show different message based on auth state
       if (isSellerAuthenticated) {
@@ -69,20 +73,28 @@ export const UpdateProfileScreen = ({ navigation }) => {
           'Buyer Authentication Required',
           'You are currently signed in as a seller. To update your buyer profile, please also sign in as a buyer.',
           [
-            { text: 'Cancel', style: 'cancel', onPress: () => navigation.goBack() },
-            { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
-          ]
+            {
+              text: 'Cancel',
+              style: 'cancel',
+              onPress: () => navigation.goBack(),
+            },
+            {
+              text: 'Sign in as Buyer',
+              onPress: () =>
+                navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
+            },
+          ],
         );
       } else {
-        setShowBuyerAuthModal(true);
+        navigation.navigate(AppScreens.LOGIN, {isItSeller: false});
       }
     }
   }, [isBuyerAuthenticated, isSellerAuthenticated, customerInfo, dispatch]);
 
-  const handleUpdateProfile = async (values, { setSubmitting }) => {
+  const handleUpdateProfile = async (values, {setSubmitting}) => {
     try {
       setLoading(true);
-      
+
       const formData = new FormData();
       formData.append('f_name', values.f_name);
       formData.append('l_name', values.l_name);
@@ -90,33 +102,39 @@ export const UpdateProfileScreen = ({ navigation }) => {
       formData.append('phone', values.phone);
       formData.append('_method', 'PUT');
 
-      const response = await smartBuyerClient.put('customer/update-profile', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await smartBuyerClient.put(
+        'customer/update-profile',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+      );
 
       // console.log('Profile updated:', response.data);
-      
+
       // Refresh customer info after successful update
       dispatch(fetchCustomerInfo());
-      
-        Toast.show({
-          type: 'success',
-        text1: 'Success',
-        text2: 'Profile updated successfully!'
-        });
 
-        navigation.goBack();
-      
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Profile updated successfully!',
+      });
+
+      navigation.goBack();
     } catch (error) {
       console.error('Error updating profile:', error);
-      handleAuthError(error, (err) => {
-        const errorMessage = err?.response?.data?.message || err?.message || 'Failed to update profile';
-      Toast.show({
-        type: 'error',
+      handleAuthError(error, err => {
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          'Failed to update profile';
+        Toast.show({
+          type: 'error',
           text1: 'Update Failed',
-          text2: errorMessage
+          text2: errorMessage,
         });
       });
     } finally {
@@ -130,97 +148,117 @@ export const UpdateProfileScreen = ({ navigation }) => {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Customer ID not found'
+        text2: 'Customer ID not found',
       });
-        return;
-      }
+      return;
+    }
 
     Alert.alert(
       'Delete Account',
       'Are you sure you want to delete your account? This action cannot be undone.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-    try {
+            try {
               setLoading(true);
-      
-              const response = await smartBuyerClient.get(`customer/account-delete/${customerInfo.id}`);
+
+              const response = await smartBuyerClient.get(
+                `customer/account-delete/${customerInfo.id}`,
+              );
               // console.log('Account deletion response:', response.data);
-              
+
               // Logout buyer after account deletion
               dispatch(logoutBuyer());
-              
-        Toast.show({
-          type: 'success',
-          text1: 'Account Deleted',
-                text2: 'Your account has been successfully deleted'
-        });
+
+              Toast.show({
+                type: 'success',
+                text1: 'Account Deleted',
+                text2: 'Your account has been successfully deleted',
+              });
 
               navigation.navigate('Login');
-              
-    } catch (error) {
+            } catch (error) {
               console.error('Error deleting account:', error);
-              handleAuthError(error, (err) => {
-                const errorMessage = err?.response?.data?.message || err?.message || 'Failed to delete account';
-      Toast.show({
-        type: 'error',
+              handleAuthError(error, err => {
+                const errorMessage =
+                  err?.response?.data?.message ||
+                  err?.message ||
+                  'Failed to delete account';
+                Toast.show({
+                  type: 'error',
                   text1: 'Deletion Failed',
-                  text2: errorMessage
+                  text2: errorMessage,
                 });
-      });
-    } finally {
+              });
+            } finally {
               setLoading(false);
-    }
-          }
-        }
-      ]
+            }
+          },
+        },
+      ],
     );
-  };
-
-  const handleAuthSuccess = () => {
-    setShowBuyerAuthModal(false);
-    // Fetch customer info after successful authentication
-    dispatch(fetchCustomerInfo());
   };
 
   if (!isBuyerAuthenticated) {
     return (
       <>
-        <Layout style={[styles.authContainer, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
-          <Text style={[styles.authMessage, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-            {isSellerAuthenticated 
+        <Layout
+          style={[
+            styles.authContainer,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-background']
+                : theme['color-basic-100'],
+            },
+          ]}>
+          <Text
+            style={[
+              styles.authMessage,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {isSellerAuthenticated
               ? 'Please sign in as a buyer to update your profile'
-              : 'Please sign in to update your profile'
-            }
+              : 'Please sign in to update your profile'}
           </Text>
           <Button
-            onPress={() => setShowBuyerAuthModal(true)}
-            style={styles.authButton}
-          >
+            onPress={() =>
+              navigation.navigate(AppScreens.LOGIN, {isItSeller: false})
+            }
+            style={styles.authButton}>
             Sign in as Buyer
           </Button>
-      </Layout>
-        
-        <BuyerAuthModal
-          visible={showBuyerAuthModal}
-          onClose={() => {
-            setShowBuyerAuthModal(false);
-            navigation.goBack();
-          }}
-          onSuccess={handleAuthSuccess}
-          title="Sign in as Buyer"
-        />
+        </Layout>
       </>
     );
   }
 
   if (!customerInfo) {
     return (
-      <Layout style={[styles.loadingContainer, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
-        <Text style={[styles.loadingText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+      <Layout
+        style={[
+          styles.loadingContainer,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}>
+        <Text
+          style={[
+            styles.loadingText,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
           Loading profile...
         </Text>
       </Layout>
@@ -228,30 +266,60 @@ export const UpdateProfileScreen = ({ navigation }) => {
   }
 
   return (
-    <Layout style={[styles.container, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
+    <Layout
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <Text style={[styles.title, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+        contentContainerStyle={styles.scrollContent}>
+        <Text
+          style={[
+            styles.title,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
           Update Profile
-            </Text>
+        </Text>
 
-          <Formik
-            initialValues={{
+        <Formik
+          initialValues={{
             f_name: customerInfo.f_name || '',
             l_name: customerInfo.l_name || '',
             email: customerInfo.email || '',
             phone: customerInfo.phone || '',
-            }}
+          }}
           validationSchema={ProfileSchema}
           onSubmit={handleUpdateProfile}
-            enableReinitialize={true}
-          >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+          enableReinitialize={true}>
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
             <View style={styles.form}>
               <View style={styles.inputContainer}>
-                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
                   First Name
                 </Text>
                 <Input
@@ -267,7 +335,15 @@ export const UpdateProfileScreen = ({ navigation }) => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
                   Last Name
                 </Text>
                 <Input
@@ -283,7 +359,15 @@ export const UpdateProfileScreen = ({ navigation }) => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
                   Email
                 </Text>
                 <Input
@@ -301,7 +385,15 @@ export const UpdateProfileScreen = ({ navigation }) => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
                   Phone
                 </Text>
                 <Input
@@ -318,40 +410,34 @@ export const UpdateProfileScreen = ({ navigation }) => {
               </View>
 
               <SubmitButton
-                  onPress={handleSubmit}
+                onPress={handleSubmit}
                 disabled={loading || isSubmitting}
                 title="Update Profile"
                 style={styles.updateButton}
               />
             </View>
-            )}
-          </Formik>
+          )}
+        </Formik>
 
         <View style={styles.dangerZone}>
-          <Text style={[styles.dangerTitle, { color: theme['color-danger-500'] }]}>
+          <Text
+            style={[styles.dangerTitle, {color: theme['color-danger-500']}]}>
             Danger Zone
           </Text>
-            <Button
-              onPress={handleDeleteAccount}
+          <Button
+            onPress={handleDeleteAccount}
             disabled={loading}
-            style={[styles.deleteButton, { backgroundColor: theme['color-danger-500'] }]}
-            appearance="filled"
-            >
-              Delete Account
-            </Button>
-          </View>
+            style={[
+              styles.deleteButton,
+              {backgroundColor: theme['color-danger-500']},
+            ]}
+            appearance="filled">
+            Delete Account
+          </Button>
+        </View>
       </ScrollView>
 
       {/* Buyer Authentication Modal */}
-      <BuyerAuthModal
-        visible={showBuyerAuthModal}
-        onClose={() => {
-          setShowBuyerAuthModal(false);
-          navigation.goBack();
-        }}
-        onSuccess={handleAuthSuccess}
-        title="Sign in as Buyer"
-      />
     </Layout>
   );
 };

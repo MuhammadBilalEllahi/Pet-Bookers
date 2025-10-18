@@ -29,7 +29,6 @@ export const BuyerProfileStack = () => {
           header: props => (
             <MainScreensHeader {...props} title="Profile" hideSearch={true} />
           ),
-          
         }}
       />
       <Screen
@@ -38,12 +37,8 @@ export const BuyerProfileStack = () => {
         options={{
           title: 'MyOrders',
           header: props => (
-                      <MainScreensHeader
-                        {...props}
-                        hideSearch={false}
-                        title="MyOrders"
-                      />
-                    ),
+            <MainScreensHeader {...props} hideSearch={false} title="MyOrders" />
+          ),
         }}
       />
       <Screen
@@ -52,12 +47,12 @@ export const BuyerProfileStack = () => {
         options={{
           title: 'UpdateProfile',
           header: props => (
-                      <MainScreensHeader
-                        {...props}
-                        hideSearch={true}
-                        title="UpdateProfile"
-                      />
-                    ),
+            <MainScreensHeader
+              {...props}
+              hideSearch={true}
+              title="UpdateProfile"
+            />
+          ),
         }}
       />
       <Screen
@@ -66,12 +61,12 @@ export const BuyerProfileStack = () => {
         options={{
           title: 'UpdatePassword',
           header: props => (
-                      <MainScreensHeader
-                        {...props}
-                        hideSearch={true}
-                        title="UpdatePassword"
-                      />
-                    ),
+            <MainScreensHeader
+              {...props}
+              hideSearch={true}
+              title="UpdatePassword"
+            />
+          ),
         }}
       />
       <Screen
@@ -80,12 +75,12 @@ export const BuyerProfileStack = () => {
         options={{
           title: 'Manage Addresses',
           header: props => (
-                      <MainScreensHeader
-                        {...props}
-                        hideSearch={true}
-                        title="Manage Addresses"
-                      />
-                    ),
+            <MainScreensHeader
+              {...props}
+              hideSearch={true}
+              title="Manage Addresses"
+            />
+          ),
         }}
       />
       <Screen
@@ -94,15 +89,15 @@ export const BuyerProfileStack = () => {
         options={{
           title: 'Settings',
           header: props => (
-            <MainScreensHeader 
-              {...props} 
-              title="App Settings" 
-              hideSearch={true} 
-              activateGoBack={true} 
-              hideCart={true} 
-              hideWishlist={true} 
-              hideNotification={true} 
-              hideSettings={true} 
+            <MainScreensHeader
+              {...props}
+              title="App Settings"
+              hideSearch={true}
+              activateGoBack={true}
+              hideCart={true}
+              hideWishlist={true}
+              hideNotification={true}
+              hideSettings={true}
             />
           ),
         }}
@@ -113,15 +108,15 @@ export const BuyerProfileStack = () => {
         options={{
           title: 'Seller Options',
           header: props => (
-            <MainScreensHeader 
-              {...props} 
-              title="Seller Options" 
-              hideSearch={true} 
-              activateGoBack={true} 
-              hideCart={true} 
-              hideWishlist={true} 
-              hideNotification={true} 
-              hideSettings={true} 
+            <MainScreensHeader
+              {...props}
+              title="Seller Options"
+              hideSearch={true}
+              activateGoBack={true}
+              hideCart={true}
+              hideWishlist={true}
+              hideNotification={true}
+              hideSettings={true}
             />
           ),
         }}

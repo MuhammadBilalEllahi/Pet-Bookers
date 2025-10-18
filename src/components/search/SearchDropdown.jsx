@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -8,161 +8,200 @@ import {
   FlatList,
   Modal,
   Text,
-  Alert
+  Alert,
 } from 'react-native';
-import { Input, Icon, Card, Spinner } from '@ui-kitten/components';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../theme/ThemeContext';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectBaseUrls } from '../../store/configs';
-import { axiosBuyerClient } from '../../utils/axiosClient';
-import { calculateDiscountedPrice } from '../../utils/products';
-import { Price } from '../Price';
-import { AirbnbRating } from 'react-native-ratings';
-import { ThemedIcon } from '../Icon';
-import { AppScreens } from '../../navigators/AppNavigator';
+import {Input, Icon, Card, Spinner} from '@ui-kitten/components';
+import {useTranslation} from 'react-i18next';
+import {useTheme} from '../../theme/ThemeContext';
+import {useSelector, useDispatch} from 'react-redux';
+import {selectBaseUrls} from '../../store/configs';
+import {axiosBuyerClient} from '../../utils/axiosClient';
+import {calculateDiscountedPrice} from '../../utils/products';
+import {Price} from '../Price';
+import {AirbnbRating} from 'react-native-ratings';
+import {ThemedIcon} from '../Icon';
+import {AppScreens} from '../../navigators/AppNavigator';
 
-const { width: screenWidth } = Dimensions.get('window');
+const {width: screenWidth} = Dimensions.get('window');
 
-export const SearchDropdown = ({ 
-  navigation, 
+export const SearchDropdown = ({
+  navigation,
   style,
   placeholder,
-  onProductSelect 
+  onProductSelect,
 }) => {
-  const { t, i18n } = useTranslation();
-  const { theme, isDark } = useTheme();
+  const {t, i18n} = useTranslation();
+  const {theme, isDark} = useTheme();
   const baseUrls = useSelector(selectBaseUrls);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const searchTimeoutRef = useRef(null);
   const inputRef = useRef(null);
 
   // Parse products function
-  const parseProducts = useCallback((productList) => {
-    if (!Array.isArray(productList)) {
-      console.log("ProductList is not array:", typeof productList);
-      return [];
-    }
-    
-    return productList.map((productItem, index) => {
-      try {
-        // Ensure safe parsing of all fields with extensive logging
-        const safePrice = Number(productItem?.unit_price) || 0;
-        const safeDiscount = Number(productItem?.discount) || 0;
-        
-        let discountedPrice = safePrice;
-        if (safeDiscount > 0 && typeof calculateDiscountedPrice === 'function') {
-          try {
-            discountedPrice = calculateDiscountedPrice(safePrice, safeDiscount, productItem?.discount_type);
-          } catch (discountError) {
-            console.warn('Discount calculation error:', discountError);
-            discountedPrice = safePrice;
-          }
-        }
-
-        const parsedProduct = {
-          id: productItem?.id ? String(productItem.id) : `temp_${index}_${Date.now()}`,
-          name: productItem?.name ? String(productItem.name).trim() : 'Unnamed Product',
-          image: `${baseUrls['product_thumbnail_url'] || ''}/${productItem?.thumbnail || 'default.png'}`,
-          price: Number(discountedPrice) || 0,
-          oldPrice: safeDiscount > 0 ? safePrice : 0,
-          isSoldOut: Number(productItem?.current_stock || 0) === 0,
-          discountType: String(productItem?.discount_type || 'flat'),
-          discount: safeDiscount,
-          rating: Number(productItem?.average_review || 0),
-          slug: productItem?.slug ? String(productItem.slug) : '',
-          current_stock: Number(productItem?.current_stock || 0),
-          unit: productItem?.unit ? String(productItem.unit) : 'pc',
-          seller: (productItem?.user || productItem?.seller) ? {} : {},
-          shop: (productItem?.user?.shop || productItem?.seller?.shop) ? {
-            name: String((productItem?.user?.shop?.name || productItem?.seller?.shop?.name) || 'Unknown Shop')
-          } : null
-        };
-        
-        console.log(`Parsed product ${index}:`, parsedProduct);
-        return parsedProduct;
-      } catch (parseError) {
-        console.error(`Error parsing product ${index}:`, parseError, productItem);
-        return null;
+  const parseProducts = useCallback(
+    productList => {
+      if (!Array.isArray(productList)) {
+        console.log('ProductList is not array:', typeof productList);
+        return [];
       }
-    }).filter(Boolean); // Remove any null results
-  }, [baseUrls]);
+
+      return productList
+        .map((productItem, index) => {
+          try {
+            // Ensure safe parsing of all fields with extensive logging
+            const safePrice = Number(productItem?.unit_price) || 0;
+            const safeDiscount = Number(productItem?.discount) || 0;
+
+            let discountedPrice = safePrice;
+            if (
+              safeDiscount > 0 &&
+              typeof calculateDiscountedPrice === 'function'
+            ) {
+              try {
+                discountedPrice = calculateDiscountedPrice(
+                  safePrice,
+                  safeDiscount,
+                  productItem?.discount_type,
+                );
+              } catch (discountError) {
+                console.warn('Discount calculation error:', discountError);
+                discountedPrice = safePrice;
+              }
+            }
+
+            const parsedProduct = {
+              id: productItem?.id
+                ? String(productItem.id)
+                : `temp_${index}_${Date.now()}`,
+              name: productItem?.name
+                ? String(productItem.name).trim()
+                : 'Unnamed Product',
+              image: `${baseUrls['product_thumbnail_url'] || ''}/${
+                productItem?.thumbnail || 'default.png'
+              }`,
+              price: Number(discountedPrice) || 0,
+              oldPrice: safeDiscount > 0 ? safePrice : 0,
+              isSoldOut: Number(productItem?.current_stock || 0) === 0,
+              discountType: String(productItem?.discount_type || 'flat'),
+              discount: safeDiscount,
+              rating: Number(productItem?.average_review || 0),
+              slug: productItem?.slug ? String(productItem.slug) : '',
+              current_stock: Number(productItem?.current_stock || 0),
+              unit: productItem?.unit ? String(productItem.unit) : 'pc',
+              seller: productItem?.user || productItem?.seller ? {} : {},
+              shop:
+                productItem?.user?.shop || productItem?.seller?.shop
+                  ? {
+                      name: String(
+                        productItem?.user?.shop?.name ||
+                          productItem?.seller?.shop?.name ||
+                          'Unknown Shop',
+                      ),
+                    }
+                  : null,
+            };
+
+            console.log(`Parsed product ${index}:`, parsedProduct);
+            return parsedProduct;
+          } catch (parseError) {
+            console.error(
+              `Error parsing product ${index}:`,
+              parseError,
+              productItem,
+            );
+            return null;
+          }
+        })
+        .filter(Boolean); // Remove any null results
+    },
+    [baseUrls],
+  );
 
   // Perform search function
-  const performSearch = useCallback(async (query) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      setShowDropdown(false);
-      return;
-    }
+  const performSearch = useCallback(
+    async query => {
+      if (!query.trim()) {
+        setSearchResults([]);
+        setShowDropdown(false);
+        return;
+      }
 
-    try {
-      setLoading(true);
-      
-      // Search from API
-      const response = await axiosBuyerClient.get(
-        `products/search?name=${encodeURIComponent(query)}&limit=10&offset=0`
-      );
-      console.log("DATA",response.data.products);
-      
-      const rawProducts = response.data.products || [];
-      console.log("Raw products length:", rawProducts.length);
-      
-      const results = parseProducts(rawProducts);
-      console.log("Parsed results:", results);
-      
-      // Ensure all results are safe before setting
-      const safeResults = results.filter(item => item && item.id && item.name);
-      setSearchResults(safeResults);
-      setShowDropdown(true); // Always show dropdown when there are results or loading
-      
-    } catch (error) {
-      console.error('Error searching products:', error);
-      setSearchResults([]);
-      setShowDropdown(false);
-    } finally {
-      setLoading(false);
-    }
-  }, [parseProducts]);
+      try {
+        setLoading(true);
+
+        // Search from API
+        const response = await axiosBuyerClient.get(
+          `products/search?name=${encodeURIComponent(query)}&limit=10&offset=0`,
+        );
+        console.log('DATA', response.data.products);
+
+        const rawProducts = response.data.products || [];
+        console.log('Raw products length:', rawProducts.length);
+
+        const results = parseProducts(rawProducts);
+        console.log('Parsed results:', results);
+
+        // Ensure all results are safe before setting
+        const safeResults = results.filter(
+          item => item && item.id && item.name,
+        );
+        setSearchResults(safeResults);
+        setShowDropdown(true); // Always show dropdown when there are results or loading
+      } catch (error) {
+        console.error('Error searching products:', error);
+        setSearchResults([]);
+        setShowDropdown(false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [parseProducts],
+  );
 
   // Handle search input change with debouncing
-  const handleSearchInputChange = useCallback((text) => {
-    setSearchQuery(text);
-    
-    // Clear existing timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    
-    // Set new timeout for debounced search
-    searchTimeoutRef.current = setTimeout(() => {
-      performSearch(text);
-    }, 300); // 300ms delay
-  }, [performSearch]);
+  const handleSearchInputChange = useCallback(
+    text => {
+      setSearchQuery(text);
+
+      // Clear existing timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      // Set new timeout for debounced search
+      searchTimeoutRef.current = setTimeout(() => {
+        performSearch(text);
+      }, 300); // 300ms delay
+    },
+    [performSearch],
+  );
 
   // Handle product selection
-  const handleProductSelect = (product) => {
+  const handleProductSelect = product => {
     console.log('Product selected:', product);
-    
+
     // Immediately hide dropdown and clear search
     setShowDropdown(false);
     setSearchQuery('');
     setSearchResults([]);
-    
+
     // Clear any pending timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     if (onProductSelect) {
       onProductSelect(product);
     } else if (navigation) {
-      navigation.navigate(AppScreens.PRODUCT_DETAIL_BUYER, { productId: product.id, slug: product.slug });
+      navigation.navigate(AppScreens.PRODUCT_DETAIL_BUYER, {
+        productId: product.id,
+        slug: product.slug,
+      });
     }
   };
 
@@ -170,7 +209,7 @@ export const SearchDropdown = ({
   const handleFocus = () => {
     if (navigation) {
       navigation.navigate(AppScreens.PRODUCTS_SEARCH, {
-        initialQuery: searchQuery
+        initialQuery: searchQuery,
       });
     }
   };
@@ -194,7 +233,7 @@ export const SearchDropdown = ({
   };
 
   // Render search icon or clear icon
-  const renderIcon = (props) => {
+  const renderIcon = props => {
     if (loading) {
       return <Spinner size="small" />;
     }
@@ -209,9 +248,9 @@ export const SearchDropdown = ({
   };
 
   // Render product item in dropdown - simplified for debugging
-  const renderProductItem = ({ item, index }) => {
+  const renderProductItem = ({item, index}) => {
     console.log('Rendering item:', item);
-    
+
     if (!item || !item.id || !item.name) {
       console.warn('Invalid item:', item);
       return null;
@@ -219,42 +258,58 @@ export const SearchDropdown = ({
 
     return (
       <TouchableOpacity
-        style={[styles.productItem, {
-          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-          borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300'],
-          borderBottomWidth: index < searchResults.length - 1 ? 1 : 0
-        }]}
+        style={[
+          styles.productItem,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-card']
+              : theme['color-basic-100'],
+            borderBottomColor: isDark
+              ? theme['color-shadcn-border']
+              : theme['color-basic-300'],
+            borderBottomWidth: index < searchResults.length - 1 ? 1 : 0,
+          },
+        ]}
         onPress={() => {
           console.log('Item touched:', item.name);
           handleProductSelect(item);
         }}
         activeOpacity={0.8}
         delayPressIn={0}
-        delayPressOut={0}
-      >
+        delayPressOut={0}>
         {/* Product Details - Simplified */}
         <View style={styles.productDetails}>
           <Text
-            style={[styles.productName, {
-              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}
-            numberOfLines={2}
-          >
+            style={[
+              styles.productName,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}
+            numberOfLines={2}>
             {String(item.name)}
           </Text>
-          
+
           {/* Price - Simplified */}
           <View style={styles.priceContainer}>
-            <Text style={{ fontSize: 13, color: isDark ? '#ffffff' : '#000000' }}>
+            <Text style={{fontSize: 13, color: isDark ? '#ffffff' : '#000000'}}>
               PKR {String(Number(item.price) || 0)}
             </Text>
           </View>
 
           {/* Stock - Simplified */}
           {Number(item.current_stock) > 0 && (
-            <Text style={[styles.stockText, {
-              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>
+            <Text
+              style={[
+                styles.stockText,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600'],
+                },
+              ]}>
               {String(Number(item.current_stock))} in stock
             </Text>
           )}
@@ -265,17 +320,33 @@ export const SearchDropdown = ({
 
   // Render empty state
   const renderEmptyState = () => (
-    <View style={[styles.emptyState, {
-      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-    }]}>
-      <ThemedIcon 
-        name="search-outline" 
+    <View
+      style={[
+        styles.emptyState,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-card']
+            : theme['color-basic-100'],
+        },
+      ]}>
+      <ThemedIcon
+        name="search-outline"
         style={styles.emptyIcon}
-        fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-400']}
+        fill={
+          isDark
+            ? theme['color-shadcn-muted-foreground']
+            : theme['color-basic-400']
+        }
       />
-      <Text style={[styles.emptyText, {
-        color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-      }]}>
+      <Text
+        style={[
+          styles.emptyText,
+          {
+            color: isDark
+              ? theme['color-shadcn-muted-foreground']
+              : theme['color-basic-600'],
+          },
+        ]}>
         {t('allProducts.noProductsFound') || 'No products found'}
       </Text>
     </View>
@@ -303,36 +374,65 @@ export const SearchDropdown = ({
         editable={false}
         style={[
           styles.searchInput,
-          { 
+          {
             direction: i18n.dir(),
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-            borderColor: showDropdown 
-              ? theme['color-primary-500'] 
-              : (isDark ? theme['color-shadcn-border'] : theme['color-basic-300'])
-          }
+            backgroundColor: isDark
+              ? theme['color-shadcn-card']
+              : theme['color-basic-100'],
+            borderColor: showDropdown
+              ? theme['color-primary-500']
+              : isDark
+              ? theme['color-shadcn-border']
+              : theme['color-basic-300'],
+          },
         ]}
-        textStyle={[styles.searchInputText, { 
-          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] 
-        }]}
-        placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+        textStyle={[
+          styles.searchInputText,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-900'],
+          },
+        ]}
+        placeholderTextColor={
+          isDark
+            ? theme['color-shadcn-muted-foreground']
+            : theme['color-basic-600']
+        }
         size="medium"
         blurOnSubmit={false}
         returnKeyType="search"
       />
 
       {/* Dropdown Results */}
-      {(showDropdown || loading) && (searchQuery.trim() !== '') && (
-        <View style={[styles.dropdown, {
-          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300'],
-          shadowColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-        }]}>
+      {(showDropdown || loading) && searchQuery.trim() !== '' && (
+        <View
+          style={[
+            styles.dropdown,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : theme['color-basic-100'],
+              borderColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-300'],
+              shadowColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            },
+          ]}>
           {loading ? (
             <View style={styles.loadingContainer}>
               <Spinner size="small" />
-              <Text style={[styles.loadingText, {
-                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>
+              <Text
+                style={[
+                  styles.loadingText,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600'],
+                  },
+                ]}>
                 {t('common.loading') || 'Loading...'}
               </Text>
             </View>
@@ -340,7 +440,9 @@ export const SearchDropdown = ({
             <FlatList
               data={searchResults}
               renderItem={renderProductItem}
-              keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+              keyExtractor={(item, index) =>
+                item.id ? item.id.toString() : index.toString()
+              }
               showsVerticalScrollIndicator={true}
               style={styles.resultsList}
               scrollEnabled={true}
@@ -371,7 +473,7 @@ const styles = StyleSheet.create({
     minHeight: 32,
     elevation: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
@@ -388,7 +490,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     maxHeight: 300,
     elevation: 8,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.15,
     shadowRadius: 8,
     zIndex: 2000,

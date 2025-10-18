@@ -8,7 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import {
   Layout,
   Text,
@@ -24,24 +24,27 @@ import {useTheme} from '../../../theme/ThemeContext';
 import {flexeStyles} from '../../../utils/globalStyles';
 import {AppScreens} from '../../../navigators/AppNavigator';
 import {
-  loadWishlist, 
-  removeFromWishlist, 
-  selectWishlist, 
-  selectWishlistLoading, 
-  selectWishlistError
+  loadWishlist,
+  removeFromWishlist,
+  selectWishlist,
+  selectWishlistLoading,
+  selectWishlistError,
 } from '../../../store/wishlist';
-import { 
-  selectIsBuyerAuthenticated, 
-  selectIsSellerAuthenticated 
+import {
+  selectIsBuyerAuthenticated,
+  selectIsSellerAuthenticated,
 } from '../../../store/user';
-import { smartBuyerClient, handleAuthError, setAuthModalHandlers } from '../../../utils/authAxiosClient';
-import { BuyerAuthModal } from '../../../components/modals';
+import {
+  smartBuyerClient,
+  handleAuthError,
+  setAuthModalHandlers,
+} from '../../../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
 
 const {width: windowWidth, height: windowHeight} = Dimensions.get('screen');
 
 export const MyWishlistScreen = ({navigation}) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const {theme, isDark} = useTheme();
   const uiKittenTheme = useUIKittenTheme();
   const dispatch = useDispatch();
@@ -50,72 +53,75 @@ export const MyWishlistScreen = ({navigation}) => {
   const wishlistItems = useSelector(selectWishlist); // This returns the array directly
   const wishlistLoading = useSelector(selectWishlistLoading);
   const wishlistError = useSelector(selectWishlistError);
-  
+
   // Get authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
-  
+
   const [refreshing, setRefreshing] = useState(false);
   const [removingItems, setRemovingItems] = useState(new Set());
-  const [showBuyerAuthModal, setShowBuyerAuthModal] = useState(false);
 
   // Set up auth modal handlers
   useEffect(() => {
     setAuthModalHandlers({
-      showBuyerAuthModal: () => setShowBuyerAuthModal(true),
+      showBuyerAuthModal: () =>
+        navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
     });
-  }, []);
+  }, [navigation]);
 
-  const fetchWishlist = useCallback(async (isRefresh = false) => {
+  const fetchWishlist = useCallback(
+    async (isRefresh = false) => {
+      // Check if user is authenticated as buyer
+      if (!isBuyerAuthenticated) {
+        if (isRefresh) {
+          setRefreshing(false);
+        }
+        return;
+      }
+
+      try {
+        await dispatch(loadWishlist());
+      } catch (error) {
+        console.error('Error fetching wishlist:', error);
+        handleAuthError(error);
+      } finally {
+        if (isRefresh) {
+          setRefreshing(false);
+        }
+      }
+    },
+    [dispatch, isBuyerAuthenticated],
+  );
+
+  const removeFromWishlistLocal = async wishlistItem => {
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
-      if (isRefresh) {
-        setRefreshing(false);
-      }
-      return;
-    }
-
-    try {
-      await dispatch(loadWishlist());
-    } catch (error) {
-      console.error('Error fetching wishlist:', error);
-      handleAuthError(error);
-    } finally {
-      if (isRefresh) {
-        setRefreshing(false);
-      }
-    }
-  }, [dispatch, isBuyerAuthenticated]);
-
-  const removeFromWishlistLocal = async (wishlistItem) => {
-    // Check if user is authenticated as buyer
-    if (!isBuyerAuthenticated) {
-      const message = isSellerAuthenticated 
+      const message = isSellerAuthenticated
         ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
         : 'Please sign in as a buyer to manage your wishlist.';
-      
-      Alert.alert(
-        'Buyer Authentication Required',
-        message,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
-        ]
-      );
+
+      Alert.alert('Buyer Authentication Required', message, [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Sign in as Buyer',
+          onPress: () =>
+            navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
+        },
+      ]);
       return;
     }
 
     const productId = wishlistItem.product_id || wishlistItem.id;
-    
+
     try {
       setRemovingItems(prev => new Set([...prev, wishlistItem.id]));
 
       dispatch(removeFromWishlist({productId}));
-      
+
       Toast.show({
         type: 'success',
         text1: 'Removed',
-        text2: 'Item removed from wishlist'
+        text2: 'Item removed from wishlist',
       });
     } catch (error) {
       console.error('Error removing from wishlist:', error);
@@ -155,22 +161,20 @@ export const MyWishlistScreen = ({navigation}) => {
             'Buyer Authentication Required',
             'You are currently signed in as a seller. To view your wishlist, please also sign in as a buyer.',
             [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Sign in as Buyer', onPress: () => setShowBuyerAuthModal(true) }
-            ]
+              {text: 'Cancel', style: 'cancel'},
+              {
+                text: 'Sign in as Buyer',
+                onPress: () =>
+                  navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
+              },
+            ],
           );
         } else {
-          setShowBuyerAuthModal(true);
+          navigation.navigate(AppScreens.LOGIN, {isItSeller: false});
         }
       }
-    }, [fetchWishlist, isBuyerAuthenticated, isSellerAuthenticated])
+    }, [fetchWishlist, isBuyerAuthenticated, isSellerAuthenticated]),
   );
-
-  const handleAuthSuccess = () => {
-    setShowBuyerAuthModal(false);
-    // Fetch wishlist after successful authentication
-    fetchWishlist();
-  };
 
   const renderWishlistItem = ({item}) => (
     <WishlistItemCard
@@ -228,27 +232,36 @@ export const MyWishlistScreen = ({navigation}) => {
 
   const renderAuthState = () => (
     <>
-      <View style={[styles.authContainer, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
-        <Text style={[styles.authMessage, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-          {isSellerAuthenticated 
+      <View
+        style={[
+          styles.authContainer,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          },
+        ]}>
+        <Text
+          style={[
+            styles.authMessage,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
+          {isSellerAuthenticated
             ? t('wishlist.sellerToBuyerAuth')
-            : t('wishlist.authRequired')
-          }
+            : t('wishlist.authRequired')}
         </Text>
         <Button
-          onPress={() => setShowBuyerAuthModal(true)}
-          style={styles.authButton}
-        >
+          onPress={() =>
+            navigation.navigate(AppScreens.LOGIN, {isItSeller: false})
+          }
+          style={styles.authButton}>
           {t('auth.signInAsBuyer')}
         </Button>
       </View>
-      
-      <BuyerAuthModal
-        visible={showBuyerAuthModal}
-        onClose={() => setShowBuyerAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        title={t('auth.signInAsBuyer')}
-      />
     </>
   );
 
@@ -281,7 +294,10 @@ export const MyWishlistScreen = ({navigation}) => {
         ]}>
         {wishlistError}
       </Text>
-      <Button appearance="outline" onPress={retryFetch} style={styles.retryButton}>
+      <Button
+        appearance="outline"
+        onPress={retryFetch}
+        style={styles.retryButton}>
         {t('wishlist.tryAgain')}
       </Button>
     </View>
@@ -313,14 +329,14 @@ export const MyWishlistScreen = ({navigation}) => {
   const renderHeader = () => (
     <Layout
       level="2"
-              style={[
-          styles.headerContainer,
-          {
-            backgroundColor: isDark
-              ? theme['color-shadcn-background']
-              : theme['color-basic-100'],
-          },
-        ]}>
+      style={[
+        styles.headerContainer,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
       {wishlistItems.length > 0 && (
         <View style={styles.headerContent}>
           <Text
@@ -345,7 +361,8 @@ export const MyWishlistScreen = ({navigation}) => {
                   : theme['color-basic-600'],
               },
             ]}>
-            {wishlistItems.length} {wishlistItems.length === 1 ? t('common.item') : t('common.items')}
+            {wishlistItems.length}{' '}
+            {wishlistItems.length === 1 ? t('common.item') : t('common.items')}
           </Text>
         </View>
       )}
@@ -410,18 +427,18 @@ export const MyWishlistScreen = ({navigation}) => {
             : theme['color-basic-100'],
         }}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={onRefresh}
             colors={[theme['color-primary-500']]}
             tintColor={theme['color-primary-500']}
-            progressBackgroundColor={isDark ? theme['color-shadcn-card'] : theme['color-basic-100']}
+            progressBackgroundColor={
+              isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }
           />
         }
         ListHeaderComponent={wishlistItems.length > 0 ? renderHeader : null}
-        ListEmptyComponent={
-          !wishlistLoading ? renderEmptyState : null
-        }
+        ListEmptyComponent={!wishlistLoading ? renderEmptyState : null}
         contentContainerStyle={[
           styles.listContainer,
           wishlistItems.length === 0 && styles.emptyListContainer,
@@ -429,19 +446,13 @@ export const MyWishlistScreen = ({navigation}) => {
             backgroundColor: isDark
               ? theme['color-shadcn-background']
               : theme['color-basic-100'],
-          }
+          },
         ]}
         // Add some padding for better UX
         contentInsetAdjustmentBehavior="automatic"
       />
-      
+
       {/* Buyer Authentication Modal */}
-      <BuyerAuthModal
-        visible={showBuyerAuthModal}
-        onClose={() => setShowBuyerAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        title={t('auth.signInAsBuyer')}
-      />
     </Layout>
   );
 };
@@ -451,7 +462,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     // Remove fixed height to allow proper card rendering
     flex: 1,
-    height: windowHeight
+    height: windowHeight,
   },
   emptyListContainer: {
     flexGrow: 1,
