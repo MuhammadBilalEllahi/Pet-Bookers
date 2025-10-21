@@ -1,5 +1,11 @@
 import React, {Suspense, useEffect, useMemo} from 'react';
-import {SafeAreaView, I18nManager, ActivityIndicator, View, StatusBar} from 'react-native';
+import {
+  SafeAreaView,
+  I18nManager,
+  ActivityIndicator,
+  View,
+  StatusBar,
+} from 'react-native';
 import {Provider as StoreProvider, useDispatch} from 'react-redux';
 import {ApplicationProvider, IconRegistry} from '@ui-kitten/components';
 import {EvaIconsPack} from '@ui-kitten/eva-icons';
@@ -17,10 +23,10 @@ import 'dayjs/locale/ur';
 
 import './src/locale';
 import {flexeStyles} from './src/utils/globalStyles';
-import { SplashScreen } from './src/screens/SplashScreen';
+import {SplashScreen} from './src/screens/SplashScreen';
 import Toast from 'react-native-toast-message';
-import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
-import { NavigationContainer } from '@react-navigation/native';
+import {ThemeProvider, useTheme} from './src/theme/ThemeContext';
+import {NavigationContainer} from '@react-navigation/native';
 
 dayjs.extend(calendar);
 dayjs.extend(localizedFormat);
@@ -64,15 +70,12 @@ const AppContent = () => {
 
   return (
     <SafeAreaView style={{flex: 1, direction: i18n.dir()}}>
-      <StatusBar 
+      <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={theme['background-basic-color-1']}
       />
       <IconRegistry icons={EvaIconsPack} />
-      <ApplicationProvider
-        {...eva}
-        theme={theme}
-        customMapping={mapping}>
+      <ApplicationProvider {...eva} theme={theme} customMapping={mapping}>
         <AppNavigator />
       </ApplicationProvider>
       <Toast />
@@ -84,10 +87,10 @@ export default function Root() {
   return (
     <StoreProvider store={store}>
       <ThemeProvider>
-        <Suspense fallback={<SplashScreen/>}>
+        <Suspense fallback={<SplashScreen />}>
           <AppContent />
         </Suspense>
       </ThemeProvider>
     </StoreProvider>
   );
-};
+}

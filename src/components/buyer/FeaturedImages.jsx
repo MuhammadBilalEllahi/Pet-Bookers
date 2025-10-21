@@ -1,12 +1,13 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {FlatList, Image, View, Dimensions, StyleSheet} from 'react-native';
+import {FlatList, View, Dimensions, StyleSheet} from 'react-native';
 import {useSelector} from 'react-redux';
 import {Layout, Spinner, Text, useTheme} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {selectBaseUrls} from '../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 import {flexeStyles} from '../../utils/globalStyles';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
+import FastImage from '@d11/react-native-fast-image';
 
 const {width: windowWidth} = Dimensions.get('window');
 const height = (windowWidth - 16) / 1.9;
@@ -41,6 +42,19 @@ export const FeaturedImages = ({slideList, loading, error}) => {
     [activeSlideIndex],
   );
 
+  // Preload banner images when slideList changes
+  useEffect(() => {
+    if (slideList && slideList.length > 0) {
+      const imageUrls = slideList.map(slide => ({
+        uri: `${BASE_URLS.banner_image_url}/${slide.photo}`,
+        priority: FastImage.priority.high,
+      }));
+
+      console.log('Preloading banner images:', imageUrls);
+      FastImage.preload(imageUrls);
+    }
+  }, [slideList]);
+
   useEffect(() => {
     if (slideChangRef) {
       clearTimeout(slideChangRef);
@@ -50,6 +64,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
     if (slideList.length === 1) {
       return;
     }
+    console.log('slide list', slideList);
 
     slideChangRef = setTimeout(() => {
       const nextIndex = activeSlideIndex + 1;
@@ -75,13 +90,20 @@ export const FeaturedImages = ({slideList, loading, error}) => {
             flexeStyles.itemsCenter,
             {height: height},
           ]}>
-          {loading && <ShimmerPlaceholder
-          LinearGradient={LinearGradient}
-          style={{height: '100%', width: '95%', borderRadius: 15}}
-          />}
+          {loading && (
+            <ShimmerPlaceholder
+              LinearGradient={LinearGradient}
+              style={{height: '100%', width: '95%', borderRadius: 15}}
+            />
+          )}
           {error && <Text>{error}</Text>}
           {!loading && !error && (
-            <Text>{t('common.noDataAvailable', 'No Data to display yet, please refresh later.')}</Text>
+            <Text>
+              {t(
+                'common.noDataAvailable',
+                'No Data to display yet, please refresh later.',
+              )}
+            </Text>
           )}
         </Layout>
       ) : (
@@ -90,7 +112,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
           data={slideList}
           renderItem={({item}) => {
             return (
-              <Slide data={item} imageBaseUrl={baseUrls['banner_image_url']} />
+              <Slide data={item} imageBaseUrl={BASE_URLS.banner_image_url} />
             );
           }}
           pagingEnabled={true}
@@ -102,7 +124,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
             offset: windowWidth * index,
             index,
           })}
-          onScrollToIndexFailed={(info) => {
+          onScrollToIndexFailed={info => {
             console.warn('ScrollToIndex failed:', info);
           }}
         />
@@ -130,6 +152,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
 };
 
 const Slide = ({data, imageBaseUrl}) => {
+  console.log('data,imageBAseurl', `${imageBaseUrl}/${data.photo}`);
   return (
     <View
       style={{
@@ -138,17 +161,25 @@ const Slide = ({data, imageBaseUrl}) => {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Image
-        source={{uri: `${imageBaseUrl}/${data.photo}`}}
-        style={[{width: windowWidth - 16, height: height}, styles.containerBorder]}
+      <FastImage
+        source={{
+          uri: `${imageBaseUrl}/${data.photo}`,
+
+          priority: FastImage.priority.high,
+        }}
+        resizeMode={FastImage.resizeMode.cover}
+        style={[
+          {width: windowWidth - 16, height: height},
+          styles.containerBorder,
+        ]}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  containerBorder:{
-    borderRadius:10
+  containerBorder: {
+    borderRadius: 10,
   },
   sliderDotContainer: {
     position: 'absolute',

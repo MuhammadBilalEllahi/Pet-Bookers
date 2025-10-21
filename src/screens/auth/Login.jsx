@@ -693,7 +693,7 @@ export const LoginScreen = ({navigation}) => {
                   ]}
                   onPress={() =>
                     navigateToPage(
-                      isSeller ? 'SellerForgotPassword' : 'ForgotPassword',
+                      isSeller ? 'ForgotPassword' : 'ForgotPassword',
                     )
                   }>
                   {t('forgotpassword')}

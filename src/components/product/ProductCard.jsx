@@ -1,15 +1,30 @@
 import React from 'react';
-import {Dimensions, Image, StyleSheet, View, TouchableOpacity} from 'react-native';
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import {Text} from '@ui-kitten/components';
-import { useTheme } from '../../theme/ThemeContext';
+import {useTheme} from '../../theme/ThemeContext';
 import {Price} from '../Price';
 import {AirbnbRating} from 'react-native-ratings';
 import {spacingStyles, flexeStyles} from '../../utils/globalStyles';
 import {ThemedIcon} from '../Icon';
 import {useDispatch, useSelector} from 'react-redux';
-import {addToWishlist, removeFromWishlist, selectIsInWishlist, selectWishlistLoading} from '../../store/wishlist';
-import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from '../../store/user';
-import { Alert } from 'react-native';
+import {
+  addToWishlist,
+  removeFromWishlist,
+  selectIsInWishlist,
+  selectWishlistLoading,
+} from '../../store/wishlist';
+import {
+  selectIsBuyerAuthenticated,
+  selectIsSellerAuthenticated,
+} from '../../store/user';
+import {Alert} from 'react-native';
+import FastImage from '@d11/react-native-fast-image';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -27,40 +42,37 @@ export const ProductCard = ({
   onProductDetail,
   slug,
   isDark,
-  
 }) => {
   const dispatch = useDispatch();
   const {theme} = useTheme();
-  
+
   // Get wishlist status from Redux - ensure we're checking the correct product ID
   const isInWishlist = useSelector(state => selectIsInWishlist(state, id));
   const wishlistLoading = useSelector(selectWishlistLoading);
-  
+
   // Debug logging for wishlist state
   // // console.log(`[ProductCard] Product ${id} (${name}) - isInWishlist: ${isInWishlist}, loading: ${wishlistLoading}`);
-  
+
   // Get authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
 
-  const toggleWishlist = (e) => {
+  const toggleWishlist = e => {
     e.stopPropagation(); // Prevent navigation
     if (!id) return;
-    
+
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
-      const message = isSellerAuthenticated 
+      const message = isSellerAuthenticated
         ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
         : 'Please sign in as a buyer to add items to wishlist.';
-      
-      Alert.alert(
-        'Buyer Authentication Required',
-        message,
-        [{ text: 'OK', style: 'default' }]
-      );
+
+      Alert.alert('Buyer Authentication Required', message, [
+        {text: 'OK', style: 'default'},
+      ]);
       return;
     }
-    
+
     if (isInWishlist) {
       // Remove from wishlist
       dispatch(removeFromWishlist({productId: id}));
@@ -88,18 +100,24 @@ export const ProductCard = ({
         {
           width: cardWidth || windowWidth * 0.45,
           // backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-        }
+        },
       ]}
-      onPress={() => onProductDetail && onProductDetail(id, slug)}
-    >
+      onPress={() => onProductDetail && onProductDetail(id, slug)}>
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: image }}
+        <FastImage
+          source={{
+            uri: image,
+            priority: FastImage.priority.high,
+          }}
+          resizeMode={FastImage.resizeMode.cover}
           style={[
             styles.image,
-            { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'] }
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-secondary']
+                : theme['color-basic-200'],
+            },
           ]}
-          resizeMode="cover"
         />
         {isSoldOut && (
           <View style={styles.soldOutContainer}>
@@ -121,38 +139,43 @@ export const ProductCard = ({
           numberOfLines={2}
           style={[
             styles.title,
-            { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
-          ]}
-        >
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
           {name}
         </Text>
-        <View style={[flexeStyles.row, flexeStyles.itemsCenter, flexeStyles.contentBetween, styles.priceRow]}>
+        <View
+          style={[
+            flexeStyles.row,
+            flexeStyles.itemsCenter,
+            flexeStyles.contentBetween,
+            styles.priceRow,
+          ]}>
           <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
             <Text
               category="h6"
-              style={[
-                styles.price,
-                { color: theme['color-shadcn-primary'] }
-              ]}
-            >
+              style={[styles.price, {color: theme['color-shadcn-primary']}]}>
               Rs {price}
             </Text>
-            {oldPrice > 0 && (
-              <Text style={styles.oldPrice}>Rs {oldPrice}</Text>
-            )}
+            {oldPrice > 0 && <Text style={styles.oldPrice}>Rs {oldPrice}</Text>}
           </View>
           <TouchableOpacity
             onPress={toggleWishlist}
             style={styles.heartButton}
-            disabled={wishlistLoading}
-          >
+            disabled={wishlistLoading}>
             <ThemedIcon
-              name={isInWishlist ? "heart" : "heart-outline"}
-              fill={isInWishlist ? '#FF512F' : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
-              style={[
-                styles.heartIcon,
-                { opacity: wishlistLoading ? 0.6 : 1 }
-              ]}
+              name={isInWishlist ? 'heart' : 'heart-outline'}
+              fill={
+                isInWishlist
+                  ? '#FF512F'
+                  : isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600']
+              }
+              style={[styles.heartIcon, {opacity: wishlistLoading ? 0.6 : 1}]}
             />
           </TouchableOpacity>
         </View>
@@ -185,14 +208,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     marginVertical: 4,
     overflow: 'hidden',
-    
   },
   imageContainer: {
     width: '100%',
     aspectRatio: 1,
     backgroundColor: '#f5f5f5',
     borderTopLeftRadius: 14,
-    
+
     borderTopRightRadius: 14,
     overflow: 'hidden',
     position: 'relative',
@@ -236,7 +258,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 8,
     paddingLeft: 2,
-    
   },
   title: {
     fontWeight: '700',

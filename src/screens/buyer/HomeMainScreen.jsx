@@ -27,10 +27,10 @@ import {
   loadProductsByCategory,
   selectProductCategories,
 } from '../../store/productCategories';
-import {selectBaseUrls} from '../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
-import { AppScreens } from '../../navigators/AppNavigator';
-
+import {AppScreens} from '../../navigators/AppNavigator';
+import {Image} from 'react-native';
 
 export const HomeMainScreen = ({navigation}) => {
   const {t} = useTranslation();
@@ -54,7 +54,10 @@ export const HomeMainScreen = ({navigation}) => {
 
   const navigateToProductDetail = (productId, slug) => {
     // console.log("[navigateToProductDetail]", productId, slug);
-    navigation.navigate(AppScreens.PRODUCT_DETAIL_BUYER, {productId: productId, slug: slug});
+    navigation.navigate(AppScreens.PRODUCT_DETAIL_BUYER, {
+      productId: productId,
+      slug: slug,
+    });
   };
 
   const navigateToVandorDetail = vandorId => {
@@ -76,21 +79,21 @@ export const HomeMainScreen = ({navigation}) => {
       console.error('Navigation error:', error);
     }
   };
-  
-  const navigateToCategory = (categoryId) => {
+
+  const navigateToCategory = categoryId => {
     // Find the category by ID
     const category = categories.find(cat => cat.id === categoryId);
     if (category) {
       // Navigate to CategoriesList with the selected category
-      navigation.navigate('CategoriesList', { selectedCategoryId: categoryId });
+      navigation.navigate('CategoriesList', {selectedCategoryId: categoryId});
     }
   };
-  
+
   const navigateToAllProducts = (productType, title, categoryId) => {
-    navigation.navigate(AppScreens.ALL_PRODUCTS, { 
-      productType, 
+    navigation.navigate(AppScreens.ALL_PRODUCTS, {
+      productType,
       title,
-      categoryId 
+      categoryId,
     });
   };
 
@@ -98,7 +101,7 @@ export const HomeMainScreen = ({navigation}) => {
     return categories.map(item => ({
       id: item.id,
       name: item.name,
-      image: `${baseUrls['category_image_url']}/${item.icon}`,
+      image: `${BASE_URLS.category_image_url}/${item.icon}`,
     }));
   }, [baseUrls, categories]);
 
@@ -109,7 +112,7 @@ export const HomeMainScreen = ({navigation}) => {
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
-        image: `${baseUrls['product_thumbnail_url']}/${productItem.thumbnail}`,
+        image: `${BASE_URLS.product_thumbnail_url}/${productItem.thumbnail}`,
         price:
           productItem.discount > 0
             ? calculateDiscountedPrice(
@@ -143,60 +146,71 @@ export const HomeMainScreen = ({navigation}) => {
     }
   };
 
-  const handleLoadMoreCategory = useCallback((categoryName) => {
-    // console.log('handleLoadMoreCategory called for:', categoryName);
-    
-    // Find the category by name
-    const category = categories.find(cat => cat.name === categoryName);
-    if (!category) {
-      // console.log('Category not found:', categoryName);
-      return;
-    }
+  const handleLoadMoreCategory = useCallback(
+    categoryName => {
+      // console.log('handleLoadMoreCategory called for:', categoryName);
 
-    const existingProducts = categorizedProducts[categoryName] || [];
-    const isLoading = categoryLoaders[categoryName];
-    const totalSize = categoryTotals[categoryName] || 0;
-    
-    // console.log('Load more check:', {
+      // Find the category by name
+      const category = categories.find(cat => cat.name === categoryName);
+      if (!category) {
+        // console.log('Category not found:', categoryName);
+        return;
+      }
+
+      const existingProducts = categorizedProducts[categoryName] || [];
+      const isLoading = categoryLoaders[categoryName];
+      const totalSize = categoryTotals[categoryName] || 0;
+
+      // console.log('Load more check:', {
       // categoryName,
       // existingProducts: existingProducts.length,
       // totalSize,
       // isLoading,
       // shouldLoad: existingProducts.length < totalSize && !isLoading
-    // });
-    
-    // Check if we need to load more
-    if (existingProducts.length < totalSize && !isLoading) {
-      // console.log('Loading more products for:', categoryName, 'offset:', existingProducts.length);
-      setCategoryLoaders(prev => ({...prev, [categoryName]: true}));
-      
-      dispatch(
-        loadProductsByCategory({
-          categoryId: category.id,
-          limit: 10,
-          offset: existingProducts.length,
-        }),
-      ).then((action) => {
-        // console.log('Load more response:', action.payload);
-        const newData = action.payload;
-        if (newData?.products) {
-          const newProducts = parsedProducts(newData.products);
-          // console.log('New products count:', newProducts.length);
-          setCategorizedProducts(prev => ({
-            ...prev,
-            [categoryName]: [...(prev[categoryName] || []), ...newProducts],
-          }));
-        }
-        setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
-      }).catch((error) => {
-        console.error('Error loading more category products:', error);
-        setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
-      });
-    } else {
-      // console.log('Not loading more - conditions not met');
-    }
-  }, [categorizedProducts, categoryLoaders, categoryTotals, categories, dispatch, parsedProducts]);
+      // });
 
+      // Check if we need to load more
+      if (existingProducts.length < totalSize && !isLoading) {
+        // console.log('Loading more products for:', categoryName, 'offset:', existingProducts.length);
+        setCategoryLoaders(prev => ({...prev, [categoryName]: true}));
+
+        dispatch(
+          loadProductsByCategory({
+            categoryId: category.id,
+            limit: 10,
+            offset: existingProducts.length,
+          }),
+        )
+          .then(action => {
+            // console.log('Load more response:', action.payload);
+            const newData = action.payload;
+            if (newData?.products) {
+              const newProducts = parsedProducts(newData.products);
+              // console.log('New products count:', newProducts.length);
+              setCategorizedProducts(prev => ({
+                ...prev,
+                [categoryName]: [...(prev[categoryName] || []), ...newProducts],
+              }));
+            }
+            setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
+          })
+          .catch(error => {
+            console.error('Error loading more category products:', error);
+            setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
+          });
+      } else {
+        // console.log('Not loading more - conditions not met');
+      }
+    },
+    [
+      categorizedProducts,
+      categoryLoaders,
+      categoryTotals,
+      categories,
+      dispatch,
+      parsedProducts,
+    ],
+  );
 
   const handleLoadMoreLatest = () => {
     if (
@@ -226,33 +240,33 @@ export const HomeMainScreen = ({navigation}) => {
     }
   };
 
-  
-const [categorizedProducts, setCategorizedProducts] = useState({});
-const [categoryLoaders, setCategoryLoaders] = useState({});
-const [categoryErrors, setCategoryErrors] = useState({});
-const [categoryTotals, setCategoryTotals] = useState({});
+  const [categorizedProducts, setCategorizedProducts] = useState({});
+  const [categoryLoaders, setCategoryLoaders] = useState({});
+  const [categoryErrors, setCategoryErrors] = useState({});
+  const [categoryTotals, setCategoryTotals] = useState({});
 
-const loadCategoryProducts = useCallback((categoryId, categoryName) => {
-  setCategoryLoaders(prev => ({...prev, [categoryName]: true}));
-  dispatch(loadProductsByCategory({categoryId, limit: 10}))
-    .then(response => {
-      if (response?.payload?.products) {
-        setCategorizedProducts(prev => ({
-          ...prev,
-          [categoryName]: parsedProducts(response.payload.products),
-        }));
-        setCategoryErrors(prev => ({...prev, [categoryName]: null}));
-      }
-    })
-    .catch(err => {
-      setCategoryErrors(prev => ({...prev, [categoryName]: err.message}));
-    })
-    .finally(() => {
-      setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
-    });
-}, [dispatch, parsedProducts]);
-
-
+  const loadCategoryProducts = useCallback(
+    (categoryId, categoryName) => {
+      setCategoryLoaders(prev => ({...prev, [categoryName]: true}));
+      dispatch(loadProductsByCategory({categoryId, limit: 10}))
+        .then(response => {
+          if (response?.payload?.products) {
+            setCategorizedProducts(prev => ({
+              ...prev,
+              [categoryName]: parsedProducts(response.payload.products),
+            }));
+            setCategoryErrors(prev => ({...prev, [categoryName]: null}));
+          }
+        })
+        .catch(err => {
+          setCategoryErrors(prev => ({...prev, [categoryName]: err.message}));
+        })
+        .finally(() => {
+          setCategoryLoaders(prev => ({...prev, [categoryName]: false}));
+        });
+    },
+    [dispatch, parsedProducts],
+  );
 
   useEffect(() => {
     dispatch(loadHomeBanners({bannerType: 'all'}));
@@ -264,76 +278,74 @@ const loadCategoryProducts = useCallback((categoryId, categoryName) => {
     dispatch(loadWishlist());
   }, []);
 
-//   useEffect(() => {
-//     console.debug("STARTING EFFECT ", categories)
-//   if (categories.length > 0) {
-//   const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
+  //   useEffect(() => {
+  //     console.debug("STARTING EFFECT ", categories)
+  //   if (categories.length > 0) {
+  //   const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
 
-//     sortedCategories.forEach(category => {
-//       // console.log("-ID ", category.id, " -Name ", category.name)
-//       loadCategoryProducts(category.id, category.name);
-//     });
-//   }
-// }, [categories]);
+  //     sortedCategories.forEach(category => {
+  //       // console.log("-ID ", category.id, " -Name ", category.name)
+  //       loadCategoryProducts(category.id, category.name);
+  //     });
+  //   }
+  // }, [categories]);
 
-useEffect(() => {
-  if (categories.length > 0) {
-    const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
+  useEffect(() => {
+    if (categories.length > 0) {
+      const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
 
-    const loadAll = async () => {
-      setCategoryLoaders(prev => {
-        const loaders = {};
-        sortedCategories.forEach(cat => loaders[cat.name] = true);
-        return {...prev, ...loaders};
-      });
-
-      try {
-        const results = await Promise.all(
-          sortedCategories.map(cat =>
-            dispatch(loadProductsByCategory({ categoryId: cat.id, limit: 10 }))
-              .then(response => ({
-                name: cat.name,
-                products: parsedProducts(response?.payload?.products || []),
-                total_size: response?.payload?.total_size || 0,
-              }))
-              .catch(error => ({
-                name: cat.name,
-                error: error?.message || 'Failed to load category',
-              }))
-          )
-        );
-
-        const newData = {};
-        const errors = {};
-        const loaders = {};
-        const totals = {};
-
-        results.forEach(result => {
-          if (result.error) {
-            errors[result.name] = result.error;
-            // console.log('Category error:', result.name, result.error);
-          } else {
-            newData[result.name] = result.products;
-            totals[result.name] = result.total_size;
-            // console.log('Category loaded:', result.name, 'products:', result.products.length, 'total:', result.total_size);
-          }
-          loaders[result.name] = false;
+      const loadAll = async () => {
+        setCategoryLoaders(prev => {
+          const loaders = {};
+          sortedCategories.forEach(cat => (loaders[cat.name] = true));
+          return {...prev, ...loaders};
         });
 
-        setCategorizedProducts(newData);
-        setCategoryErrors(errors);
-        setCategoryLoaders(loaders);
-        setCategoryTotals(totals);
-      } catch (err) {
-        console.error("Error loading categories:", err);
-      }
-    };
+        try {
+          const results = await Promise.all(
+            sortedCategories.map(cat =>
+              dispatch(loadProductsByCategory({categoryId: cat.id, limit: 10}))
+                .then(response => ({
+                  name: cat.name,
+                  products: parsedProducts(response?.payload?.products || []),
+                  total_size: response?.payload?.total_size || 0,
+                }))
+                .catch(error => ({
+                  name: cat.name,
+                  error: error?.message || 'Failed to load category',
+                })),
+            ),
+          );
 
-    loadAll();
-  }
-}, [categories]);
+          const newData = {};
+          const errors = {};
+          const loaders = {};
+          const totals = {};
 
+          results.forEach(result => {
+            if (result.error) {
+              errors[result.name] = result.error;
+              // console.log('Category error:', result.name, result.error);
+            } else {
+              newData[result.name] = result.products;
+              totals[result.name] = result.total_size;
+              // console.log('Category loaded:', result.name, 'products:', result.products.length, 'total:', result.total_size);
+            }
+            loaders[result.name] = false;
+          });
 
+          setCategorizedProducts(newData);
+          setCategoryErrors(errors);
+          setCategoryLoaders(loaders);
+          setCategoryTotals(totals);
+        } catch (err) {
+          console.error('Error loading categories:', err);
+        }
+      };
+
+      loadAll();
+    }
+  }, [categories]);
 
   const parsedSellers = useMemo(() => {
     if (!Array.isArray(sellers)) return [];
@@ -343,7 +355,6 @@ useEffect(() => {
       name: seller.name,
       image: `${baseUrls['shop_image_url']}/${seller.image}`,
     }));
-    
   }, [baseUrls, sellers]);
 
   return (
@@ -363,6 +374,7 @@ useEffect(() => {
           loading={homeBannersLoading}
           error={homeBannersError}
         />
+
         <HorizontalItemsList
           containerStyle={{marginVertical: 16}}
           list={topCategories}
@@ -383,10 +395,16 @@ useEffect(() => {
             paddingHorizontal: 14,
             // backgroundColor: isDark ? '#101426' : 'white',
           }}
-          onProductDetail={(productId, slug) => navigateToProductDetail(productId, slug)}
+          onProductDetail={(productId, slug) =>
+            navigateToProductDetail(productId, slug)
+          }
           onLoadMore={handleLoadMoreFeatured}
-          hasMore={featuredProducts.products.length < featuredProducts.total_size}
-          onViewAll={() => navigateToAllProducts('featured', t('featuredProducts'))}
+          hasMore={
+            featuredProducts.products.length < featuredProducts.total_size
+          }
+          onViewAll={() =>
+            navigateToAllProducts('featured', t('featuredProducts'))
+          }
           productType="featured"
         />
         {/* <ProductsList
@@ -417,29 +435,29 @@ useEffect(() => {
           onLoadMore={handleLoadMorePopular}
           hasMore={popularProducts.products.length < popularProducts.total_size}
         /> */}
-        
+
         <CategoryWiseProductsList
-  categorizedProducts={categorizedProducts}
-  loadingMap={categoryLoaders}
-  errorMap={categoryErrors}
-  onProductDetail={(productId, slug) =>
-    navigateToProductDetail(productId, slug)
-  }
-  onLoadMore={handleLoadMoreCategory}
-  onViewAll={(categoryId, categoryName) => 
-    navigateToAllProducts(null, categoryName, categoryId)
-  }
-  categories={categories}
-  categoriesLoading={categoriesLoading}
-  categoryTotals={categoryTotals}
-  // onLoadMore={categoryName => {
-  //   const category = categories.find(c => c.name === categoryName);
-  //   if (category) {
-  //     loadCategoryProducts(category.id, category.name);
-  //   }
-  // }}
-/>
-<HorizontalItemsList
+          categorizedProducts={categorizedProducts}
+          loadingMap={categoryLoaders}
+          errorMap={categoryErrors}
+          onProductDetail={(productId, slug) =>
+            navigateToProductDetail(productId, slug)
+          }
+          onLoadMore={handleLoadMoreCategory}
+          onViewAll={(categoryId, categoryName) =>
+            navigateToAllProducts(null, categoryName, categoryId)
+          }
+          categories={categories}
+          categoriesLoading={categoriesLoading}
+          categoryTotals={categoryTotals}
+          // onLoadMore={categoryName => {
+          //   const category = categories.find(c => c.name === categoryName);
+          //   if (category) {
+          //     loadCategoryProducts(category.id, category.name);
+          //   }
+          // }}
+        />
+        <HorizontalItemsList
           containerStyle={{marginVertical: 10, paddingHorizontal: 14}}
           list={parsedSellers}
           listTitle={t('sellers')}
@@ -449,32 +467,10 @@ useEffect(() => {
           onItemPress={item => navigateToVandorDetail(item)}
           onViewAll={navigateToAllVandorsScreen}
         />
-
       </ScrollView>
     </Layout>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export const CategoryWiseProductsList = ({
   categorizedProducts = {},
@@ -487,8 +483,8 @@ export const CategoryWiseProductsList = ({
   categoriesLoading = false,
   categoryTotals = {},
 }) => {
-  const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
+  const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
 
   // If categories are still loading, show nothing
   if (categoriesLoading) {
@@ -499,59 +495,79 @@ export const CategoryWiseProductsList = ({
   if (categories.length > 0 && Object.keys(categorizedProducts).length === 0) {
     return (
       <View>
-        {categories.map((category) => (
-          <View key={category.id} style={{ marginVertical: 16, paddingHorizontal: 14 }}>
+        {categories.map(category => (
+          <View
+            key={category.id}
+            style={{marginVertical: 16, paddingHorizontal: 14}}>
             {/* Category Header */}
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingHorizontal: 10,
-              marginBottom: 8,
-            }}>
-              <Text 
-                category="p1" 
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 10,
+                marginBottom: 8,
+              }}>
+              <Text
+                category="p1"
                 style={{
-                  textTransform: 'uppercase', 
+                  textTransform: 'uppercase',
                   fontWeight: '700',
                   fontSize: 15,
                   letterSpacing: 0.5,
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
                 }}>
                 {category.name}
               </Text>
-              <TouchableOpacity 
-                style={{ flexDirection: 'row', alignItems: 'center' }}
+              <TouchableOpacity
+                style={{flexDirection: 'row', alignItems: 'center'}}
                 activeOpacity={0.7}
-                onPress={() => onViewAll && onViewAll(category.id, category.name)}
-              >
-                <Text 
-                  category="label" 
+                onPress={() =>
+                  onViewAll && onViewAll(category.id, category.name)
+                }>
+                <Text
+                  category="label"
                   style={{
-                    textTransform: 'uppercase', 
+                    textTransform: 'uppercase',
                     fontWeight: '700',
                     fontSize: 15,
                     letterSpacing: 0.5,
-                    color: theme['color-shadcn-primary']
+                    color: theme['color-shadcn-primary'],
                   }}>
                   {t('viewAll')}
                 </Text>
                 <ThemedIcon
                   name="arrow-ios-forward-outline"
                   fill={theme['color-shadcn-primary']}
-                  style={{ marginLeft: 2 }}
+                  style={{marginLeft: 2}}
                 />
               </TouchableOpacity>
             </View>
-            
+
             {/* Shimmer Products */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingHorizontal: 10,
+              }}>
               {[...Array(3)].map((_, idx) => (
-                <ProductCardShimmer 
+                <ProductCardShimmer
                   key={idx}
-                  shimmerColors={isDark ? 
-                    [theme['color-shadcn-card'], theme['color-shadcn-secondary'], theme['color-shadcn-card']] :
-                    [theme['color-basic-200'], theme['color-basic-300'], theme['color-basic-200']]
+                  shimmerColors={
+                    isDark
+                      ? [
+                          theme['color-shadcn-card'],
+                          theme['color-shadcn-secondary'],
+                          theme['color-shadcn-card'],
+                        ]
+                      : [
+                          theme['color-basic-200'],
+                          theme['color-basic-300'],
+                          theme['color-basic-200'],
+                        ]
                   }
                 />
               ))}
@@ -570,10 +586,10 @@ export const CategoryWiseProductsList = ({
         const category = categories.find(cat => cat.name === categoryName);
         const isLoading = loadingMap[categoryName];
         const totalSize = categoryTotals[categoryName] || 0;
-        
+
         // Check if there are more products to load
         const hasMore = products.length < totalSize && !isLoading;
-        
+
         // console.log('CategoryWiseProductsList:', {
         //   categoryName,
         //   productsCount: products.length,
@@ -581,7 +597,7 @@ export const CategoryWiseProductsList = ({
         //   isLoading,
         //   hasMore
         // });
-        
+
         return (
           <ProductsList
             key={categoryName}

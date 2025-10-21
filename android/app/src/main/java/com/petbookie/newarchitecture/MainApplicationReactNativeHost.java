@@ -1,4 +1,4 @@
-package com.petbookie.newarchitecture;
+package com.petbookers.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.petbookie.BuildConfig;
-import com.petbookie.newarchitecture.components.MainComponentsRegistry;
-import com.petbookie.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.petbookers.BuildConfig;
+import com.petbookers.newarchitecture.components.MainComponentsRegistry;
+import com.petbookers.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

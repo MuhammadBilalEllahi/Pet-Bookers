@@ -21,6 +21,7 @@ import {
 } from '../../../store/user';
 import {BASE_URLS} from '../../../store/configs';
 import {Dimensions} from 'react-native';
+import FastImage from '@d11/react-native-fast-image';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth; // 16px padding on each side
@@ -361,14 +362,17 @@ export default function LuckyDrawInstance() {
             marginBottom: 12,
             alignSelf: 'center',
           }}>
-          <Image
-            source={{uri: `${BASE_URLS.lucky_draw_url}/${luckyDraw.image}`}}
+          <FastImage
+            source={{
+              uri: `${BASE_URLS.lucky_draw_url}/${luckyDraw.image}`,
+              priority: FastImage.priority.high,
+            }}
             style={{
               width: '100%',
               height: '100%',
               minHeight: 300, // Ensure minimum height
             }}
-            resizeMode="cover"
+            resizeMode={FastImage.resizeMode.cover}
           />
         </View>
       )}
@@ -377,10 +381,10 @@ export default function LuckyDrawInstance() {
         contentContainerStyle={{paddingBottom: 50}}>
         {/* Icon and Welcome */}
         <View style={styles.iconContainer}>
-          <Image
+          <FastImage
             source={require('../../../../assets/new/bottom_nav/lucky_draw.png')}
             style={styles.iconImage}
-            resizeMode="contain"
+            resizeMode={FastImage.resizeMode.contain}
           />
           <Text
             style={[

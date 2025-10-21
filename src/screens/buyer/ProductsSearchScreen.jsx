@@ -20,7 +20,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '../../theme/ThemeContext';
 import {useSelector, useDispatch} from 'react-redux';
-import {selectBaseUrls} from '../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 import {selectProductCategories} from '../../store/productCategories';
 import {axiosBuyerClient} from '../../utils/axiosClient';
 import {calculateDiscountedPrice} from '../../utils/products';
@@ -161,7 +161,7 @@ export const ProductsSearchScreen = ({navigation, route}) => {
               name: productItem?.name
                 ? String(productItem.name).trim()
                 : 'Unnamed Product',
-              image: `${baseUrls['product_thumbnail_url'] || ''}/${
+              image: `${BASE_URLS.product_thumbnail_url || ''}/${
                 productItem?.thumbnail || 'default.png'
               }`,
               price: Number(discountedPrice) || 0,

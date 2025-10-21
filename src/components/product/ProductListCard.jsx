@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
-import {Dimensions, Image, StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
+import React, {useState} from 'react';
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import {Text, Button} from '@ui-kitten/components';
-import { useTheme } from '../../theme/ThemeContext';
-import { useDispatch, useSelector} from 'react-redux';
-import {addToWishlist, removeFromWishlist, selectIsInWishlist, selectWishlistLoading} from '../../store/wishlist';
-import { selectIsBuyerAuthenticated, selectIsSellerAuthenticated } from '../../store/user';
-import { smartBuyerClient, handleAuthError } from '../../utils/authAxiosClient';
+import {useTheme} from '../../theme/ThemeContext';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  addToWishlist,
+  removeFromWishlist,
+  selectIsInWishlist,
+  selectWishlistLoading,
+} from '../../store/wishlist';
+import {
+  selectIsBuyerAuthenticated,
+  selectIsSellerAuthenticated,
+} from '../../store/user';
+import {smartBuyerClient, handleAuthError} from '../../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
 import {ThemedIcon} from '../Icon';
+import FastImage from '@d11/react-native-fast-image';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -28,37 +45,35 @@ export const ProductListCard = ({
 }) => {
   const dispatch = useDispatch();
   const {theme} = useTheme();
-  
+
   // Cart state
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
-  
+
   // Get wishlist status from Redux
   const isInWishlist = useSelector(state => selectIsInWishlist(state, id));
   const wishlistLoading = useSelector(selectWishlistLoading);
-  
+
   // Get authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
 
-  const toggleWishlist = (e) => {
+  const toggleWishlist = e => {
     e.stopPropagation(); // Prevent navigation
     if (!id) return;
-    
+
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
-      const message = isSellerAuthenticated 
+      const message = isSellerAuthenticated
         ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
         : 'Please sign in as a buyer to add items to wishlist.';
-      
-      Alert.alert(
-        'Buyer Authentication Required',
-        message,
-        [{ text: 'OK', style: 'default' }]
-      );
+
+      Alert.alert('Buyer Authentication Required', message, [
+        {text: 'OK', style: 'default'},
+      ]);
       return;
     }
-    
+
     if (isInWishlist) {
       // Remove from wishlist
       dispatch(removeFromWishlist({productId: id}));
@@ -78,57 +93,57 @@ export const ProductListCard = ({
     }
   };
 
-  const handleAddToCart = async (e) => {
+  const handleAddToCart = async e => {
     e.stopPropagation(); // Prevent navigation
-    
+
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
-      const message = isSellerAuthenticated 
+      const message = isSellerAuthenticated
         ? 'You are signed in as a seller. Please also sign in as a buyer to add items to cart.'
         : 'Please sign in as a buyer to add items to cart.';
-      
-      Alert.alert(
-        'Buyer Authentication Required',
-        message,
-        [{ text: 'OK', style: 'default' }]
-      );
+
+      Alert.alert('Buyer Authentication Required', message, [
+        {text: 'OK', style: 'default'},
+      ]);
       return;
     }
 
     try {
       setAddingToCart(true);
-      
+
       const response = await smartBuyerClient.post('cart/add', {
         id: id,
         quantity: 1,
       });
-      
+
       setAddingToCart(false);
       setAddedToCart(true);
-      
+
       Toast.show({
         type: 'success',
         text1: 'Added to Cart',
-        text2: 'Product added to cart successfully!'
+        text2: 'Product added to cart successfully!',
       });
-      
+
       // Reset added state after 2 seconds
       setTimeout(() => {
         setAddedToCart(false);
       }, 2000);
-      
     } catch (error) {
       console.error('Error adding to cart:', error);
-      
+
       setAddingToCart(false);
-      
+
       // Handle auth errors with proper modal display
-      handleAuthError(error, (err) => {
-        const errorMessage = err?.response?.data?.message || err?.message || 'Failed to add to cart';
+      handleAuthError(error, err => {
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          'Failed to add to cart';
         Toast.show({
           type: 'error',
           text1: 'Error',
-          text2: errorMessage
+          text2: errorMessage,
         });
       });
     }
@@ -140,21 +155,32 @@ export const ProductListCard = ({
       style={[
         styles.card,
         {
-          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-300'],
-        }
+          backgroundColor: isDark
+            ? theme['color-shadcn-card']
+            : theme['color-basic-100'],
+          borderColor: isDark
+            ? theme['color-shadcn-border']
+            : theme['color-basic-300'],
+        },
       ]}
-      onPress={() => onProductDetail && onProductDetail(id, slug)}
-    >
+      onPress={() => onProductDetail && onProductDetail(id, slug)}>
       {/* Image Container - Left Side */}
+      {console.log('\nimage------------------', image)}
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: image }}
+        <FastImage
+          source={{
+            uri: image,
+            priority: FastImage.priority.high,
+          }}
           style={[
             styles.image,
-            { backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'] }
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-secondary']
+                : theme['color-basic-200'],
+            },
           ]}
-          resizeMode="cover"
+          resizeMode={FastImage.resizeMode.cover}
         />
         {isSoldOut && (
           <View style={styles.soldOutContainer}>
@@ -180,23 +206,28 @@ export const ProductListCard = ({
             numberOfLines={2}
             style={[
               styles.title,
-              { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
-            ]}
-          >
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
             {name}
           </Text>
           <TouchableOpacity
             onPress={toggleWishlist}
             style={styles.heartButton}
-            disabled={wishlistLoading}
-          >
+            disabled={wishlistLoading}>
             <ThemedIcon
-              name={isInWishlist ? "heart" : "heart-outline"}
-              fill={isInWishlist ? '#FF512F' : (isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'])}
-              style={[
-                styles.heartIcon,
-                { opacity: wishlistLoading ? 0.6 : 1 }
-              ]}
+              name={isInWishlist ? 'heart' : 'heart-outline'}
+              fill={
+                isInWishlist
+                  ? '#FF512F'
+                  : isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600']
+              }
+              style={[styles.heartIcon, {opacity: wishlistLoading ? 0.6 : 1}]}
             />
           </TouchableOpacity>
         </View>
@@ -206,23 +237,24 @@ export const ProductListCard = ({
           <View style={styles.priceContainer}>
             <Text
               category="h6"
-              style={[
-                styles.price,
-                { color: theme['color-shadcn-primary'] }
-              ]}
-            >
+              style={[styles.price, {color: theme['color-shadcn-primary']}]}>
               Rs {price}
             </Text>
             {oldPrice > 0 && (
-              <Text style={[
-                styles.oldPrice,
-                { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }
-              ]}>
+              <Text
+                style={[
+                  styles.oldPrice,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600'],
+                  },
+                ]}>
                 Rs {oldPrice}
               </Text>
             )}
           </View>
-          
+
           <TouchableOpacity
             onPress={handleAddToCart}
             style={[
@@ -230,11 +262,10 @@ export const ProductListCard = ({
               {
                 backgroundColor: theme['color-shadcn-primary'],
                 borderColor: theme['color-shadcn-primary'],
-                opacity: isSoldOut ? 0.5 : 1
-              }
+                opacity: isSoldOut ? 0.5 : 1,
+              },
             ]}
-            disabled={addingToCart || isSoldOut}
-          >
+            disabled={addingToCart || isSoldOut}>
             {addingToCart ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : addedToCart ? (
@@ -275,7 +306,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     elevation: 2,
   },
   imageContainer: {
