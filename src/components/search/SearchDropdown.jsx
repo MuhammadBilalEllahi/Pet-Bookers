@@ -46,7 +46,7 @@ export const SearchDropdown = ({
   const parseProducts = useCallback(
     productList => {
       if (!Array.isArray(productList)) {
-        console.log('ProductList is not array:', typeof productList);
+        // console.log('ProductList is not array:', typeof productList);
         return [];
       }
 
@@ -106,7 +106,7 @@ export const SearchDropdown = ({
                   : null,
             };
 
-            console.log(`Parsed product ${index}:`, parsedProduct);
+            // console.log(`Parsed product ${index}:`, parsedProduct);
             return parsedProduct;
           } catch (parseError) {
             console.error(
@@ -138,13 +138,13 @@ export const SearchDropdown = ({
         const response = await axiosBuyerClient.get(
           `products/search?name=${encodeURIComponent(query)}&limit=10&offset=0`,
         );
-        console.log('DATA', response.data.products);
+        // console.log('DATA', response.data.products);
 
         const rawProducts = response.data.products || [];
-        console.log('Raw products length:', rawProducts.length);
+        // console.log('Raw products length:', rawProducts.length);
 
         const results = parseProducts(rawProducts);
-        console.log('Parsed results:', results);
+        // console.log('Parsed results:', results);
 
         // Ensure all results are safe before setting
         const safeResults = results.filter(
@@ -183,7 +183,7 @@ export const SearchDropdown = ({
 
   // Handle product selection
   const handleProductSelect = product => {
-    console.log('Product selected:', product);
+    // console.log('Product selected:', product);
 
     // Immediately hide dropdown and clear search
     setShowDropdown(false);
@@ -249,7 +249,7 @@ export const SearchDropdown = ({
 
   // Render product item in dropdown - simplified for debugging
   const renderProductItem = ({item, index}) => {
-    console.log('Rendering item:', item);
+    // console.log('Rendering item:', item);
 
     if (!item || !item.id || !item.name) {
       console.warn('Invalid item:', item);
@@ -271,7 +271,7 @@ export const SearchDropdown = ({
           },
         ]}
         onPress={() => {
-          console.log('Item touched:', item.name);
+          // console.log('Item touched:', item.name);
           handleProductSelect(item);
         }}
         activeOpacity={0.8}

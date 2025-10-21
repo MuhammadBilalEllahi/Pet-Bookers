@@ -1,60 +1,138 @@
-import { Layout, Text, Card, Divider, Spinner, Button, Icon, Input, Tab, TabView, TopNavigation, TopNavigationAction } from '@ui-kitten/components'
-import React, { useEffect, useState, useCallback } from 'react'
-import { View, StyleSheet, FlatList, RefreshControl, ScrollView, Platform, Alert, Modal, TouchableOpacity, Image } from 'react-native'
-import { useTranslation } from 'react-i18next'
-import { AppScreens } from '../../../navigators/AppNavigator'
-import { useTheme } from '../../../theme/ThemeContext'
-import { createSmartBuyerClient } from '../../../utils/authAxiosClient'
-import { spacingStyles } from '../../../utils/globalStyles'
+import {
+  Layout,
+  Text,
+  Card,
+  Divider,
+  Spinner,
+  Button,
+  Icon,
+  Input,
+  Tab,
+  TabView,
+  TopNavigation,
+  TopNavigationAction,
+} from '@ui-kitten/components';
+import React, {useEffect, useState, useCallback} from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  Platform,
+  Alert,
+  Modal,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {AppScreens} from '../../../navigators/AppNavigator';
+import {useTheme} from '../../../theme/ThemeContext';
+import {createSmartBuyerClient} from '../../../utils/authAxiosClient';
+import {spacingStyles} from '../../../utils/globalStyles';
 import Toast from 'react-native-toast-message';
 
-import { selectBaseUrls } from '../../../store/configs';
-import { useSelector } from 'react-redux';
+import {selectBaseUrls} from '../../../store/configs';
+import {useSelector} from 'react-redux';
 import OrdersTab from './tabs/OrdersTab';
 import RefundsTab from './tabs/RefundsTab';
 import ReviewModal from './tabs/ReviewModal';
-
-
+import SellerReviewModal from './tabs/SellerReviewModal';
 
 const smartBuyerClient = createSmartBuyerClient();
 
 // Reusable component for status badges
-const StatusBadge = ({ status, t }) => {
-
+const StatusBadge = ({status, t}) => {
   return (
-    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(status) }]}>
-      <Text style={styles.statusBadgeText}>
-        {status}
-      </Text>
+    <View
+      style={[styles.statusBadge, {backgroundColor: getStatusColor(status)}]}>
+      <Text style={styles.statusBadgeText}>{status}</Text>
     </View>
   );
 };
 
 // Reusable component for address display
-const AddressInfo = ({ address, isDark, theme, t }) => {
+const AddressInfo = ({address, isDark, theme, t}) => {
   if (!address) return null;
 
   return (
-    <View style={[styles.addressContainer, {
-      borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-      backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-    }]}>
-      <Text category="s2" style={[styles.addressLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
+    <View
+      style={[
+        styles.addressContainer,
+        {
+          borderColor: isDark
+            ? theme['color-shadcn-border']
+            : theme['color-basic-400'],
+          backgroundColor: isDark
+            ? theme['color-shadcn-card']
+            : theme['color-basic-100'],
+        },
+      ]}>
+      <Text
+        category="s2"
+        style={[
+          styles.addressLabel,
+          {
+            color: isDark
+              ? theme['color-shadcn-muted-foreground']
+              : theme['color-basic-600'],
+          },
+        ]}>
         Billing Address:
       </Text>
-      <Text style={[styles.addressText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>
+      <Text
+        style={[
+          styles.addressText,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-800'],
+          },
+        ]}>
         {address.contact_person_name}
       </Text>
-      <Text style={[styles.addressText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>
+      <Text
+        style={[
+          styles.addressText,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-800'],
+          },
+        ]}>
         {address.address}
       </Text>
-      <Text style={[styles.addressText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>
+      <Text
+        style={[
+          styles.addressText,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-800'],
+          },
+        ]}>
         {`${address.city}, ${address.state} ${address.zip}`}
       </Text>
-      <Text style={[styles.addressText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>
+      <Text
+        style={[
+          styles.addressText,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-800'],
+          },
+        ]}>
         {address.country}
       </Text>
-      <Text style={[styles.addressText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>
+      <Text
+        style={[
+          styles.addressText,
+          {
+            color: isDark
+              ? theme['color-shadcn-foreground']
+              : theme['color-basic-800'],
+          },
+        ]}>
         {`Phone: ${address.phone}`}
       </Text>
     </View>
@@ -62,64 +140,112 @@ const AddressInfo = ({ address, isDark, theme, t }) => {
 };
 
 // Collapsible Address Component
-const CollapsibleAddress = ({ address, isDark, theme, t }) => {
+const CollapsibleAddress = ({address, isDark, theme, t}) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <View style={styles.addressContainer}>
       <TouchableOpacity
-        style={[styles.addressHeader, {
-          backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-        }]}
-        onPress={() => setIsExpanded(!isExpanded)}
-      >
+        style={[
+          styles.addressHeader,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-secondary']
+              : theme['color-basic-200'],
+          },
+        ]}
+        onPress={() => setIsExpanded(!isExpanded)}>
         <View style={styles.addressHeaderContent}>
           <Icon
             name="pin"
             width={16}
             height={16}
-            fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+            fill={
+              isDark
+                ? theme['color-shadcn-muted-foreground']
+                : theme['color-basic-600']
+            }
           />
           <Text
             category="s1"
-            style={[styles.addressTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
-          >
+            style={[
+              styles.addressTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
             Billing Address
           </Text>
         </View>
         <Icon
-          name={isExpanded ? "arrow-up" : "arrow-down"}
+          name={isExpanded ? 'arrow-up' : 'arrow-down'}
           width={16}
           height={16}
-          fill={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+          fill={
+            isDark
+              ? theme['color-shadcn-muted-foreground']
+              : theme['color-basic-600']
+          }
         />
       </TouchableOpacity>
 
       {isExpanded && (
         <View style={styles.addressContent}>
           <Text
-            style={[styles.addressText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}
-          >
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
             {address.contact_person_name}
           </Text>
           <Text
-            style={[styles.addressText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}
-          >
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
             {address.phone}
           </Text>
           <Text
-            style={[styles.addressText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}
-          >
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
             {address.address}
           </Text>
           <Text
-            style={[styles.addressText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}
-          >
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
             {address.city}, {address.state} {address.zip}
           </Text>
           <Text
-            style={[styles.addressText, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}
-          >
+            style={[
+              styles.addressText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
             {address.country}
           </Text>
         </View>
@@ -129,30 +255,47 @@ const CollapsibleAddress = ({ address, isDark, theme, t }) => {
 };
 
 // Product Details Component
-const ProductDetails = ({ product, isDark, theme, t }) => {
+const ProductDetails = ({product, isDark, theme, t}) => {
   // console.log("product in productdetails", JSON.stringify(product, null, 2));
   return (
-    <View style={[styles.productDetailsContainer, {
-      backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200']
-    }]}>
+    <View
+      style={[
+        styles.productDetailsContainer,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-secondary']
+            : theme['color-basic-200'],
+        },
+      ]}>
       <View style={styles.productInfo}>
         <Text
           category="s1"
-          style={[styles.productName, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}
-        >
+          style={[
+            styles.productName,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
           {product.product_details?.name || 'Product Name'}
         </Text>
         <Text
           category="c1"
-          style={[styles.productMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}
-        >
+          style={[
+            styles.productMeta,
+            {
+              color: isDark
+                ? theme['color-shadcn-muted-foreground']
+                : theme['color-basic-600'],
+            },
+          ]}>
           Qty: {product.qty} • PKR {product.price}
         </Text>
         {product.discount > 0 && (
           <Text
             category="c1"
-            style={[styles.discountText, { color: theme['color-success-500'] }]}
-          >
+            style={[styles.discountText, {color: theme['color-success-500']}]}>
             Discount: PKR {product.discount}
           </Text>
         )}
@@ -165,9 +308,9 @@ const ProductDetails = ({ product, isDark, theme, t }) => {
 
 // --- End API Utility Functions ---
 
-export const MyOrders = ({ navigation }) => {
-  const { t } = useTranslation();
-  const { theme, isDark } = useTheme();
+export const MyOrders = ({navigation}) => {
+  const {t} = useTranslation();
+  const {theme, isDark} = useTheme();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -176,19 +319,19 @@ export const MyOrders = ({ navigation }) => {
   const [refunds, setRefunds] = useState([]);
   const [refundsLoading, setRefundsLoading] = useState(false);
 
-  const navigateToOrderDetails = (order) => {
-    navigation.navigate(AppScreens.OrderDetails, { order });
+  const navigateToOrderDetails = order => {
+    navigation.navigate(AppScreens.OrderDetails, {order});
   };
 
-  const navigateToSellerInfo = (sellerId) => {
-    navigation.navigate(AppScreens.VANDOR_DETAIL, { sellerId });
+  const navigateToSellerInfo = sellerId => {
+    navigation.navigate(AppScreens.VANDOR_DETAIL, {sellerId});
   };
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const response = await smartBuyerClient.get('customer/order/list');
-      // // console.log("response in customerlist", JSON.stringify(response.data, null, 2));
+      // console.log("response in customerlist", JSON.stringify(response.data, null, 2));
       setOrders((response.data || []).slice().reverse());
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -223,9 +366,13 @@ export const MyOrders = ({ navigation }) => {
     fetchRefunds();
   }, []);
 
-  const formatDate = useCallback((dateString) => {
+  const formatDate = useCallback(dateString => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   }, []);
 
   // Group orders by order_group_id
@@ -239,16 +386,27 @@ export const MyOrders = ({ navigation }) => {
 
   // Add state for modals
   const [orderProducts, setOrderProducts] = useState({});
-  const [reviewModal, setReviewModal] = useState({ visible: false, order: null });
+  const [reviewModal, setReviewModal] = useState({visible: false, order: null});
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const baseUrls = useSelector(selectBaseUrls);
   const [reviewedOrders, setReviewedOrders] = useState(new Set());
-  const [refundReason,  setRefundReason] = useState('');
+  const [refundReason, setRefundReason] = useState('');
+
+  // Seller review state
+  const [sellerReviewModal, setSellerReviewModal] = useState({
+    visible: false,
+    sellerId: null,
+    sellerName: null,
+  });
+  const [sellerReviewText, setSellerReviewText] = useState('');
+  const [sellerReviewRating, setSellerReviewRating] = useState(5);
+  const [reviewedSellers, setReviewedSellers] = useState(new Set());
+  const [canReviewSeller, setCanReviewSeller] = useState({});
 
   // No need to fetch order products separately; use order.details from get_order_list
 
-  const openReviewModal = (order) => {
+  const openReviewModal = order => {
     if (order.order_status !== 'delivered') {
       Toast.show({
         type: 'error',
@@ -267,16 +425,109 @@ export const MyOrders = ({ navigation }) => {
       return;
     }
 
-    setReviewModal({ visible: true, order });
+    setReviewModal({visible: true, order});
     setReviewRating(5);
     setReviewText('');
   };
 
   const closeReviewModal = () => {
-    setReviewModal({ visible: false, order: null });
+    setReviewModal({visible: false, order: null});
   };
 
+  // Seller review functions
+  const checkCanReviewSeller = async sellerId => {
+    try {
+      const response = await smartBuyerClient.get(
+        `customer/can-review?seller_id=${sellerId}`,
+      );
+      // console.log('can review', response.data, sellerId);
+      const canReview = response.data?.is_eligble || false;
+      setCanReviewSeller(prev => ({
+        ...prev,
+        [sellerId]: canReview,
+      }));
+      return canReview;
+    } catch (error) {
+      console.error('Error checking if can review seller:', error);
+      setCanReviewSeller(prev => ({
+        ...prev,
+        [sellerId]: false,
+      }));
+      return false;
+    }
+  };
 
+  const openSellerReviewModal = async (sellerId, sellerName) => {
+    if (reviewedSellers.has(sellerId)) {
+      Toast.show({
+        type: 'info',
+        text1: 'Already Reviewed',
+        text2: 'You have already reviewed this seller',
+      });
+      return;
+    }
+
+    const canReview = await checkCanReviewSeller(sellerId);
+    if (!canReview) {
+      Toast.show({
+        type: 'error',
+        text1: 'Cannot Review',
+        text2: 'You cannot review this seller at this time',
+      });
+      return;
+    }
+
+    setSellerReviewModal({visible: true, sellerId, sellerName});
+    setSellerReviewRating(5);
+    setSellerReviewText('');
+  };
+
+  const closeSellerReviewModal = () => {
+    setSellerReviewModal({visible: false, sellerId: null, sellerName: null});
+  };
+
+  const handleSubmitSellerReview = async () => {
+    if (!sellerReviewText.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please enter a review comment',
+      });
+      return;
+    }
+
+    try {
+      const response = await smartBuyerClient.post(
+        'customer/seller-reviews/submit',
+        {
+          seller_id: sellerReviewModal.sellerId,
+          rating: sellerReviewRating,
+          comment: sellerReviewText,
+        },
+      );
+
+      if (response) {
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Seller review submitted successfully',
+        });
+        // Mark seller as reviewed
+        setReviewedSellers(
+          prev => new Set([...prev, sellerReviewModal.sellerId]),
+        );
+        closeSellerReviewModal();
+        fetchOrders(); // Refresh orders to update UI
+      }
+    } catch (error) {
+      console.error('Error submitting seller review:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to submit seller review',
+      });
+    }
+  };
 
   const handleSubmitReview = async () => {
     if (!reviewText.trim()) {
@@ -292,11 +543,14 @@ export const MyOrders = ({ navigation }) => {
       // console.log("reviewModal.order.id", reviewModal.order.id);
       // console.log("reviewRating", reviewRating);
       // console.log("reviewText", reviewText);
-      const response = await smartBuyerClient.post('customer/order/deliveryman-reviews/submit', {
-        order_id: reviewModal.order.id,
-        rating: reviewRating,
-        comment: reviewText
-      });
+      const response = await smartBuyerClient.post(
+        'customer/order/deliveryman-reviews/submit',
+        {
+          order_id: reviewModal.order.id,
+          rating: reviewRating,
+          comment: reviewText,
+        },
+      );
 
       if (response) {
         Toast.show({
@@ -319,7 +573,7 @@ export const MyOrders = ({ navigation }) => {
     }
   };
 
-  const handleRefundRequest = (order) => {
+  const handleRefundRequest = order => {
     if (order.order_status !== 'delivered') {
       Toast.show({
         type: 'error',
@@ -328,23 +582,33 @@ export const MyOrders = ({ navigation }) => {
       });
       return;
     }
-    navigation.navigate(AppScreens.REFUND_SCREEN, { order });
+    navigation.navigate(AppScreens.REFUND_SCREEN, {order});
   };
 
   // Filtered data for search
-  const filteredOrders = Object.values(groupedOrders).flat().filter(order => {
-    if (!searchQuery) return true;
-    return (
-      order.id.toString().includes(searchQuery) ||
-      (order.billing_address_data?.address && order.billing_address_data.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (order.details?.[0]?.product_details?.name && order.details[0].product_details.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  });
+  const filteredOrders = Object.values(groupedOrders)
+    .flat()
+    .filter(order => {
+      if (!searchQuery) return true;
+      return (
+        order.id.toString().includes(searchQuery) ||
+        (order.billing_address_data?.address &&
+          order.billing_address_data.address
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())) ||
+        (order.details?.[0]?.product_details?.name &&
+          order.details[0].product_details.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()))
+      );
+    });
 
   const filteredRefunds = refunds.filter(refund => {
     if (!searchQuery) return true;
     return (
-      refund.product_details?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      refund.product_details?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       refund.id?.toString().includes(searchQuery)
     );
   });
@@ -361,9 +625,12 @@ export const MyOrders = ({ navigation }) => {
   };
 
   // Modern order card UI
-  const renderOrderGroup = ({ item: groupId }) => {
+  const renderOrderGroup = ({item: groupId, onSellerReview}) => {
     const groupOrders = groupedOrders[groupId];
-    const totalAmount = groupOrders.reduce((sum, order) => sum + parseFloat(order.order_amount), 0);
+    const totalAmount = groupOrders.reduce(
+      (sum, order) => sum + parseFloat(order.order_amount),
+      0,
+    );
 
     // If only one order in group, render as before
     if (groupOrders.length === 1) {
@@ -371,61 +638,170 @@ export const MyOrders = ({ navigation }) => {
       const products = order.details || [];
       const firstProduct = products[0];
       return (
-        <Card key={order.id} style={[styles.orderCard, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'], ...Platform.select({ ios: { shadowColor: isDark ? '#000' : '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: isDark ? 0.3 : 0.1, shadowRadius: 4, }, android: { elevation: 4, }, }), }]}>
+        <Card
+          key={order.id}
+          style={[
+            styles.orderCard,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : theme['color-basic-100'],
+              ...Platform.select({
+                ios: {
+                  shadowColor: isDark ? '#000' : '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: isDark ? 0.3 : 0.1,
+                  shadowRadius: 4,
+                },
+                android: {elevation: 4},
+              }),
+            },
+          ]}>
           <View style={styles.orderCardRow}>
             {firstProduct?.product_details?.thumbnail ? (
               <Image
-                source={{ uri: `${baseUrls['product_thumbnail_url']}/${firstProduct.product_details.thumbnail}` }}
+                source={{
+                  uri: `${baseUrls['product_thumbnail_url']}/${firstProduct.product_details.thumbnail}`,
+                }}
                 style={styles.productImage}
               />
             ) : (
-              <View style={[styles.productImage, { backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center' }]}/>
+              <View
+                style={[
+                  styles.productImage,
+                  {
+                    backgroundColor: '#eee',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  },
+                ]}
+              />
             )}
-            <View style={{ flex: 1, marginLeft: 8 }}>
-              <Text category="h6" style={[styles.productName, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], marginBottom: 2 }]}>
+            <View style={{flex: 1, marginLeft: 8}}>
+              <Text
+                category="h6"
+                style={[
+                  styles.productName,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                    marginBottom: 2,
+                  },
+                ]}>
                 {firstProduct?.product_details?.name || 'Product Name'}
               </Text>
               <View style={styles.orderHeader}>
                 <View style={styles.orderTitleContainer}>
-                  <Text category="c1" style={[styles.orderTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  <Text
+                    category="c1"
+                    style={[
+                      styles.orderTitle,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
                     {t('Order')} #{order.id}
                   </Text>
-                  <Text category="c1" style={[styles.orderDate, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
+                  <Text
+                    category="c1"
+                    style={[
+                      styles.orderDate,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
                     {formatDate(order.created_at)}
                   </Text>
                 </View>
-                <View style={fixedStatusBadgeStyle}><StatusBadge status={order.order_status} t={t} /></View>
+                <View style={fixedStatusBadgeStyle}>
+                  <StatusBadge status={order.order_status} t={t} />
+                </View>
               </View>
               <View style={styles.orderDetailsRow}>
-                <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
+                <Text
+                  style={[
+                    styles.orderMeta,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    },
+                  ]}>
                   {t('Payment')}: {order.payment_method}
                 </Text>
-                <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
+                <Text
+                  style={[
+                    styles.orderMeta,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    },
+                  ]}>
                   {t('Status')}: {order.payment_status}
                 </Text>
-                <Text style={[styles.orderMeta, { color: isDark ? theme['color-primary-500'] : theme['color-primary-600'] }]}>PKR {order.order_amount}</Text>
+                <Text
+                  style={[
+                    styles.orderMeta,
+                    {
+                      color: isDark
+                        ? theme['color-primary-500']
+                        : theme['color-primary-600'],
+                    },
+                  ]}>
+                  PKR {order.order_amount}
+                </Text>
               </View>
             </View>
           </View>
           {firstProduct && (
-            <ProductDetails product={firstProduct} isDark={isDark} theme={theme} t={t} />
+            <ProductDetails
+              product={firstProduct}
+              isDark={isDark}
+              theme={theme}
+              t={t}
+            />
           )}
-          <CollapsibleAddress address={order.billing_address_data} isDark={isDark} theme={theme} t={t} />
+          <CollapsibleAddress
+            address={order.billing_address_data}
+            isDark={isDark}
+            theme={theme}
+            t={t}
+          />
           <View style={styles.actionRow}>
-            <Button size="tiny" status="basic" style={[styles.sellerInfoButton, {
-                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
-                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-              }]} onPress={() => navigateToSellerInfo(order.seller_id)}>
-              <Text style={{
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }}>
+            <Button
+              size="tiny"
+              status="basic"
+              style={[
+                styles.sellerInfoButton,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-secondary']
+                    : theme['color-basic-200'],
+                  borderColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-400'],
+                },
+              ]}
+              onPress={() => navigateToSellerInfo(order.seller_id)}>
+              <Text
+                style={{
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                }}>
                 View Seller Info
               </Text>
             </Button>
             {/* {order.order_status === 'delivered' && (
               <Button size="tiny" status="danger" style={styles.actionBtn} onPress={() => handleRefundRequest(order)}>Refund</Button>
             )} */}
-            {order.order_status === 'delivered' && !reviewedOrders.has(order.id) && (
+            {/* {order.order_status === 'delivered' && !reviewedOrders.has(order.id) && (
               <Button 
                 size="tiny" 
                 status="info" 
@@ -448,29 +824,76 @@ export const MyOrders = ({ navigation }) => {
                 <Text category="c1" style={[styles.reviewedText, { color: theme['color-success-500'] }]}>{t('product.reviewed', 'Reviewed')}</Text>
               </View>
             )}
-            {order.digital_product_id && (
+            {order.order_status === 'delivered' && !reviewedSellers.has(order.seller_id) && (
               <Button 
                 size="tiny" 
-                status="primary" 
+                status="warning" 
                 style={[styles.actionBtn, {
-                  backgroundColor: theme['color-primary-500'],
-                  borderColor: theme['color-primary-600']
+                  backgroundColor: theme['color-warning-500'],
+                  borderColor: theme['color-warning-600']
                 }]} 
-                onPress={async () => {
-                  await smartBuyerClient.get(`customer/order/digital-product-download/${order.digital_product_id}`);
-                  Toast.show({ type: 'success', text1: 'Download', text2: 'Digital product download started.' });
-                }}
+                onPress={() => openSellerReviewModal(order.seller_id, order.seller_is || `Seller ${order.seller_id}`)}
               >
                 <Text style={{ color: '#ffffff' }}>
-                  Download
+                  Review Seller
                 </Text>
               </Button>
             )}
+            {reviewedSellers.has(order.seller_id) && (
+              <View style={[styles.reviewedBadge, {
+                backgroundColor: isDark ? 'rgba(255, 193, 7, 0.2)' : '#FFF3CD'
+              }]}>
+                <Icon name="star" width={16} height={16} fill={theme['color-warning-500']} />
+                <Text category="c1" style={[styles.reviewedText, { color: theme['color-warning-500'] }]}>Seller Reviewed</Text>
+              </View>
+            )} */}
+            {order.digital_product_id && (
+              <Button
+                size="tiny"
+                status="primary"
+                style={[
+                  styles.actionBtn,
+                  {
+                    backgroundColor: theme['color-primary-500'],
+                    borderColor: theme['color-primary-600'],
+                  },
+                ]}
+                onPress={async () => {
+                  await smartBuyerClient.get(
+                    `customer/order/digital-product-download/${order.digital_product_id}`,
+                  );
+                  Toast.show({
+                    type: 'success',
+                    text1: 'Download',
+                    text2: 'Digital product download started.',
+                  });
+                }}>
+                <Text style={{color: '#ffffff'}}>Download</Text>
+              </Button>
+            )}
           </View>
-          <View style={[styles.groupTotal, {
-            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)'
-          }]}>
-            <Text category="s1" style={[styles.groupTotalText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.groupTotal', 'Group Total:')} PKR {totalAmount.toFixed(2)}</Text>
+          <View
+            style={[
+              styles.groupTotal,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : 'rgba(0, 0, 0, 0.03)',
+              },
+            ]}>
+            <Text
+              category="s1"
+              style={[
+                styles.groupTotalText,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                },
+              ]}>
+              {t('order.groupTotal', 'Group Total:')} PKR{' '}
+              {totalAmount.toFixed(2)}
+            </Text>
           </View>
         </Card>
       );
@@ -478,64 +901,264 @@ export const MyOrders = ({ navigation }) => {
 
     // Multiple orders in group: show all under one card
     return (
-      <Card key={groupId} style={[styles.orderCard, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'], ...Platform.select({ ios: { shadowColor: isDark ? '#000' : '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: isDark ? 0.3 : 0.1, shadowRadius: 4, }, android: { elevation: 4, }, }), }]}>
-        <Text category="h6" style={[styles.groupHeader, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.orderGroup', 'Order Group:')} {groupId}</Text>
+      <Card
+        key={groupId}
+        style={[
+          styles.orderCard,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-card']
+              : theme['color-basic-100'],
+            ...Platform.select({
+              ios: {
+                shadowColor: isDark ? '#000' : '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: isDark ? 0.3 : 0.1,
+                shadowRadius: 4,
+              },
+              android: {elevation: 4},
+            }),
+          },
+        ]}>
+        <Text
+          category="h6"
+          style={[
+            styles.groupHeader,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
+          {t('order.orderGroup', 'Order Group:')} {groupId}
+        </Text>
         {groupOrders.map((order, index) => {
           const products = order.details || [];
           const firstProduct = products[0];
           return (
-            <View key={order.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <View
+              key={order.id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 12,
+              }}>
               {firstProduct?.product_details?.thumbnail ? (
                 <Image
-                  source={{ uri: `${baseUrls['product_thumbnail_url']}/${firstProduct.product_details.thumbnail}` }}
+                  source={{
+                    uri: `${baseUrls['product_thumbnail_url']}/${firstProduct.product_details.thumbnail}`,
+                  }}
                   style={styles.productImage}
                 />
               ) : (
-                <View style={[styles.productImage, { backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center' }]}/>
+                <View
+                  style={[
+                    styles.productImage,
+                    {
+                      backgroundColor: '#eee',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    },
+                  ]}
+                />
               )}
-              <View style={{ flex: 1, marginLeft: 8 }}>
-                <Text category="h6" style={[styles.productName, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'], marginBottom: 2 }]}>
+              <View style={{flex: 1, marginLeft: 8}}>
+                <Text
+                  category="h6"
+                  style={[
+                    styles.productName,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                      marginBottom: 2,
+                    },
+                  ]}>
                   {firstProduct?.product_details?.name || 'Product Name'}
                 </Text>
-                <Text category="c1" style={[styles.orderTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.orderNumber', 'Order #')}{order.id}</Text>
-                <Text category="c1" style={[styles.orderDate, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{formatDate(order.created_at)}</Text>
-                <View style={fixedStatusBadgeStyle}><StatusBadge status={order.order_status} t={t} /></View>
+                <Text
+                  category="c1"
+                  style={[
+                    styles.orderTitle,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
+                  {t('order.orderNumber', 'Order #')}
+                  {order.id}
+                </Text>
+                <Text
+                  category="c1"
+                  style={[
+                    styles.orderDate,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    },
+                  ]}>
+                  {formatDate(order.created_at)}
+                </Text>
+                <View style={fixedStatusBadgeStyle}>
+                  <StatusBadge status={order.order_status} t={t} />
+                </View>
                 <View style={styles.orderDetailsRow}>
-                  <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{t('Payment')}: {order.payment_method}</Text>
-                  <Text style={[styles.orderMeta, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{t('Status')}: {order.payment_status}</Text>
-                  <Text style={[styles.orderMeta, { color: isDark ? theme['color-primary-500'] : theme['color-primary-600'] }]}>PKR {order.order_amount}</Text>
+                  <Text
+                    style={[
+                      styles.orderMeta,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('Payment')}: {order.payment_method}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.orderMeta,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('Status')}: {order.payment_status}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.orderMeta,
+                      {
+                        color: isDark
+                          ? theme['color-primary-500']
+                          : theme['color-primary-600'],
+                      },
+                    ]}>
+                    PKR {order.order_amount}
+                  </Text>
                 </View>
                 {/* Action Buttons for each order */}
                 <View style={styles.actionRow}>
-                  <Button size="tiny" status="basic" style={[styles.sellerInfoButton, {
-                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
-                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-              }]} onPress={() => navigateToSellerInfo(order.seller_id)}>
-              <Text style={{
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }}>
-                View Seller Info
-              </Text>
-            </Button>
+                  <Button
+                    size="tiny"
+                    status="basic"
+                    style={[
+                      styles.sellerInfoButton,
+                      {
+                        backgroundColor: isDark
+                          ? theme['color-shadcn-secondary']
+                          : theme['color-basic-200'],
+                        borderColor: isDark
+                          ? theme['color-shadcn-border']
+                          : theme['color-basic-400'],
+                      },
+                    ]}
+                    onPress={() => navigateToSellerInfo(order.seller_id)}>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      }}>
+                      View Seller Info
+                    </Text>
+                  </Button>
                   {/* {order.order_status === 'delivered' && (
                     <Button size="tiny" status="danger" style={styles.actionBtn} onPress={() => handleRefundRequest(order)}>Refund</Button>
                   )} */}
-                  {order.order_status === 'delivered' && !reviewedOrders.has(order.id) && (
-                    <Button size="tiny" status="info" style={styles.actionBtn} onPress={() => openReviewModal(order)}>
-                      Review Delivery
-                    </Button>
-                  )}
+                  {order.order_status === 'delivered' &&
+                    !reviewedOrders.has(order.id) && (
+                      <Button
+                        size="tiny"
+                        status="info"
+                        style={styles.actionBtn}
+                        onPress={() => openReviewModal(order)}>
+                        Review Delivery
+                      </Button>
+                    )}
                   {reviewedOrders.has(order.id) && (
                     <View style={styles.reviewedBadge}>
-                      <Icon name="checkmark-circle-2" width={16} height={16} fill={theme['color-success-500']} />
-                      <Text category="c1" style={[styles.reviewedText, { color: theme['color-success-500'] }]}>{t('product.reviewed', 'Reviewed')}</Text>
+                      <Icon
+                        name="checkmark-circle-2"
+                        width={16}
+                        height={16}
+                        fill={theme['color-success-500']}
+                      />
+                      <Text
+                        category="c1"
+                        style={[
+                          styles.reviewedText,
+                          {color: theme['color-success-500']},
+                        ]}>
+                        {t('product.reviewed', 'Reviewed')}
+                      </Text>
+                    </View>
+                  )}
+                  {/* Seller Review Button */}
+                  {order.order_status === 'delivered' &&
+                    !reviewedSellers.has(order.seller_id) && (
+                      <Button
+                        size="tiny"
+                        status="warning"
+                        style={[
+                          styles.actionBtn,
+                          {
+                            backgroundColor: theme['color-warning-500'],
+                            borderColor: theme['color-warning-600'],
+                          },
+                        ]}
+                        onPress={() =>
+                          openSellerReviewModal(
+                            order.seller_id,
+                            order.seller_is || `Seller ${order.seller_id}`,
+                          )
+                        }>
+                        <Text style={{color: '#ffffff'}}>Review Seller</Text>
+                      </Button>
+                    )}
+                  {reviewedSellers.has(order.seller_id) && (
+                    <View
+                      style={[
+                        styles.reviewedBadge,
+                        {
+                          backgroundColor: isDark
+                            ? 'rgba(255, 193, 7, 0.2)'
+                            : '#FFF3CD',
+                        },
+                      ]}>
+                      <Icon
+                        name="star"
+                        width={16}
+                        height={16}
+                        fill={theme['color-warning-500']}
+                      />
+                      <Text
+                        category="c1"
+                        style={[
+                          styles.reviewedText,
+                          {color: theme['color-warning-500']},
+                        ]}>
+                        Seller Reviewed
+                      </Text>
                     </View>
                   )}
                   {order.digital_product_id && (
-                    <Button size="tiny" status="primary" style={styles.actionBtn} onPress={async () => {
-                      await smartBuyerClient.get(`customer/order/digital-product-download/${order.digital_product_id}`);
-                      Toast.show({ type: 'success', text1: 'Download', text2: 'Digital product download started.' });
-                    }}>
+                    <Button
+                      size="tiny"
+                      status="primary"
+                      style={styles.actionBtn}
+                      onPress={async () => {
+                        await smartBuyerClient.get(
+                          `customer/order/digital-product-download/${order.digital_product_id}`,
+                        );
+                        Toast.show({
+                          type: 'success',
+                          text1: 'Download',
+                          text2: 'Digital product download started.',
+                        });
+                      }}>
                       Download
                     </Button>
                   )}
@@ -545,9 +1168,25 @@ export const MyOrders = ({ navigation }) => {
           );
         })}
         {/* Billing Address for the group (from first order) */}
-        <CollapsibleAddress address={groupOrders[0].billing_address_data} isDark={isDark} theme={theme} t={t} />
+        <CollapsibleAddress
+          address={groupOrders[0].billing_address_data}
+          isDark={isDark}
+          theme={theme}
+          t={t}
+        />
         <View style={styles.groupTotal}>
-          <Text category="s1" style={[styles.groupTotalText, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>{t('order.groupTotal', 'Group Total:')} PKR {totalAmount.toFixed(2)}</Text>
+          <Text
+            category="s1"
+            style={[
+              styles.groupTotalText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('order.groupTotal', 'Group Total:')} PKR {totalAmount.toFixed(2)}
+          </Text>
         </View>
       </Card>
     );
@@ -555,36 +1194,84 @@ export const MyOrders = ({ navigation }) => {
 
   // Header with Search Bar
   const renderHeader = () => (
-    <View style={{ padding: 8, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
+    <View
+      style={{
+        padding: 8,
+        backgroundColor: isDark
+          ? theme['color-shadcn-background']
+          : theme['color-basic-100'],
+      }}>
       <Input
         placeholder={t('search.searchProducts', 'Search orders or refunds...')}
         value={searchQuery}
         onChangeText={setSearchQuery}
-        accessoryLeft={<Icon name="search" width={20} height={20} fill={theme['color-primary-500']} />}
-        style={[{ borderRadius: 8 }, {
-          backgroundColor: isDark ? theme['color-shadcn-input'] : theme['color-basic-200'],
-          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400']
-        }]}
+        accessoryLeft={
+          <Icon
+            name="search"
+            width={20}
+            height={20}
+            fill={theme['color-primary-500']}
+          />
+        }
+        style={[
+          {borderRadius: 8},
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-input']
+              : theme['color-basic-200'],
+            borderColor: isDark
+              ? theme['color-shadcn-border']
+              : theme['color-basic-400'],
+          },
+        ]}
         textStyle={{
-          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
+          color: isDark
+            ? theme['color-shadcn-foreground']
+            : theme['color-basic-900'],
         }}
       />
     </View>
   );
 
   return (
-    <Layout style={{ flex: 1, backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }}>
+    <Layout
+      style={{
+        flex: 1,
+        backgroundColor: isDark
+          ? theme['color-shadcn-background']
+          : theme['color-basic-100'],
+      }}>
       {renderHeader()}
-      <TabView selectedIndex={selectedTab} onSelect={setSelectedTab} style={{ flex: 1 }}>
-        <Tab title={t('tabs.orders', 'Orders')} style={{
-          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-        }}>
-          <OrdersTab groupedOrders={groupedOrders} renderOrderGroup={renderOrderGroup} loading={loading} />
+      <TabView
+        selectedIndex={selectedTab}
+        onSelect={setSelectedTab}
+        style={{flex: 1}}>
+        <Tab
+          title={t('tabs.orders', 'Orders')}
+          style={{
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          }}>
+          <OrdersTab
+            groupedOrders={groupedOrders}
+            renderOrderGroup={renderOrderGroup}
+            loading={loading}
+            onSellerReview={openSellerReviewModal}
+          />
         </Tab>
-        <Tab title={t('order.refunds', 'Refunds')} style={{
-          backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-        }}>
-          <RefundsTab refundsLoading={refundsLoading} filteredRefunds={filteredRefunds} baseUrls={baseUrls} />
+        <Tab
+          title={t('order.refunds', 'Refunds')}
+          style={{
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+          }}>
+          <RefundsTab
+            refundsLoading={refundsLoading}
+            filteredRefunds={filteredRefunds}
+            baseUrls={baseUrls}
+          />
         </Tab>
       </TabView>
       <ReviewModal
@@ -598,22 +1285,54 @@ export const MyOrders = ({ navigation }) => {
         theme={theme}
         isDark={isDark}
       />
+      <SellerReviewModal
+        sellerReviewModal={sellerReviewModal}
+        closeSellerReviewModal={closeSellerReviewModal}
+        sellerReviewRating={sellerReviewRating}
+        setSellerReviewRating={setSellerReviewRating}
+        sellerReviewText={sellerReviewText}
+        setSellerReviewText={setSellerReviewText}
+        handleSubmitSellerReview={handleSubmitSellerReview}
+        theme={theme}
+        isDark={isDark}
+      />
     </Layout>
-  )
-}
+  );
+};
 
-export const OrderDetails = ({ route, navigation }) => {
-  const { order } = route.params;
-  const { t } = useTranslation();
-  const { theme, isDark } = useTheme();
+export const OrderDetails = ({route, navigation}) => {
+  const {order} = route.params;
+  const {t} = useTranslation();
+  const {theme, isDark} = useTheme();
 
   const renderField = (label, value) => {
     if (value === null || value === undefined || value === '') return null;
 
     return (
       <View style={styles.detailRow}>
-        <Text category="label" style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>{label}:</Text>
-        <Text style={[styles.detailValue, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{value.toString()}</Text>
+        <Text
+          category="label"
+          style={[
+            styles.detailLabel,
+            {
+              color: isDark
+                ? theme['color-shadcn-muted-foreground']
+                : theme['color-basic-600'],
+            },
+          ]}>
+          {label}:
+        </Text>
+        <Text
+          style={[
+            styles.detailValue,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-800'],
+            },
+          ]}>
+          {value.toString()}
+        </Text>
       </View>
     );
   };
@@ -623,32 +1342,56 @@ export const OrderDetails = ({ route, navigation }) => {
 
     return (
       <Card
-        style={[styles.addressCard, {
-          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-          ...Platform.select({
-            ios: {
-              shadowColor: isDark ? '#000' : '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: isDark ? 0.3 : 0.1,
-              shadowRadius: 4,
-            },
-            android: {
-              elevation: 3,
-            },
-          }),
-        }]}
-      >
+        style={[
+          styles.addressCard,
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-card']
+              : theme['color-basic-100'],
+            ...Platform.select({
+              ios: {
+                shadowColor: isDark ? '#000' : '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: isDark ? 0.3 : 0.1,
+                shadowRadius: 4,
+              },
+              android: {
+                elevation: 3,
+              },
+            }),
+          },
+        ]}>
         <View style={styles.addressHeader}>
           <Icon
-            name='pin-outline'
+            name="pin-outline"
             width={20}
             height={20}
             fill={theme['color-primary-500']}
             style={styles.addressIcon}
           />
-          <Text category="h6" style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{title}</Text>
+          <Text
+            category="h6"
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-800'],
+              },
+            ]}>
+            {title}
+          </Text>
         </View>
-        <Divider style={[styles.divider, { backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }]} />
+        <Divider
+          style={[
+            styles.divider,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            },
+          ]}
+        />
         {renderField(t('Address'), addressData.address)}
         {renderField(t('Address Type'), addressData.address_type)}
         {renderField(t('City'), addressData.city)}
@@ -657,36 +1400,63 @@ export const OrderDetails = ({ route, navigation }) => {
         {renderField(t('Phone'), addressData.phone)}
         {renderField(t('State'), addressData.state)}
         {renderField(t('ZIP'), addressData.zip)}
-        {addressData.latitude && renderField(t('Latitude'), addressData.latitude)}
-        {addressData.longitude && renderField(t('Longitude'), addressData.longitude)}
+        {addressData.latitude &&
+          renderField(t('Latitude'), addressData.latitude)}
+        {addressData.longitude &&
+          renderField(t('Longitude'), addressData.longitude)}
       </Card>
     );
   };
 
   return (
-    <Layout style={[styles.container, { backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'] }]}>
+    <Layout
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Card style={[styles.mainCard, {
-          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-          padding: 16,
-          ...Platform.select({
-            ios: {
-              shadowColor: isDark ? '#000' : '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: isDark ? 0.3 : 0.1,
-              shadowRadius: 4,
+        <Card
+          style={[
+            styles.mainCard,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : theme['color-basic-100'],
+              padding: 16,
+              ...Platform.select({
+                ios: {
+                  shadowColor: isDark ? '#000' : '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: isDark ? 0.3 : 0.1,
+                  shadowRadius: 4,
+                },
+                android: {
+                  elevation: 4,
+                },
+              }),
             },
-            android: {
-              elevation: 4,
-            },
-          }),
-        }]}>
-          <Text category="h5" style={[styles.orderTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+          ]}>
+          <Text
+            category="h5"
+            style={[
+              styles.orderTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
             {t('Order')} #{order.id}
           </Text>
 
           <View style={styles.statusContainer}>
-            <Text category="s1" style={styles.statusLabel}>{t('Status')}:</Text>
+            <Text category="s1" style={styles.statusLabel}>
+              {t('Status')}:
+            </Text>
             <StatusBadge status={order.order_status} t={t} />
           </View>
 
@@ -695,21 +1465,41 @@ export const OrderDetails = ({ route, navigation }) => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
-                name='shopping-bag-outline'
+                name="shopping-bag-outline"
                 width={20}
                 height={20}
                 fill={theme['color-primary-500']}
                 style={styles.sectionIcon}
               />
-              <Text category="h6" style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{t('Order Information')}</Text>
+              <Text
+                category="h6"
+                style={[
+                  styles.sectionTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-800'],
+                  },
+                ]}>
+                {t('Order Information')}
+              </Text>
             </View>
             {renderField(t('Order Group ID'), order.order_group_id)}
             {renderField(t('Order Type'), order.order_type)}
-            {renderField(t('Created At'), new Date(order.created_at).toLocaleString())}
-            {renderField(t('Updated At'), new Date(order.updated_at).toLocaleString())}
+            {renderField(
+              t('Created At'),
+              new Date(order.created_at).toLocaleString(),
+            )}
+            {renderField(
+              t('Updated At'),
+              new Date(order.updated_at).toLocaleString(),
+            )}
             {renderField(t('Verification Code'), order.verification_code)}
             {renderField(t('Order Note'), order.order_note)}
-            {renderField(t('Is Paused'), order.is_pause === "1" ? t('Yes') : t('No'))}
+            {renderField(
+              t('Is Paused'),
+              order.is_pause === '1' ? t('Yes') : t('No'),
+            )}
           </View>
 
           <Divider style={styles.divider} />
@@ -717,24 +1507,44 @@ export const OrderDetails = ({ route, navigation }) => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
-                name='credit-card-outline'
+                name="credit-card-outline"
                 width={20}
                 height={20}
                 fill={theme['color-primary-500']}
                 style={styles.sectionIcon}
               />
-              <Text category="h6" style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{t('Financial Information')}</Text>
+              <Text
+                category="h6"
+                style={[
+                  styles.sectionTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-800'],
+                  },
+                ]}>
+                {t('Financial Information')}
+              </Text>
             </View>
             {renderField(t('Order Amount'), `PKR ${order.order_amount}`)}
-            {renderField(t('Admin Commission'), `PKR ${order.admin_commission}`)}
+            {renderField(
+              t('Admin Commission'),
+              `PKR ${order.admin_commission}`,
+            )}
             {renderField(t('Shipping Cost'), `PKR ${order.shipping_cost}`)}
             {renderField(t('Discount Amount'), `PKR ${order.discount_amount}`)}
             {renderField(t('Discount Type'), order.discount_type)}
             {renderField(t('Extra Discount'), `PKR ${order.extra_discount}`)}
             {renderField(t('Extra Discount Type'), order.extra_discount_type)}
             {renderField(t('Coupon Code'), order.coupon_code)}
-            {renderField(t('Coupon Discount Bearer'), order.coupon_discount_bearer)}
-            {renderField(t('Deliveryman Charge'), `PKR ${order.deliveryman_charge}`)}
+            {renderField(
+              t('Coupon Discount Bearer'),
+              order.coupon_discount_bearer,
+            )}
+            {renderField(
+              t('Deliveryman Charge'),
+              `PKR ${order.deliveryman_charge}`,
+            )}
           </View>
 
           <Divider style={styles.divider} />
@@ -742,13 +1552,24 @@ export const OrderDetails = ({ route, navigation }) => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
-                name='credit-card-outline'
+                name="credit-card-outline"
                 width={20}
                 height={20}
                 fill={theme['color-primary-500']}
                 style={styles.sectionIcon}
               />
-              <Text category="h6" style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{t('Payment Information')}</Text>
+              <Text
+                category="h6"
+                style={[
+                  styles.sectionTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-800'],
+                  },
+                ]}>
+                {t('Payment Information')}
+              </Text>
             </View>
             {renderField(t('Payment Method'), order.payment_method)}
             {renderField(t('Payment Status'), order.payment_status)}
@@ -762,22 +1583,39 @@ export const OrderDetails = ({ route, navigation }) => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
-                name='car-outline'
+                name="car-outline"
                 width={20}
                 height={20}
                 fill={theme['color-primary-500']}
                 style={styles.sectionIcon}
               />
-              <Text category="h6" style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{t('Delivery Information')}</Text>
+              <Text
+                category="h6"
+                style={[
+                  styles.sectionTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-800'],
+                  },
+                ]}>
+                {t('Delivery Information')}
+              </Text>
             </View>
             {renderField(t('Delivery Type'), order.delivery_type)}
             {renderField(t('Delivery Service'), order.delivery_service_name)}
             {renderField(t('Delivery Man ID'), order.delivery_man_id)}
             {renderField(t('Driver Phone'), order.driver_phone)}
-            {renderField(t('Expected Delivery Date'), order.expected_delivery_date)}
+            {renderField(
+              t('Expected Delivery Date'),
+              order.expected_delivery_date,
+            )}
             {renderField(t('Shipping Method ID'), order.shipping_method_id)}
             {renderField(t('Shipping Type'), order.shipping_type)}
-            {renderField(t('Third Party Tracking ID'), order.third_party_delivery_tracking_id)}
+            {renderField(
+              t('Third Party Tracking ID'),
+              order.third_party_delivery_tracking_id,
+            )}
             {renderField(t('Cause'), order.cause)}
           </View>
 
@@ -786,19 +1624,33 @@ export const OrderDetails = ({ route, navigation }) => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
-                name='person-outline'
+                name="person-outline"
                 width={20}
                 height={20}
                 fill={theme['color-primary-500']}
                 style={styles.sectionIcon}
               />
-              <Text category="h6" style={[styles.sectionTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-800'] }]}>{t('Seller Information')}</Text>
+              <Text
+                category="h6"
+                style={[
+                  styles.sectionTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-800'],
+                  },
+                ]}>
+                {t('Seller Information')}
+              </Text>
             </View>
             {renderField(t('Seller ID'), order.seller_id)}
             {renderField(t('Seller Is'), order.seller_is)}
             {renderField(t('Customer ID'), order.customer_id)}
             {renderField(t('Customer Type'), order.customer_type)}
-            {renderField(t('Checked'), order.checked === 1 ? t('Yes') : t('No'))}
+            {renderField(
+              t('Checked'),
+              order.checked === 1 ? t('Yes') : t('No'),
+            )}
           </View>
         </Card>
 
@@ -806,15 +1658,17 @@ export const OrderDetails = ({ route, navigation }) => {
         {renderAddress(order.shipping_address_data, t('Shipping Address'))}
 
         <Button
-          style={[styles.backButton, {
-            backgroundColor: theme['color-primary-500'],
-            borderColor: theme['color-primary-600']
-          }]}
+          style={[
+            styles.backButton,
+            {
+              backgroundColor: theme['color-primary-500'],
+              borderColor: theme['color-primary-600'],
+            },
+          ]}
           status="primary"
-          accessoryLeft={(props) => <Icon {...props} name='arrow-back-outline' />}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={{ color: '#ffffff' }}>
+          accessoryLeft={props => <Icon {...props} name="arrow-back-outline" />}
+          onPress={() => navigation.goBack()}>
+          <Text style={{color: '#ffffff'}}>
             {t('product.back', 'Back to Orders')}
           </Text>
         </Button>
@@ -823,16 +1677,24 @@ export const OrderDetails = ({ route, navigation }) => {
   );
 };
 
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   switch (status?.toLowerCase()) {
-    case 'pending': return '#f39c12';
-    case 'processing': return '#3498db';
-    case 'delivered': return '#2ecc71';
-    case 'returned': return '#e74c3c';
-    case 'failed': return '#e74c3c';
-    case 'canceled': return '#95a5a6';
-    case 'out_for_delivery': return '#9b59b6';
-    default: return '#95a5a6';
+    case 'pending':
+      return '#f39c12';
+    case 'processing':
+      return '#3498db';
+    case 'delivered':
+      return '#2ecc71';
+    case 'returned':
+      return '#e74c3c';
+    case 'failed':
+      return '#e74c3c';
+    case 'canceled':
+      return '#95a5a6';
+    case 'out_for_delivery':
+      return '#9b59b6';
+    default:
+      return '#95a5a6';
   }
 };
 
@@ -1098,35 +1960,35 @@ const styles = StyleSheet.create({
   orderCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
   productImage: {
     width: 56,
     height: 56,
     borderRadius: 8,
-    backgroundColor: '#eee'
+    backgroundColor: '#eee',
   },
   orderDetailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 4,
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   orderMeta: {
     fontSize: 12,
     marginRight: 8,
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   actionRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginTop: 8
+    marginTop: 8,
   },
   actionBtn: {
     marginLeft: 8,
-    marginTop: 0
+    marginTop: 0,
   },
   sellerInfoButton: {
     marginTop: 16,
@@ -1138,12 +2000,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContent: { width: 320, borderRadius: 16, padding: 24 },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 16 },
-  productCount: { fontSize: 12, marginTop: 4 },
-  ratingContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
-  ratingText: { marginLeft: 12, fontSize: 16, fontWeight: 'bold' },
-  modalLabel: { marginTop: 16, marginBottom: 8, fontWeight: '600' },
+  modalContent: {width: 320, borderRadius: 16, padding: 24},
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 16,
+  },
+  productCount: {fontSize: 12, marginTop: 4},
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  ratingText: {marginLeft: 12, fontSize: 16, fontWeight: 'bold'},
+  modalLabel: {marginTop: 16, marginBottom: 8, fontWeight: '600'},
   modalContainer: {
     backgroundColor: 'white',
     borderRadius: 12,

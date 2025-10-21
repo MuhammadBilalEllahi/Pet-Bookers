@@ -45,6 +45,7 @@ export const UpdateProfileScreen = ({navigation}) => {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   // Get state from Redux
   const customerInfo = useSelector(selectCustomerInfo);
@@ -92,7 +93,41 @@ export const UpdateProfileScreen = ({navigation}) => {
   }, [isBuyerAuthenticated, isSellerAuthenticated, customerInfo, dispatch]);
 
   const handleUpdateProfile = async (values, {setSubmitting}) => {
+    // console.log('🚀 FORM SUBMITTED - Profile update started with values:', values);
+
+    // Validate required fields before submission
+    if (!values.f_name || !values.l_name || !values.email || !values.phone) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please fill in all required fields',
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(values.email)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please enter a valid email address',
+      });
+      return;
+    }
+
+    // Validate phone format
+    if (!/^\d+$/.test(values.phone) || values.phone.length < 10) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please enter a valid phone number (at least 10 digits)',
+      });
+      return;
+    }
+
     try {
+      // console.log('⏳ Setting loading state to true');
       setLoading(true);
 
       const formData = new FormData();
@@ -102,7 +137,14 @@ export const UpdateProfileScreen = ({navigation}) => {
       formData.append('phone', values.phone);
       formData.append('_method', 'PUT');
 
-      const response = await smartBuyerClient.put(
+      // console.log('Sending profile update data:', {
+      //   f_name: values.f_name,
+      //   l_name: values.l_name,
+      //   email: values.email,
+      //   phone: values.phone,
+      // });
+
+      const response = await smartBuyerClient.post(
         'customer/update-profile',
         formData,
         {
@@ -112,7 +154,11 @@ export const UpdateProfileScreen = ({navigation}) => {
         },
       );
 
-      // console.log('Profile updated:', response.data);
+      // console.log('Profile updated successfully:', response.data);
+
+      // Set submitted state
+      setSubmitted(true);
+      // console.log('✅ FORM SUBMITTED SUCCESSFULLY - Profile updated!');
 
       // Refresh customer info after successful update
       dispatch(fetchCustomerInfo());
@@ -123,12 +169,19 @@ export const UpdateProfileScreen = ({navigation}) => {
         text2: 'Profile updated successfully!',
       });
 
-      navigation.goBack();
+      // Navigate back after a short delay to show success state
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1500);
     } catch (error) {
       console.error('Error updating profile:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+
       handleAuthError(error, err => {
         const errorMessage =
           err?.response?.data?.message ||
+          err?.response?.data?.error ||
           err?.message ||
           'Failed to update profile';
         Toast.show({
@@ -138,6 +191,7 @@ export const UpdateProfileScreen = ({navigation}) => {
         });
       });
     } finally {
+      // console.log('⏳ Setting loading state to false');
       setLoading(false);
       setSubmitting(false);
     }
@@ -308,115 +362,134 @@ export const UpdateProfileScreen = ({navigation}) => {
             errors,
             touched,
             isSubmitting,
-          }) => (
-            <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color: isDark
-                        ? theme['color-shadcn-foreground']
-                        : theme['color-basic-900'],
-                    },
-                  ]}>
-                  First Name
-                </Text>
-                <Input
-                  placeholder="Enter your first name"
-                  value={values.f_name}
-                  onChangeText={handleChange('f_name')}
-                  onBlur={handleBlur('f_name')}
-                  style={styles.input}
-                />
-                {touched.f_name && errors.f_name && (
-                  <InputError error={errors.f_name} />
+            isValid,
+          }) => {
+            return (
+              <View style={styles.form}>
+                <View style={styles.inputContainer}>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    First Name
+                  </Text>
+                  <Input
+                    placeholder="Enter your first name"
+                    value={values.f_name}
+                    onChangeText={handleChange('f_name')}
+                    onBlur={handleBlur('f_name')}
+                    style={styles.input}
+                  />
+                  {touched.f_name && errors.f_name && (
+                    <InputError error={errors.f_name} />
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    Last Name
+                  </Text>
+                  <Input
+                    placeholder="Enter your last name"
+                    value={values.l_name}
+                    onChangeText={handleChange('l_name')}
+                    onBlur={handleBlur('l_name')}
+                    style={styles.input}
+                  />
+                  {touched.l_name && errors.l_name && (
+                    <InputError error={errors.l_name} />
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    Email
+                  </Text>
+                  <Input
+                    placeholder="Enter your email"
+                    value={values.email}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                  />
+                  {touched.email && errors.email && (
+                    <InputError error={errors.email} />
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    Phone
+                  </Text>
+                  <Input
+                    placeholder="Enter your phone number"
+                    value={values.phone}
+                    onChangeText={handleChange('phone')}
+                    onBlur={handleBlur('phone')}
+                    keyboardType="phone-pad"
+                    style={styles.input}
+                  />
+                  {touched.phone && errors.phone && (
+                    <InputError error={errors.phone} />
+                  )}
+                </View>
+
+                {submitted ? (
+                  <View
+                    style={[
+                      styles.successContainer,
+                      {backgroundColor: theme['color-success-100']},
+                    ]}>
+                    <Text
+                      style={[
+                        styles.successText,
+                        {color: theme['color-success-600']},
+                      ]}>
+                      ✅ Profile updated successfully!
+                    </Text>
+                  </View>
+                ) : (
+                  <SubmitButton
+                    btnText={isSubmitting ? 'Updating...' : 'Update Profile'}
+                    onPress={handleSubmit}
+                    disabled={loading || isSubmitting}
+                    style={styles.updateButton}
+                  />
                 )}
               </View>
-
-              <View style={styles.inputContainer}>
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color: isDark
-                        ? theme['color-shadcn-foreground']
-                        : theme['color-basic-900'],
-                    },
-                  ]}>
-                  Last Name
-                </Text>
-                <Input
-                  placeholder="Enter your last name"
-                  value={values.l_name}
-                  onChangeText={handleChange('l_name')}
-                  onBlur={handleBlur('l_name')}
-                  style={styles.input}
-                />
-                {touched.l_name && errors.l_name && (
-                  <InputError error={errors.l_name} />
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color: isDark
-                        ? theme['color-shadcn-foreground']
-                        : theme['color-basic-900'],
-                    },
-                  ]}>
-                  Email
-                </Text>
-                <Input
-                  placeholder="Enter your email"
-                  value={values.email}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={styles.input}
-                />
-                {touched.email && errors.email && (
-                  <InputError error={errors.email} />
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color: isDark
-                        ? theme['color-shadcn-foreground']
-                        : theme['color-basic-900'],
-                    },
-                  ]}>
-                  Phone
-                </Text>
-                <Input
-                  placeholder="Enter your phone number"
-                  value={values.phone}
-                  onChangeText={handleChange('phone')}
-                  onBlur={handleBlur('phone')}
-                  keyboardType="phone-pad"
-                  style={styles.input}
-                />
-                {touched.phone && errors.phone && (
-                  <InputError error={errors.phone} />
-                )}
-              </View>
-
-              <SubmitButton
-                onPress={handleSubmit}
-                disabled={loading || isSubmitting}
-                title="Update Profile"
-                style={styles.updateButton}
-              />
-            </View>
-          )}
+            );
+          }}
         </Formik>
 
         <View style={styles.dangerZone}>
@@ -473,6 +546,18 @@ const styles = StyleSheet.create({
   updateButton: {
     marginTop: 16,
     borderRadius: 8,
+  },
+  successContainer: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  successText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   authContainer: {
     flex: 1,

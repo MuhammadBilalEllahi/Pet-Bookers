@@ -16,7 +16,7 @@ export const loadWishlist = () => async (dispatch, getState) => {
     }
     dispatch(setWishlistLoading(true));
     const {data} = await smartBuyerClient.get('customer/wish-list/');
-    // // console.log('[loadWishlist] success:', data);
+    // console.log('[loadWishlist] success:', data);
     dispatch(setWishlist(data || []));
     } catch (error) {
     console.error('[loadWishlist] error:', error);

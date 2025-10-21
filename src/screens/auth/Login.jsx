@@ -91,7 +91,7 @@ export const LoginScreen = ({navigation}) => {
       } else if (selectedTab === 'phone' && values.phone.trim() !== '') {
         // formData.append('countryCode', values.countryCode || '+92');
         // formData.append('phoneNoCC', values.phone.trim());
-        console.log('isSeller', isSeller);
+        // console.log('isSeller', isSeller);
         const phoneValue =
           (values.countryCode || '+92') + '' + values.phone.trim();
         formData.append(isSeller ? 'phone' : 'email', phoneValue);
@@ -103,7 +103,7 @@ export const LoginScreen = ({navigation}) => {
         'Content-Type': 'multipart/form-data',
       };
       let response;
-      console.log('formdata', formData);
+      // console.log('formdata', formData);
       isSeller
         ? (response = await axiosSellerClient.post('auth/login', formData, {
             headers: headers,

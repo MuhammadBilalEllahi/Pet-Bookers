@@ -17,22 +17,19 @@ export const SplashScreen = ({ navigation }) => {
   const { isDark, theme } = useTheme();
   
   // const navigation= useNavigation();
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   const initializeApp = async () => {
-  //     try {
-  //       await dispatch(loadAppConfigs());
-  //       setTimeout(() => {
-  //         navigation.replace('AuthLoader');
-  //       }, 200);
-  //     } catch (error) {
-  //       navigation.replace('AuthLoader');
-  //     }
-  //   };
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        await dispatch(loadAppConfigs());
+ 
+      } catch (error) {
+      }
+    };
 
-  //   initializeApp();
-  // }, []);
+    initializeApp();
+  }, []);
   
 
   return (

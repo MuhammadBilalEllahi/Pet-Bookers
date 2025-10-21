@@ -351,10 +351,10 @@ export const ProductDetailScreen = ({route, navigation}) => {
       try {
         setLoading(true);
         const response = await axiosBuyerClient.get(`products/details/${slug}`);
-        console.log(
-          '[fetchProductDetails]',
-          JSON.stringify(response.data, null, 10),
-        );
+        // console.log(
+        //   '[fetchProductDetails]',
+        //   JSON.stringify(response.data, null, 10),
+        // );
         setProduct(response.data);
       } catch (error) {
         console.error(
@@ -645,8 +645,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
         `products/social-share-link/${product.slug}`,
       );
       const shareLink = response.data;
-      console.log('shareLink', shareLink);
-      console.log('product', product);
+      // console.log('shareLink', shareLink);
+      // console.log('product', product);
 
       const shareOptions = {
         title: t('product.shareTitle', {productName: product.name}),

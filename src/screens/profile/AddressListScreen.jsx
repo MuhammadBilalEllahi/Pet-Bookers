@@ -68,15 +68,10 @@ export const AddressListScreen = ({ navigation }) => {
     try {
       setDeletingId(addressId);
       
-      const formData = new FormData();
-      formData.append('address_id', addressId);
+        const submitData =
+     { 'address_id': addressId}
 
-      const response = await axiosBuyerClient.delete('customer/address/', {
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axiosBuyerClient.delete('customer/address/', submitData);
 
       if (response.data) {
         Toast.show({

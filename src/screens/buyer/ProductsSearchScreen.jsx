@@ -127,7 +127,7 @@ export const ProductsSearchScreen = ({navigation, route}) => {
   const parseProducts = useCallback(
     productList => {
       if (!Array.isArray(productList)) {
-        console.log('ProductList is not array:', typeof productList);
+        // console.log('ProductList is not array:', typeof productList);
         return [];
       }
 
@@ -212,7 +212,7 @@ export const ProductsSearchScreen = ({navigation, route}) => {
         setLoading(true);
         setShowResults(true);
 
-        console.log('QUERY', query);
+        // console.log('QUERY', query);
         const response = await axiosBuyerClient.get(
           `products/search?name=${encodeURIComponent(query)}&limit=20&offset=0`,
         );

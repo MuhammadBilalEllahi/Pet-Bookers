@@ -1,0 +1,1148 @@
+{
+	"info": {
+		"_postman_id": "96b1e686-b134-4cf5-80ab-e0be1011ecac",
+		"name": "PetBookers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7795978",
+		"_collection_link": "https://orange-flare-904627.postman.co/workspace/New-Team-Workspace~14f8f44d-542e-48d4-8760-0e98546454f3/collection/7795978-96b1e686-b134-4cf5-80ab-e0be1011ecac?action=share&source=collection_link&creator=7795978"
+	},
+	"item": [
+		{
+			"name": "Seller Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "seller1@abc.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "Test12345",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "+923147201639",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/auth/login",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Customer Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "cus1@abc.com",
+							"description": "it may include phone number or email but posted field is email:\nyou just need to change the value in email like: \n'03147201639' or 'usmansaeed8050@gmail.com'",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "Test12345",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/auth/login",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sellers Info",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/seller-info",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"seller-info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order Statics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/order-statistics",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"order-statistics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeliveryMan",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/seller-delivery-man",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"seller-delivery-man"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shop product reviews",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/shop-product-reviews",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"shop-product-reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Monthly Earning",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/monthly-earning",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"monthly-earning"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Monthly-commission-given",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/monthly-commission-given",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"monthly-commission-given"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shop Info",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/shop-info",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"shop-info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transactions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/transactions",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Withdraw method list",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/withdraw-method-list",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"withdraw-method-list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Top delivery man",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/top-delivery-man",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"top-delivery-man"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Seller Profile Update",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "cmtJdplmbxacm7RbQ5NcaEizk45rgtZXlT3hLxE0tQHDOBknLM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "f_name",
+							"value": "Osamaa",
+							"type": "text"
+						},
+						{
+							"key": "l_name",
+							"value": "Tabusum",
+							"type": "text"
+						},
+						{
+							"key": "bank_name",
+							"value": "Habibi Bank",
+							"type": "text"
+						},
+						{
+							"key": "branch",
+							"value": "Isb",
+							"type": "text"
+						},
+						{
+							"key": "account_no",
+							"value": "78601",
+							"type": "text"
+						},
+						{
+							"key": "holder_name",
+							"value": "Usama",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "03147201639",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/C:/Users/atiq_/OneDrive/Desktop/nepra.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/seller-update",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"seller-update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Products List",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/products/list",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"products",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Orders List",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "dZSCbOkOFfxTu6Rxj47gigGMCE3kuc4lsB8xdLymk0QpMmVD2c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/orders/list",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"orders",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/categories",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LatestProducts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/products/latest",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"latest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FeaturedProduct",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/products/featured",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"featured"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TopRatedProduct",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/products/top-rated",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"top-rated"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Customer Info",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "GWHZ1yz9mzF2XyU0nzJdI2G7Ob5efuD0TwIIX5rN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost/petbookers/api/v1/customer/info",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"petbookers",
+						"api",
+						"v1",
+						"customer",
+						"info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddToCart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "oP1kmQCWjoEZFXfZhwBrsr0k6VwarzXRTzQQjsW0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "id",
+							"value": "48",
+							"type": "text"
+						},
+						{
+							"key": "quantity",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/cart/add",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"cart",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetCart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "oP1kmQCWjoEZFXfZhwBrsr0k6VwarzXRTzQQjsW0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/cart/",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"cart",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SellerInfoForCustomer",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "oP1kmQCWjoEZFXfZhwBrsr0k6VwarzXRTzQQjsW0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/seller?seller_id=16",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"seller"
+					],
+					"query": [
+						{
+							"key": "seller_id",
+							"value": "16"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetShippingCost",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "oP1kmQCWjoEZFXfZhwBrsr0k6VwarzXRTzQQjsW0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/cart/shipping-cost",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"cart",
+						"shipping-cost"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CustomerWishList",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "oP1kmQCWjoEZFXfZhwBrsr0k6VwarzXRTzQQjsW0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/customer/wish-list?",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"wish-list"
+					],
+					"query": [
+						{
+							"key": null,
+							"value": null,
+							"description": "https://petbookers.com.pk/storage/app/public/product/thumbnail/2025-05-01-681359f948f60.png"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddToWishList",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "oP1kmQCWjoEZFXfZhwBrsr0k6VwarzXRTzQQjsW0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "product_id",
+							"value": "48",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/customer/wish-list/add",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"wish-list",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SellerShopUpdate",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "cmtJdplmbxacm7RbQ5NcaEizk45rgtZXlT3hLxE0tQHDOBknLM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Tea",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "i8 lahore",
+							"type": "text"
+						},
+						{
+							"key": "contact",
+							"value": "+923334545456",
+							"type": "text"
+						},
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/C:/Users/atiq_/OneDrive/Desktop/mai.JPG"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v3/seller/shop-update",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v3",
+						"seller",
+						"shop-update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CustomerProfileUpdate",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "X4q4kA0lnph24Syk4jrP26BClTGB477ajs1c9H5B",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "f_name",
+							"value": "Ali",
+							"type": "text"
+						},
+						{
+							"key": "l_name",
+							"value": "Tareen",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "+923147289876",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/C:/Users/atiq_/OneDrive/Desktop/ccms_users.JPG"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/customer/update-profile",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"update-profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CustomerCanReview",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "X4q4kA0lnph24Syk4jrP26BClTGB477ajs1c9H5B",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/customer/can-review?seller_id=12",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"can-review"
+					],
+					"query": [
+						{
+							"key": "seller_id",
+							"value": "12"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CustomerCanPaticipate",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "X4q4kA0lnph24Syk4jrP26BClTGB477ajs1c9H5B",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://petbookers.com.pk/api/v1/customer/can-participate?event_id=1",
+					"protocol": "https",
+					"host": [
+						"petbookers",
+						"com",
+						"pk"
+					],
+					"path": [
+						"api",
+						"v1",
+						"customer",
+						"can-participate"
+					],
+					"query": [
+						{
+							"key": "event_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

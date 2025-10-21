@@ -7,7 +7,7 @@ export const getShopInfo = () => {
 };
 
 export const updateShopInfo = (formData) => {
-  return axiosSellerClient.put('/shop-update', formData, {
+  return axiosSellerClient.post('/shop-update', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
@@ -18,7 +18,7 @@ export const getSellerInfo = () => {
 };
 
 export const updateSellerInfo = (formData) => {
-  return axiosSellerClient.put('/seller-update', formData, {
+  return axiosSellerClient.post('/seller-update', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };

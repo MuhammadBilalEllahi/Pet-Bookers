@@ -14,7 +14,7 @@ import {
   handleAuthError,
   setAuthModalHandlers,
 } from '../../../utils/authAxiosClient';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   selectIsSellerAuthenticated,
   selectIsBuyerAuthenticated,
@@ -23,16 +23,23 @@ import {useTheme} from '../../../theme/ThemeContext';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import {AppScreens} from '../../../navigators/AppNavigator';
+import { Image } from 'react-native';
+import { BASE_URLS } from '../../../store/configs';
+import { selectProductCategories, loadProductCategories } from '../../../store/productCategories';
 
 const MyPostedAdsScreen = ({navigation}) => {
   const {t} = useTranslation();
   const {theme, isDark} = useTheme();
+  const dispatch = useDispatch();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Get authentication states
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  
+  // Get categories for mapping
+  const {categories} = useSelector(selectProductCategories);
 
   // Set up auth modal handlers
   useEffect(() => {
@@ -41,6 +48,11 @@ const MyPostedAdsScreen = ({navigation}) => {
         navigation.navigate(AppScreens.LOGIN, {isItSeller: true}),
     });
   }, [navigation]);
+
+  // Load categories when component mounts
+  useEffect(() => {
+    dispatch(loadProductCategories());
+  }, [dispatch]);
 
   const loadProducts = async () => {
     try {
@@ -81,6 +93,32 @@ const MyPostedAdsScreen = ({navigation}) => {
       return;
     }
     navigation.navigate(AppScreens.SELLER_ADD_PRODUCT);
+  };
+
+  // Helper function to get category names from category_ids
+  const getCategoryNames = categoryIds => {
+    if (!categoryIds || !categories) return [];
+    
+    try {
+      // Parse category_ids if it's a string (from JSON response)
+      const parsedIds = typeof categoryIds === 'string' 
+        ? JSON.parse(categoryIds) 
+        : categoryIds;
+      
+      if (!Array.isArray(parsedIds)) return [];
+      
+      return parsedIds
+        .map(categoryItem => {
+          // Handle object format: {"id":"21","position":1}
+          const categoryId = typeof categoryItem === 'object' ? categoryItem.id : categoryItem;
+          const category = categories.find(cat => cat.id == categoryId); // Use == for string/number comparison
+          return category ? category.name : null;
+        })
+        .filter(Boolean);
+    } catch (error) {
+      console.error('Error parsing category_ids:', error);
+      return [];
+    }
   };
 
   // Check authentication on component mount
@@ -233,8 +271,11 @@ const MyPostedAdsScreen = ({navigation}) => {
         <FlatList
           data={products}
           keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
-            <View style={{marginBottom: 18}}>
+          renderItem={({item}) => {
+            console.log("ITEMS", JSON.stringify(item, null, 2));
+            const categoryNames = getCategoryNames(item.category_ids);
+            
+            return (<View style={{marginBottom: 18}}>
               <TouchableOpacity
                 style={[
                   {
@@ -243,8 +284,6 @@ const MyPostedAdsScreen = ({navigation}) => {
                       : theme['color-basic-100'],
                     borderRadius: 14,
                     padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
                     shadowColor: '#000',
                     shadowOpacity: 0.08,
                     shadowRadius: 8,
@@ -254,129 +293,368 @@ const MyPostedAdsScreen = ({navigation}) => {
                 ]}
                 onPress={() => handleProductPress(item)}
                 activeOpacity={0.92}>
-                {/* Avatar/Image */}
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 8,
-                    backgroundColor: isDark
-                      ? theme['color-shadcn-secondary']
-                      : theme['color-basic-200'],
-                    marginRight: 14,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  {/* Placeholder icon */}
-                </View>
-                {/* Info */}
-                <View style={{flex: 1}}>
-                  <Text
-                    style={{
-                      color: isDark
-                        ? theme['color-shadcn-muted-foreground']
-                        : theme['color-basic-600'],
-                      fontSize: 13,
-                      fontWeight: 'bold',
-                      marginBottom: 2,
-                    }}>
-                    Seller
-                  </Text>
-                  <Text
-                    style={{
-                      color: isDark
-                        ? theme['color-shadcn-foreground']
-                        : theme['color-basic-900'],
-                      fontSize: 16,
-                      fontWeight: 'bold',
-                      marginBottom: 2,
-                    }}
-                    numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  <Text
-                    style={{
-                      color: theme['color-shadcn-primary'],
-                      fontSize: 15,
-                      fontWeight: 'bold',
-                      marginBottom: 2,
-                    }}>
-                    Rs {item.unit_price}
-                  </Text>
-                  {/* Date, views, messages, featured badge */}
+                
+                {/* Header Row with Image and Basic Info */}
+                <View style={{flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12}}>
+                  {/* Product Image */}
                   <View
                     style={{
-                      flexDirection: 'row',
+                      width: 60,
+                      height: 60,
+                      borderRadius: 8,
+                      backgroundColor: isDark
+                        ? theme['color-shadcn-secondary']
+                        : theme['color-basic-200'],
+                      marginRight: 14,
+                      justifyContent: 'center',
                       alignItems: 'center',
-                      marginTop: 6,
                     }}>
+                    <Image 
+                      source={{
+                        uri: item.thumbnail 
+                          ? `${BASE_URLS.product_thumbnail_url}/${item.thumbnail}` 
+                          : item.images && item.images.length > 0 
+                            ? `${BASE_URLS.product_image_url}/${JSON.parse(item.images)[0]}` 
+                            : 'https://via.placeholder.com/120x120?text=No+Image'
+                      }} 
+                      style={{width: 60, height: 60, borderRadius: 8}}
+                    />
+                  </View>
+                  
+                  {/* Product Basic Info */}
+                  <View style={{flex: 1}}>
                     <Text
                       style={{
                         color: isDark
-                          ? theme['color-shadcn-muted-foreground']
-                          : theme['color-basic-600'],
-                        fontSize: 12,
-                        marginRight: 12,
-                      }}>
-                      Created on{' '}
-                      {item.created_at
-                        ? new Date(item.created_at).toLocaleDateString()
-                        : '01/05/2025'}
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        marginBottom: 4,
+                      }}
+                      numberOfLines={2}>
+                      {item.name}
                     </Text>
                     <Text
                       style={{
-                        color: isDark
-                          ? theme['color-shadcn-muted-foreground']
-                          : theme['color-basic-600'],
-                        fontSize: 12,
-                        marginRight: 8,
+                        color: theme['color-shadcn-primary'],
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        marginBottom: 4,
                       }}>
-                      0 Views
+                      Rs {item.unit_price?.toLocaleString()}
                     </Text>
-                    <Text
-                      style={{
-                        color: isDark
-                          ? theme['color-shadcn-muted-foreground']
-                          : theme['color-basic-600'],
-                        fontSize: 12,
-                        marginRight: 8,
-                      }}>
-                      0 Messages
-                    </Text>
-                    <View
-                      style={{
-                        backgroundColor: theme['color-warning-default'],
-                        borderRadius: 8,
+                    
+                    {/* Status and Featured Badges */}
+                    <View style={{flexDirection: 'row', flexWrap: 'wrap', marginBottom: 4}}>
+                      {/* Status Badge */}
+                      <View style={{
+                        backgroundColor: item.status === 1 
+                          ? theme['color-success-default'] 
+                          : theme['color-warning-default'],
+                        borderRadius: 6,
                         paddingHorizontal: 8,
                         paddingVertical: 2,
-                        marginLeft: 4,
+                        marginRight: 6,
+                        marginBottom: 4,
                       }}>
-                      <Text
-                        style={{
-                          color: '#fff',
-                          fontSize: 11,
-                          fontWeight: 'bold',
+                        <Text
+                          style={{
+                            color: theme['color-basic-100'],
+                            fontSize: 10,
+                            fontWeight: 'bold',
+                          }}>
+                          {item.status === 1 ? 'Active' : 'Inactive'}
+                        </Text>
+                      </View>
+                      
+                      {/* Featured Badge */}
+                      {item.featured_status === 1 && (
+                        <View style={{
+                          backgroundColor: theme['color-primary-500'],
+                          borderRadius: 6,
+                          paddingHorizontal: 8,
+                          paddingVertical: 2,
+                          marginRight: 6,
+                          marginBottom: 4,
                         }}>
-                        Featured
-                      </Text>
+                          <Text
+                            style={{
+                              color: theme['color-basic-100'],
+                              fontSize: 10,
+                              fontWeight: 'bold',
+                            }}>
+                            Featured
+                          </Text>
+                        </View>
+                      )}
+                      
+                      {/* Request Status Badge */}
+                      {item.request_status !== null && (
+                        <View style={{
+                          backgroundColor: item.request_status === 1 
+                            ? theme['color-success-default']
+                            : item.request_status === 0 
+                              ? theme['color-warning-default']
+                              : theme['color-danger-default'],
+                          borderRadius: 6,
+                          paddingHorizontal: 8,
+                          paddingVertical: 2,
+                          marginRight: 6,
+                          marginBottom: 4,
+                        }}>
+                          <Text
+                            style={{
+                              color: theme['color-basic-100'],
+                              fontSize: 10,
+                              fontWeight: 'bold',
+                            }}>
+                          Status:  {item.request_status === 1 ? 'Approved' : 
+                             item.request_status === 0 ? 'Pending' : 'Denied'}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   </View>
+                  
+                  {/* Ellipsis icon */}
+                  <View style={{marginLeft: 8}}>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 22,
+                      }}>
+                      ⋮
+                    </Text>
+                  </View>
                 </View>
-                {/* Ellipsis icon */}
-                <View style={{marginLeft: 8, marginTop: 2}}>
+
+                {/* Denied Note */}
+                {item.denied_note && (
+                  <View style={{
+                    backgroundColor: theme['color-danger-100'],
+                    borderRadius: 8,
+                    padding: 8,
+                    marginBottom: 8,
+                    borderLeftWidth: 3,
+                    borderLeftColor: theme['color-danger-default'],
+                  }}>
+                    <Text
+                      style={{
+                        color: theme['color-danger-700'],
+                        fontSize: 12,
+                        fontWeight: '600',
+                        marginBottom: 2,
+                      }}>
+                      Denial Reason:
+                    </Text>
+                    <Text
+                      style={{
+                        color: theme['color-danger-600'],
+                        fontSize: 11,
+                        lineHeight: 16,
+                      }}>
+                      {item.denied_note}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Categories */}
+                {categoryNames.length > 0 && (
+                  <View style={{marginBottom: 8}}>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                        fontWeight: '600',
+                        marginBottom: 4,
+                      }}>
+                      Categories:
+                    </Text>
+                    <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+                      {categoryNames.map((categoryName, index) => (
+                        <Text
+                          key={index}
+                          style={{
+                            backgroundColor: isDark
+                              ? theme['color-shadcn-secondary']
+                              : theme['color-basic-200'],
+                            color: isDark
+                              ? theme['color-shadcn-foreground']
+                              : theme['color-basic-900'],
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 12,
+                            fontSize: 10,
+                            fontWeight: '500',
+                            marginRight: 6,
+                            marginBottom: 4,
+                          }}>
+                          {categoryName}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Product Description */}
+                {item.details && (
+                  <View style={{marginBottom: 8}}>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                        fontWeight: '600',
+                        marginBottom: 4,
+                      }}>
+                      Description:
+                    </Text>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                        fontSize: 11,
+                        lineHeight: 16,
+                      }}
+                      numberOfLines={2}>
+                      {item.details}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Product Details Row */}
+                <View style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: 8,
+                }}>
+                  <View style={{flex: 1}}>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                      }}>
+                      Stock: {item.current_stock} {item.unit}
+                    </Text>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                      }}>
+                      Min Order: {item.minimum_order_qty} {item.unit}
+                    </Text>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                      }}>
+                      Type: {item.product_type || 'Physical'}
+                    </Text>
+                    {item.is_living === 1 && (
+                      <Text
+                        style={{
+                          color: theme['color-success-default'],
+                          fontSize: 12,
+                          fontWeight: '600',
+                        }}>
+                        Living Product
+                      </Text>
+                    )}
+                  </View>
+                  <View style={{flex: 1, alignItems: 'flex-end'}}>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                      }}>
+                      Reviews: {item.reviews_count || 0}
+                    </Text>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                      }}>
+                      Shipping: {item.free_shipping ? 'Free' : `Rs ${item.shipping_cost || 0}`}
+                    </Text>
+                    <Text
+                      style={{
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                        fontSize: 12,
+                      }}>
+                      Published: {item.published === 1 ? 'Yes' : 'No'}
+                    </Text>
+                    {item.code && (
+                      <Text
+                        style={{
+                          color: isDark
+                            ? theme['color-shadcn-muted-foreground']
+                            : theme['color-basic-600'],
+                          fontSize: 12,
+                        }}>
+                        Code: {item.code}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                {/* Footer Row */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingTop: 8,
+                    borderTopWidth: 1,
+                    borderTopColor: isDark
+                      ? theme['color-shadcn-border']
+                      : theme['color-basic-300'],
+                  }}>
                   <Text
                     style={{
                       color: isDark
                         ? theme['color-shadcn-muted-foreground']
                         : theme['color-basic-600'],
-                      fontSize: 22,
+                      fontSize: 11,
                     }}>
-                    ⋮
+                    Created: {item.created_at
+                      ? new Date(item.created_at).toLocaleDateString()
+                      : 'N/A'}
+                  </Text>
+                  <Text
+                    style={{
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                      fontSize: 11,
+                    }}>
+                    Updated: {item.updated_at
+                      ? new Date(item.updated_at).toLocaleDateString()
+                      : 'N/A'}
                   </Text>
                 </View>
               </TouchableOpacity>
               {/* Try Featured Ads Button */}
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   backgroundColor: theme['color-shadcn-primary'],
                   borderRadius: 8,
@@ -399,9 +677,9 @@ const MyPostedAdsScreen = ({navigation}) => {
                   }}>
                   {t('myAds.tryFeatured')}
                 </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+              </TouchableOpacity> */}
+            </View>)
+          }}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -499,3 +777,4 @@ const styles = StyleSheet.create({
 });
 
 export default MyPostedAdsScreen;
+

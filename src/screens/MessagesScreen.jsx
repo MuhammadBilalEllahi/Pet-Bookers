@@ -1,6 +1,14 @@
 import React from 'react';
 import {Avatar, Input, Layout, Text} from '@ui-kitten/components';
-import {Button, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View, Alert, Image} from 'react-native';
+import {
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+  Alert,
+  Image,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {BackButton} from '../components/BackButton';
 import {MessagesList} from '../components/chat';
@@ -9,27 +17,32 @@ import {setBottomTabBarVisibility} from '../store/configs';
 import {resetActiveRoom} from '../store/chat';
 import {flexeStyles, spacingStyles} from '../utils/globalStyles';
 import {useTheme} from '../theme/ThemeContext';
-import { useEffect, useState } from 'react';
-import { useRoute } from '@react-navigation/native';
-import { 
-  selectIsBuyerAuthenticated, 
-  selectIsSellerAuthenticated 
+import {useEffect, useState} from 'react';
+import {useRoute} from '@react-navigation/native';
+import {
+  selectIsBuyerAuthenticated,
+  selectIsSellerAuthenticated,
 } from '../store/user';
-import { smartBuyerClient, smartSellerClient, handleAuthError } from '../utils/authAxiosClient';
+import {
+  smartBuyerClient,
+  smartSellerClient,
+  handleAuthError,
+} from '../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 export const MessagesScreen = ({navigation}) => {
   const {theme, isDark} = useTheme();
-  const {t} = useTranslation(); 
+  const {t} = useTranslation();
   const dispatch = useDispatch();
   const route = useRoute();
-  const {roomId, recipientProfile, recipientName, chatType, productInfo} = route.params;
-  
+  const {roomId, recipientProfile, recipientName, chatType, productInfo} =
+    route.params;
+
   // Authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
-  
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -38,20 +51,24 @@ export const MessagesScreen = ({navigation}) => {
   // console.log('Chat params:', { roomId, recipientProfile, recipientName, chatType, productInfo });
 
   // Check authentication based on chat type
-  const isAuthenticated = chatType === 'buyer' ? isBuyerAuthenticated : isSellerAuthenticated;
+  const isAuthenticated =
+    chatType === 'buyer' ? isBuyerAuthenticated : isSellerAuthenticated;
   const client = chatType === 'buyer' ? smartBuyerClient : smartSellerClient;
 
   useEffect(() => {
     // Hide bottom tab bar when entering MessagesScreen
     dispatch(setBottomTabBarVisibility(false));
-    
+
     if (!isAuthenticated) {
       Alert.alert(
         t('messagesScreen.authRequired.title'),
-        t('messagesScreen.authRequired.message', { chatType }),
+        t('messagesScreen.authRequired.message', {chatType}),
         [
-          { text: t('messagesScreen.authRequired.goBack'), onPress: () => navigation.goBack() }
-        ]
+          {
+            text: t('messagesScreen.authRequired.goBack'),
+            onPress: () => navigation.goBack(),
+          },
+        ],
       );
       return;
     }
@@ -73,20 +90,24 @@ export const MessagesScreen = ({navigation}) => {
     try {
       setIsLoading(true);
       let response;
-      
+
       if (chatType === 'buyer') {
         // Buyer fetching messages with seller (roomId is the seller_id)
-        response = await smartBuyerClient.get(`customer/chat/get-messages/seller/${roomId}?limit=50&offset=0`);
+        response = await smartBuyerClient.get(
+          `customer/chat/get-messages/seller/${roomId}?limit=50&offset=0`,
+        );
       } else {
         // Seller fetching messages with customer (roomId is the customer/user_id)
-        response = await smartSellerClient.get(`messages/get-message/customer/${roomId}?limit=50&offset=0`);
+        response = await smartSellerClient.get(
+          `messages/get-message/customer/${roomId}?limit=50&offset=0`,
+        );
       }
 
       // console.log(`${chatType} chat response:`, JSON.stringify(response.data, null, 2));
-      
+
       if (response.data) {
         let messagesData = [];
-        
+
         if (chatType === 'buyer') {
           // Handle buyer chat response structure
           if (response.data.message && Array.isArray(response.data.message)) {
@@ -106,29 +127,32 @@ export const MessagesScreen = ({navigation}) => {
         const formattedMessages = messagesData.map(msg => ({
           id: msg.id,
           message: msg.message,
-          selfMessage: chatType === 'buyer' 
-            ? msg.sent_by_customer === 1 
-            : msg.sent_by_seller === 1,
+          selfMessage:
+            chatType === 'buyer'
+              ? msg.sent_by_customer === 1
+              : msg.sent_by_seller === 1,
           messageDateTime: msg.created_at,
           status: 'sent',
           attachmentType: msg.attachment_type || null,
           attachment: msg.attachment || null,
         }));
-        
+
         // Sort messages by creation time (newest first for display)
-        const sortedMessages = formattedMessages.sort((a, b) => 
-          new Date(b.messageDateTime) - new Date(a.messageDateTime)
+        const sortedMessages = formattedMessages.sort(
+          (a, b) => new Date(b.messageDateTime) - new Date(a.messageDateTime),
         );
-        
+
         setMessages(sortedMessages);
       }
     } catch (error) {
       console.error(`Error fetching ${chatType} messages:`, error);
-      handleAuthError(error, (err) => {
+      handleAuthError(error, err => {
         Toast.show({
           type: 'error',
           text1: t('common.error'),
-          text2: `${t('messagesScreen.messages.failedToLoad')}: ${err?.message || t('messagesScreen.messages.unknownError')}`
+          text2: `${t('messagesScreen.messages.failedToLoad')}: ${
+            err?.message || t('messagesScreen.messages.unknownError')
+          }`,
         });
       });
     } finally {
@@ -144,13 +168,16 @@ export const MessagesScreen = ({navigation}) => {
     try {
       setIsSending(true);
       let response;
-      
+
       if (chatType === 'buyer') {
         // Buyer sending message to seller (roomId is seller_id)
-        response = await smartBuyerClient.post('customer/chat/send-message/seller', {
-          id: roomId, // seller_id
-          message: newMessage.trim(),
-        });
+        response = await smartBuyerClient.post(
+          'customer/chat/send-message/seller',
+          {
+            id: roomId, // seller_id
+            message: newMessage.trim(),
+          },
+        );
       } else {
         // Seller sending message to customer (roomId is customer/user_id)
         response = await smartSellerClient.post('messages/send/customer', {
@@ -172,27 +199,30 @@ export const MessagesScreen = ({navigation}) => {
           attachmentType: null,
           attachment: null,
         };
-        
+
         // Add message to the top of the list (newest first)
         setMessages(prevMessages => [newMsg, ...prevMessages]);
         setNewMessage('');
-        
+
         // Toast.show({
         //   type: 'success',
         //   text1: 'Message sent',
         //   text2: 'Your message has been delivered'
         // });
-        
+
         // Optionally refresh messages to get the real message with server ID
         // setTimeout(() => fetchMessages(), 1000);
       }
     } catch (error) {
       console.error(`Error sending ${chatType} message:`, error);
-      handleAuthError(error, (err) => {
+      handleAuthError(error, err => {
         Toast.show({
           type: 'error',
           text1: t('messagesScreen.messages.failedToSend'),
-          text2: err?.response?.data?.message || err?.message || t('messagesScreen.messages.pleaseRetry')
+          text2:
+            err?.response?.data?.message ||
+            err?.message ||
+            t('messagesScreen.messages.pleaseRetry'),
         });
       });
     } finally {
@@ -210,8 +240,12 @@ export const MessagesScreen = ({navigation}) => {
     <TouchableWithoutFeedback onPress={handleSendPress}>
       <ThemedIcon
         {...props}
-        name={isSending ? "clock-outline" : "paper-plane-outline"}
-        fill={isSending ? theme['color-shadcn-muted-foreground'] : theme['color-shadcn-primary']}
+        name={isSending ? 'clock-outline' : 'paper-plane-outline'}
+        fill={
+          isSending
+            ? theme['color-shadcn-muted-foreground']
+            : theme['color-shadcn-primary']
+        }
       />
     </TouchableWithoutFeedback>
   );
@@ -220,7 +254,7 @@ export const MessagesScreen = ({navigation}) => {
     // Ensure bottom tab bar is visible before going back
     dispatch(setBottomTabBarVisibility(true));
     dispatch(resetActiveRoom());
-    
+
     // Small delay to ensure Redux state is updated before navigation
     setTimeout(() => {
       navigation.goBack();
@@ -234,25 +268,48 @@ export const MessagesScreen = ({navigation}) => {
         <View style={styles.authPrompt}>
           <ThemedIcon
             name="lock-outline"
-            style={[styles.authIcon, { 
-              fill: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-400'] 
-            }]}
+            style={[
+              styles.authIcon,
+              {
+                fill: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-400'],
+              },
+            ]}
           />
-          <Text style={[styles.authTitle, {
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>
+          <Text
+            style={[
+              styles.authTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
             {t('messagesScreen.authRequired.title')}
           </Text>
-          <Text style={[styles.authMessage, {
-            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-          }]}>
-            {t('messagesScreen.authRequired.message', { chatType })}
+          <Text
+            style={[
+              styles.authMessage,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
+            {t('messagesScreen.authRequired.message', {chatType})}
           </Text>
-          <TouchableOpacity 
-            style={[styles.authButton, { backgroundColor: theme['color-shadcn-primary'] }]}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={[styles.authButtonText, { color: theme['color-shadcn-primary-foreground'] }]}>
+          <TouchableOpacity
+            style={[
+              styles.authButton,
+              {backgroundColor: theme['color-shadcn-primary']},
+            ]}
+            onPress={() => navigation.goBack()}>
+            <Text
+              style={[
+                styles.authButtonText,
+                {color: theme['color-shadcn-primary-foreground']},
+              ]}>
               {t('messagesScreen.authRequired.goBack')}
             </Text>
           </TouchableOpacity>
@@ -269,7 +326,9 @@ export const MessagesScreen = ({navigation}) => {
         display: 'flex',
         justifyContent: 'space-between',
         flexGrow: 1,
-        backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
+        backgroundColor: isDark
+          ? theme['color-shadcn-background']
+          : theme['color-basic-100'],
       }}>
       <Layout style={{flex: 1}}>
         <Layout
@@ -280,182 +339,251 @@ export const MessagesScreen = ({navigation}) => {
             spacingStyles.px16,
             spacingStyles.py8,
             {
-              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : theme['color-basic-100'],
               borderBottomWidth: 1,
-              borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+              borderBottomColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
             },
           ]}>
           <BackButton onPress={onGoBack} />
           <View
             style={[flexeStyles.row, flexeStyles.itemsCenter, {marginLeft: 4}]}>
-            <Avatar
-              source={{uri: recipientProfile}}
-              style={styles.avatar}
-            />
+            <Avatar source={{uri: recipientProfile}} style={styles.avatar} />
             <View style={{marginLeft: 12}}>
-              <Text 
-                category="h6" 
-                style={{ 
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+              <Text
+                category="h6"
+                style={{
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
                   fontWeight: '600',
-                }}
-              >
+                }}>
                 {recipientName || t('common.user')}
               </Text>
               <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
-                <View 
+                <View
                   style={[
                     styles.onlineIndicator,
-                    { backgroundColor: theme['color-success-default'] }
-                  ]} 
+                    {backgroundColor: theme['color-success-default']},
+                  ]}
                 />
-                <Text 
-                  category="c2" 
-                  style={{ 
-                    color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'],
+                <Text
+                  category="c2"
+                  style={{
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600'],
                     marginLeft: 4,
-                  }}
-                >
-                  {chatType === 'buyer' 
+                  }}>
+                  {chatType === 'buyer'
                     ? t('messagesScreen.chatStatus.youAreChattingAsSeller')
-                    : t('messagesScreen.chatStatus.youAreChattingAsBuyer')
-                  }
+                    : t('messagesScreen.chatStatus.youAreChattingAsBuyer')}
                 </Text>
               </View>
             </View>
           </View>
           {/* Chat type indicator */}
-          <View style={styles.chatTypeIndicator}>
-            <Text style={[styles.chatTypeText, {
-              color: chatType === 'buyer' 
-                ? theme['color-info-default'] 
-                : theme['color-warning-default']
-            }]}>
-              {chatType === 'buyer' ? t('messagesScreen.chatStatus.seller') : t('messagesScreen.chatStatus.buyer')}
+          <View
+            style={[
+              styles.chatTypeIndicator,
+              {
+                backgroundColor: theme['background-basic-color-2'],
+                borderColor: theme['border-basic-color-1'],
+                borderWidth: 1,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.chatTypeText,
+                {
+                  color: isDark ? 'white' : '#121212',
+                },
+              ]}>
+              {chatType === 'buyer'
+                ? t('messagesScreen.chatStatus.seller')
+                : t('messagesScreen.chatStatus.buyer')}
             </Text>
           </View>
         </Layout>
-        
+
         {/* Product Info Card - Show when coming from ProductDetailScreen */}
         {productInfo && (
-          <View style={[
-            styles.productInfoCard,
-            { 
-              backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-              borderBottomColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-            }
-          ]}>
+          <View
+            style={[
+              styles.productInfoCard,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+                borderBottomColor: isDark
+                  ? theme['color-shadcn-border']
+                  : theme['color-basic-400'],
+              },
+            ]}>
             <View style={styles.productInfoHeader}>
               <ThemedIcon
                 name="info-outline"
-                style={[styles.productInfoIcon, { 
-                  fill: theme['color-shadcn-primary'] 
-                }]}
+                style={[
+                  styles.productInfoIcon,
+                  {
+                    fill: theme['color-shadcn-primary'],
+                  },
+                ]}
               />
-              <Text style={[styles.productInfoTitle, {
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>
+              <Text
+                style={[
+                  styles.productInfoTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
                 {t('messagesScreen.productInfo.chattingAbout')}
               </Text>
             </View>
             <View style={styles.productInfoContent}>
               <Image
-                source={{ uri: productInfo.image }}
+                source={{uri: productInfo.image}}
                 style={styles.productImage}
               />
               <View style={styles.productDetails}>
-                <Text style={[styles.productName, {
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}>
+                <Text
+                  style={[
+                    styles.productName,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
                   {productInfo.name}
                 </Text>
-                <Text style={[styles.productPrice, {
-                  color: theme['color-shadcn-primary']
-                }]}>
+                <Text
+                  style={[
+                    styles.productPrice,
+                    {
+                      color: theme['color-shadcn-primary'],
+                    },
+                  ]}>
                   PKR {productInfo.price?.toLocaleString() || '0'}
                 </Text>
-                <Text style={[styles.productShop, {
-                  color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                }]}>
-                  {t('messagesScreen.productInfo.from')}: {productInfo.seller?.shopName || t('common.shop')}
+                <Text
+                  style={[
+                    styles.productShop,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    },
+                  ]}>
+                  {t('messagesScreen.productInfo.from')}:{' '}
+                  {productInfo.seller?.shopName || t('common.shop')}
                 </Text>
               </View>
             </View>
           </View>
         )}
-        
+
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ThemedIcon
               name="loader-outline"
-              style={[styles.loadingIcon, { 
-                fill: theme['color-shadcn-primary'] 
-              }]}
+              style={[
+                styles.loadingIcon,
+                {
+                  fill: theme['color-shadcn-primary'],
+                },
+              ]}
             />
-            <Text style={[styles.loadingText, {
-              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>
+            <Text
+              style={[
+                styles.loadingText,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600'],
+                },
+              ]}>
               {t('messagesScreen.messages.loading')}
             </Text>
           </View>
         ) : (
-          <MessagesList 
-            messagesList={messages} 
+          <MessagesList
+            messagesList={messages}
             keyExtractor={item => item.id.toString()}
           />
         )}
       </Layout>
-      
-      <Layout 
-        level="1" 
+
+      <Layout
+        level="1"
         style={[
           styles.inputContainer,
-          { 
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
+          {
+            backgroundColor: isDark
+              ? theme['color-shadcn-card']
+              : theme['color-basic-100'],
             borderTopWidth: 1,
-            borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-          }
-        ]}
-      >
+            borderTopColor: isDark
+              ? theme['color-shadcn-border']
+              : theme['color-basic-400'],
+          },
+        ]}>
         <View style={styles.inputWrapper}>
           <Input
             value={newMessage}
             onChangeText={setNewMessage}
-            placeholder={t('messagesScreen.messages.placeholder', { chatType })}
+            placeholder={t('messagesScreen.messages.placeholder', {chatType})}
             style={[
               styles.input,
-              { 
-                backgroundColor: isDark ? theme['color-shadcn-secondary'] : theme['color-basic-200'],
-                borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-              }
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-secondary']
+                  : theme['color-basic-200'],
+                borderColor: isDark
+                  ? theme['color-shadcn-border']
+                  : theme['color-basic-400'],
+              },
             ]}
-            textStyle={{ 
-              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'],
+            textStyle={{
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
             }}
-            placeholderTextColor={isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']}
+            placeholderTextColor={
+              isDark
+                ? theme['color-shadcn-muted-foreground']
+                : theme['color-basic-600']
+            }
             disabled={isSending}
             onSubmitEditing={handleSendPress}
             multiline
           />
-          <TouchableOpacity 
-            onPress={handleSendPress} 
+          <TouchableOpacity
+            onPress={handleSendPress}
             style={[
               styles.sendButton,
-              { 
-                backgroundColor: isSending ? theme['color-shadcn-muted'] : theme['color-shadcn-primary'],
-                opacity: isSending ? 0.7 : 1
-              }
+              {
+                backgroundColor: isSending
+                  ? theme['color-shadcn-muted']
+                  : theme['color-shadcn-primary'],
+                opacity: isSending ? 0.7 : 1,
+              },
             ]}
-            disabled={isSending}
-          >
-            <Text 
+            disabled={isSending}>
+            <Text
               category="s1"
-              style={{ 
+              style={{
                 color: theme['color-shadcn-primary-foreground'],
-                fontWeight: '600'
-              }}
-            >
-              {isSending ? t('messagesScreen.messages.sending') : t('messagesScreen.messages.send')}
+                fontWeight: '600',
+              }}>
+              {isSending
+                ? t('messagesScreen.messages.sending')
+                : t('messagesScreen.messages.send')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -486,7 +614,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   chatTypeText: {
     fontSize: 12,
@@ -619,4 +746,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

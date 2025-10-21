@@ -1,40 +1,39 @@
 import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSelector } from 'react-redux';
+import {StyleSheet, View, Image} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {useSelector} from 'react-redux';
 import {
   BottomNavigation,
   BottomNavigationTab,
   Text,
-
 } from '@ui-kitten/components';
-import { useTheme } from '../../theme/ThemeContext';
-import { ThemedIcon } from '../../components/Icon';
-import { selectShowBottomTabBar } from '../../store/configs';
-import { MainScreensHeader } from '../../components/buyer';
-import { 
-  selectIfAnonymous, 
-  selectIsSeller, 
+import {useTheme} from '../../theme/ThemeContext';
+import {ThemedIcon} from '../../components/Icon';
+import {selectShowBottomTabBar} from '../../store/configs';
+import {MainScreensHeader} from '../../components/buyer';
+import {
+  selectIfAnonymous,
+  selectIsSeller,
   selectUserType,
   selectIsSellerAuthenticated,
   selectIsBuyerAuthenticated,
-  selectIsAnyAuthenticated
+  selectIsAnyAuthenticated,
 } from '../../store/user';
 
 // Screens and Navigation Stacks
-import { BuyerHomeStack } from './BuyerHomeStack';
-import { ChatNavigator } from '../ChatNavigator';
-import { MyWishlistScreen } from '../../screens/buyer/product/MyWishlistScreen';
-import { BuyerProfileStack } from './BuyerProfileStack';
+import {BuyerHomeStack} from './BuyerHomeStack';
+import {ChatNavigator} from '../ChatNavigator';
+import {MyWishlistScreen} from '../../screens/buyer/product/MyWishlistScreen';
+import {BuyerProfileStack} from './BuyerProfileStack';
 
-import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
+import {AuthRestrictedError} from '../../components/auth/AuthRestrictedError';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
 import MyCartScreen from '../../screens/buyer/checkout/MyCartScreen';
-import { ThemeProvider } from '../../theme/ThemeContext';
-import { SellerTabRoutes } from '../seller/SellerMainNavigator';
-import { SellerNewProductStack } from '../seller/SellerNewProductStack';
-import { CommonActions } from '@react-navigation/native';
+import {ThemeProvider} from '../../theme/ThemeContext';
+import {SellerTabRoutes} from '../seller/SellerMainNavigator';
+import {SellerNewProductStack} from '../seller/SellerNewProductStack';
+import {CommonActions} from '@react-navigation/native';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -45,7 +44,7 @@ const profileUserIcon = require('../../../assets/new/bottom_nav/profile_user.png
 
 const activeUnderIcon = require('../../../assets/new/bottom_nav/active.png');
 
-const { Navigator, Screen } = createBottomTabNavigator();
+const {Navigator, Screen} = createBottomTabNavigator();
 
 // Navigation route enum for buyer main navigator
 export const BuyerMainRoutes = Object.freeze({
@@ -63,20 +62,31 @@ const ICON_DARK_GREY = '#444444';
 const TEXT_BLACK = '#000000';
 
 // Ensure text does not wrap by setting flexShrink: 0, flexGrow: 0, minWidth: 0, and allowFontScaling: false
-const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => {
-  const { theme, isDark } = useTheme();
-  const { i18n } = useTranslation();
+const renderTabIconWithActive = (
+  iconSource,
+  isActive,
+  label,
+  customIconStyle = {},
+) => {
+  const {theme, isDark} = useTheme();
+  const {i18n} = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
   return (
-    <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
+    <View
+      style={styles.iconWithActiveContainer}
+      key={`iconWithActiveContainer-${label}`}>
       <Image
         source={iconSource}
         style={{
           width: 36,
           height: 36,
           resizeMode: 'contain',
-          tintColor: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : ICON_DARK_GREY,
+          tintColor: isDark
+            ? isActive
+              ? theme['color-shadcn-primary']
+              : theme['color-shadcn-foreground']
+            : ICON_DARK_GREY,
           ...customIconStyle,
         }}
         key={`icon-image-${label}`}
@@ -85,7 +95,11 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
         style={{
           fontWeight: '700',
           fontSize: 12,
-          color: isDark ? (isActive ? theme['color-shadcn-primary'] : theme['color-shadcn-foreground']) : TEXT_BLACK,
+          color: isDark
+            ? isActive
+              ? theme['color-shadcn-primary']
+              : theme['color-shadcn-foreground']
+            : TEXT_BLACK,
           marginTop: 2,
           flexShrink: 0,
           flexGrow: 0,
@@ -95,8 +109,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
         numberOfLines={1}
         ellipsizeMode="clip"
         allowFontScaling={false}
-        key={`icon-label-${label}`}
-      >
+        key={`icon-label-${label}`}>
         {label}
       </Text>
       {isActive && (
@@ -118,8 +131,8 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
 
 // Do not change color of plus icon (no tintColor)
 const renderAddTabIconWithActive = (isActive, label) => {
-  const { theme, isDark } = useTheme();
-  const { i18n } = useTranslation();
+  const {theme, isDark} = useTheme();
+  const {i18n} = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
   return (
@@ -132,8 +145,7 @@ const renderAddTabIconWithActive = (isActive, label) => {
             backgroundColor: isDark ? theme['color-shadcn-card'] : '#fff',
           },
         ]}
-        key={`addButton-${label}`}
-      >
+        key={`addButton-${label}`}>
         <Image
           source={sellPlusIcon}
           style={{
@@ -159,8 +171,7 @@ const renderAddTabIconWithActive = (isActive, label) => {
         numberOfLines={1}
         ellipsizeMode="clip"
         allowFontScaling={false}
-        key={`addButton-label-${label}`}
-      >
+        key={`addButton-label-${label}`}>
         {label}
       </Text>
       {isActive && (
@@ -180,13 +191,13 @@ const renderAddTabIconWithActive = (isActive, label) => {
   );
 };
 
-const BottomTabBar = ({ navigation, state, isAnonymous }) => {
-  const { theme, isDark } = useTheme();
-  const { t, i18n } = useTranslation();
+const BottomTabBar = ({navigation, state, isAnonymous}) => {
+  const {theme, isDark} = useTheme();
+  const {t, i18n} = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
   const isRTL = i18n.dir() === 'rtl';
 
-  const handleTabPress = (index) => {
+  const handleTabPress = index => {
     const rtlIndex = isRTL ? state.routes.length - 1 - index : index;
     const routeName = state.routeNames[rtlIndex];
     const stackKey = state.routes[rtlIndex].key;
@@ -198,8 +209,8 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: routeName }],
-      })
+        routes: [{name: routeName}],
+      }),
     );
   };
 
@@ -214,21 +225,24 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
             position: 'absolute',
             bottom: showBottomTabBar ? 0 : -1000,
             overflow: showBottomTabBar ? 'visible' : 'hidden',
-            backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'],
-            borderTopColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
+            backgroundColor: isDark
+              ? theme['color-shadcn-background']
+              : theme['color-basic-100'],
+            borderTopColor: isDark
+              ? theme['color-shadcn-border']
+              : theme['color-basic-400'],
             flexDirection: isRTL ? 'row-reverse' : 'row',
           },
         ]}
         onSelect={handleTabPress}
-        key="bottomNavigation"
-      >
+        key="bottomNavigation">
         <BottomNavigationTab
           key="tab-home"
           icon={() =>
             renderTabIconWithActive(
               homeIcon,
               state.index === (isRTL ? 4 : 0),
-              t('tabs.home')
+              t('tabs.home'),
             )
           }
         />
@@ -238,7 +252,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
             renderTabIconWithActive(
               chatIcon,
               state.index === (isRTL ? 3 : 1),
-              t('tabs.chat')
+              t('tabs.chat'),
             )
           }
         />
@@ -247,7 +261,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
           icon={() =>
             renderAddTabIconWithActive(
               state.index === (isRTL ? 2 : 2),
-              t('tabs.sell')
+              t('tabs.sell'),
             )
           }
         />
@@ -258,7 +272,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
               luckyDrawIcon,
               state.index === (isRTL ? 1 : 3),
               t('tabs.luckydraw'),
-              { width: 48, height: 35 }
+              {width: 48, height: 35},
             )
           }
         />
@@ -268,7 +282,7 @@ const BottomTabBar = ({ navigation, state, isAnonymous }) => {
             renderTabIconWithActive(
               profileUserIcon,
               state.index === (isRTL ? 0 : 4),
-              t('tabs.profile')
+              t('tabs.profile'),
             )
           }
         />
@@ -282,29 +296,34 @@ export const BuyerMainNavigator = () => {
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isAnyAuthenticated = useSelector(selectIsAnyAuthenticated);
-  
+
   // Legacy selectors for backward compatibility (can be removed later)
   const isAnonymous = useSelector(selectIfAnonymous);
   const isSeller = useSelector(selectIsSeller);
-  
-  const { theme, isDark } = useTheme();
-  
+
+  const {theme, isDark} = useTheme();
+
   // Determine if user is essentially anonymous (no authentication in either system)
   const isEffectivelyAnonymous = isAnonymous && !isAnyAuthenticated;
-  
-  console.log("BuyerMainNavigator - Auth States:", {
-    isSellerAuthenticated,
-    isBuyerAuthenticated,
-    isAnyAuthenticated,
-    isAnonymous,
-    isSeller,
-    isEffectivelyAnonymous
-  });
+
+  // console.log("BuyerMainNavigator - Auth States:", {
+  //   isSellerAuthenticated,
+  //   isBuyerAuthenticated,
+  //   isAnyAuthenticated,
+  //   isAnonymous,
+  //   isSeller,
+  //   isEffectivelyAnonymous
+  // });
   return (
     <Navigator
-      tabBar={props => <BottomTabBar {...props} isAnonymous={isEffectivelyAnonymous} key="bottomTabBar" />}
-      screenOptions={{ headerShown: false }}
-    >
+      tabBar={props => (
+        <BottomTabBar
+          {...props}
+          isAnonymous={isEffectivelyAnonymous}
+          key="bottomTabBar"
+        />
+      )}
+      screenOptions={{headerShown: false}}>
       <Screen
         name={BuyerMainRoutes.BUYER_HOME}
         component={BuyerHomeStack}
@@ -312,162 +331,160 @@ export const BuyerMainNavigator = () => {
       />
       {isEffectivelyAnonymous
         ? [
-          <Screen
-            key="screen-BuyerChat-anon"
-            name={BuyerMainRoutes.BUYER_CHAT}
-            options={{
-              headerShown: true,
-              header: props => (
-                <MainScreensHeader
+            <Screen
+              key="screen-BuyerChat-anon"
+              name={BuyerMainRoutes.BUYER_CHAT}
+              options={{
+                headerShown: true,
+                header: props => (
+                  <MainScreensHeader
+                    {...props}
+                    hideSearch={true}
+                    title="Chat"
+                  />
+                ),
+              }}>
+              {props => (
+                <AuthRestrictedError
                   {...props}
-                  hideSearch={true}
-                  title="Chat"
+                  subTitle="messages.loginRequired"
+                  key="authError-BuyerChat-anon"
                 />
-              ),
-            }}
-          >
-            {props => (
-              <AuthRestrictedError
-                {...props}
-                subTitle="messages.loginRequired"
-                key="authError-BuyerChat-anon"
-              />
-            )}
-          </Screen>,
-          <Screen
-            key="screen-SellerPostAd-anon"
-            name={BuyerMainRoutes.SELLER_POST_AD}
-            options={{
-              headerShown: true,
-              header: props => (
-                <MainScreensHeader
+              )}
+            </Screen>,
+            <Screen
+              key="screen-SellerPostAd-anon"
+              name={BuyerMainRoutes.SELLER_POST_AD}
+              options={{
+                headerShown: true,
+                header: props => (
+                  <MainScreensHeader
+                    {...props}
+                    hideSearch={true}
+                    title="AddProduct"
+                  />
+                ),
+              }}>
+              {props => (
+                <AuthRestrictedError
                   {...props}
-                  hideSearch={true}
-                  title="AddProduct"
+                  isItSeller={true}
+                  subTitle="messages.sellerLoginRequired"
+                  key="authError-SellerPostAd-anon"
                 />
-              ),
-            }}
-          >
-            {props => (
-              <AuthRestrictedError
-                {...props}
-                isItSeller={true}
-                subTitle="messages.sellerLoginRequired"
-                key="authError-SellerPostAd-anon"
-              />
-            )}
-          </Screen>,
-          <Screen
-            key="screen-BuyerWishlist-anon"
-            name={BuyerMainRoutes.BUYER_WISHLIST}
-            options={{
-              headerShown: true,
-              header: props => (
-                <MainScreensHeader
+              )}
+            </Screen>,
+            <Screen
+              key="screen-BuyerWishlist-anon"
+              name={BuyerMainRoutes.BUYER_WISHLIST}
+              options={{
+                headerShown: true,
+                header: props => (
+                  <MainScreensHeader
+                    {...props}
+                    hideSearch={true}
+                    title="BuyerWishlist"
+                  />
+                ),
+              }}>
+              {props => (
+                <AuthRestrictedError
                   {...props}
-                  hideSearch={true}
-                  title="BuyerWishlist"
+                  subTitle="messages.buyerLoginRequired"
+                  key="authError-BuyerWishlist-anon"
                 />
-              ),
-            }}
-          >
-            {props => (
-              <AuthRestrictedError
-                {...props}
-                subTitle="messages.buyerLoginRequired"
-                key="authError-BuyerWishlist-anon"
-              />
-            )}
-          </Screen>,
-          <Screen
-            key="screen-BuyerProfile-anon"
-            name={BuyerMainRoutes.BUYER_PROFILE}
-            options={{
-              headerShown: true,
-              header: props => (
-                <MainScreensHeader
+              )}
+            </Screen>,
+            <Screen
+              key="screen-BuyerProfile-anon"
+              name={BuyerMainRoutes.BUYER_PROFILE}
+              options={{
+                headerShown: true,
+                header: props => (
+                  <MainScreensHeader
+                    {...props}
+                    hideSearch={true}
+                    title="Profile"
+                  />
+                ),
+              }}>
+              {props => (
+                <AuthRestrictedError
                   {...props}
-                  hideSearch={true}
-                  title="Profile"
+                  subTitle="messages.loginRequired"
+                  key="authError-BuyerProfile-anon"
                 />
-              ),
-            }}
-          >
-            {props => (
-              <AuthRestrictedError
-                {...props}
-                subTitle="messages.loginRequired"
-                key="authError-BuyerProfile-anon"
-              />
-            )}
-          </Screen>,
-        ]
+              )}
+            </Screen>,
+          ]
         : [
-          <Screen
-            key="screen-BuyerChat"
-            name={BuyerMainRoutes.BUYER_CHAT}
-            component={ChatNavigator}
-          />,
-          // <Screen
-          //   key="screen-BuyerCart"
-          //   name={BuyerMainRoutes.BUYER_CART}
-          //   // component={MyCartScreen}
-          //   component={}
+            <Screen
+              key="screen-BuyerChat"
+              name={BuyerMainRoutes.BUYER_CHAT}
+              component={ChatNavigator}
+            />,
+            // <Screen
+            //   key="screen-BuyerCart"
+            //   name={BuyerMainRoutes.BUYER_CART}
+            //   // component={MyCartScreen}
+            //   component={}
 
-          //   options={{
-          //     headerShown: true,
-          //     header: props => (
-          //       <MainScreensHeader {...props} hideSearch={true} key="header-BuyerCart" />
-          //     ),
-          //   }}
-          // />,
-          <Screen
-            name={SellerTabRoutes.POST_AD}
-            component={isSellerAuthenticated ? SellerNewProductStack : AuthRestrictedError}
-            initialParams={{
-              isItSeller: isSellerAuthenticated,
-              subTitle: "messages.sellerLoginRequired"
-            }}
-            key="screen-SellerPostAd"
-            options={{
-              unmountOnBlur: true,
-            }}
-          />,
+            //   options={{
+            //     headerShown: true,
+            //     header: props => (
+            //       <MainScreensHeader {...props} hideSearch={true} key="header-BuyerCart" />
+            //     ),
+            //   }}
+            // />,
+            <Screen
+              name={SellerTabRoutes.POST_AD}
+              component={
+                isSellerAuthenticated
+                  ? SellerNewProductStack
+                  : AuthRestrictedError
+              }
+              initialParams={{
+                isItSeller: isSellerAuthenticated,
+                subTitle: 'messages.sellerLoginRequired',
+              }}
+              key="screen-SellerPostAd"
+              options={{
+                unmountOnBlur: true,
+              }}
+            />,
 
+            // <Screen
+            //   key="screen-BuyerWishlist"
+            //   name={BuyerMainRoutes.BUYER_WISHLIST}
+            //   component={MyWishlistScreen}
+            //   options={{
+            //     headerShown: true,
+            //     header: props => <MainScreensHeader {...props} hideSearch={true} title="My Wishlist" key="header-BuyerWishlist" />,
+            //   }}
+            // />,
 
-          // <Screen
-          //   key="screen-BuyerWishlist"
-          //   name={BuyerMainRoutes.BUYER_WISHLIST}
-          //   component={MyWishlistScreen}
-          //   options={{
-          //     headerShown: true,
-          //     header: props => <MainScreensHeader {...props} hideSearch={true} title="My Wishlist" key="header-BuyerWishlist" />,
-          //   }}
-          // />,
+            <Screen
+              key="screen-BuyerLuckyDraw"
+              name={BuyerMainRoutes.BUYER_LUCKYDRAW}
+              component={LuckyDrawListScreen}
+              options={{
+                headerShown: true,
+                header: props => (
+                  <MainScreensHeader
+                    {...props}
+                    hideSearch={true}
+                    key="header-BuyerLuckyDraw"
+                  />
+                ),
+              }}
+            />,
 
-
-          <Screen
-            key="screen-BuyerLuckyDraw"
-            name={BuyerMainRoutes.BUYER_LUCKYDRAW}
-            component={LuckyDrawListScreen}
-
-
-            options={{
-              headerShown: true,
-              header: props => (
-                <MainScreensHeader {...props} hideSearch={true} key="header-BuyerLuckyDraw" />
-              ),
-            }}
-          />,
-
-
-
-          <Screen
-            key="screen-BuyerProfile"
-            name={BuyerMainRoutes.BUYER_PROFILE}
-            component={BuyerProfileStack}
-          />,
-        ]}
+            <Screen
+              key="screen-BuyerProfile"
+              name={BuyerMainRoutes.BUYER_PROFILE}
+              component={BuyerProfileStack}
+            />,
+          ]}
     </Navigator>
   );
 };
@@ -497,7 +514,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
@@ -511,7 +528,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     borderTopWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: {width: 0, height: -2},
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 12,

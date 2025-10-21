@@ -14,7 +14,7 @@ import {ThemedIcon} from '../Icon';
 import {Price} from '../Price';
 import {flexeStyles} from '../../utils/globalStyles';
 import {useTheme} from '../../theme/ThemeContext';
-import {selectBaseUrls} from '../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -90,7 +90,7 @@ console.log("item.product", item.product);
               uri: product?.thumbnail 
                 ? (product?.thumbnail?.startsWith('http') 
                    ? product?.thumbnail 
-                   : `${baseUrls['product_thumbnail_url']}/${product?.thumbnail}`)
+                   : `${BASE_URLS.product_thumbnail_url}/${product?.thumbnail}`)
                 : product?.image
                 ? (product?.image?.startsWith('http')
                    ? product?.image
@@ -177,21 +177,6 @@ console.log("item.product", item.product);
                 },
               ]}>
               {product.current_stock > 0 ? t('product.inStock', 'In Stock') : t('product.outOfStock')}
-            </Text>
-          )}
-
-          {product.reviews_count !== undefined && (
-            <Text
-              category="c2"
-              style={[
-                styles.reviews,
-                {
-                  color: isDark
-                    ? theme['color-shadcn-muted-foreground']
-                    : theme['color-basic-500'],
-                },
-              ]}>
-              {product.reviews_count} {product.reviews_count === 1 ? t('product.review', 'review') : t('product.reviews')}
             </Text>
           )}
 

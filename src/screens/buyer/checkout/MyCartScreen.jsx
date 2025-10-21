@@ -25,7 +25,7 @@ import {useNavigation} from '@react-navigation/native';
 import {axiosBuyerClient} from '../../../utils/axiosClient';
 import {useTheme} from '../../../theme/ThemeContext';
 import {useSelector} from 'react-redux';
-import {selectBaseUrls} from '../../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../../store/configs';
 import {createShimmerPlaceholder} from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -570,6 +570,7 @@ export const MyCartScreen = () => {
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState({});
   const [refreshing, setRefreshing] = useState(false);
+  const [shippingCost, setShippingCost] = useState(0);
   const {theme, isDark} = useTheme();
   const baseUrls = useSelector(selectBaseUrls);
   const navigation = useNavigation();
@@ -586,10 +587,24 @@ export const MyCartScreen = () => {
       const response = await axiosBuyerClient.get(
         'shipping-method/payment-methods',
       );
-      console.log('Shipping method response:', response.data);
+      // console.log('Shipping method response:', response.data);
       setPaymentMethods(response.data);
     } catch (error) {
       console.error('Error getting shipping method:', error);
+    }
+  };
+
+  // Get shipping cost from API
+  const getShippingCost = async () => {
+    try {
+      const response = await axiosBuyerClient.get('cart/shipping-cost');
+      // console.log('Shipping cost response:', response.data);
+      // Assuming the API returns the shipping cost in response.data.shipping_cost or similar
+      const cost = response.data?.shipping_cost || response.data?.cost || 0;
+      setShippingCost(cost);
+    } catch (error) {
+      console.error('Error getting shipping cost:', error);
+      setShippingCost(0);
     }
   };
 
@@ -646,10 +661,9 @@ export const MyCartScreen = () => {
     0,
   );
   const tax = cartData.reduce((sum, item) => sum + item.tax * item.quantity, 0);
-  const cartShippingPrice = cartData.reduce(
-    (sum, item) => sum + (item.shipping_cost || 0),
-    0,
-  );
+
+  // Use shipping cost from API instead of calculating from cart data
+  const cartShippingPrice = shippingCost;
 
   // Add selected shipping method cost from filtered methods
   const filteredPaymentMethods = getFilteredPaymentMethods();
@@ -669,14 +683,21 @@ export const MyCartScreen = () => {
     try {
       setLoading(true);
       const response = await axiosBuyerClient.get('cart');
-      console.log('Cart Response:', JSON.stringify(response.data, null, 2));
+      // console.log('Cart Response:', JSON.stringify(response.data, null, 2));
       setCartData(response.data || []);
+      // Fetch shipping cost after cart data is loaded
+      if (response.data && response.data.length > 0) {
+        await getShippingCost();
+      } else {
+        setShippingCost(0);
+      }
     } catch (error) {
       // console.log('Cart Error:', error.toString() || error.response?.data || error.message);
       if (error.response?.status === 401) {
         // console.log('Authentication required');
       }
       setCartData([]);
+      setShippingCost(0);
     } finally {
       setLoading(false);
     }
@@ -741,6 +762,9 @@ export const MyCartScreen = () => {
 
       // Remove item from local state
       setCartData(prevData => prevData.filter(item => item.id !== cartItemId));
+
+      // Refresh shipping cost after removing item
+      await getShippingCost();
     } catch (error) {
       console.error('Error removing from cart:', error);
       Alert.alert(t('common.error'), t('cart.removeItemFailed'));
@@ -1020,7 +1044,7 @@ export const MyCartScreen = () => {
           onPress={() => navigateToProductDetail(item)}>
           <Image
             source={{
-              uri: `${baseUrls['product_thumbnail_url']}/${item.thumbnail}`,
+              uri: `${BASE_URLS.product_thumbnail_url}/${item.thumbnail}`,
             }}
             style={styles.productImage}
           />
@@ -1697,7 +1721,7 @@ export const MyCartScreen = () => {
                     fontSize: 12,
                   },
                 ]}>
-                Rs {cartShippingPrice.toLocaleString()}
+                Rs {shippingCost.toLocaleString()}
               </Text>
             </View>
           )}

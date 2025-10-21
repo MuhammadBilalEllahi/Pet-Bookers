@@ -91,21 +91,21 @@ export const AddAddressScreen = ({ navigation, route }) => {
     try {
       setLoading(true);
       
-      const submitData = new FormData();
-      submitData.append('contact_person_name', formData.contact_person_name);
-      submitData.append('address', formData.address);
-      submitData.append('city', formData.city);
-      submitData.append('zip', formData.zip);
-      submitData.append('phone', formData.phone);
-      submitData.append('address_type', formData.address_type);
-      submitData.append('is_billing', formData.is_billing ? '1' : '0');
-      submitData.append('country', formData.country);
+      const submitData=
+     { 'contact_person_name': formData.contact_person_name,
+      'address': formData.address,
+      'city': formData.city,
+      'zip': formData.zip,
+      'phone': formData.phone,
+      'address_type': formData.address_type,
+      'is_billing': formData.is_billing ? '1' : '0',
+      'latitude': "0",
+      'longitude': "0",
+      'country': formData.country}
 
-      const response = await axiosBuyerClient.post('customer/address/add', submitData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axiosBuyerClient.post('customer/address/add', submitData);
+
+     
 
       if (response.data) {
         Toast.show({

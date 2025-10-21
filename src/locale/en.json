@@ -65,8 +65,8 @@
   "alreadyHaveAnAccount": "Already Have An Account",
   "fillUpTheFormToCreateAnAccount": "Fill up the form to create an account",
   "selectOption": "Select Option",
-  
-"countryCodeNote": "* Country Code must like for BD 880", 
+
+  "countryCodeNote": "* Country Code must like for BD 880",
   "Punjab": "Punjab",
   "Sindh": "Sindh",
   "KPK": "KPK",
@@ -318,8 +318,23 @@
     "deleteImageError": "Failed to delete image",
     "uploadImageSuccess": "Image uploaded successfully",
     "uploadImageError": "Failed to upload image",
-    "permissionDenied": "Storage permission is required to upload images",
-    "imagePickerError": "Failed to pick image"
+    "permissionDenied": "Permission Denied",
+    "storagePermission": "Storage permission is required to upload images",
+    "imagePickerError": "Failed to pick image",
+    "name": "Product Name",
+    "details": "Product Description",
+    "price": "Price",
+    "stock": "Stock",
+    "minOrder": "Minimum Order",
+    "unit": "Unit",
+    "code": "Product Code",
+    "tax": "Tax",
+    "discount": "Discount",
+    "shippingCost": "Shipping Cost",
+    "uploadThumbnail": "Upload Thumbnail",
+    "images": "Product Images",
+    "status": "Status",
+    "saving": "Saving..."
   },
   "Transactions": "Transactions",
   "Request Withdrawal": "Request Withdrawal",
@@ -783,6 +798,8 @@
       "date": "Date: "
     },
     "form": {
+      "alreadyParticipated": "You have alreday Participated",
+      "yourLuckyNumber": "You Lucky Number",
       "nameLabel": "Name",
       "namePlaceholder": "Write your name here",
       "cityLabel": "City",

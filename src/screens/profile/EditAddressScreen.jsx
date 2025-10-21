@@ -111,22 +111,20 @@ export const EditAddressScreen = ({ navigation, route }) => {
     try {
       setLoading(true);
       
-      const submitData = new FormData();
-      submitData.append('address_id', address.id);
-      submitData.append('contact_person_name', formData.contact_person_name);
-      submitData.append('address', formData.address);
-      submitData.append('city', formData.city);
-      submitData.append('zip', formData.zip);
-      submitData.append('phone', formData.phone);
-      submitData.append('address_type', formData.address_type);
-      submitData.append('is_billing', formData.is_billing ? '1' : '0');
-      submitData.append('country', formData.country);
+      const submitData=
+     { 'address_id': address.id,
+      'contact_person_name': formData.contact_person_name,
+      'address': formData.address,
+      'city': formData.city,
+      'zip': formData.zip,
+      'phone': formData.phone,
+      'address_type': formData.address_type,
+      'latitude': "0",
+      'longitude': "0",
+      'is_billing': formData.is_billing ? '1' : '0',
+      'country': formData.country}
 
-      const response = await axiosBuyerClient.put('customer/address/update', submitData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axiosBuyerClient.put('customer/address/update', submitData);
 
       if (response.data) {
         Toast.show({
