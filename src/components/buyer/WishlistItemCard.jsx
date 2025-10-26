@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Dimensions,
   Image,
@@ -15,7 +15,8 @@ import {Price} from '../Price';
 import {flexeStyles} from '../../utils/globalStyles';
 import {useTheme} from '../../theme/ThemeContext';
 import {BASE_URLS, selectBaseUrls} from '../../store/configs';
-
+import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../common/FastImageWithFallback';
 const {width: windowWidth} = Dimensions.get('screen');
 
 export const WishlistItemCard = ({
@@ -31,7 +32,10 @@ export const WishlistItemCard = ({
   const handleRemove = () => {
     Alert.alert(
       t('wishlist.removeTitle', 'Remove from Wishlist'),
-      t('wishlist.removeMessage', 'Are you sure you want to remove this item from your wishlist?'),
+      t(
+        'wishlist.removeMessage',
+        'Are you sure you want to remove this item from your wishlist?',
+      ),
       [
         {
           text: t('common.cancel'),
@@ -56,7 +60,7 @@ export const WishlistItemCard = ({
     <ThemedIcon
       {...props}
       name="heart"
-        fill={theme['color-danger-default']}
+      fill={theme['color-danger-default']}
       style={{width: 20, height: 20}}
     />
   );
@@ -64,7 +68,7 @@ export const WishlistItemCard = ({
   if (!item.product) {
     return null;
   }
-console.log("item.product", item.product);
+  // console.log("item.product", item.product);
   const product = item.product;
 
   return (
@@ -85,27 +89,24 @@ console.log("item.product", item.product);
         onPress={handleProductPress}
         style={styles.contentContainer}>
         <View style={styles.imageContainer}>
-          <Image
+          <FastImageWithFallback
             source={{
-              uri: product?.thumbnail 
-                ? (product?.thumbnail?.startsWith('http') 
-                   ? product?.thumbnail 
-                   : `${BASE_URLS.product_thumbnail_url}/${product?.thumbnail}`)
+              uri: product?.thumbnail
+                ? product?.thumbnail?.startsWith('http')
+                  ? product?.thumbnail
+                  : `${BASE_URLS.product_thumbnail_url}/${product?.thumbnail}`
                 : product?.image
-                ? (product?.image?.startsWith('http')
-                   ? product?.image
-                   : `${baseUrls['product_image_url']}/${product?.image}`)
+                ? product?.image?.startsWith('http')
+                  ? product?.image
+                  : `${baseUrls['product_image_url']}/${product?.image}`
                 : 'https://via.placeholder.com/120x120?text=No+Image',
+              priority: FastImage.priority.high,
             }}
-            style={[
-              styles.image,
-              {
-                backgroundColor: isDark
-                  ? theme['color-shadcn-secondary']
-                  : theme['color-basic-200'],
-              },
-            ]}
-            resizeMode="cover"
+            fallbackSource={{
+              uri: 'https://via.placeholder.com/120x120?text=No+Image',
+            }}
+            resizeMode={FastImage.resizeMode.cover}
+            style={styles.image}
           />
         </View>
 
@@ -121,7 +122,11 @@ console.log("item.product", item.product);
                   : theme['color-basic-900'],
               },
             ]}>
-            {product.name || product.slug?.replace(/-/g, ' ')?.replace(/\b\w/g, l => l.toUpperCase()) || 'Product Name'}
+            {product.name ||
+              product.slug
+                ?.replace(/-/g, ' ')
+                ?.replace(/\b\w/g, l => l.toUpperCase()) ||
+              'Product Name'}
           </Text>
 
           {product.brand && (
@@ -140,13 +145,15 @@ console.log("item.product", item.product);
           )}
 
           {(product.unit_price || product.price) && (
-            <View style={[flexeStyles.row, flexeStyles.itemsCenter, styles.priceRow]}>
+            <View
+              style={[
+                flexeStyles.row,
+                flexeStyles.itemsCenter,
+                styles.priceRow,
+              ]}>
               <Text
                 category="h6"
-                style={[
-                  styles.price,
-                  {color: theme['color-shadcn-primary']},
-                ]}>
+                style={[styles.price, {color: theme['color-shadcn-primary']}]}>
                 Rs {product.unit_price || product.price || '0'}
               </Text>
               {product.discount > 0 && product.unit_price && (
@@ -159,7 +166,10 @@ console.log("item.product", item.product);
                         : theme['color-basic-500'],
                     },
                   ]}>
-                  Rs {(product.unit_price / (1 - product.discount / 100)).toFixed(0)}
+                  Rs{' '}
+                  {(product.unit_price / (1 - product.discount / 100)).toFixed(
+                    0,
+                  )}
                 </Text>
               )}
             </View>
@@ -171,12 +181,15 @@ console.log("item.product", item.product);
               style={[
                 styles.stock,
                 {
-                  color: product.current_stock > 0
-                    ? theme['color-success-default']
-                    : theme['color-danger-default'],
+                  color:
+                    product.current_stock > 0
+                      ? theme['color-success-default']
+                      : theme['color-danger-default'],
                 },
               ]}>
-              {product.current_stock > 0 ? t('product.inStock', 'In Stock') : t('product.outOfStock')}
+              {product.current_stock > 0
+                ? t('product.inStock', 'In Stock')
+                : t('product.outOfStock')}
             </Text>
           )}
 
@@ -190,7 +203,9 @@ console.log("item.product", item.product);
                   : theme['color-basic-500'],
               },
             ]}>
-            {t('wishlist.addedOn', 'Added {{date}}', {date: new Date(item.created_at).toLocaleDateString()})}
+            {t('wishlist.addedOn', 'Added {{date}}', {
+              date: new Date(item.created_at).toLocaleDateString(),
+            })}
           </Text>
         </View>
       </TouchableOpacity>
@@ -291,4 +306,4 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
   },
-}); 
+});

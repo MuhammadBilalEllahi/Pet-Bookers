@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Modal,
+  FlatList,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
@@ -22,6 +24,8 @@ import {
 import {BASE_URLS} from '../../../store/configs';
 import {Dimensions} from 'react-native';
 import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../../../components/common/FastImageWithFallback';
+import {citiesByState, COUNTRY_CODES} from '../../../utils/constants';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth; // 16px padding on each side
@@ -151,6 +155,106 @@ const styles = StyleSheet.create({
   disabledButtonText: {
     opacity: 0.8,
   },
+  cityModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  cityModalContent: {
+    width: '100%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  cityModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  cityModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cityModalSearchContainer: {
+    padding: 16,
+    paddingTop: 12,
+  },
+  cityModalSearchInput: {
+    borderRadius: 4,
+  },
+  cityModalList: {
+    maxHeight: 400,
+    paddingHorizontal: 16,
+  },
+  cityModalOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  cityModalOptionText: {
+    fontSize: 16,
+  },
+  phoneRowImproved: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  countryCodeTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRightWidth: 1,
+    minWidth: 90,
+    justifyContent: 'center',
+  },
+  countryCodeText: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  countryCodeDropdownIcon: {
+    fontSize: 12,
+    marginLeft: 2,
+  },
+  phoneInputImproved: {
+    flex: 1,
+    marginVertical: 0,
+    marginLeft: 0,
+    borderWidth: 0,
+    paddingLeft: 2,
+  },
+  countryModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countryModal: {
+    borderRadius: 10,
+    width: 280,
+    maxHeight: 350,
+    paddingVertical: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  countryModalItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+  },
+  countryModalItemText: {
+    fontSize: 16,
+  },
 });
 
 export default function LuckyDrawInstance() {
@@ -166,11 +270,42 @@ export default function LuckyDrawInstance() {
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+92');
   const [submitting, setSubmitting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [luckyNumber, setLuckyNumber] = useState(null);
   const [participationStatus, setParticipationStatus] = useState(null);
   const [checkingParticipation, setCheckingParticipation] = useState(true);
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [countryModalVisible, setCountryModalVisible] = useState(false);
+
+  // Get all cities from constants
+  const getAllCities = () => {
+    const allCities = [];
+    Object.values(citiesByState).forEach(stateCities => {
+      allCities.push(...stateCities);
+    });
+    return allCities.sort();
+  };
+
+  // Filter cities based on search query
+  const getFilteredCities = () => {
+    const allCities = getAllCities();
+    if (!citySearchQuery.trim()) {
+      return allCities;
+    }
+    return allCities.filter(cityName =>
+      cityName.toLowerCase().includes(citySearchQuery.toLowerCase()),
+    );
+  };
+
+  // Handle city selection
+  const handleCitySelect = selectedCity => {
+    setCity(selectedCity);
+    setShowCityModal(false);
+    setCitySearchQuery('');
+  };
 
   // Check participation status when component mounts
   useEffect(() => {
@@ -187,7 +322,23 @@ export default function LuckyDrawInstance() {
           : customerInfo.name || '';
 
       setName(fullName);
-      setPhone(customerInfo.phone || '');
+
+      // Parse phone number to extract country code and phone number
+      const userPhone = customerInfo.phone || '';
+      if (userPhone) {
+        // Try to find matching country code
+        const foundCountry = COUNTRY_CODES.find(code =>
+          userPhone.startsWith(code.code),
+        );
+        if (foundCountry) {
+          setCountryCode(foundCountry.code);
+          setPhone(userPhone.substring(foundCountry.code.length));
+        } else {
+          // Default to Pakistan code if no match
+          setCountryCode('+92');
+          setPhone(userPhone);
+        }
+      }
 
       // If customer has city information, use it
       // Check for various possible city field names
@@ -272,11 +423,12 @@ export default function LuckyDrawInstance() {
 
     setSubmitting(true);
     try {
+      const fullPhoneNumber = `${countryCode}${phone.trim()}`;
       const response = await axiosBuyerClient.post('luckydraw/submit', {
         event_id: luckyDraw.id,
         name: name.trim(),
         city: city.trim(),
-        phone: phone.trim(),
+        phone: fullPhoneNumber,
       });
       const luckyNumber = response?.data?.lucky_no;
       setLuckyNumber(luckyNumber);
@@ -362,7 +514,11 @@ export default function LuckyDrawInstance() {
             marginBottom: 12,
             alignSelf: 'center',
           }}>
-          <FastImage
+          <FastImageWithFallback
+            onLoadStart={() => console.log('🟡 FastImage loading started')}
+            onLoad={() => console.log('✅ FastImage loaded successfully')}
+            onError={error => console.log('❌ FastImage load error:', error)}
+            onLoadEnd={() => console.log('⚪ FastImage load ended')}
             source={{
               uri: `${BASE_URLS.lucky_draw_url}/${luckyDraw.image}`,
               priority: FastImage.priority.high,
@@ -370,7 +526,7 @@ export default function LuckyDrawInstance() {
             style={{
               width: '100%',
               height: '100%',
-              minHeight: 300, // Ensure minimum height
+              minHeight: 100, // Ensure minimum height
             }}
             resizeMode={FastImage.resizeMode.cover}
           />
@@ -382,6 +538,10 @@ export default function LuckyDrawInstance() {
         {/* Icon and Welcome */}
         <View style={styles.iconContainer}>
           <FastImage
+            onLoadStart={() => console.log('🟡 FastImage loading started')}
+            onLoad={() => console.log('✅ FastImage loaded successfully')}
+            onError={error => console.log('❌ FastImage load error:', error)}
+            onLoadEnd={() => console.log('⚪ FastImage load ended')}
             source={require('../../../../assets/new/bottom_nav/lucky_draw.png')}
             style={styles.iconImage}
             resizeMode={FastImage.resizeMode.contain}
@@ -551,11 +711,8 @@ export default function LuckyDrawInstance() {
             }
             size="large"
           />
-          <Input
-            label={t('luckyDrawInstance.form.cityLabel')}
-            placeholder={t('luckyDrawInstance.form.cityPlaceholder')}
-            value={city}
-            onChangeText={setCity}
+          <TouchableOpacity
+            onPress={() => setShowCityModal(true)}
             style={[
               styles.input,
               {
@@ -565,49 +722,143 @@ export default function LuckyDrawInstance() {
                 borderColor: isDark
                   ? theme['color-shadcn-border']
                   : theme['color-basic-400'],
+                borderWidth: 1,
+                borderRadius: 4,
+                paddingHorizontal: 12,
+                paddingVertical: 14,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
               },
-            ]}
-            textStyle={{
-              color: isDark
-                ? theme['color-shadcn-foreground']
-                : theme['color-basic-900'],
-            }}
-            placeholderTextColor={
-              isDark
-                ? theme['color-shadcn-muted-foreground']
-                : theme['color-basic-600']
-            }
-            size="large"
-          />
-          <Input
-            label={t('luckyDrawInstance.form.phoneLabel')}
-            placeholder={t('luckyDrawInstance.form.phonePlaceholder')}
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            style={[
-              styles.input,
-              {
-                backgroundColor: isDark
-                  ? theme['color-shadcn-card']
-                  : theme['color-basic-100'],
-                borderColor: isDark
-                  ? theme['color-shadcn-border']
-                  : theme['color-basic-400'],
-              },
-            ]}
-            textStyle={{
-              color: isDark
-                ? theme['color-shadcn-foreground']
-                : theme['color-basic-900'],
-            }}
-            placeholderTextColor={
-              isDark
-                ? theme['color-shadcn-muted-foreground']
-                : theme['color-basic-600']
-            }
-            size="large"
-          />
+            ]}>
+            <View style={{flex: 1}}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  marginBottom: 4,
+                  color: isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600'],
+                }}>
+                {t('luckyDrawInstance.form.cityLabel')}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 15,
+                  color: city
+                    ? isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900']
+                    : isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600'],
+                }}>
+                {city || t('luckyDrawInstance.form.cityPlaceholder')}
+              </Text>
+            </View>
+            <Icon
+              name="search-outline"
+              fill={
+                isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600']
+              }
+              style={{width: 24, height: 24}}
+            />
+          </TouchableOpacity>
+          <View style={{marginBottom: 16}}>
+            <View
+              style={[
+                styles.phoneRowImproved,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-card']
+                    : theme['color-basic-100'],
+                  borderColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-400'],
+                },
+              ]}>
+              <TouchableOpacity
+                style={[
+                  styles.countryCodeTouchable,
+                  {
+                    backgroundColor: isDark
+                      ? theme['color-shadcn-secondary']
+                      : theme['color-basic-200'],
+                    borderRightColor: isDark
+                      ? theme['color-shadcn-border']
+                      : theme['color-basic-400'],
+                  },
+                ]}
+                onPress={() => setCountryModalVisible(true)}
+                activeOpacity={0.7}>
+                <Text
+                  style={[
+                    styles.countryCodeText,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
+                  {COUNTRY_CODES.find(c => c.code === countryCode)?.label ||
+                    '+92'}
+                </Text>
+                <Text
+                  style={[
+                    styles.countryCodeDropdownIcon,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    },
+                  ]}>
+                  ▼
+                </Text>
+              </TouchableOpacity>
+              <View style={{flex: 1}}>
+                <View style={{paddingHorizontal: 12, paddingVertical: 0}}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    }}>
+                    {t('luckyDrawInstance.form.phoneLabel')}
+                  </Text>
+                </View>
+                <Input
+                  placeholder={t('luckyDrawInstance.form.phonePlaceholder')}
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                  textStyle={[
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}
+                  style={[
+                    styles.phoneInputImproved,
+                    {
+                      backgroundColor: isDark
+                        ? theme['color-shadcn-card']
+                        : theme['color-basic-100'],
+                    },
+                  ]}
+                  placeholderTextColor={
+                    isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600']
+                  }
+                  maxLength={15}
+                />
+              </View>
+            </View>
+          </View>
           {/* Show participation status if already participated */}
           {participationStatus?.alreadyParticipated && (
             <View
@@ -699,6 +950,223 @@ export default function LuckyDrawInstance() {
           />
         </View>
       </ScrollView>
+
+      {/* City Selection Modal */}
+      <Modal
+        visible={showCityModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCityModal(false)}>
+        <TouchableOpacity
+          style={styles.cityModalOverlay}
+          activeOpacity={1}
+          onPress={() => {
+            setShowCityModal(false);
+            setCitySearchQuery('');
+          }}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={e => e.stopPropagation()}
+            style={[
+              styles.cityModalContent,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
+            {/* Modal Header */}
+            <View
+              style={[
+                styles.cityModalHeader,
+                {
+                  borderBottomColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-300'],
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.cityModalTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('luckyDrawInstance.form.selectCity') || 'Select City'}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowCityModal(false);
+                  setCitySearchQuery('');
+                }}>
+                <Icon
+                  name="close"
+                  fill={
+                    isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600']
+                  }
+                  style={{width: 24, height: 24}}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Input */}
+            <View style={styles.cityModalSearchContainer}>
+              <Input
+                placeholder={
+                  t('luckyDrawInstance.form.searchCityPlaceholder') ||
+                  'Search city...'
+                }
+                value={citySearchQuery}
+                onChangeText={setCitySearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+                accessoryLeft={props => (
+                  <Icon
+                    {...props}
+                    name="search-outline"
+                    fill={
+                      isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600']
+                    }
+                  />
+                )}
+                style={[
+                  styles.cityModalSearchInput,
+                  {
+                    backgroundColor: isDark
+                      ? theme['color-shadcn-background']
+                      : theme['color-basic-200'],
+                    borderColor: isDark
+                      ? theme['color-shadcn-border']
+                      : theme['color-basic-400'],
+                  },
+                ]}
+                textStyle={{
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                }}
+                placeholderTextColor={
+                  isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600']
+                }
+              />
+            </View>
+
+            {/* City List */}
+            <FlatList
+              data={getFilteredCities()}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.cityModalOption,
+                    {
+                      backgroundColor:
+                        city === item
+                          ? isDark
+                            ? theme['color-shadcn-secondary']
+                            : theme['color-primary-100']
+                          : 'transparent',
+                    },
+                  ]}
+                  onPress={() => handleCitySelect(item)}>
+                  <Text
+                    style={[
+                      styles.cityModalOptionText,
+                      {
+                        color:
+                          city === item
+                            ? theme['color-shadcn-primary']
+                            : isDark
+                            ? theme['color-shadcn-foreground']
+                            : theme['color-basic-900'],
+                        fontWeight: city === item ? '600' : '400',
+                      },
+                    ]}>
+                    {item}
+                  </Text>
+                  {city === item && (
+                    <Icon
+                      name="checkmark"
+                      fill={theme['color-shadcn-primary']}
+                      style={{width: 20, height: 20}}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
+              style={styles.cityModalList}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Country Code Selection Modal */}
+      <Modal
+        visible={countryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCountryModalVisible(false)}>
+        <TouchableOpacity
+          style={[
+            styles.countryModalOverlay,
+            {
+              backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)',
+            },
+          ]}
+          activeOpacity={1}
+          onPressOut={() => setCountryModalVisible(false)}>
+          <View
+            style={[
+              styles.countryModal,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
+            <FlatList
+              data={COUNTRY_CODES}
+              keyExtractor={item => item.code}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.countryModalItem,
+                    {
+                      borderBottomColor: isDark
+                        ? theme['color-shadcn-border']
+                        : theme['color-basic-400'],
+                    },
+                  ]}
+                  onPress={() => {
+                    setCountryCode(item.code);
+                    setCountryModalVisible(false);
+                  }}>
+                  <Text
+                    style={[
+                      styles.countryModalItemText,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </Layout>
   );
 }

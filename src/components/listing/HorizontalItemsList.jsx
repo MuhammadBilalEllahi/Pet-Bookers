@@ -14,7 +14,7 @@ import {ThemedIcon} from '../Icon';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
-import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../common/FastImageWithFallback';
 
 const ITEM_HORIZONTAL_MARGIN = 6;
 const ITEM_PADDING = 6;
@@ -200,22 +200,23 @@ export const HorizontalItemsList = ({
                       : theme['color-basic-200'],
                   },
                 ]}>
-                {console.log('TTTTTTT', item)}
-                <FastImage
+                
+                <FastImageWithFallback
+                  source={{
+                    uri: item.image,
+                    priority: 'high',
+                  }}
+                  fallbackSource={{
+                    uri: 'https://via.placeholder.com/60x60/cccccc/666666?text=No+Image',
+                  }}
                   style={[
                     styles.image,
                     roundedImage && {borderRadius: ITEM_WIDTH / 2},
-                    {
-                      backgroundColor: isDark
-                        ? theme['color-shadcn-secondary']
-                        : theme['color-basic-300'],
-                    },
                   ]}
-                  source={{
-                    uri: item.image,
-                    priority: FastImage.priority.high,
-                  }}
-                  resizeMode={FastImage.resizeMode.cover}
+                  resizeMode="cover"
+                  showDebugLogs={false}
+                  maxRetries={2}
+                  retryDelay={1000}
                 />
               </View>
               <Text

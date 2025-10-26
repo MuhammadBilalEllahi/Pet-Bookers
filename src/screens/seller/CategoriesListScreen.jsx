@@ -2,6 +2,8 @@ import {Card, Layout, Text, useTheme} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {Dimensions, FlatList, Image, ScrollView} from 'react-native';
 import {flexeStyles} from '../../utils/globalStyles';
+import FastImageWithFallback from '../../components/common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -150,8 +152,13 @@ export const CategoriesListScreen = ({navigation}) => {
                   borderColor: theme['color-primary-default'],
                 },
               ]}>
-              <Image
+              <FastImageWithFallback
+                priority={FastImage.priority.high}
+                resizeMode={FastImage.resizeMode.cover}
                 source={{uri: item.image}}
+                fallbackSource={{
+                  uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                }}
                 style={{
                   width: '100%',
                   height: 'auto',

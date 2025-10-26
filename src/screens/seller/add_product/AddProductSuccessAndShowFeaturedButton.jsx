@@ -1,24 +1,33 @@
 import React from 'react';
-import { View, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
-import { Layout, Text, useTheme, Icon } from '@ui-kitten/components';
-import { useNavigation } from '@react-navigation/native';
-import { Dimensions } from 'react-native';
-const {width}  = Dimensions.get('window');
+import {
+  View,
+  StyleSheet,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import {Layout, Text, useTheme, Icon} from '@ui-kitten/components';
+import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
+import {Dimensions} from 'react-native';
+const {width} = Dimensions.get('window');
 
-export default  AddProductSuccessAndShowFeaturedButton = () => {
+export default AddProductSuccessAndShowFeaturedButton = () => {
   const theme = useTheme();
   const navigation = useNavigation();
+  const {t} = useTranslation();
 
   const handleClose = () => {
     navigation.goBack();
   };
   const handleTryFeatured = () => {
     navigation.navigate('ProductFeatureCheckoutScreen');
-  }
+  };
   return (
     <Layout style={styles.container} level="3">
-      
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         {/* Success Checkmark */}
         <View style={styles.checkmarkContainer}>
           <Image
@@ -26,18 +35,22 @@ export default  AddProductSuccessAndShowFeaturedButton = () => {
             style={styles.checkmark}
             resizeMode="contain"
           />
-          <Text style={styles.successText}>Your Ad was</Text>
-          <Text style={styles.successTextBold}>successfully posted</Text>
+          <Text style={styles.successText}>{t('common.yourAdWas')}</Text>
+          <Text style={styles.successTextBold}>
+            {t('common.successfullyPosted')}
+          </Text>
         </View>
         {/* Divider */}
         <View style={styles.divider} />
         {/* Featured Ads Section */}
         <Text style={[styles.featuredTitle, {marginBottom: 25}]}>
-          Get better and quicker deals{'\n'} with{' '}
-          <Text style={styles.featuredBadge}>Featured</Text> ads
+          {t('common.getBetterAndQuickerDeals')}
+          {'\n'} {t('common.with')}{' '}
+          <Text style={styles.featuredBadge}>{t('common.featured')}</Text>{' '}
+          {t('common.featuredAds')}
         </Text>
         <View style={styles.featuredCardsRow}>
-          {[1,2].map((item, idx) => (
+          {[1, 2].map((item, idx) => (
             <View key={idx} style={styles.featuredCard}>
               <View style={styles.featuredImageBox}>
                 <Image
@@ -45,19 +58,29 @@ export default  AddProductSuccessAndShowFeaturedButton = () => {
                   style={styles.featuredImage}
                   resizeMode="contain"
                 />
-                <View style={styles.featuredLabel}><Text style={styles.featuredLabelText}>Featured</Text></View>
+                <View style={styles.featuredLabel}>
+                  <Text style={styles.featuredLabelText}>
+                    {t('common.featured')}
+                  </Text>
+                </View>
               </View>
-              <Text style={styles.cardTitle}>Your listing</Text>
+              <Text style={styles.cardTitle}>{t('common.yourListing')}</Text>
               <Text style={styles.cardPrice}>PKR 120,000</Text>
               <View style={styles.cardMetaRow}>
-                <Text style={styles.cardLocation}>📍 {idx === 0 ? 'Saddar, Karachi' : 'Malir, Karachi'}</Text>
-                <Text style={styles.cardDate}>{idx === 0 ? '22 Sep' : '24 Sep'}</Text>
+                <Text style={styles.cardLocation}>
+                  📍 {idx === 0 ? 'Saddar, Karachi' : 'Malir, Karachi'}
+                </Text>
+                <Text style={styles.cardDate}>
+                  {idx === 0 ? '22 Sep' : '24 Sep'}
+                </Text>
               </View>
             </View>
           ))}
         </View>
         {/* Try Featured Ads Button */}
-        <TouchableOpacity style={styles.tryFeaturedBtn} onPress={handleTryFeatured}>
+        <TouchableOpacity
+          style={styles.tryFeaturedBtn}
+          onPress={handleTryFeatured}>
           <Text style={styles.tryFeaturedBtnText}>{t('tryFeatured')}</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -232,7 +255,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     backgroundColor: '#FF512F',
-shadowColor: '#FF512F',
+    shadowColor: '#FF512F',
   },
   tryFeaturedBtnText: {
     color: '#fff',

@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   StyleSheet,
@@ -160,6 +160,12 @@ export const LoginScreen = ({navigation}) => {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (route.params?.isItSeller !== undefined) {
+      setIsSeller(route.params.isItSeller);
+    }
+  }, [route.params?.isItSeller]);
 
   return (
     <AuthContainer>

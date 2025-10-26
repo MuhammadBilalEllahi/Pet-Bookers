@@ -685,7 +685,7 @@ export default function ShipingDetails({route}) {
                 }
                 selectedIndex={selectedShippingIndex}
                 onSelect={handleShippingAddressChange}
-                placeholder="Select Shipping Address">
+                placeholder={t('common.selectShippingAddress')}>
                 {addresses.map((address, i) => (
                   <SelectItem
                     key={i}

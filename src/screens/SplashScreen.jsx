@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {
   StyleSheet,
   Image,
@@ -7,15 +7,16 @@ import {
   Text,
   SafeAreaView,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { loadAppConfigs } from '../store/configs';
-import { useTheme } from '../theme/ThemeContext';
+import {useDispatch} from 'react-redux';
+import {loadAppConfigs} from '../store/configs';
+import {useTheme} from '../theme/ThemeContext';
+import FastImage from '@d11/react-native-fast-image';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-export const SplashScreen = ({ navigation }) => {
-  const { isDark, theme } = useTheme();
-  
+export const SplashScreen = ({navigation}) => {
+  const {isDark, theme} = useTheme();
+
   // const navigation= useNavigation();
   const dispatch = useDispatch();
 
@@ -23,37 +24,60 @@ export const SplashScreen = ({ navigation }) => {
     const initializeApp = async () => {
       try {
         await dispatch(loadAppConfigs());
- 
-      } catch (error) {
-      }
+      } catch (error) {}
     };
 
     initializeApp();
   }, []);
-  
 
   return (
-    <SafeAreaView style={[styles.container, { 
-      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-    }]}>
-      <Image
-        source={isDark ? require('../../assets/new/welcome_screen_bg_dark.png') : require('../../assets/new/welcome_screen_bg.png')}
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
+      <FastImage
+        source={
+          isDark
+            ? require('../../assets/new/welcome_screen_bg_dark.png')
+            : require('../../assets/new/welcome_screen_bg.png')
+        }
         style={styles.backgroundImage}
-        resizeMode="cover"
+        resizeMode={FastImage.resizeMode.cover}
+        priority={FastImage.priority.high}
       />
       <View style={styles.contentContainer}>
-        <Image
+        <FastImage
           source={require('../../assets/new/main_logo.png')}
           style={styles.logo}
-          resizeMode="contain"
+          resizeMode={FastImage.resizeMode.contain}
+          priority={FastImage.priority.high}
         />
         <View style={styles.textContainer}>
-          <Text style={[styles.titleText, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Your Pet, Our Security!</Text>
-          <Text style={[styles.subtitleText, { 
-            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
-          }]}>
+          <Text
+            style={[
+              styles.titleText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            Your Pet, Our Security!
+          </Text>
+          <Text
+            style={[
+              styles.subtitleText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-700'],
+              },
+            ]}>
             The best marketplace for {'\n'} exotic pets
           </Text>
         </View>

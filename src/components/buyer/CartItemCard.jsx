@@ -3,16 +3,19 @@ import {Image, StyleSheet} from 'react-native';
 import {flexeStyles} from '../../utils/globalStyles';
 import {ThemedIcon} from '../Icon';
 import {Price} from '../Price';
+import FastImage from '@d11/react-native-fast-image';
 
 export const CartItemCard = () => {
   const theme = useTheme();
   return (
     <Layout style={[styles.card, flexeStyles.row]}>
-      <Image
+      <FastImageWithFallback
         style={[styles.image]}
         source={{
           uri: 'https://repository-images.githubusercontent.com/260096455/47f1b200-8b2e-11ea-8fa1-ab106189aeb0',
         }}
+        priority={FastImage.priority.high}
+        resizeMode={FastImage.resizeMode.cover}
       />
       <Layout style={[flexeStyles.contentBetween, {flexShrink: 1}]}>
         <Layout style={[flexeStyles.row, flexeStyles.contentBetween]}>

@@ -39,6 +39,8 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import {useTheme as useThemeContext} from '../../../theme/ThemeContext';
 import {AppScreens} from '../../../navigators/AppNavigator';
+import FastImageWithFallback from '../../../components/common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -411,10 +413,14 @@ export const AddProductScreen = ({navigation}) => {
               style={styles.imageSlider}>
               {images.map((image, index) => (
                 <View key={index} style={styles.sliderImageContainer}>
-                  <Image
+                  <FastImageWithFallback
+                    priority={FastImage.priority.high}
+                    resizeMode={FastImage.resizeMode.cover}
                     source={{uri: image.uri}}
+                    fallbackSource={{
+                      uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                    }}
                     style={styles.sliderImage}
-                    resizeMode="cover"
                   />
                 </View>
               ))}
@@ -1347,8 +1353,13 @@ export const AddProductScreen = ({navigation}) => {
                   <TouchableOpacity
                     style={styles.uploadTouchable}
                     onPress={() => handleImagePick('thumbnail')}>
-                    <Image
+                    <FastImageWithFallback
+                      priority={FastImage.priority.high}
+                      resizeMode={FastImage.resizeMode.cover}
                       source={require('../../../../assets/new/icons/upload-icon.png')}
+                      fallbackSource={{
+                        uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                      }}
                       style={[
                         styles.uploadIcon,
                         {
@@ -1384,8 +1395,13 @@ export const AddProductScreen = ({navigation}) => {
                   </TouchableOpacity>
                   {thumbnail && (
                     <View style={styles.imagePreviewContainer}>
-                      <Image
+                      <FastImageWithFallback
+                        priority={FastImage.priority.high}
+                        resizeMode={FastImage.resizeMode.cover}
                         source={{uri: thumbnail.uri}}
+                        fallbackSource={{
+                          uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                        }}
                         style={styles.previewImage}
                       />
                       <TouchableOpacity
@@ -1420,8 +1436,13 @@ export const AddProductScreen = ({navigation}) => {
                   <TouchableOpacity
                     style={styles.uploadTouchable}
                     onPress={() => handleImagePick('images')}>
-                    <Image
+                    <FastImageWithFallback
+                      priority={FastImage.priority.high}
+                      resizeMode={FastImage.resizeMode.cover}
                       source={require('../../../../assets/new/icons/upload-icon.png')}
+                      fallbackSource={{
+                        uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                      }}
                       style={[
                         styles.uploadIcon,
                         {
@@ -1477,8 +1498,13 @@ export const AddProductScreen = ({navigation}) => {
                               : theme['color-basic-100'],
                           },
                         ]}>
-                        <Image
+                        <FastImageWithFallback
+                          priority={FastImage.priority.high}
+                          resizeMode={FastImage.resizeMode.cover}
                           source={{uri: img.uri}}
+                          fallbackSource={{
+                            uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                          }}
                           style={[
                             styles.previewImage,
                             {

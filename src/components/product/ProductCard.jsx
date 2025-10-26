@@ -24,6 +24,7 @@ import {
   selectIsSellerAuthenticated,
 } from '../../store/user';
 import {Alert} from 'react-native';
+import FastImageWithFallback from '../common/FastImageWithFallback';
 import FastImage from '@d11/react-native-fast-image';
 
 const {width: windowWidth} = Dimensions.get('screen');
@@ -45,6 +46,7 @@ export const ProductCard = ({
 }) => {
   const dispatch = useDispatch();
   const {theme} = useTheme();
+  // console.log('image------------------', image);
 
   // Get wishlist status from Redux - ensure we're checking the correct product ID
   const isInWishlist = useSelector(state => selectIsInWishlist(state, id));
@@ -104,20 +106,19 @@ export const ProductCard = ({
       ]}
       onPress={() => onProductDetail && onProductDetail(id, slug)}>
       <View style={styles.imageContainer}>
-        <FastImage
+        <FastImageWithFallback
           source={{
             uri: image,
-            priority: FastImage.priority.high,
           }}
           resizeMode={FastImage.resizeMode.cover}
-          style={[
-            styles.image,
-            {
-              backgroundColor: isDark
-                ? theme['color-shadcn-secondary']
-                : theme['color-basic-200'],
-            },
-          ]}
+          fallbackSource={{
+            uri: 'https://via.placeholder.com/200x200/cccccc/666666?text=Product+Image',
+          }}
+          style={styles.image}
+          showDebugLogs={false}
+          maxRetries={2}
+          retryDelay={1500}
+          priority={FastImage.priority.high}
         />
         {isSoldOut && (
           <View style={styles.soldOutContainer}>

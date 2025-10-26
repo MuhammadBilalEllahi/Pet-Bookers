@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -16,40 +16,39 @@ import {
   Spinner,
   Divider,
 } from '@ui-kitten/components';
-import { useTheme } from '../../../../theme/ThemeContext';
-import { useTranslation } from 'react-i18next';
-import { MainScreensHeader } from '../../../../components/buyer';
-import { axiosSellerClient } from '../../../../utils/axiosClient';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { selectBaseUrls } from '../../../../store/configs';
-import { useSelector } from 'react-redux';
-import { ImagePicker } from '../../../../components/form';
-import { ProfileActionButton } from '../../../../components/profile';
-import { AppScreens } from '../../../../navigators/AppNavigator';
-import { ThemedIcon } from '../../../../components/Icon';
+import {useTheme} from '../../../../theme/ThemeContext';
+import {useTranslation} from 'react-i18next';
+import {MainScreensHeader} from '../../../../components/buyer';
+import {axiosSellerClient} from '../../../../utils/axiosClient';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {selectBaseUrls} from '../../../../store/configs';
+import {useSelector} from 'react-redux';
+import {ImagePicker} from '../../../../components/form';
+import {ProfileActionButton} from '../../../../components/profile';
+import {AppScreens} from '../../../../navigators/AppNavigator';
+import {ThemedIcon} from '../../../../components/Icon';
 
-import { getShopInfo, updateShopInfo } from '../../../../services/sellerApi';
-
+import {getShopInfo, updateShopInfo} from '../../../../services/sellerApi';
 
 // Permission request helper for gallery access
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
     const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
     );
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   } else if (Platform.OS === 'android') {
     const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
     );
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   }
   return true; // iOS handles it via Info.plist
 };
 
-export const FarmDetailsEditScreen = ({ navigation }) => {
-  const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
+export const FarmDetailsEditScreen = ({navigation}) => {
+  const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
   const baseUrls = useSelector(selectBaseUrls);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -62,7 +61,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   const [selectedDeliveryMan, setSelectedDeliveryMan] = useState(null);
 
   const navigateToEarnings = (deliveryMan = null) => {
-    navigation.navigate(AppScreens.EARNINGS_STATS, { deliveryMan });
+    navigation.navigate(AppScreens.EARNINGS_STATS, {deliveryMan});
   };
 
   // Shop Info State
@@ -87,16 +86,21 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
           name: response.data.name || '',
           address: response.data.address || '',
           contact: response.data.contact || '',
-          image: response.data.image ? {
-            uri: `${baseUrls['shop_image_url']}/${response.data.image}`,
-            name: response.data.image,
-            type: 'image/jpeg'
-          } : null,
+          image: response.data.image
+            ? {
+                uri: `${baseUrls['shop_image_url']}/${response.data.image}`,
+                name: response.data.image,
+                type: 'image/jpeg',
+              }
+            : null,
         });
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      Alert.alert(t('farmDetailsEditScreen.alerts.errorTitle'), t('farmDetailsEditScreen.alerts.fetchError'));
+      Alert.alert(
+        t('farmDetailsEditScreen.alerts.errorTitle'),
+        t('farmDetailsEditScreen.alerts.fetchError'),
+      );
     } finally {
       setLoading(false);
     }
@@ -105,7 +109,10 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   const handleImagePick = async () => {
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) {
-      Alert.alert(t('farmDetailsEditScreen.alerts.permissionDenied'), t('farmDetailsEditScreen.alerts.storagePermission'));
+      Alert.alert(
+        t('farmDetailsEditScreen.alerts.permissionDenied'),
+        t('farmDetailsEditScreen.alerts.storagePermission'),
+      );
       return;
     }
 
@@ -118,7 +125,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
           uri: asset.uri,
           name: asset.fileName || 'image.jpg',
           type: asset.type || 'image/jpeg',
-        }
+        },
       }));
     }
   };
@@ -133,7 +140,10 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
       shopFormData.append('contact', shopInfo.contact);
       if (shopInfo.image && shopInfo.image.uri) {
         shopFormData.append('image', {
-          uri: Platform.OS === 'ios' ? shopInfo.image.uri.replace('file://', '') : shopInfo.image.uri,
+          uri:
+            Platform.OS === 'ios'
+              ? shopInfo.image.uri.replace('file://', '')
+              : shopInfo.image.uri,
           type: shopInfo.image.type,
           name: shopInfo.image.name,
         });
@@ -143,17 +153,21 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
 
       await updateShopInfo(shopFormData);
 
-      Alert.alert(t('farmDetailsEditScreen.alerts.successTitle'), t('farmDetailsEditScreen.alerts.updateSuccess'));
+      Alert.alert(
+        t('farmDetailsEditScreen.alerts.successTitle'),
+        t('farmDetailsEditScreen.alerts.updateSuccess'),
+      );
       // navigation.goBack();
     } catch (error) {
       console.error('Error updating shop data:', error);
-      Alert.alert(t('farmDetailsEditScreen.alerts.errorTitle'), t('farmDetailsEditScreen.alerts.updateError'));
+      Alert.alert(
+        t('farmDetailsEditScreen.alerts.errorTitle'),
+        t('farmDetailsEditScreen.alerts.updateError'),
+      );
     } finally {
       setUploading(false);
     }
   };
-
-  
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
@@ -164,11 +178,11 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   };
 
   const navigateToOrders = (deliveryMan = null) => {
-    navigation.navigate(AppScreens.ORDERS_STATS, { deliveryMan });
+    navigation.navigate(AppScreens.ORDERS_STATS, {deliveryMan});
   };
 
   const navigateToReviews = (deliveryMan = null) => {
-    navigation.navigate(AppScreens.REVIEWS_STATS, { deliveryMan });
+    navigation.navigate(AppScreens.REVIEWS_STATS, {deliveryMan});
   };
 
   const navigateToTransactions = () => {
@@ -176,7 +190,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   };
 
   const navigateToShopSettings = () => {
-      navigation.navigate(AppScreens.SHOP_SETTINGS);
+    navigation.navigate(AppScreens.SHOP_SETTINGS);
   };
 
   const closeAllModals = () => {
@@ -190,96 +204,153 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
   if (loading) {
     return (
       <Layout style={styles.loadingContainer}>
-        <Spinner size='large' />
+        <Spinner size="large" />
       </Layout>
     );
   }
 
   return (
-    <Layout style={[styles.container, { 
-      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-    }]}>
+    <Layout
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
       {showDeliveryManagement ? (
         <Delivery onBack={() => setShowDeliveryManagement(false)} />
       ) : (
         <ScrollView style={styles.scrollView}>
           {/* Header with Back Button */}
           <View style={styles.headerRow}>
-            <Text style={[styles.sectionTitle, { 
-              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>{t('farmDetailsEditScreen.title')}</Text>
+            <Text
+              style={[
+                styles.sectionTitle,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                },
+              ]}>
+              {t('farmDetailsEditScreen.title')}
+            </Text>
             <Button
               appearance="ghost"
               size="small"
               onPress={navigateToDeliveryManagement}
-              style={styles.navButton}
-            >
+              style={styles.navButton}>
               {t('farmDetailsEditScreen.deliveryManagement')}
             </Button>
           </View>
 
           {/* Farm Management Options */}
-          <Layout style={[styles.section, { 
-            backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-            borderRadius: 12 
-          }]}>
-            <Text style={[styles.sectionTitle, { 
-              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>{t('farmDetailsEditScreen.managementOptions')}</Text>
-            
+          <Layout
+            style={[
+              styles.section,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : 'rgba(255,255,255,0.95)',
+                borderRadius: 12,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                },
+              ]}>
+              {t('farmDetailsEditScreen.managementOptions')}
+            </Text>
+
             <View style={styles.managementGrid}>
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={navigateToDeliveryManagement}
-                accessoryLeft={(props) => <ThemedIcon name="car-outline" iconStyle={{ width: 22, height: 22 }} />}
-              >
-                {t('farmDetailsEditScreen.managementButtons.deliveryManagement.title')}
+                accessoryLeft={props => (
+                  <ThemedIcon
+                    name="car-outline"
+                    iconStyle={{width: 22, height: 22}}
+                  />
+                )}>
+                {t(
+                  'farmDetailsEditScreen.managementButtons.deliveryManagement.title',
+                )}
               </Button>
-              
+
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToEarnings()}
-                accessoryLeft={(props) => <ThemedIcon name="trending-up-outline" iconStyle={{ width: 22, height: 22 }} />}
-              >
+                accessoryLeft={props => (
+                  <ThemedIcon
+                    name="trending-up-outline"
+                    iconStyle={{width: 22, height: 22}}
+                  />
+                )}>
                 {t('farmDetailsEditScreen.managementButtons.earnings.title')}
               </Button>
-              
+
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToOrders()}
-                accessoryLeft={(props) => <ThemedIcon name="list-outline" iconStyle={{ width: 22, height: 22 }} />}
-              >
+                accessoryLeft={props => (
+                  <ThemedIcon
+                    name="list-outline"
+                    iconStyle={{width: 22, height: 22}}
+                  />
+                )}>
                 {t('farmDetailsEditScreen.managementButtons.orders.title')}
               </Button>
-              
+
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToReviews()}
-                accessoryLeft={(props) => <ThemedIcon name="star-outline" iconStyle={{ width: 22, height: 22 }} />}
-              >
+                accessoryLeft={props => (
+                  <ThemedIcon
+                    name="star-outline"
+                    iconStyle={{width: 22, height: 22}}
+                  />
+                )}>
                 {t('farmDetailsEditScreen.managementButtons.reviews.title')}
               </Button>
-              
+
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToTransactions()}
-                accessoryLeft={(props) => <ThemedIcon name="credit-card-outline" iconStyle={{ width: 22, height: 22 }} />}
-              >
-                {t('farmDetailsEditScreen.managementButtons.transactions.title')}
+                accessoryLeft={props => (
+                  <ThemedIcon
+                    name="credit-card-outline"
+                    iconStyle={{width: 22, height: 22}}
+                  />
+                )}>
+                {t(
+                  'farmDetailsEditScreen.managementButtons.transactions.title',
+                )}
               </Button>
-              
+
               <Button
                 appearance="outline"
                 style={styles.managementButton}
                 onPress={() => navigateToShopSettings()}
-                accessoryLeft={(props) => <ThemedIcon name="settings-outline" iconStyle={{ width: 22, height: 22 }} />}
-              >
-                {t('farmDetailsEditScreen.managementButtons.shopSettings.title')}
+                accessoryLeft={props => (
+                  <ThemedIcon
+                    name="settings-outline"
+                    iconStyle={{width: 22, height: 22}}
+                  />
+                )}>
+                {t(
+                  'farmDetailsEditScreen.managementButtons.shopSettings.title',
+                )}
               </Button>
             </View>
           </Layout>
@@ -292,7 +363,7 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
             <View style={styles.headerRow}>
               <Text style={[styles.sectionTitle, { 
                 color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>Farm Details</Text>
+              }]}>{t('common.farmDetails')}</Text>
               <Button
                 appearance="ghost"
                 size="small"
@@ -392,10 +463,6 @@ export const FarmDetailsEditScreen = ({ navigation }) => {
         </Layout> */}
         </ScrollView>
       )}
-
-        
-
-  
     </Layout>
   );
 };
@@ -506,4 +573,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
   },
-}); 
+});

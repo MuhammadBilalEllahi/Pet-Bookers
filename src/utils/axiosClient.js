@@ -42,7 +42,8 @@ axiosBuyerClient.interceptors.request.use(
     return config;
   },
   error => {
-    Promise.reject(error);
+    console.error('Buyer Request Error:', error);
+    return Promise.reject(error);
   },
 );
 
@@ -63,6 +64,45 @@ axiosSellerClient.interceptors.request.use(
     return config;
   },
   error => {
-    Promise.reject(error);
+    console.error('Seller Request Error:', error);
+    return Promise.reject(error);
+  },
+);
+
+// ==================== BUYER RESPONSE INTERCEPTOR ====================
+axiosBuyerClient.interceptors.response.use(
+  response => {
+    return response;
+  },
+  error => {
+    console.error('Buyer API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      config: error.config,
+    });
+    return Promise.reject(error);
+  },
+);
+
+// ==================== SELLER RESPONSE INTERCEPTOR ====================
+axiosSellerClient.interceptors.response.use(
+  response => {
+    return response;
+  },
+  error => {
+    console.error('Seller API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      config: error.config,
+    });
+    return Promise.reject(error);
   },
 );

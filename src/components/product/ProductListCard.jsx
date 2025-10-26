@@ -167,7 +167,10 @@ export const ProductListCard = ({
       {/* Image Container - Left Side */}
       {console.log('\nimage------------------', image)}
       <View style={styles.imageContainer}>
-        <FastImage
+        <FastImage   onLoadStart={() => console.log('🟡 FastImage loading started')}
+  onLoad={() => console.log('✅ FastImage loaded successfully')}
+  onError={(error) => console.log('❌ FastImage load error:', error)}
+  onLoadEnd={() => console.log('⚪ FastImage load ended')}
           source={{
             uri: image,
             priority: FastImage.priority.high,

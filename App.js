@@ -26,7 +26,6 @@ import {flexeStyles} from './src/utils/globalStyles';
 import {SplashScreen} from './src/screens/SplashScreen';
 import Toast from 'react-native-toast-message';
 import {ThemeProvider, useTheme} from './src/theme/ThemeContext';
-import {NavigationContainer} from '@react-navigation/native';
 
 dayjs.extend(calendar);
 dayjs.extend(localizedFormat);
@@ -87,7 +86,8 @@ export default function Root() {
   return (
     <StoreProvider store={store}>
       <ThemeProvider>
-        <Suspense fallback={<SplashScreen />}>
+        <Suspense
+          fallback={<SplashScreen showLoadingText={true} duration={2000} />}>
           <AppContent />
         </Suspense>
       </ThemeProvider>

@@ -5,18 +5,20 @@ import {useTranslation} from 'react-i18next';
 import {Button, Layout, Text} from '@ui-kitten/components';
 import {ThemedIcon} from '../Icon';
 import {flexeStyles} from '../../utils/globalStyles';
-import { AppScreens } from '../../navigators/AppNavigator';
+import {AppScreens} from '../../navigators/AppNavigator';
 
-export const AuthRestrictedError = ({subTitle, isItSeller=false}) => {
-  
-  const route = useRoute()
-  
-  const isitSeller = route.params?.isItSeller || isItSeller ||false;
-  const subtitle = route.params?.subTitle || subTitle || "messages.sellerLoginRequired";
+export const AuthRestrictedError = ({subTitle, isItSeller = false}) => {
+  const route = useRoute();
+
+  const isitSeller = route.params?.isItSeller || isItSeller || false;
+  const subtitle =
+    route.params?.subTitle || subTitle || 'messages.sellerLoginRequired';
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
-  
 
+  console.log('isitSeller', isitSeller);
+  console.log('subtitle', subtitle);
+  console.log('i18n.language', i18n.language);
   const onNavigateToAuth = () => {
     // const { isItSeller= false} = route.params || {};
     navigation.navigate(AppScreens.AUTH, {isItSeller: isitSeller});

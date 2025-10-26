@@ -11,6 +11,13 @@ import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import {useTheme} from '../../../theme/ThemeContext';
 import {Image} from 'react-native';
 import {BASE_URLS} from '../../../store/configs';
+import FastImageWithFallback from '../../../components/common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
+import {Dimensions} from 'react-native';
+
+const {width: screenWidth} = Dimensions.get('window');
+const imageWidth = screenWidth; // 16px padding on each side
+const imageHeight = (imageWidth * 4) / 9; // 16:9 ratio
 
 // Dummy data for testing
 
@@ -232,17 +239,24 @@ export default function LuckyDrawListScreen() {
             <View style={styles.cardContent}>
               <View
                 style={{
-                  width: '100%',
-                  aspectRatio: 16 / 9,
+                  width: imageWidth,
+                  height: imageHeight,
                   borderRadius: 12,
                   overflow: 'hidden',
+                  borderBottomLeftRadius: 0,
+                  borderBottomRightRadius: 0,
+                  backgroundColor: '#f0f0f0',
                   marginBottom: 12,
+                  alignSelf: 'center',
                 }}>
-                <Image
-                  source={{uri: `${BASE_URLS.lucky_draw_url}/${item.image}`}}
+                <FastImageWithFallback
+                  source={{
+                    uri: `${BASE_URLS.lucky_draw_url}/${item.image}`,
+                  }}
                   style={{width: '100%', height: '100%'}}
-                  resizeMode="cover"
+                  resizeMode={FastImage.resizeMode.cover}
                   resizeMethod="auto"
+                  priority={FastImage.priority.high}
                 />
               </View>
               <Text

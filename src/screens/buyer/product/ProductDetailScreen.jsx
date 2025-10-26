@@ -43,7 +43,7 @@ import {
   selectIsInWishlist,
 } from '../../../store/wishlist';
 import {calculateDiscountedPrice} from '../../../utils/products';
-import {selectBaseUrls} from '../../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../../store/configs';
 import {selectProductCategories} from '../../../store/productCategories';
 import {setActiveRoom} from '../../../store/chat';
 import {setBottomTabBarVisibility} from '../../../store/configs';
@@ -309,10 +309,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
       return list.map(productItem => ({
         id: productItem.id,
         name: productItem.name,
-        image:
-          baseUrls && baseUrls['product_thumbnail_url'] && productItem.thumbnail
-            ? `${baseUrls['product_thumbnail_url']}/${productItem.thumbnail}`
-            : '',
+        image: productItem.thumbnail
+          ? `${BASE_URLS.product_thumbnail_url}/${productItem.thumbnail}`
+          : '',
         price:
           productItem.discount > 0
             ? calculateDiscountedPrice(
@@ -645,7 +644,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
         `products/social-share-link/${product.slug}`,
       );
       const shareLink = response.data;
-      // console.log('shareLink', shareLink);
+      console.log('shareLink', shareLink);
       // console.log('product', product);
 
       const shareOptions = {
@@ -925,7 +924,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
                       }}>
-                      BOOSTED
+                      {t('product.boosted')}
                     </Text>
                   </Layout>
                 )}
@@ -999,7 +998,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                       fontSize: 16,
                       marginRight: 8,
                     }}>
-                    Rs {product.unit_price.toLocaleString()}
+                    {t('common.rs')} {product.unit_price.toLocaleString()}
                   </Text>
                   <Text
                     style={{
@@ -1159,7 +1158,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   fontSize: 16,
                 }}>
-                Overview
+                {t('product.overview')}
               </Text>
               {activeTab === 'overview' && (
                 <View
@@ -1189,7 +1188,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   fontSize: 16,
                 }}>
-                Reviews
+                {t('product.reviews')}
               </Text>
               {activeTab === 'reviews' && (
                 <View
@@ -1408,7 +1407,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           ? theme['color-shadcn-foreground']
                           : theme['color-basic-900'],
                       }}>
-                      Categories
+                      {t('product.categories')}
                     </Text>
                     <Layout
                       style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>
@@ -1452,7 +1451,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           ? theme['color-shadcn-foreground']
                           : theme['color-basic-900'],
                       }}>
-                      Tags
+                      {t('product.tags')}
                     </Text>
                     <Layout
                       style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>
@@ -1499,7 +1498,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                             ? theme['color-shadcn-foreground']
                             : theme['color-basic-900'],
                         }}>
-                        Product Video
+                        {t('product.productVideo')}
                       </Text>
                       <TouchableOpacity
                         onPress={() =>
@@ -1615,7 +1614,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           : theme['color-basic-900'],
                         fontSize: 14,
                       }}>
-                      {getSellerCity(product)}
+                      {getSellerCity(product)
+                        ? t(getSellerCity(product))
+                        : t('product.cityNotAvailable')}
                     </Text>
                   </Layout>
                   <Layout style={{flexDirection: 'row', marginBottom: 8}}>
@@ -1638,7 +1639,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           : theme['color-basic-900'],
                         fontSize: 14,
                       }}>
-                      {getSellerState(product)}
+                      {getSellerState(product)
+                        ? t(getSellerState(product))
+                        : t('product.stateNotAvailable')}
                     </Text>
                   </Layout>
                 </Layout>

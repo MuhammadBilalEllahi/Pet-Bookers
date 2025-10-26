@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -22,16 +22,16 @@ import {
   Toggle,
 } from '@ui-kitten/components';
 
-import { useTheme } from '../../../../../theme/ThemeContext';
-import { useTranslation } from 'react-i18next';
-import { axiosSellerClient } from '../../../../../utils/axiosClient';
-import { ThemedIcon } from '../../../../../components/Icon';
-import { MainScreensHeader } from '../../../../../components/buyer';
-import { CustomDateTimePicker } from '../../../../../components/form';
+import {useTheme} from '../../../../../theme/ThemeContext';
+import {useTranslation} from 'react-i18next';
+import {axiosSellerClient} from '../../../../../utils/axiosClient';
+import {ThemedIcon} from '../../../../../components/Icon';
+import {MainScreensHeader} from '../../../../../components/buyer';
+import {CustomDateTimePicker} from '../../../../../components/form';
 
-export const CouponHandling = ({ navigation }) => {
-  const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
+export const CouponHandling = ({navigation}) => {
+  const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
   const [loading, setLoading] = useState(true);
   const [coupons, setCoupons] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -73,13 +73,13 @@ export const CouponHandling = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await axiosSellerClient.get('/coupon/list', {
-        params: { limit: 50, offset: 0 }
+        params: {limit: 50, offset: 0},
       });
       // console.log("coupons list", response.data);
       setCoupons(response.data.coupons || []);
     } catch (error) {
       console.error('Error fetching coupons:', error);
-      Alert.alert('Error', 'Failed to fetch coupons');
+      Alert.alert(t('common.error'), t('common.failedToFetchCoupons'));
     } finally {
       setLoading(false);
     }
@@ -115,84 +115,111 @@ export const CouponHandling = ({ navigation }) => {
     try {
       const response = await axiosSellerClient.post('/coupon/store', formData);
       // console.log("coupon created", response.data);
-      Alert.alert('Success', 'Coupon created successfully');
+      Alert.alert(t('common.success'), t('common.couponCreatedSuccessfully'));
       setShowCreateModal(false);
       resetForm();
       fetchCoupons();
     } catch (error) {
       console.error('Error creating coupon:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to create coupon');
+      Alert.alert(
+        t('common.error'),
+        error.response?.data?.message || t('common.failedToCreateCoupon'),
+      );
     }
   };
 
   const handleEditCoupon = async () => {
     try {
-      const response = await axiosSellerClient.put(`/coupon/update/${selectedCoupon.id}`, formData);
+      const response = await axiosSellerClient.put(
+        `/coupon/update/${selectedCoupon.id}`,
+        formData,
+      );
       // console.log("coupon updated", response.data);
-      Alert.alert('Success', 'Coupon updated successfully');
+      Alert.alert(t('common.success'), t('common.couponUpdatedSuccessfully'));
       setShowEditModal(false);
       resetForm();
       fetchCoupons();
     } catch (error) {
       console.error('Error updating coupon:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update coupon');
+      Alert.alert(
+        t('common.error'),
+        error.response?.data?.message || t('common.failedToUpdateCoupon'),
+      );
     }
   };
 
   const handleStatusUpdate = async (couponId, newStatus) => {
     try {
-      const response = await axiosSellerClient.put(`/coupon/status-update/${couponId}`, {
-        status: newStatus
-      });
+      const response = await axiosSellerClient.put(
+        `/coupon/status-update/${couponId}`,
+        {
+          status: newStatus,
+        },
+      );
       // console.log("status updated", response.data);
-      Alert.alert('Success', 'Coupon status updated successfully');
+      Alert.alert(
+        t('common.success'),
+        t('common.couponStatusUpdatedSuccessfully'),
+      );
       fetchCoupons();
     } catch (error) {
       console.error('Error updating status:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update status');
+      Alert.alert(
+        t('common.error'),
+        error.response?.data?.message || t('common.failedToUpdateStatus'),
+      );
     }
   };
 
-  const handleDeleteCoupon = async (couponId) => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this coupon?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const response = await axiosSellerClient.delete(`/coupon/delete/${couponId}`);
-              // console.log("coupon deleted", response.data);
-              Alert.alert('Success', 'Coupon deleted successfully');
-              fetchCoupons();
-            } catch (error) {
-              console.error('Error deleting coupon:', error);
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete coupon');
-            }
+  const handleDeleteCoupon = async couponId => {
+    Alert.alert(t('common.confirmDelete'), t('common.areYouSureDeleteCoupon'), [
+      {text: t('common.cancel'), style: 'cancel'},
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const response = await axiosSellerClient.delete(
+              `/coupon/delete/${couponId}`,
+            );
+            // console.log("coupon deleted", response.data);
+            Alert.alert(
+              t('common.success'),
+              t('common.couponDeletedSuccessfully'),
+            );
+            fetchCoupons();
+          } catch (error) {
+            console.error('Error deleting coupon:', error);
+            Alert.alert(
+              t('common.error'),
+              error.response?.data?.message || t('common.failedToDeleteCoupon'),
+            );
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleCheckCoupon = async () => {
     try {
       setCheckLoading(true);
-      const response = await axiosSellerClient.post('/coupon/check-coupon', checkData);
+      const response = await axiosSellerClient.post(
+        '/coupon/check-coupon',
+        checkData,
+      );
       // console.log("coupon check result", response.data);
       setCheckResult(response.data);
     } catch (error) {
       console.error('Error checking coupon:', error);
-      setCheckResult({ message: error.response?.data?.message || 'Invalid coupon' });
+      setCheckResult({
+        message: error.response?.data?.message || 'Invalid coupon',
+      });
     } finally {
       setCheckLoading(false);
     }
   };
 
-  const openEditModal = (coupon) => {
+  const openEditModal = coupon => {
     setSelectedCoupon(coupon);
     setFormData({
       coupon_type: coupon.coupon_type || '',
@@ -210,128 +237,226 @@ export const CouponHandling = ({ navigation }) => {
     setShowEditModal(true);
   };
 
-  const getStatusColor = (status) => {
-    return status === 1 ? theme['color-success-500'] : theme['color-danger-500'];
+  const getStatusColor = status => {
+    return status === 1
+      ? theme['color-success-500']
+      : theme['color-danger-500'];
   };
 
-  const getStatusText = (status) => {
+  const getStatusText = status => {
     return status === 1 ? 'Active' : 'Inactive';
   };
 
-  const getCouponTypeText = (type) => {
+  const getCouponTypeText = type => {
     switch (type) {
-      case 'discount_on_purchase': return 'Discount on Purchase';
-      case 'free_delivery': return 'Free Delivery';
-      case 'first_order': return 'First Order';
-      default: return type;
+      case 'discount_on_purchase':
+        return 'Discount on Purchase';
+      case 'free_delivery':
+        return 'Free Delivery';
+      case 'first_order':
+        return 'First Order';
+      default:
+        return type;
     }
   };
 
-  const getDiscountTypeText = (type) => {
+  const getDiscountTypeText = type => {
     switch (type) {
-      case 'amount': return 'Fixed Amount';
-      case 'percentage': return 'Percentage';
-      default: return type;
+      case 'amount':
+        return 'Fixed Amount';
+      case 'percentage':
+        return 'Percentage';
+      default:
+        return type;
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     return new Date(dateString).toLocaleDateString();
   };
 
   const isFormValid = () => {
-    const required = ['coupon_type', 'min_purchase', 'code', 'title', 'start_date', 'expire_date'];
-    const discountRequired = ['customer_id', 'limit', 'discount_type', 'discount'];
-    
+    const required = [
+      'coupon_type',
+      'min_purchase',
+      'code',
+      'title',
+      'start_date',
+      'expire_date',
+    ];
+    const discountRequired = [
+      'customer_id',
+      'limit',
+      'discount_type',
+      'discount',
+    ];
+
     for (const field of required) {
       if (!formData[field]) return false;
     }
-    
+
     if (formData.coupon_type === 'discount_on_purchase') {
       for (const field of discountRequired) {
         if (!formData[field]) return false;
       }
     }
-    
+
     return true;
   };
 
   if (loading) {
     return (
       <Layout style={styles.loadingContainer}>
-        <Spinner size='large' />
+        <Spinner size="large" />
       </Layout>
     );
   }
 
   return (
-    <Layout style={[styles.container, { 
-      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-    }]}>
+    <Layout
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
       {/* <MainScreensHeader title="Coupon Management" navigation={navigation} /> */}
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.headerRow}>
-          <Text style={[styles.title, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Coupons ({coupons.length})</Text>
+          <Text
+            style={[
+              styles.title,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.coupons')} ({coupons.length})
+          </Text>
           <Button
             size="small"
-            onPress={() => setTimeout(() => {
+            onPress={() =>
+              setTimeout(() => {
                 setShowCreateModal(true);
-              }, 400)}
-            style={styles.addButton}
-          >
-            Add Coupon
+              }, 400)
+            }
+            style={styles.addButton}>
+            {t('common.addCoupon')}
           </Button>
         </View>
 
         <Button
           appearance="outline"
           onPress={() => setShowCheckModal(true)}
-          style={styles.checkButton}
-        >
-          Check Coupon
+          style={styles.checkButton}>
+          {t('common.checkCoupon')}
         </Button>
 
         {coupons.length === 0 ? (
-          <Card style={[styles.emptyCard, { 
-            backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)'
-          }]}>
-            <Text style={[styles.emptyText, { 
-              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}>No coupons found</Text>
+          <Card
+            style={[
+              styles.emptyCard,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : 'rgba(255,255,255,0.95)',
+              },
+            ]}>
+            <Text
+              style={[
+                styles.emptyText,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600'],
+                },
+              ]}>
+              {t('common.noCouponsFound')}
+            </Text>
           </Card>
         ) : (
-          coupons.map((coupon) => (
+          coupons.map(coupon => (
             <Card
               key={coupon.id}
-              style={[styles.couponCard, { 
-                backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-                marginBottom: 12
-              }]}
-            >
+              style={[
+                styles.couponCard,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-card']
+                    : 'rgba(255,255,255,0.95)',
+                  marginBottom: 12,
+                },
+              ]}>
               <View style={styles.couponHeader}>
                 <View>
-                  <Text style={[styles.couponTitle, { 
-                    color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }]}>{coupon.title}</Text>
-                  <Text style={[styles.couponCode, { 
-                    color: theme['color-shadcn-primary'],
-                    fontWeight: 'bold'
-                  }]}>Code: {coupon.code}</Text>
+                  <Text
+                    style={[
+                      styles.couponTitle,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    {coupon.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.couponCode,
+                      {
+                        color: theme['color-shadcn-primary'],
+                        fontWeight: 'bold',
+                      },
+                    ]}>
+                    {t('common.code')}: {coupon.code}
+                  </Text>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(coupon.status) }]}>
-                  <Text style={styles.statusText}>{getStatusText(coupon.status)}</Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {backgroundColor: getStatusColor(coupon.status)},
+                  ]}>
+                  <Text style={styles.statusText}>
+                    {getStatusText(coupon.status)}
+                  </Text>
                 </View>
               </View>
 
-              <Divider style={{ marginVertical: 8, backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+              <Divider
+                style={{
+                  marginVertical: 8,
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-400'],
+                }}
+              />
 
               <View style={styles.couponDetails}>
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Type:</Text>
-                  <Text style={[styles.detailValue, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  <Text
+                    style={[
+                      styles.detailLabel,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('common.type')}:
+                  </Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
                     {getCouponTypeText(coupon.coupon_type)}
                   </Text>
                 </View>
@@ -339,14 +464,47 @@ export const CouponHandling = ({ navigation }) => {
                 {coupon.coupon_type === 'discount_on_purchase' && (
                   <>
                     <View style={styles.detailRow}>
-                      <Text style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Discount:</Text>
-                      <Text style={[styles.detailValue, { color: theme['color-shadcn-primary'] }]}>
-                        {coupon.discount}{coupon.discount_type === 'percentage' ? '%' : '$'}
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-muted-foreground']
+                              : theme['color-basic-600'],
+                          },
+                        ]}>
+                        {t('common.discount')}:
+                      </Text>
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {color: theme['color-shadcn-primary']},
+                        ]}>
+                        {coupon.discount}
+                        {coupon.discount_type === 'percentage' ? '%' : '$'}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
-                      <Text style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Max Discount:</Text>
-                      <Text style={[styles.detailValue, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-muted-foreground']
+                              : theme['color-basic-600'],
+                          },
+                        ]}>
+                        {t('common.maxDiscount')}:
+                      </Text>
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-foreground']
+                              : theme['color-basic-900'],
+                          },
+                        ]}>
                         ${coupon.max_discount}
                       </Text>
                     </View>
@@ -354,23 +512,78 @@ export const CouponHandling = ({ navigation }) => {
                 )}
 
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Min Purchase:</Text>
-                  <Text style={[styles.detailValue, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
+                  <Text
+                    style={[
+                      styles.detailLabel,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('common.minPurchase')}:
+                  </Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
                     ${coupon.min_purchase}
                   </Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Limit:</Text>
-                  <Text style={[styles.detailValue, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-                    {coupon.limit} uses
+                  <Text
+                    style={[
+                      styles.detailLabel,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('common.limit')}:
+                  </Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    {coupon.limit} {t('common.uses')}
                   </Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>Valid:</Text>
-                  <Text style={[styles.detailValue, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-                    {formatDate(coupon.start_date)} - {formatDate(coupon.expire_date)}
+                  <Text
+                    style={[
+                      styles.detailLabel,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-muted-foreground']
+                          : theme['color-basic-600'],
+                      },
+                    ]}>
+                    {t('common.valid')}:
+                  </Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    {formatDate(coupon.start_date)} -{' '}
+                    {formatDate(coupon.expire_date)}
                   </Text>
                 </View>
               </View>
@@ -380,26 +593,27 @@ export const CouponHandling = ({ navigation }) => {
                   size="tiny"
                   appearance="outline"
                   onPress={() => openEditModal(coupon)}
-                  style={styles.actionButton}
-                >
-                  Edit
+                  style={styles.actionButton}>
+                  {t('common.edit')}
                 </Button>
                 <Button
                   size="tiny"
                   appearance="outline"
-                  onPress={() => handleStatusUpdate(coupon.id, coupon.status === 1 ? 0 : 1)}
-                  style={styles.actionButton}
-                >
-                  {coupon.status === 1 ? 'Deactivate' : 'Activate'}
+                  onPress={() =>
+                    handleStatusUpdate(coupon.id, coupon.status === 1 ? 0 : 1)
+                  }
+                  style={styles.actionButton}>
+                  {coupon.status === 1
+                    ? t('common.deactivate')
+                    : t('common.activate')}
                 </Button>
                 <Button
                   size="tiny"
                   appearance="outline"
                   status="danger"
                   onPress={() => handleDeleteCoupon(coupon.id)}
-                  style={styles.actionButton}
-                >
-                  Delete
+                  style={styles.actionButton}>
+                  {t('common.delete')}
                 </Button>
               </View>
             </Card>
@@ -412,101 +626,207 @@ export const CouponHandling = ({ navigation }) => {
         visible={showCreateModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowCreateModal(false)}
-      >
+        onRequestClose={() => setShowCreateModal(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { 
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-          }]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { 
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>Create New Coupon</Text>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.createNewCoupon')}
+              </Text>
               <TouchableOpacity onPress={() => setShowCreateModal(false)}>
                 <ThemedIcon name="close-outline" size={24} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={[styles.modalScroll, {maxHeight: '85%'}]}   contentContainerStyle={{ paddingBottom: 40 }}>
+            <ScrollView
+              style={[styles.modalScroll, {maxHeight: '85%'}]}
+              contentContainerStyle={{paddingBottom: 40}}>
               <Input
-                label="Coupon Title"
+                label={t('common.couponTitle')}
                 value={formData.title}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, title: text}))
+                }
                 style={styles.input}
               />
 
               <Input
-                label="Coupon Code"
+                label={t('common.couponCode')}
                 value={formData.code}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, code: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, code: text}))
+                }
                 style={styles.input}
               />
 
-              <Text style={[styles.formLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Coupon Type</Text>
+              <Text
+                style={[
+                  styles.formLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.couponType')}
+              </Text>
               <Select
                 style={styles.select}
-                selectedIndex={formData.coupon_type ? new IndexPath(['discount_on_purchase', 'free_delivery', 'first_order'].indexOf(formData.coupon_type)) : null}
-                onSelect={(index) => {
-                  const types = ['discount_on_purchase', 'free_delivery', 'first_order'];
-                  setFormData(prev => ({ ...prev, coupon_type: types[index.row] }));
+                selectedIndex={
+                  formData.coupon_type
+                    ? new IndexPath(
+                        [
+                          'discount_on_purchase',
+                          'free_delivery',
+                          'first_order',
+                        ].indexOf(formData.coupon_type),
+                      )
+                    : null
+                }
+                onSelect={index => {
+                  const types = [
+                    'discount_on_purchase',
+                    'free_delivery',
+                    'first_order',
+                  ];
+                  setFormData(prev => ({
+                    ...prev,
+                    coupon_type: types[index.row],
+                  }));
                 }}
-                value={getCouponTypeText(formData.coupon_type) || 'Select Type'}
-              >
+                value={
+                  getCouponTypeText(formData.coupon_type) || 'Select Type'
+                }>
                 <SelectItem title="Discount on Purchase" />
                 <SelectItem title="Free Delivery" />
                 <SelectItem title="First Order" />
               </Select>
 
-              <Text style={[styles.formLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Customer</Text>
+              <Text
+                style={[
+                  styles.formLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.customer')}
+              </Text>
               <Select
                 style={styles.select}
-                selectedIndex={formData.customer_id ? new IndexPath(customers.findIndex(c => c.id.toString() === formData.customer_id)) : null}
-                onSelect={(index) => {
-                  setFormData(prev => ({ ...prev, customer_id: customers[index.row].id.toString() }));
+                selectedIndex={
+                  formData.customer_id
+                    ? new IndexPath(
+                        customers.findIndex(
+                          c => c.id.toString() === formData.customer_id,
+                        ),
+                      )
+                    : null
+                }
+                onSelect={index => {
+                  setFormData(prev => ({
+                    ...prev,
+                    customer_id: customers[index.row].id.toString(),
+                  }));
                 }}
-                value={customers.find(c => c.id.toString() === formData.customer_id)?.f_name + ' ' + customers.find(c => c.id.toString() === formData.customer_id)?.l_name || 'Select Customer'}
-              >
-                {customers.map((customer) => (
-                  <SelectItem key={customer.id} title={`${customer.f_name} ${customer.l_name}`} />
+                value={
+                  customers.find(c => c.id.toString() === formData.customer_id)
+                    ?.f_name +
+                    ' ' +
+                    customers.find(
+                      c => c.id.toString() === formData.customer_id,
+                    )?.l_name || 'Select Customer'
+                }>
+                {customers.map(customer => (
+                  <SelectItem
+                    key={customer.id}
+                    title={`${customer.f_name} ${customer.l_name}`}
+                  />
                 ))}
               </Select>
 
               <Input
-                label="Usage Limit"
+                label={t('common.usageLimit')}
                 value={formData.limit}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, limit: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, limit: text}))
+                }
                 keyboardType="numeric"
                 style={styles.input}
               />
 
               {formData.coupon_type === 'discount_on_purchase' && (
                 <>
-                  <Text style={[styles.formLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Discount Type</Text>
+                  <Text
+                    style={[
+                      styles.formLabel,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    Discount Type
+                  </Text>
                   <Select
                     style={styles.select}
-                    selectedIndex={formData.discount_type ? new IndexPath(['amount', 'percentage'].indexOf(formData.discount_type)) : null}
-                    onSelect={(index) => {
+                    selectedIndex={
+                      formData.discount_type
+                        ? new IndexPath(
+                            ['amount', 'percentage'].indexOf(
+                              formData.discount_type,
+                            ),
+                          )
+                        : null
+                    }
+                    onSelect={index => {
                       const types = ['amount', 'percentage'];
-                      setFormData(prev => ({ ...prev, discount_type: types[index.row] }));
+                      setFormData(prev => ({
+                        ...prev,
+                        discount_type: types[index.row],
+                      }));
                     }}
-                    value={getDiscountTypeText(formData.discount_type) || 'Select Type'}
-                  >
+                    value={
+                      getDiscountTypeText(formData.discount_type) ||
+                      'Select Type'
+                    }>
                     <SelectItem title="Fixed Amount" />
                     <SelectItem title="Percentage" />
                   </Select>
 
                   <Input
-                    label="Discount Value"
+                    label={t('common.discountValue')}
                     value={formData.discount}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, discount: text }))}
+                    onChangeText={text =>
+                      setFormData(prev => ({...prev, discount: text}))
+                    }
                     keyboardType="numeric"
                     style={styles.input}
                   />
 
                   <Input
-                    label="Max Discount"
+                    label={t('common.maxDiscount')}
                     value={formData.max_discount}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, max_discount: text }))}
+                    onChangeText={text =>
+                      setFormData(prev => ({...prev, max_discount: text}))
+                    }
                     keyboardType="numeric"
                     style={styles.input}
                   />
@@ -514,25 +834,35 @@ export const CouponHandling = ({ navigation }) => {
               )}
 
               <Input
-                label="Minimum Purchase"
+                label={t('common.minimumPurchase')}
                 value={formData.min_purchase}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, min_purchase: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, min_purchase: text}))
+                }
                 keyboardType="numeric"
                 style={styles.input}
               />
 
               <CustomDateTimePicker
-                label="Start Date"
+                label={t('common.startDate')}
                 value={formData.start_date}
-                onChange={(date) => setFormData(prev => ({ ...prev, start_date: date }))}
+                onChange={date =>
+                  setFormData(prev => ({...prev, start_date: date}))
+                }
                 style={styles.input}
               />
 
               <CustomDateTimePicker
-                label="Expire Date"
+                label={t('common.expireDate')}
                 value={formData.expire_date}
-                onChange={(date) => setFormData(prev => ({ ...prev, expire_date: date }))}
-                minimumDate={formData.start_date ? new Date(formData.start_date) : new Date()}
+                onChange={date =>
+                  setFormData(prev => ({...prev, expire_date: date}))
+                }
+                minimumDate={
+                  formData.start_date
+                    ? new Date(formData.start_date)
+                    : new Date()
+                }
                 style={styles.input}
               />
 
@@ -540,16 +870,14 @@ export const CouponHandling = ({ navigation }) => {
                 <Button
                   appearance="outline"
                   onPress={() => setShowCreateModal(false)}
-                  style={styles.cancelButton}
-                >
-                  Cancel
+                  style={styles.cancelButton}>
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   onPress={handleCreateCoupon}
                   disabled={!isFormValid()}
-                  style={styles.submitButton}
-                >
-                  Create Coupon
+                  style={styles.submitButton}>
+                  {t('common.createCoupon')}
                 </Button>
               </View>
             </ScrollView>
@@ -562,101 +890,207 @@ export const CouponHandling = ({ navigation }) => {
         visible={showEditModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowEditModal(false)}
-      >
+        onRequestClose={() => setShowEditModal(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { 
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-          }]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { 
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>Edit Coupon</Text>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.editCoupon')}
+              </Text>
               <TouchableOpacity onPress={() => setShowEditModal(false)}>
                 <ThemedIcon name="close-outline" size={24} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={[styles.modalScroll, {maxHeight: '85%'}]}   contentContainerStyle={{ paddingBottom: 40 }}>
+            <ScrollView
+              style={[styles.modalScroll, {maxHeight: '85%'}]}
+              contentContainerStyle={{paddingBottom: 40}}>
               <Input
-                label="Coupon Title"
+                label={t('common.couponTitle')}
                 value={formData.title}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, title: text}))
+                }
                 style={styles.input}
               />
 
               <Input
-                label="Coupon Code"
+                label={t('common.couponCode')}
                 value={formData.code}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, code: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, code: text}))
+                }
                 style={styles.input}
               />
 
-              <Text style={[styles.formLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Coupon Type</Text>
+              <Text
+                style={[
+                  styles.formLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.couponType')}
+              </Text>
               <Select
                 style={styles.select}
-                selectedIndex={formData.coupon_type ? new IndexPath(['discount_on_purchase', 'free_delivery', 'first_order'].indexOf(formData.coupon_type)) : null}
-                onSelect={(index) => {
-                  const types = ['discount_on_purchase', 'free_delivery', 'first_order'];
-                  setFormData(prev => ({ ...prev, coupon_type: types[index.row] }));
+                selectedIndex={
+                  formData.coupon_type
+                    ? new IndexPath(
+                        [
+                          'discount_on_purchase',
+                          'free_delivery',
+                          'first_order',
+                        ].indexOf(formData.coupon_type),
+                      )
+                    : null
+                }
+                onSelect={index => {
+                  const types = [
+                    'discount_on_purchase',
+                    'free_delivery',
+                    'first_order',
+                  ];
+                  setFormData(prev => ({
+                    ...prev,
+                    coupon_type: types[index.row],
+                  }));
                 }}
-                value={getCouponTypeText(formData.coupon_type) || 'Select Type'}
-              >
+                value={
+                  getCouponTypeText(formData.coupon_type) || 'Select Type'
+                }>
                 <SelectItem title="Discount on Purchase" />
                 <SelectItem title="Free Delivery" />
                 <SelectItem title="First Order" />
               </Select>
 
-              <Text style={[styles.formLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Customer</Text>
+              <Text
+                style={[
+                  styles.formLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.customer')}
+              </Text>
               <Select
                 style={styles.select}
-                selectedIndex={formData.customer_id ? new IndexPath(customers.findIndex(c => c.id.toString() === formData.customer_id)) : null}
-                onSelect={(index) => {
-                  setFormData(prev => ({ ...prev, customer_id: customers[index.row].id.toString() }));
+                selectedIndex={
+                  formData.customer_id
+                    ? new IndexPath(
+                        customers.findIndex(
+                          c => c.id.toString() === formData.customer_id,
+                        ),
+                      )
+                    : null
+                }
+                onSelect={index => {
+                  setFormData(prev => ({
+                    ...prev,
+                    customer_id: customers[index.row].id.toString(),
+                  }));
                 }}
-                value={customers.find(c => c.id.toString() === formData.customer_id)?.f_name + ' ' + customers.find(c => c.id.toString() === formData.customer_id)?.l_name || 'Select Customer'}
-              >
-                {customers.map((customer) => (
-                  <SelectItem key={customer.id} title={`${customer.f_name} ${customer.l_name}`} />
+                value={
+                  customers.find(c => c.id.toString() === formData.customer_id)
+                    ?.f_name +
+                    ' ' +
+                    customers.find(
+                      c => c.id.toString() === formData.customer_id,
+                    )?.l_name || 'Select Customer'
+                }>
+                {customers.map(customer => (
+                  <SelectItem
+                    key={customer.id}
+                    title={`${customer.f_name} ${customer.l_name}`}
+                  />
                 ))}
               </Select>
 
               <Input
-                label="Usage Limit"
+                label={t('common.usageLimit')}
                 value={formData.limit}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, limit: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, limit: text}))
+                }
                 keyboardType="numeric"
                 style={styles.input}
               />
 
               {formData.coupon_type === 'discount_on_purchase' && (
                 <>
-                  <Text style={[styles.formLabel, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>Discount Type</Text>
+                  <Text
+                    style={[
+                      styles.formLabel,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    Discount Type
+                  </Text>
                   <Select
                     style={styles.select}
-                    selectedIndex={formData.discount_type ? new IndexPath(['amount', 'percentage'].indexOf(formData.discount_type)) : null}
-                    onSelect={(index) => {
+                    selectedIndex={
+                      formData.discount_type
+                        ? new IndexPath(
+                            ['amount', 'percentage'].indexOf(
+                              formData.discount_type,
+                            ),
+                          )
+                        : null
+                    }
+                    onSelect={index => {
                       const types = ['amount', 'percentage'];
-                      setFormData(prev => ({ ...prev, discount_type: types[index.row] }));
+                      setFormData(prev => ({
+                        ...prev,
+                        discount_type: types[index.row],
+                      }));
                     }}
-                    value={getDiscountTypeText(formData.discount_type) || 'Select Type'}
-                  >
+                    value={
+                      getDiscountTypeText(formData.discount_type) ||
+                      'Select Type'
+                    }>
                     <SelectItem title="Fixed Amount" />
                     <SelectItem title="Percentage" />
                   </Select>
 
                   <Input
-                    label="Discount Value"
+                    label={t('common.discountValue')}
                     value={formData.discount}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, discount: text }))}
+                    onChangeText={text =>
+                      setFormData(prev => ({...prev, discount: text}))
+                    }
                     keyboardType="numeric"
                     style={styles.input}
                   />
 
                   <Input
-                    label="Max Discount"
+                    label={t('common.maxDiscount')}
                     value={formData.max_discount}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, max_discount: text }))}
+                    onChangeText={text =>
+                      setFormData(prev => ({...prev, max_discount: text}))
+                    }
                     keyboardType="numeric"
                     style={styles.input}
                   />
@@ -664,25 +1098,35 @@ export const CouponHandling = ({ navigation }) => {
               )}
 
               <Input
-                label="Minimum Purchase"
+                label={t('common.minimumPurchase')}
                 value={formData.min_purchase}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, min_purchase: text }))}
+                onChangeText={text =>
+                  setFormData(prev => ({...prev, min_purchase: text}))
+                }
                 keyboardType="numeric"
                 style={styles.input}
               />
 
               <CustomDateTimePicker
-                label="Start Date"
+                label={t('common.startDate')}
                 value={formData.start_date}
-                onChange={(date) => setFormData(prev => ({ ...prev, start_date: date }))}
+                onChange={date =>
+                  setFormData(prev => ({...prev, start_date: date}))
+                }
                 style={styles.input}
               />
 
               <CustomDateTimePicker
-                label="Expire Date"
+                label={t('common.expireDate')}
                 value={formData.expire_date}
-                onChange={(date) => setFormData(prev => ({ ...prev, expire_date: date }))}
-                minimumDate={formData.start_date ? new Date(formData.start_date) : new Date()}
+                onChange={date =>
+                  setFormData(prev => ({...prev, expire_date: date}))
+                }
+                minimumDate={
+                  formData.start_date
+                    ? new Date(formData.start_date)
+                    : new Date()
+                }
                 style={styles.input}
               />
 
@@ -690,16 +1134,14 @@ export const CouponHandling = ({ navigation }) => {
                 <Button
                   appearance="outline"
                   onPress={() => setShowEditModal(false)}
-                  style={styles.cancelButton}
-                >
+                  style={styles.cancelButton}>
                   Cancel
                 </Button>
                 <Button
                   onPress={handleEditCoupon}
                   disabled={!isFormValid()}
-                  style={styles.submitButton}
-                >
-                  Update Coupon
+                  style={styles.submitButton}>
+                  {t('common.updateCoupon')}
                 </Button>
               </View>
             </ScrollView>
@@ -712,16 +1154,29 @@ export const CouponHandling = ({ navigation }) => {
         visible={showCheckModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowCheckModal(false)}
-      >
+        onRequestClose={() => setShowCheckModal(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { 
-            backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
-          }]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { 
-                color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-              }]}>Check Coupon</Text>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('common.checkCoupon')}
+              </Text>
               <TouchableOpacity onPress={() => setShowCheckModal(false)}>
                 <ThemedIcon name="close-outline" size={24} />
               </TouchableOpacity>
@@ -729,37 +1184,48 @@ export const CouponHandling = ({ navigation }) => {
 
             <View style={styles.checkForm}>
               <Input
-                label="Coupon Code"
+                label={t('common.couponCode')}
                 value={checkData.code}
-                onChangeText={(text) => setCheckData(prev => ({ ...prev, code: text }))}
+                onChangeText={text =>
+                  setCheckData(prev => ({...prev, code: text}))
+                }
                 style={styles.input}
               />
 
               <Input
-                label="User ID"
+                label={t('common.userID')}
                 value={checkData.user_id}
-                onChangeText={(text) => setCheckData(prev => ({ ...prev, user_id: text }))}
+                onChangeText={text =>
+                  setCheckData(prev => ({...prev, user_id: text}))
+                }
                 keyboardType="numeric"
                 style={styles.input}
               />
 
               <Input
-                label="Order Amount"
+                label={t('common.orderAmount')}
                 value={checkData.order_amount}
-                onChangeText={(text) => setCheckData(prev => ({ ...prev, order_amount: text }))}
+                onChangeText={text =>
+                  setCheckData(prev => ({...prev, order_amount: text}))
+                }
                 keyboardType="numeric"
                 style={styles.input}
               />
 
               {checkResult && (
                 <Card style={styles.resultCard}>
-                  <Text style={[styles.resultText, { 
-                    color: checkResult.coupon_discount_amount ? theme['color-success-500'] : theme['color-danger-500']
-                  }]}>
-                    {checkResult.coupon_discount_amount 
+                  <Text
+                    style={[
+                      styles.resultText,
+                      {
+                        color: checkResult.coupon_discount_amount
+                          ? theme['color-success-500']
+                          : theme['color-danger-500'],
+                      },
+                    ]}>
+                    {checkResult.coupon_discount_amount
                       ? `Valid! Discount: $${checkResult.coupon_discount_amount}`
-                      : checkResult.message || 'Invalid coupon'
-                    }
+                      : checkResult.message || 'Invalid coupon'}
                   </Text>
                 </Card>
               )}
@@ -768,16 +1234,20 @@ export const CouponHandling = ({ navigation }) => {
                 <Button
                   appearance="outline"
                   onPress={() => setShowCheckModal(false)}
-                  style={styles.cancelButton}
-                >
+                  style={styles.cancelButton}>
                   Cancel
                 </Button>
                 <Button
                   onPress={handleCheckCoupon}
-                  disabled={checkLoading || !checkData.code || !checkData.order_amount}
-                  style={styles.submitButton}
-                >
-                  {checkLoading ? <Spinner size='small' /> : 'Check Coupon'}
+                  disabled={
+                    checkLoading || !checkData.code || !checkData.order_amount
+                  }
+                  style={styles.submitButton}>
+                  {checkLoading ? (
+                    <Spinner size="small" />
+                  ) : (
+                    t('common.checkCoupon')
+                  )}
                 </Button>
               </View>
             </View>
@@ -874,19 +1344,19 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 4,
   },
-//   modalOverlay: {
-//     flex: 1,
-//     backgroundColor: 'rgba(0,0,0,0.5)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   modalContent: {
-//     width: '90%',
-//     maxHeight: '80%',
-//     borderRadius: 12,
-//     padding: 16,
-//   },
-modalOverlay: {
+  //   modalOverlay: {
+  //     flex: 1,
+  //     backgroundColor: 'rgba(0,0,0,0.5)',
+  //     justifyContent: 'center',
+  //     alignItems: 'center',
+  //   },
+  //   modalContent: {
+  //     width: '90%',
+  //     maxHeight: '80%',
+  //     borderRadius: 12,
+  //     padding: 16,
+  //   },
+  modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',

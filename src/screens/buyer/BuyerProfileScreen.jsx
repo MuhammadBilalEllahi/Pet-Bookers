@@ -47,6 +47,7 @@ import {useTheme} from '../../theme/ThemeContext';
 import {AppScreens} from '../../navigators/AppNavigator';
 import {useTranslation} from 'react-i18next';
 import {BASE_URL} from '../../utils/constants';
+import {BASE_URLS} from '../../store/configs';
 
 const {width, height} = Dimensions.get('window');
 
@@ -206,6 +207,12 @@ export const BuyerProfileScreen = ({
       );
     }
   };
+  console.log(
+    'CUSTOMER INFO',
+    customerInfo,
+    '\n',
+    `${BASE_URLS.customer_image_url}/${customerInfo.image}`,
+  );
 
   return (
     <Layout
@@ -277,7 +284,7 @@ export const BuyerProfileScreen = ({
               <Avatar
                 source={{
                   uri: customerInfo?.image
-                    ? `https://petbookers.com/storage/app/public/profile/${customerInfo.image}`
+                    ? `${BASE_URLS.customer_image_url}/${customerInfo.image}`
                     : 'https://randomuser.me/api/portraits/men/1.jpg',
                 }}
                 style={{

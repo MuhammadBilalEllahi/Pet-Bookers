@@ -30,6 +30,8 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {BASE_URL} from '../../utils/constants';
 import {selectBaseUrls} from '../../store/configs';
 import {useSelector} from 'react-redux';
+import FastImageWithFallback from '../../components/common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -1007,8 +1009,13 @@ export const EditProductScreen = ({route, navigation}) => {
               onPress={() => pickImage('thumbnail')}
               style={styles.imageUploadButton}>
               {thumbnail ? (
-                <Image
+                <FastImageWithFallback
+                  priority={FastImage.priority.high}
+                  resizeMode={FastImage.resizeMode.cover}
                   source={{uri: thumbnail.uri || thumbnail}}
+                  fallbackSource={{
+                    uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                  }}
                   style={styles.thumbnail}
                 />
               ) : (
@@ -1037,8 +1044,13 @@ export const EditProductScreen = ({route, navigation}) => {
               style={styles.imagesScroll}>
               {selectedImages.map((image, index) => (
                 <View key={index} style={styles.imageContainer}>
-                  <Image
+                  <FastImageWithFallback
+                    priority={FastImage.priority.high}
+                    resizeMode={FastImage.resizeMode.cover}
                     source={{uri: image.uri || image}}
+                    fallbackSource={{
+                      uri: 'https://via.placeholder.com/120x120?text=No+Image',
+                    }}
                     style={styles.productImage}
                   />
                   <TouchableOpacity

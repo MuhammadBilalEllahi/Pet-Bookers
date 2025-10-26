@@ -1,8 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSelector } from 'react-redux';
+import {StyleSheet, View, Image} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {useSelector} from 'react-redux';
 import {
   BottomNavigation,
   BottomNavigationTab,
@@ -10,25 +10,24 @@ import {
   Text,
   useTheme,
 } from '@ui-kitten/components';
-import { ThemedIcon } from '../../components/Icon';
-import { selectShowBottomTabBar } from '../../store/configs';
-import { useTheme as useCustomTheme } from '../../theme/ThemeContext';
-import { CommonActions } from '@react-navigation/native';
+import {ThemedIcon} from '../../components/Icon';
+import {selectShowBottomTabBar} from '../../store/configs';
+import {useTheme as useCustomTheme} from '../../theme/ThemeContext';
+import {CommonActions} from '@react-navigation/native';
 
 // Screens and Navigation Stacks
-import { SellerHomeStack } from './SellerHomeStack';
-import { ChatNavigator } from '../ChatNavigator';
-import { SellerNewProductStack } from './SellerNewProductStack';
-import { SellerProfileStack } from './SellerProfileStack';
-import { SellerPostedProductsStack } from './SellerPostedProductsStack';
-import { BuyerMainRoutes } from '../buyer/BuyerMainNavigator';
+import {SellerHomeStack} from './SellerHomeStack';
+import {ChatNavigator} from '../ChatNavigator';
+import {SellerNewProductStack} from './SellerNewProductStack';
+import {SellerProfileStack} from './SellerProfileStack';
+import {SellerPostedProductsStack} from './SellerPostedProductsStack';
+import {BuyerMainRoutes} from '../buyer/BuyerMainNavigator';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
-import { MainScreensHeader } from '../../components/buyer';
-import { selectIsSeller } from '../../store/user';
-import { AuthRestrictedError } from '../../components/auth/AuthRestrictedError';
+import {MainScreensHeader} from '../../components/buyer';
+import {selectIsSeller} from '../../store/user';
+import {AuthRestrictedError} from '../../components/auth/AuthRestrictedError';
 
-
-const { Navigator, Screen } = createBottomTabNavigator();
+const {Navigator, Screen} = createBottomTabNavigator();
 
 // Enum for Seller Tab Navigation
 export const SellerTabRoutes = Object.freeze({
@@ -50,18 +49,29 @@ const ICON_DARK_GREY = '#444444';
 const TEXT_BLACK = '#000000';
 const ORANGE_ACCENT = '#FF6B00';
 
-const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = {}) => {
-  const { isDark } = useCustomTheme();
-  
+const renderTabIconWithActive = (
+  iconSource,
+  isActive,
+  label,
+  customIconStyle = {},
+) => {
+  const {isDark} = useCustomTheme();
+
   return (
-    <View style={styles.iconWithActiveContainer} key={`iconWithActiveContainer-${label}`}>
+    <View
+      style={styles.iconWithActiveContainer}
+      key={`iconWithActiveContainer-${label}`}>
       <Image
         source={iconSource}
         style={{
           width: 36,
           height: 36,
           resizeMode: 'contain',
-          tintColor: isActive ? ORANGE_ACCENT : (isDark ? '#FFFFFF' : ICON_DARK_GREY),
+          tintColor: isActive
+            ? ORANGE_ACCENT
+            : isDark
+            ? '#FFFFFF'
+            : ICON_DARK_GREY,
           ...customIconStyle,
         }}
         key={`icon-image-${label}`}
@@ -79,8 +89,7 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
         numberOfLines={1}
         ellipsizeMode="clip"
         allowFontScaling={false}
-        key={`icon-label-${label}`}
-      >
+        key={`icon-label-${label}`}>
         {label}
       </Text>
       {isActive && (
@@ -101,8 +110,8 @@ const renderTabIconWithActive = (iconSource, isActive, label, customIconStyle = 
 };
 
 const renderAddTabIconWithActive = (isActive, label) => {
-  const { isDark } = useCustomTheme();
-  
+  const {isDark} = useCustomTheme();
+
   return (
     <View style={styles.addButtonContainer} key={`addButtonContainer-${label}`}>
       <View
@@ -113,8 +122,7 @@ const renderAddTabIconWithActive = (isActive, label) => {
             backgroundColor: isDark ? '#1F1F1F' : '#fff',
           },
         ]}
-        key={`addButton-${label}`}
-      >
+        key={`addButton-${label}`}>
         <Image
           source={sellPlusIcon}
           style={{
@@ -139,8 +147,7 @@ const renderAddTabIconWithActive = (isActive, label) => {
         numberOfLines={1}
         ellipsizeMode="clip"
         allowFontScaling={false}
-        key={`addButton-label-${label}`}
-      >
+        key={`addButton-label-${label}`}>
         {label}
       </Text>
       {isActive && (
@@ -160,13 +167,13 @@ const renderAddTabIconWithActive = (isActive, label) => {
   );
 };
 
-const BottomTabBar = ({ navigation, state }) => {
+const BottomTabBar = ({navigation, state}) => {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
-  const { isDark } = useCustomTheme();
+  const {isDark} = useCustomTheme();
 
-  const handleTabPress = (index) => {
+  const handleTabPress = index => {
     const routeName = state.routeNames[index];
     const stackKey = state.routes[index].key;
     navigation.navigate({
@@ -177,8 +184,8 @@ const BottomTabBar = ({ navigation, state }) => {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: routeName }],
-      })
+        routes: [{name: routeName}],
+      }),
     );
   };
 
@@ -197,35 +204,23 @@ const BottomTabBar = ({ navigation, state }) => {
           },
         ]}
         onSelect={handleTabPress}
-        key="bottomNavigation"
-      >
+        key="bottomNavigation">
         <BottomNavigationTab
           key="tab-home"
           icon={() =>
-            renderTabIconWithActive(
-              homeIcon,
-              state.index === 0,
-              t('tabs.home')
-            )
+            renderTabIconWithActive(homeIcon, state.index === 0, t('tabs.home'))
           }
         />
         <BottomNavigationTab
           key="tab-chat"
           icon={() =>
-            renderTabIconWithActive(
-              chatIcon,
-              state.index === 1,
-              t('tabs.chat')
-            )
+            renderTabIconWithActive(chatIcon, state.index === 1, t('tabs.chat'))
           }
         />
         <BottomNavigationTab
           key="tab-add"
           icon={() =>
-            renderAddTabIconWithActive(
-              state.index === 2,
-              t('tabs.sell')
-            )
+            renderAddTabIconWithActive(state.index === 2, t('tabs.sell'))
           }
         />
         <BottomNavigationTab
@@ -234,18 +229,18 @@ const BottomTabBar = ({ navigation, state }) => {
             renderTabIconWithActive(
               luckyDrawIcon,
               state.index === 3,
-              t('tabs.luckydraw')
+              t('tabs.luckydraw'),
             )
           }
         />
-          
+
         <BottomNavigationTab
           key="tab-profile"
           icon={() =>
             renderTabIconWithActive(
               profileUserIcon,
               state.index === 4,
-              t('tabs.account')
+              t('tabs.account'),
             )
           }
         />
@@ -255,37 +250,36 @@ const BottomTabBar = ({ navigation, state }) => {
 };
 
 export const SellerMainNavigator = () => {
-  
   return (
     <Navigator
       tabBar={props => <BottomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
+      screenOptions={{headerShown: false}}>
       <Screen name={SellerTabRoutes.HOME} component={SellerHomeStack} />
       <Screen name={SellerTabRoutes.CHAT} component={ChatNavigator} />
-      
+
       <Screen
         name={SellerTabRoutes.POST_AD}
         component={SellerNewProductStack}
-       
         options={{
           unmountOnBlur: true,
         }}
       />
       <Screen
-            // key="screen-BuyerLuckyDraw"
-            name={BuyerMainRoutes.BUYER_LUCKYDRAW}
-            component={LuckyDrawListScreen}
-            
+        // key="screen-BuyerLuckyDraw"
+        name={BuyerMainRoutes.BUYER_LUCKYDRAW}
+        component={LuckyDrawListScreen}
+        options={{
+          headerShown: true,
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              hideSearch={true}
+              key="header-BuyerLuckyDraw"
+            />
+          ),
+        }}
+      />
 
-            options={{
-              headerShown: true,
-              header: props => (
-                <MainScreensHeader {...props} hideSearch={true} key="header-BuyerLuckyDraw" />
-              ),
-            }}
-          />
-      
       <Screen name={SellerTabRoutes.PROFILE} component={SellerProfileStack} />
     </Navigator>
   );
@@ -321,7 +315,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: {width: 0, height: -2},
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 12,

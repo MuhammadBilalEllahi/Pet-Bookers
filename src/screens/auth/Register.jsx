@@ -79,6 +79,7 @@ export const RegisterScreen = ({navigation}) => {
   const {isItSeller: initialIsSeller = true} = route.params || {};
   const [isItSeller, setIsItSeller] = useState(initialIsSeller);
   const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
+  const [approvalDialogVisible, setApprovalDialogVisible] = useState(false);
   const {isDark, theme} = useTheme();
   const {t} = useTranslation();
 
@@ -209,11 +210,16 @@ export const RegisterScreen = ({navigation}) => {
           isItSeller ? AppScreens.SELLER_HOME_MAIN : AppScreens.BUYER_HOME_MAIN,
         );
       } else {
-        navigateToPage(AppScreens.LOGIN, {
-          isItSeller: isItSeller,
-          email: values.email.trim(),
-          password: values.password,
-        });
+        // For sellers, show approval dialog instead of navigating to login
+        if (isItSeller) {
+          setApprovalDialogVisible(true);
+        } else {
+          navigateToPage(AppScreens.LOGIN, {
+            isItSeller: isItSeller,
+            email: values.email.trim(),
+            password: values.password,
+          });
+        }
       }
       // Optionally navigate to login or home after registration
       // navigation.navigate('Login');
@@ -251,7 +257,7 @@ export const RegisterScreen = ({navigation}) => {
   return (
     <AuthContainer>
       <Image
-        source={require('../../../assets/latest/petbooker_icon.png')}
+        source={require('../../../assets/new/main_logo.png')}
         style={styles.topLeftLogo}
       />
 
@@ -392,6 +398,88 @@ export const RegisterScreen = ({navigation}) => {
                 {t('buyer')}
               </Text>
             </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Account Approval Dialog */}
+      <Modal
+        visible={approvalDialogVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setApprovalDialogVisible(false)}>
+        <TouchableOpacity
+          style={[
+            styles.modalOverlay,
+            {
+              backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)',
+            },
+          ]}
+          activeOpacity={1}
+          onPressOut={() => setApprovalDialogVisible(false)}>
+          <View
+            style={[
+              styles.approvalDialog,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
+            <View style={styles.approvalDialogContent}>
+              <Icon
+                name="checkmark-circle"
+                fill={theme['color-shadcn-primary']}
+                style={{width: 48, height: 48, marginBottom: 16}}
+              />
+              <Text
+                style={[
+                  styles.approvalDialogTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {t('registration.accountApprovalTitle')}
+              </Text>
+              <Text
+                style={[
+                  styles.approvalDialogMessage,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-700'],
+                  },
+                ]}>
+                {t('registration.accountApprovalMessage')}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.approvalDialogButton,
+                  {
+                    backgroundColor: theme['color-shadcn-primary'],
+                  },
+                ]}
+                onPress={() => {
+                  setApprovalDialogVisible(false);
+                  navigateToPage(AppScreens.LOGIN, {
+                    isItSeller: true,
+                    email: '',
+                    password: '',
+                  });
+                }}>
+                <Text
+                  style={[
+                    styles.approvalDialogButtonText,
+                    {
+                      color: theme['color-shadcn-primary-foreground'],
+                    },
+                  ]}>
+                  {t('registration.okay')}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -1445,5 +1533,43 @@ const styles = StyleSheet.create({
   userTypeOptionText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  approvalDialog: {
+    borderRadius: 16,
+    width: 320,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  approvalDialogContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  approvalDialogTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  approvalDialogMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  approvalDialogButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    minWidth: 120,
+  },
+  approvalDialogButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

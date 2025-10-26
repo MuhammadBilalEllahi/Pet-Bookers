@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSelector, createSlice} from '@reduxjs/toolkit';
 import {axiosBuyerClient} from '../utils/axiosClient';
-import { BASE_URL } from '../utils/constants';
+import {BASE_URL} from '../utils/constants';
 
 const initialState = {
   showBottomTabBar: true,
@@ -14,7 +14,7 @@ export const loadAppConfigs = createAsyncThunk(
     const {data: result} = await axiosBuyerClient.get('config');
     if (result) {
       dispatch(setCompanyLogo(result.company_logo));
-      console.log("BASE URLS", result.base_urls);
+      // console.log('BASE URLS', result.base_urls);
       dispatch(setBaseUrls(result.base_urls));
     }
   },
@@ -36,22 +36,26 @@ export const loadAppConfigs = createAsyncThunk(
   }
 */
 
-export const BASE_URLS = {
+// Fallback URLs in case API config fails
+export const FALLBACK_BASE_URLS = {
   banner_image_url: `${BASE_URL}storage/app/public/banner`,
   brand_image_url: `${BASE_URL}storage/app/public/brand`,
   category_image_url: `${BASE_URL}storage/app/public/category`,
-  customer_image_url: `${BASE_URL}storage/app/public/profile`,
+  customer_image_url: `${BASE_URL}storage/app/profile`,
   delivery_man_image_url: `${BASE_URL}storage/app/public/delivery-man`,
   digital_product_url: `${BASE_URL}storage/app/public/product/digital-product`,
   notification_image_url: `${BASE_URL}storage/app/public/notification`,
   product_image_url: `${BASE_URL}storage/app/public/product`,
-  product_thumbnail_url: `${BASE_URL}storage/app/public/product/thumbnail`,
+  product_thumbnail_url: `${BASE_URL}storage/app/product/thumbnail`,
   review_image_url: `${BASE_URL}storage/app/public`,
   seller_image_url: `${BASE_URL}storage/app/public/seller`,
   shop_image_url: `${BASE_URL}storage/app/public/shop`,
-  lucky_draw_url: `${BASE_URL}public/images`
+  lucky_draw_url: `${BASE_URL}public/images`,
+  shop_banner_url: `${BASE_URL}storage/app/public/shop/banner`,
 };
 
+// Legacy export for backward compatibility
+export const BASE_URLS = FALLBACK_BASE_URLS;
 
 const slice = createSlice({
   name: 'configs',
@@ -93,5 +97,19 @@ export const selectBaseUrls = createSelector(
   selectConfigsData,
   data => data.baseUrls,
 );
+
+// Selector to get image URLs with fallback
+export const selectImageUrls = createSelector(selectConfigsData, data => {
+  const apiUrls = data.baseUrls;
+  console.log('API URLs', apiUrls);
+  // If API URLs are available and not empty, use them, otherwise use fallback
+  // if (apiUrls && Object.keys(apiUrls).length > 0) {
+  //   return {
+  //     ...FALLBACK_BASE_URLS,
+  //     ...apiUrls, // API URLs override fallback URLs
+  //   };
+  // }
+  return FALLBACK_BASE_URLS;
+});
 
 export default slice.reducer;

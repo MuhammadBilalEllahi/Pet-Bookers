@@ -1,34 +1,14 @@
 import React from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import {
-  Layout,
-  Text,
-  Divider,
-} from '@ui-kitten/components';
-import { useTheme } from '../../../../theme/ThemeContext';
-import { useTranslation } from 'react-i18next';
-import { ProfileActionButton } from '../../../../components/profile';
-import { AppScreens } from '../../../../navigators/AppNavigator';
+import {StyleSheet, ScrollView, Alert} from 'react-native';
+import {Layout, Text, Divider} from '@ui-kitten/components';
+import {useTheme} from '../../../../theme/ThemeContext';
+import {useTranslation} from 'react-i18next';
+import {ProfileActionButton} from '../../../../components/profile';
+import {AppScreens} from '../../../../navigators/AppNavigator';
 
-
-
-
-
-
-export const FarmManagement = ({ navigation }) => {
-  const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
-
- 
- 
-
-
-
-
+export const FarmManagement = ({navigation}) => {
+  const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
 
   // Management navigation functions
   const navigateToDeliveryManagement = () => {
@@ -36,15 +16,15 @@ export const FarmManagement = ({ navigation }) => {
   };
 
   const navigateToEarnings = (deliveryMan = null) => {
-    navigation.navigate(AppScreens.EARNINGS_STATS, { deliveryMan });
+    navigation.navigate(AppScreens.EARNINGS_STATS, {deliveryMan});
   };
 
   const navigateToOrders = (deliveryMan = null) => {
-    navigation.navigate(AppScreens.ORDERS_STATS, { deliveryMan });
+    navigation.navigate(AppScreens.ORDERS_STATS, {deliveryMan});
   };
 
   const navigateToReviews = (deliveryMan = null) => {
-    navigation.navigate(AppScreens.REVIEWS_STATS, { deliveryMan });
+    navigation.navigate(AppScreens.REVIEWS_STATS, {deliveryMan});
   };
 
   const navigateToTransactions = () => {
@@ -66,13 +46,16 @@ export const FarmManagement = ({ navigation }) => {
   const navigateToPOS = () => {
     Alert.alert(
       t('farmManagement.pos.lockedTitle', 'Access Restricted'),
-      t('farmManagement.pos.lockedMessage', 'You are not eligible yet for this access. This feature will be available soon.'),
+      t(
+        'farmManagement.pos.lockedMessage',
+        'You are not eligible yet for this access. This feature will be available soon.',
+      ),
       [
         {
           text: t('common.ok', 'OK'),
-          style: 'default'
-        }
-      ]
+          style: 'default',
+        },
+      ],
     );
   };
 
@@ -89,18 +72,38 @@ export const FarmManagement = ({ navigation }) => {
   };
 
   return (
-    <Layout style={[styles.container, { 
-      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-    }]}>
+    <Layout
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}>
       <ScrollView style={styles.scrollView}>
         {/* Financial Management */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <Text style={[styles.sectionTitle, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Financial Management</Text>
+        <Layout
+          style={[
+            styles.section,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : 'rgba(255,255,255,0.95)',
+              borderRadius: 12,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.financialManagement')}
+          </Text>
 
           <ProfileActionButton
             title={t('farmManagement.actions.refundHandle.title')}
@@ -108,7 +111,13 @@ export const FarmManagement = ({ navigation }) => {
             iconName="undo-outline"
             onPress={navigateToRefundHandle}
           />
-          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <Divider
+            style={{
+              backgroundColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            }}
+          />
           <ProfileActionButton
             title={t('farmManagement.actions.couponHandling.title')}
             subtitle={t('farmManagement.actions.couponHandling.subtitle')}
@@ -118,17 +127,33 @@ export const FarmManagement = ({ navigation }) => {
         </Layout>
 
         {/* Statistics & Analytics */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <Text style={[styles.sectionTitle, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Statistics & Analytics</Text>
+        <Layout
+          style={[
+            styles.section,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : 'rgba(255,255,255,0.95)',
+              borderRadius: 12,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.statisticsAndAnalytics')}
+          </Text>
 
           <ProfileActionButton
             title={t('farmDetailsEditScreen.managementButtons.earnings.title')}
-            subtitle={t('farmDetailsEditScreen.managementButtons.earnings.subtitle')}
+            subtitle={t(
+              'farmDetailsEditScreen.managementButtons.earnings.subtitle',
+            )}
             iconName="trending-up-outline"
             onPress={() => navigateToEarnings()}
           />
@@ -139,50 +164,104 @@ export const FarmManagement = ({ navigation }) => {
             iconName="list-outline"
             onPress={() => navigateToOrders()}
           /> */}
-          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <Divider
+            style={{
+              backgroundColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            }}
+          />
           <ProfileActionButton
             title={t('farmDetailsEditScreen.managementButtons.reviews.title')}
-            subtitle={t('farmDetailsEditScreen.managementButtons.reviews.subtitle')}
+            subtitle={t(
+              'farmDetailsEditScreen.managementButtons.reviews.subtitle',
+            )}
             iconName="star-outline"
             onPress={() => navigateToReviews()}
           />
-          <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <Divider
+            style={{
+              backgroundColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            }}
+          />
           <ProfileActionButton
-            title={t('farmDetailsEditScreen.managementButtons.transactions.title')}
-            subtitle={t('farmDetailsEditScreen.managementButtons.transactions.subtitle')}
+            title={t(
+              'farmDetailsEditScreen.managementButtons.transactions.title',
+            )}
+            subtitle={t(
+              'farmDetailsEditScreen.managementButtons.transactions.subtitle',
+            )}
             iconName="credit-card-outline"
             onPress={() => navigateToTransactions()}
           />
         </Layout>
         {/* Settings */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <Text style={[styles.sectionTitle, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Settings</Text>
+        <Layout
+          style={[
+            styles.section,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : 'rgba(255,255,255,0.95)',
+              borderRadius: 12,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.settings')}
+          </Text>
 
           <ProfileActionButton
-            title={t('farmDetailsEditScreen.managementButtons.shopSettings.title')}
-            subtitle={t('farmDetailsEditScreen.managementButtons.shopSettings.subtitle')}
+            title={t(
+              'farmDetailsEditScreen.managementButtons.shopSettings.title',
+            )}
+            subtitle={t(
+              'farmDetailsEditScreen.managementButtons.shopSettings.subtitle',
+            )}
             iconName="settings-outline"
             onPress={() => navigateToShopSettings()}
           />
         </Layout>
 
         {/* Delivery Management */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <Text style={[styles.sectionTitle, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Delivery Management</Text>
+        <Layout
+          style={[
+            styles.section,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : 'rgba(255,255,255,0.95)',
+              borderRadius: 12,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.deliveryManagement')}
+          </Text>
 
           <ProfileActionButton
-            title={t('farmDetailsEditScreen.managementButtons.deliveryManagement.title')}
-            subtitle={t('farmDetailsEditScreen.managementButtons.deliveryManagement.subtitle')}
+            title={t(
+              'farmDetailsEditScreen.managementButtons.deliveryManagement.title',
+            )}
+            subtitle={t(
+              'farmDetailsEditScreen.managementButtons.deliveryManagement.subtitle',
+            )}
             iconName="car-outline"
             onPress={navigateToDeliveryManagement}
             disabled
@@ -190,20 +269,40 @@ export const FarmManagement = ({ navigation }) => {
         </Layout>
 
         {/* Sales Management */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <Text style={[styles.sectionTitle, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Sales Management</Text>
+        <Layout
+          style={[
+            styles.section,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : 'rgba(255,255,255,0.95)',
+              borderRadius: 12,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.salesManagement')}
+          </Text>
           <ProfileActionButton
             title={t('farmManagement.actions.order.title')}
             subtitle={t('farmManagement.actions.order.subtitle')}
             iconName="shopping-cart-outline"
             onPress={navigateToOrder}
           />
-            <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <Divider
+            style={{
+              backgroundColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            }}
+          />
 
           <ProfileActionButton
             title={t('farmManagement.actions.pos.title')}
@@ -211,27 +310,45 @@ export const FarmManagement = ({ navigation }) => {
             iconName="lock-outline"
             onPress={navigateToPOS}
             disabled={true}
-            style={{ opacity: 0.6 }}
+            style={{opacity: 0.6}}
           />
-        
         </Layout>
 
-
         {/* Shippings */}
-        <Layout style={[styles.section, { 
-          backgroundColor: isDark ? theme['color-shadcn-card'] : 'rgba(255,255,255,0.95)',
-          borderRadius: 12 
-        }]}>
-          <Text style={[styles.sectionTitle, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>Shippings</Text>
-<ProfileActionButton
+        <Layout
+          style={[
+            styles.section,
+            {
+              backgroundColor: isDark
+                ? theme['color-shadcn-card']
+                : 'rgba(255,255,255,0.95)',
+              borderRadius: 12,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
+            {t('common.shippings')}
+          </Text>
+          <ProfileActionButton
             title={t('farmManagement.actions.shippingMethod.title')}
             subtitle={t('farmManagement.actions.shippingMethod.subtitle')}
             iconName="options-outline"
             onPress={navigateToShippingMethod}
           />
-                    <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
+          <Divider
+            style={{
+              backgroundColor: isDark
+                ? theme['color-shadcn-border']
+                : theme['color-basic-400'],
+            }}
+          />
 
           <ProfileActionButton
             title={t('farmManagement.actions.shipping.title')}
@@ -239,13 +356,7 @@ export const FarmManagement = ({ navigation }) => {
             iconName="paper-plane-outline"
             onPress={navigateToShipping}
           />
-          
         </Layout>
-
-        
-        
-        
-
       </ScrollView>
     </Layout>
   );
@@ -269,4 +380,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-}); 
+});

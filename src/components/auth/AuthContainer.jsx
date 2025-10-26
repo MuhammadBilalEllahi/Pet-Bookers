@@ -1,20 +1,22 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import {ScrollView, StyleSheet, Image} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 // import { useSelector } from 'react-redux';
-import { Button, Layout, Text } from '@ui-kitten/components';
+import {Button, Layout, Text} from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { ThemedIcon } from '../Icon';
 // import { selectCompanyLogo } from '../../store/configs';
-import { flexeStyles } from '../../utils/globalStyles';
+import {flexeStyles} from '../../utils/globalStyles';
 // import { I18nManager } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import {useTheme} from '../../theme/ThemeContext';
+import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../common/FastImageWithFallback';
 
-export const AuthContainer = ({ title, subTitle, children }) => {
-  const { t, i18n } = useTranslation();
+export const AuthContainer = ({title, subTitle, children}) => {
+  const {t, i18n} = useTranslation();
   const navigation = useNavigation();
-  const { isDark, theme } = useTheme();
+  const {isDark, theme} = useTheme();
   // const companyLogo = useSelector(selectCompanyLogo);
 
   const onLanguageChange = lang => {
@@ -30,16 +32,27 @@ export const AuthContainer = ({ title, subTitle, children }) => {
   // };
 
   return (
-    <Layout style={[styles.container, { 
-      backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100']
-    }]} level="1">
-
-{/* https://petbookers.com.pk/customer/auth/login */}
+    <Layout
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-background']
+            : theme['color-basic-100'],
+        },
+      ]}
+      level="1">
+      {/* https://petbookers.com.pk/customer/auth/login */}
       {/* https://petbookers.com.pk/customer/auth/sign-up */}
-      <Image
-        source={isDark ? require('../../../assets/new/login_page_bg_dark.png') : require('../../../assets/new/login_page_bg.png')}
+      <FastImage
+        source={
+          isDark
+            ? require('../../../assets/new/login_page_bg_dark.png')
+            : require('../../../assets/new/login_page_bg.png')
+        }
+        priority={FastImage.priority.high}
         style={styles.backgroundImage}
-        resizeMode="cover"
+        resizeMode={FastImage.resizeMode.cover}
       />
 
       <ScrollView
@@ -56,29 +69,45 @@ export const AuthContainer = ({ title, subTitle, children }) => {
               paddingVertical: 8,
             },
           ]}>
-
-
-
-          <Text category="h4" style={[styles.title, { 
-            color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-          }]}>
+          <Text
+            category="h4"
+            style={[
+              styles.title,
+              {
+                color: isDark
+                  ? theme['color-shadcn-foreground']
+                  : theme['color-basic-900'],
+              },
+            ]}>
             {t(title)}
           </Text>
           {subTitle && (
-            <Text category="p1" style={[styles.subTitle, { 
-              color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-700']
-            }]}>
+            <Text
+              category="p1"
+              style={[
+                styles.subTitle,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-700'],
+                },
+              ]}>
               {t(subTitle)}
             </Text>
           )}
           {children}
-          <Layout style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={[{ 
-              fontSize: 16, 
-              fontWeight: 'bold',
-              color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-            }]}>
-               {t('language')}
+          <Layout style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Text
+              style={[
+                {
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                },
+              ]}>
+              {t('language')}
             </Text>
 
             <Layout
@@ -92,24 +121,33 @@ export const AuthContainer = ({ title, subTitle, children }) => {
               <Text
                 category="p2"
                 status="basic"
-                style={[styles.languageChanger, { 
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}
+                style={[
+                  styles.languageChanger,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}
                 onPress={() => onLanguageChange('en')}>
                 English
               </Text>
               <Text
                 category="p2"
                 status="basic"
-                style={[styles.languageChanger, { 
-                  color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                }]}
+                style={[
+                  styles.languageChanger,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}
                 onPress={() => onLanguageChange('ur')}>
                 اردو
               </Text>
             </Layout>
           </Layout>
-
         </Layout>
       </ScrollView>
     </Layout>
@@ -138,9 +176,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'capitalize',
   },
-  subTitle: { 
-    marginVertical: 8, 
-    textAlign: 'center' 
+  subTitle: {
+    marginVertical: 8,
+    textAlign: 'center',
   },
   languageChanger: {
     marginHorizontal: 10,

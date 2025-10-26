@@ -460,7 +460,7 @@ export const HomeMainScreen = ({navigation}) => {
         <HorizontalItemsList
           containerStyle={{marginVertical: 10, paddingHorizontal: 14}}
           list={parsedSellers}
-          listTitle={t('sellers')}
+          listTitle={t('sellers.Sellers')}
           roundedImage={true}
           loading={sellersLoading}
           loadingError={sellersError}

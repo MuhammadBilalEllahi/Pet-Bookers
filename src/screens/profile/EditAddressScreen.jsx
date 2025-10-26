@@ -15,9 +15,11 @@ import {
 import { useTheme } from '../../theme/ThemeContext';
 import { axiosBuyerClient } from '../../utils/axiosClient';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 export const EditAddressScreen = ({ navigation, route }) => {
   const { theme, isDark } = useTheme();
+  const { t } = useTranslation();
   const { address, onAddressUpdated } = route.params || {};
   
   const [loading, setLoading] = useState(false);
@@ -76,29 +78,29 @@ export const EditAddressScreen = ({ navigation, route }) => {
     const errors = [];
     
     if (!formData.contact_person_name.trim()) {
-      errors.push('Contact person name is required');
+      errors.push(t('editAddressScreen.contactNameRequired'));
     }
     
     if (!formData.address.trim()) {
-      errors.push('Address is required');
+      errors.push(t('editAddressScreen.addressRequired'));
     }
     
     if (!formData.city.trim()) {
-      errors.push('City is required');
+      errors.push(t('editAddressScreen.cityRequired'));
     }
     
     if (!formData.zip.trim()) {
-      errors.push('ZIP code is required');
+      errors.push(t('editAddressScreen.zipRequired'));
     }
     
     if (!formData.phone.trim()) {
-      errors.push('Phone number is required');
+      errors.push(t('editAddressScreen.phoneRequired'));
     } else if (formData.phone.length < 10) {
-      errors.push('Phone number must be at least 10 digits');
+      errors.push(t('editAddressScreen.phoneMinLength'));
     }
     
     if (errors.length > 0) {
-      Alert.alert('Validation Error', errors.join('\n'));
+      Alert.alert(t('editAddressScreen.validationError'), errors.join('\n'));
       return false;
     }
     
@@ -129,8 +131,8 @@ export const EditAddressScreen = ({ navigation, route }) => {
       if (response.data) {
         Toast.show({
           type: 'success',
-          text1: 'Address Updated',
-          text2: response.data.message || 'Address updated successfully',
+          text1: t('editAddressScreen.addressUpdatedTitle'),
+          text2: response.data.message || t('editAddressScreen.addressUpdatedMessage'),
           position: 'top',
         });
 
@@ -146,8 +148,8 @@ export const EditAddressScreen = ({ navigation, route }) => {
       console.error('Update address error:', error);
       Toast.show({
         type: 'error',
-        text1: 'Update Address Failed',
-        text2: error.response?.data?.message || 'Failed to update address',
+        text1: t('editAddressScreen.updateAddressFailedTitle'),
+        text2: error.response?.data?.message || t('editAddressScreen.updateAddressFailedMessage'),
         position: 'top',
       });
     } finally {
@@ -163,9 +165,9 @@ export const EditAddressScreen = ({ navigation, route }) => {
   if (!address) {
     return (
       <Layout level="3" style={[styles.container, styles.errorContainer]}>
-        <Text category="h6">Error: No address data provided</Text>
+        <Text category="h6">{t('editAddressScreen.errorTitle')}</Text>
         <Button onPress={() => navigation.goBack()} style={styles.errorButton}>
-          Go Back
+          {t('editAddressScreen.goBack')}
         </Button>
       </Layout>
     );
@@ -179,20 +181,20 @@ export const EditAddressScreen = ({ navigation, route }) => {
       >
         <Layout style={[styles.header, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
           <Text category="h5" style={{ color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }}>
-            Edit Address
+            {t('editAddressScreen.title')}
           </Text>
           <Text category="p2" style={[styles.subtitle, { color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600'] }]}>
-            Update your delivery address information
+            {t('editAddressScreen.subtitle')}
           </Text>
         </Layout>
 
         <Card style={[styles.formCard, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
           <View style={styles.formGroup}>
             <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-              Contact Person Name *
+              {t('editAddressScreen.contactPersonNameLabel')}
             </Text>
             <Input
-              placeholder="Enter full name"
+              placeholder={t('editAddressScreen.contactPersonNamePlaceholder')}
               value={formData.contact_person_name}
               onChangeText={(text) => handleInputChange('contact_person_name', text)}
               accessoryLeft={PersonIcon}
@@ -202,27 +204,27 @@ export const EditAddressScreen = ({ navigation, route }) => {
 
           <View style={styles.formGroup}>
             <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-              Address Type *
+              {t('editAddressScreen.addressTypeLabel')}
             </Text>
             <Select
               selectedIndex={selectedAddressType}
               onSelect={handleAddressTypeChange}
-              value={addressTypes[selectedAddressType.row]?.title}
+              value={t(`editAddressScreen.addressType${addressTypes[selectedAddressType.row]?.title}`)}
               accessoryLeft={HomeIcon}
               style={styles.input}
             >
               {addressTypes.map((type, index) => (
-                <SelectItem key={index} title={type.title} />
+                <SelectItem key={index} title={t(`editAddressScreen.addressType${type.title}`)} />
               ))}
             </Select>
           </View>
 
           <View style={styles.formGroup}>
             <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-              Street Address *
+              {t('editAddressScreen.streetAddressLabel')}
             </Text>
             <Input
-              placeholder="Enter street address"
+              placeholder={t('editAddressScreen.streetAddressPlaceholder')}
               value={formData.address}
               onChangeText={(text) => handleInputChange('address', text)}
               accessoryLeft={LocationIcon}
@@ -235,10 +237,10 @@ export const EditAddressScreen = ({ navigation, route }) => {
           <View style={styles.row}>
             <View style={styles.halfWidth}>
               <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-                City *
+                {t('editAddressScreen.cityLabel')}
               </Text>
               <Input
-                placeholder="Enter city"
+                placeholder={t('editAddressScreen.cityPlaceholder')}
                 value={formData.city}
                 onChangeText={(text) => handleInputChange('city', text)}
                 accessoryLeft={LocationIcon}
@@ -248,10 +250,10 @@ export const EditAddressScreen = ({ navigation, route }) => {
             
             <View style={styles.halfWidth}>
               <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-                ZIP Code *
+                {t('editAddressScreen.zipCodeLabel')}
               </Text>
               <Input
-                placeholder="Enter ZIP"
+                placeholder={t('editAddressScreen.zipCodePlaceholder')}
                 value={formData.zip}
                 onChangeText={(text) => handleInputChange('zip', text)}
                 keyboardType="numeric"
@@ -262,10 +264,10 @@ export const EditAddressScreen = ({ navigation, route }) => {
 
           <View style={styles.formGroup}>
             <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-              Phone Number *
+              {t('editAddressScreen.phoneNumberLabel')}
             </Text>
             <Input
-              placeholder="Enter phone number"
+              placeholder={t('editAddressScreen.phoneNumberPlaceholder')}
               value={formData.phone}
               onChangeText={(text) => handleInputChange('phone', text)}
               accessoryLeft={PhoneIcon}
@@ -276,10 +278,10 @@ export const EditAddressScreen = ({ navigation, route }) => {
 
           <View style={styles.formGroup}>
             <Text category="label" style={[styles.label, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}>
-              Country
+              {t('editAddressScreen.countryLabel')}
             </Text>
             <Input
-              placeholder="Country"
+              placeholder={t('editAddressScreen.countryPlaceholder')}
               value={formData.country}
               onChangeText={(text) => handleInputChange('country', text)}
               accessoryLeft={LocationIcon}
@@ -293,7 +295,7 @@ export const EditAddressScreen = ({ navigation, route }) => {
             style={styles.checkbox}
           >
             <Text style={{ color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }}>
-              Use as billing address
+              {t('editAddressScreen.useAsBilling')}
             </Text>
           </CheckBox>
         </Card>
@@ -305,7 +307,7 @@ export const EditAddressScreen = ({ navigation, route }) => {
             onPress={() => navigation.goBack()}
             disabled={loading}
           >
-            Cancel
+            {t('editAddressScreen.cancel')}
           </Button>
           
           <Button
@@ -313,7 +315,7 @@ export const EditAddressScreen = ({ navigation, route }) => {
             onPress={handleSubmit}
             disabled={loading}
           >
-            {loading ? 'Updating...' : 'Update Address'}
+            {loading ? t('editAddressScreen.updating') : t('editAddressScreen.updateAddress')}
           </Button>
         </View>
       </ScrollView>

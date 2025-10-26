@@ -444,7 +444,7 @@ export const BuyerMainNavigator = () => {
                   : AuthRestrictedError
               }
               initialParams={{
-                isItSeller: isSellerAuthenticated,
+                isItSeller: !isSellerAuthenticated,
                 subTitle: 'messages.sellerLoginRequired',
               }}
               key="screen-SellerPostAd"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,22 +7,22 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
+import {Layout, Text, Button, Spinner} from '@ui-kitten/components';
+
+import {useTheme} from '../../../../../theme/ThemeContext';
+import {useTranslation} from 'react-i18next';
+import {axiosSellerClient} from '../../../../../utils/axiosClient';
+import {ThemedIcon} from '../../../../../components/Icon';
 import {
-  Layout,
-  Text,
-  Button,
-  Spinner,
-} from '@ui-kitten/components';
+  getEarningStatistics,
+  getMonthlyEarning,
+  getMonthlyCommissionGiven,
+  getOrderStatistics,
+} from '../../../../../services/sellerApi';
 
-import { useTheme } from '../../../../../theme/ThemeContext';
-import { useTranslation } from 'react-i18next';
-import { axiosSellerClient } from '../../../../../utils/axiosClient';
-import { ThemedIcon } from '../../../../../components/Icon';
-import { getEarningStatistics, getMonthlyEarning, getMonthlyCommissionGiven, getOrderStatistics } from '../../../../../services/sellerApi';
-
-export default function SellerEarningsPage({ navigation }) {
-  const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
+export default function SellerEarningsPage({navigation}) {
+  const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
 
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -35,7 +35,7 @@ export default function SellerEarningsPage({ navigation }) {
   const [hasMore, setHasMore] = useState(true);
   const [statsType, setStatsType] = useState('yearEarn');
   const [statsLoading, setStatsLoading] = useState(false);
-  const [stats, setStats] = useState({ seller_earn: [], commission_earn: [] });
+  const [stats, setStats] = useState({seller_earn: [], commission_earn: []});
   const [monthlyEarnings, setMonthlyEarnings] = useState([]);
   const [monthlyCommission, setMonthlyCommission] = useState([]);
   const [orderStats, setOrderStats] = useState(null);
@@ -73,8 +73,11 @@ export default function SellerEarningsPage({ navigation }) {
       setHasMore(response.data.orders && response.data.orders.length === 10);
       setCurrentPage(page);
     } catch (error) {
-      console.error('Error fetching earnings:', error?.response?.data || error.message);
-      Alert.alert('Error', 'Failed to fetch earnings');
+      console.error(
+        'Error fetching earnings:',
+        error?.response?.data || error.message,
+      );
+      Alert.alert(t('common.error'), t('common.failedToFetchEarnings'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -85,10 +88,10 @@ export default function SellerEarningsPage({ navigation }) {
     setStatsLoading(true);
     try {
       const response = await getEarningStatistics(type);
-      setStats(response.data || { seller_earn: [], commission_earn: [] });
+      setStats(response.data || {seller_earn: [], commission_earn: []});
     } catch (error) {
       console.error('Error fetching statistics:', error);
-      setStats({ seller_earn: [], commission_earn: [] });
+      setStats({seller_earn: [], commission_earn: []});
     } finally {
       setStatsLoading(false);
     }
@@ -98,7 +101,9 @@ export default function SellerEarningsPage({ navigation }) {
     try {
       const response = await getMonthlyEarning();
       // Backend returns comma-separated string
-      setMonthlyEarnings((response.data || '').split(',').filter(Boolean).map(Number));
+      setMonthlyEarnings(
+        (response.data || '').split(',').filter(Boolean).map(Number),
+      );
     } catch (error) {
       setMonthlyEarnings([]);
     }
@@ -107,7 +112,9 @@ export default function SellerEarningsPage({ navigation }) {
   const fetchMonthlyCommission = async () => {
     try {
       const response = await getMonthlyCommissionGiven();
-      setMonthlyCommission((response.data || '').split(',').filter(Boolean).map(Number));
+      setMonthlyCommission(
+        (response.data || '').split(',').filter(Boolean).map(Number),
+      );
     } catch (error) {
       setMonthlyCommission([]);
     }
@@ -137,34 +144,62 @@ export default function SellerEarningsPage({ navigation }) {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status) {
-      case 'pending': return '#ff9500';
-      case 'confirmed': return '#007aff';
-      case 'processing': return '#5856d6';
-      case 'out_for_delivery': return '#ff2d92';
-      case 'delivered': return '#34c759';
-      case 'canceled': return '#ff3b30';
-      case 'returned': return '#af52de';
-      case 'failed': return '#ff3b30';
-      default: return '#8e8e93';
+      case 'pending':
+        return '#ff9500';
+      case 'confirmed':
+        return '#007aff';
+      case 'processing':
+        return '#5856d6';
+      case 'out_for_delivery':
+        return '#ff2d92';
+      case 'delivered':
+        return '#34c759';
+      case 'canceled':
+        return '#ff3b30';
+      case 'returned':
+        return '#af52de';
+      case 'failed':
+        return '#ff3b30';
+      default:
+        return '#8e8e93';
     }
   };
 
-  const getStatusText = (status) => {
+  const getStatusText = status => {
     return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   return (
-    <View style={[styles.pageContainer, { backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}>
+    <View
+      style={[
+        styles.pageContainer,
+        {
+          backgroundColor: isDark
+            ? theme['color-shadcn-card']
+            : theme['color-basic-100'],
+        },
+      ]}>
       <View style={styles.pageHeader}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <ThemedIcon name="arrow-back-outline" iconStyle={{ width: 28, height: 28 }} />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}>
+          <ThemedIcon
+            name="arrow-back-outline"
+            iconStyle={{width: 28, height: 28}}
+          />
         </TouchableOpacity>
-        <Text style={[styles.pageTitle, {
-          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>
-          Earnings
+        <Text
+          style={[
+            styles.pageTitle,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
+          {t('common.earnings')}
         </Text>
       </View>
 
@@ -175,41 +210,63 @@ export default function SellerEarningsPage({ navigation }) {
             size="tiny"
             appearance={statsType === 'yearEarn' ? 'filled' : 'outline'}
             style={styles.statsTabBtn}
-            onPress={() => setStatsType('yearEarn')}
-          >Year</Button>
+            onPress={() => setStatsType('yearEarn')}>
+            {t('common.year')}
+          </Button>
           <Button
             size="tiny"
             appearance={statsType === 'MonthEarn' ? 'filled' : 'outline'}
             style={styles.statsTabBtn}
-            onPress={() => setStatsType('MonthEarn')}
-          >Month</Button>
+            onPress={() => setStatsType('MonthEarn')}>
+            {t('common.month')}
+          </Button>
           <Button
             size="tiny"
             appearance={statsType === 'WeekEarn' ? 'filled' : 'outline'}
             style={styles.statsTabBtn}
-            onPress={() => setStatsType('WeekEarn')}
-          >Week</Button>
+            onPress={() => setStatsType('WeekEarn')}>
+            {t('common.week')}
+          </Button>
         </View>
         {statsLoading ? (
-          <View style={{ alignItems: 'center', marginVertical: 12 }}>
+          <View style={{alignItems: 'center', marginVertical: 12}}>
             <Spinner size="small" />
           </View>
         ) : (
           <View style={styles.statsBarContainer}>
-            <Text style={styles.statsTitle}>Earnings</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsBarScroll}>
+            <Text style={styles.statsTitle}>{t('common.earnings')}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.statsBarScroll}>
               {stats.seller_earn.map((val, idx) => (
                 <View key={idx} style={styles.statsBarItem}>
-                  <View style={[styles.statsBar, { height: Math.max(8, Math.min(60, Number(val) / 10)) }]} />
+                  <View
+                    style={[
+                      styles.statsBar,
+                      {height: Math.max(8, Math.min(60, Number(val) / 10))},
+                    ]}
+                  />
                   <Text style={styles.statsBarLabel}>{val}</Text>
                 </View>
               ))}
             </ScrollView>
-            <Text style={styles.statsTitle}>Commission</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsBarScroll}>
+            <Text style={styles.statsTitle}>{t('common.commission')}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.statsBarScroll}>
               {stats.commission_earn.map((val, idx) => (
                 <View key={idx} style={styles.statsBarItem}>
-                  <View style={[styles.statsBar, { backgroundColor: '#ff9500', height: Math.max(8, Math.min(60, Number(val) / 10)) }]} />
+                  <View
+                    style={[
+                      styles.statsBar,
+                      {
+                        backgroundColor: '#ff9500',
+                        height: Math.max(8, Math.min(60, Number(val) / 10)),
+                      },
+                    ]}
+                  />
                   <Text style={styles.statsBarLabel}>{val}</Text>
                 </View>
               ))}
@@ -222,27 +279,47 @@ export default function SellerEarningsPage({ navigation }) {
       {/* Earnings Summary */}
       <View style={styles.earningsSummary}>
         <View style={styles.summaryCard}>
-          <Text style={[styles.summaryLabel, {
-            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-          }]}>
-            Total Earnings
+          <Text
+            style={[
+              styles.summaryLabel,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
+            {t('common.totalEarnings')}
           </Text>
-          <Text style={[styles.summaryAmount, {
-            color: theme['color-shadcn-primary']
-          }]}>
+          <Text
+            style={[
+              styles.summaryAmount,
+              {
+                color: theme['color-shadcn-primary'],
+              },
+            ]}>
             ${earnings.total_earn}
           </Text>
         </View>
 
         <View style={styles.summaryCard}>
-          <Text style={[styles.summaryLabel, {
-            color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-          }]}>
-            Withdrawable Balance
+          <Text
+            style={[
+              styles.summaryLabel,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}>
+            {t('common.withdrawableBalance')}
           </Text>
-          <Text style={[styles.summaryAmount, {
-            color: theme['color-shadcn-success']
-          }]}>
+          <Text
+            style={[
+              styles.summaryAmount,
+              {
+                color: theme['color-shadcn-success'],
+              },
+            ]}>
             ${earnings.withdrawable_balance}
           </Text>
         </View>
@@ -250,10 +327,16 @@ export default function SellerEarningsPage({ navigation }) {
 
       {/* Orders List */}
       <View style={styles.ordersSection}>
-        <Text style={[styles.sectionTitle, {
-          color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-        }]}>
-          Order History
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
+          ]}>
+          {t('common.orderHistory')}
         </Text>
 
         <ScrollView
@@ -261,35 +344,54 @@ export default function SellerEarningsPage({ navigation }) {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          onScroll={({ nativeEvent }) => {
-            const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          onScroll={({nativeEvent}) => {
+            const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
             const paddingToBottom = 20;
-            if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+            if (
+              layoutMeasurement.height + contentOffset.y >=
+              contentSize.height - paddingToBottom
+            ) {
               loadMore();
             }
           }}
-          scrollEventThrottle={400}
-        >
+          scrollEventThrottle={400}>
           {earnings.orders.length > 0 ? (
-            earnings.orders.map((order) => (
+            earnings.orders.map(order => (
               <View key={order.id} style={styles.orderItem}>
                 <View style={styles.orderHeader}>
                   <View style={styles.orderInfo}>
-                    <Text style={[styles.orderId, {
-                      color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                    }]}>
-                      Order #{order.id}
+                    <Text
+                      style={[
+                        styles.orderId,
+                        {
+                          color: isDark
+                            ? theme['color-shadcn-foreground']
+                            : theme['color-basic-900'],
+                        },
+                      ]}>
+                      {t('common.orderHash')}
+                      {order.id}
                     </Text>
-                    <Text style={[styles.orderDate, {
-                      color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                    }]}>
+                    <Text
+                      style={[
+                        styles.orderDate,
+                        {
+                          color: isDark
+                            ? theme['color-shadcn-muted-foreground']
+                            : theme['color-basic-600'],
+                        },
+                      ]}>
                       {new Date(order.updated_at).toLocaleDateString()}
                     </Text>
                   </View>
                   <View style={styles.orderStatus}>
-                    <View style={[styles.statusBadge, {
-                      backgroundColor: getStatusColor(order.order_status)
-                    }]}>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        {
+                          backgroundColor: getStatusColor(order.order_status),
+                        },
+                      ]}>
                       <Text style={styles.statusText}>
                         {getStatusText(order.order_status)}
                       </Text>
@@ -299,14 +401,24 @@ export default function SellerEarningsPage({ navigation }) {
 
                 <View style={styles.orderEarnings}>
                   <View style={styles.earningRow}>
-                    <Text style={[styles.earningLabel, {
-                      color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-                    }]}>
-                      Delivery Charge:
+                    <Text
+                      style={[
+                        styles.earningLabel,
+                        {
+                          color: isDark
+                            ? theme['color-shadcn-muted-foreground']
+                            : theme['color-basic-600'],
+                        },
+                      ]}>
+                      {t('common.deliveryCharge')}:
                     </Text>
-                    <Text style={[styles.earningAmount, {
-                      color: theme['color-shadcn-primary']
-                    }]}>
+                    <Text
+                      style={[
+                        styles.earningAmount,
+                        {
+                          color: theme['color-shadcn-primary'],
+                        },
+                      ]}>
                       ${order.deliveryman_charge}
                     </Text>
                   </View>
@@ -315,15 +427,30 @@ export default function SellerEarningsPage({ navigation }) {
             ))
           ) : (
             <View style={styles.emptyContainer}>
-              <ThemedIcon name="trending-up-outline" iconStyle={{ width: 48, height: 48 }} />
-              <Text style={[styles.emptyText, {
-                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>
-                No orders found
+              <ThemedIcon
+                name="trending-up-outline"
+                iconStyle={{width: 48, height: 48}}
+              />
+              <Text
+                style={[
+                  styles.emptyText,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600'],
+                  },
+                ]}>
+                {t('common.noOrdersFound')}
               </Text>
-              <Text style={[styles.emptySubtext, {
-                color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-              }]}>
+              <Text
+                style={[
+                  styles.emptySubtext,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600'],
+                  },
+                ]}>
                 No orders have been completed yet
               </Text>
             </View>
@@ -331,7 +458,7 @@ export default function SellerEarningsPage({ navigation }) {
 
           {loading && earnings.orders.length > 0 && (
             <View style={styles.loadingMore}>
-              <Spinner size='small' />
+              <Spinner size="small" />
             </View>
           )}
         </ScrollView>
@@ -359,20 +486,43 @@ export default function SellerEarningsPage({ navigation }) {
 
       {/* Monthly Earnings/Commission Section */}
       <View style={styles.statsSection}>
-        <Text style={styles.sectionTitle}>Monthly Earnings (Current Year)</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsBarScroll}>
+        <Text style={styles.sectionTitle}>
+          {t('common.monthlyEarningsCurrentYear')}
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.statsBarScroll}>
           {monthlyEarnings.map((val, idx) => (
             <View key={idx} style={styles.statsBarItem}>
-              <View style={[styles.statsBar, { height: Math.max(8, Math.min(60, Number(val) / 10)) }]} />
+              <View
+                style={[
+                  styles.statsBar,
+                  {height: Math.max(8, Math.min(60, Number(val) / 10))},
+                ]}
+              />
               <Text style={styles.statsBarLabel}>{val}</Text>
             </View>
           ))}
         </ScrollView>
-        <Text style={styles.sectionTitle}>Monthly Commission (Current Year)</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsBarScroll}>
+        <Text style={styles.sectionTitle}>
+          {t('common.monthlyCommissionCurrentYear')}
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.statsBarScroll}>
           {monthlyCommission.map((val, idx) => (
             <View key={idx} style={styles.statsBarItem}>
-              <View style={[styles.statsBar, { backgroundColor: '#ff9500', height: Math.max(8, Math.min(60, Number(val) / 10)) }]} />
+              <View
+                style={[
+                  styles.statsBar,
+                  {
+                    backgroundColor: '#ff9500',
+                    height: Math.max(8, Math.min(60, Number(val) / 10)),
+                  },
+                ]}
+              />
               <Text style={styles.statsBarLabel}>{val}</Text>
             </View>
           ))}

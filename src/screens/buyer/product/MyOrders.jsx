@@ -868,7 +868,7 @@ export const MyOrders = ({navigation}) => {
                     text2: 'Digital product download started.',
                   });
                 }}>
-                <Text style={{color: '#ffffff'}}>Download</Text>
+                <Text style={{color: '#ffffff'}}>{t('common.download')}</Text>
               </Button>
             )}
           </View>

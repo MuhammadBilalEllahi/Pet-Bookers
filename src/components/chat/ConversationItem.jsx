@@ -2,8 +2,10 @@ import {Avatar, Card, Text, useTheme} from '@ui-kitten/components';
 import {StyleSheet, View, Image} from 'react-native';
 import {ThemedIcon} from '../Icon';
 import {flexeStyles} from '../../utils/globalStyles';
+import FastImageWithFallback from '../common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
 
-export const ConversationItem = (props) => {
+export const ConversationItem = props => {
   const theme = useTheme();
   // Support both old and new data structures
   const {
@@ -31,17 +33,28 @@ export const ConversationItem = (props) => {
     return (
       <View style={styles.chatItem}>
         {avatar ? (
-          <Image source={avatar} style={styles.avatar} />
+          <FastImageWithFallback
+            priority={FastImage.priority.high}
+            resizeMode={FastImage.resizeMode.cover}
+            source={avatar}
+            style={styles.avatar}
+            fallbackSource={{
+              uri: 'https://via.placeholder.com/48x48?text=No+Image',
+            }}
+          />
         ) : (
-          <Avatar source={{ uri: imgUrl }} style={styles.avatar} />
+          <Avatar source={{uri: imgUrl}} style={styles.avatar} />
         )}
         <View style={styles.chatInfo}>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.pet}>{pet}</Text>
-          <Text style={status === 'available' ? styles.available : styles.inactive}>
+          <Text
+            style={status === 'available' ? styles.available : styles.inactive}>
             {lastMessage}
           </Text>
-          {adStatus === 'inactive' && <Text style={styles.adInactive}>Ad Inactive</Text>}
+          {adStatus === 'inactive' && (
+            <Text style={styles.adInactive}>Ad Inactive</Text>
+          )}
         </View>
       </View>
     );
@@ -59,33 +72,42 @@ export const ConversationItem = (props) => {
           recipientName: title,
         })
       }>
-      <View style={{ flexDirection: 'row' }}>
-        <Avatar
-          source={{ uri: imgUrl }}
-          style={styles.avatar}
-        />
-        <View style={{ flexGrow: 1 }}>
-          <View style={[styles.titleContainer, { flexDirection: 'row' }]}>
-            <View style={{ flex: 1 }}>
+      <View style={{flexDirection: 'row'}}>
+        <Avatar source={{uri: imgUrl}} style={styles.avatar} />
+        <View style={{flexGrow: 1}}>
+          <View style={[styles.titleContainer, {flexDirection: 'row'}]}>
+            <View style={{flex: 1}}>
               <Text style={styles.title}>{title}</Text>
               {subtitle && (
-                <Text style={[styles.subtitle, { color: theme['color-basic-600'] }]}>{subtitle}</Text>
+                <Text
+                  style={[styles.subtitle, {color: theme['color-basic-600']}]}>
+                  {subtitle}
+                </Text>
               )}
             </View>
             {/* Optionally show lastUpdated here */}
           </View>
-          <View style={[styles.messageContainer, { flexDirection: 'row' }]}>
-            <View style={[styles.messageInnerContainer, { flexDirection: 'row' }]}>
+          <View style={[styles.messageContainer, {flexDirection: 'row'}]}>
+            <View
+              style={[styles.messageInnerContainer, {flexDirection: 'row'}]}>
               {attachmentType && (
-                <Text style={{ marginRight: 4 }}>[{attachmentType}]</Text>
+                <Text style={{marginRight: 4}}>[{attachmentType}]</Text>
               )}
-              {msgText && <Text style={{ flexShrink: 1 }}>{msgText}</Text>}
+              {msgText && <Text style={{flexShrink: 1}}>{msgText}</Text>}
             </View>
             <View style={styles.statusContainer}>
               {messageStatus?.isSentByUs && (
                 <ThemedIcon
-                  name={messageStatus.isSeen ? 'done-all-outline' : 'checkmark-outline'}
-                  fill={messageStatus.isSeen ? theme['color-primary-default'] : theme['color-basic-600']}
+                  name={
+                    messageStatus.isSeen
+                      ? 'done-all-outline'
+                      : 'checkmark-outline'
+                  }
+                  fill={
+                    messageStatus.isSeen
+                      ? theme['color-primary-default']
+                      : theme['color-basic-600']
+                  }
                   iconStyle={{width: 16, height: 16, marginRight: 4}}
                 />
               )}
@@ -93,7 +115,7 @@ export const ConversationItem = (props) => {
                 <View
                   style={[
                     styles.unreadCounter,
-                    { backgroundColor: theme['color-primary-default'] },
+                    {backgroundColor: theme['color-primary-default']},
                   ]}>
                   <Text style={styles.unreadNumber}>{unreadMessages}</Text>
                 </View>
@@ -107,7 +129,7 @@ export const ConversationItem = (props) => {
 };
 
 const styles = StyleSheet.create({
-  card: { padding: 10 },
+  card: {padding: 10},
   chatItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -153,8 +175,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     flexGrow: 1,
   },
-  title: { fontSize: 16, fontWeight: '700', marginRight: 4 },
-  subtitle: { fontSize: 14, marginTop: 2, marginRight: 4 },
+  title: {fontSize: 16, fontWeight: '700', marginRight: 4},
+  subtitle: {fontSize: 14, marginTop: 2, marginRight: 4},
   messageContainer: {
     justifyContent: 'space-between',
     flexGrow: 1,
@@ -176,7 +198,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginLeft: 10,
   },
-  unreadNumber: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  unreadNumber: {color: '#fff', fontSize: 12, fontWeight: '700'},
   tabBar: {
     flexDirection: 'row',
     marginTop: 10,

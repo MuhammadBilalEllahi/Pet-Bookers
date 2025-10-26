@@ -3,11 +3,11 @@ import {FlatList, View, Dimensions, StyleSheet} from 'react-native';
 import {useSelector} from 'react-redux';
 import {Layout, Spinner, Text, useTheme} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {BASE_URLS, selectBaseUrls} from '../../store/configs';
+import {selectImageUrls} from '../../store/configs';
 import {flexeStyles} from '../../utils/globalStyles';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
-import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../common/FastImageWithFallback';
 
 const {width: windowWidth} = Dimensions.get('window');
 const height = (windowWidth - 16) / 1.9;
@@ -18,7 +18,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
   const {t} = useTranslation();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const carouselRef = useRef();
-  const baseUrls = useSelector(selectBaseUrls);
+  const imageUrls = useSelector(selectImageUrls);
 
   const theme = useTheme();
 
@@ -44,16 +44,17 @@ export const FeaturedImages = ({slideList, loading, error}) => {
 
   // Preload banner images when slideList changes
   useEffect(() => {
-    if (slideList && slideList.length > 0) {
-      const imageUrls = slideList.map(slide => ({
-        uri: `${BASE_URLS.banner_image_url}/${slide.photo}`,
-        priority: FastImage.priority.high,
+    if (slideList && slideList.length > 0 && imageUrls.banner_image_url) {
+      const imageUrlsToPreload = slideList.map(slide => ({
+        uri: `${imageUrls.banner_image_url}/${slide.photo}`,
+        priority: FastImageWithFallback.priority?.high || 'high',
       }));
 
-      console.log('Preloading banner images:', imageUrls);
-      FastImage.preload(imageUrls);
+      // console.log('Preloading banner images:', imageUrlsToPreload);
+      // Note: FastImageWithFallback doesn't have preload method, 
+      // but individual images will load with retry mechanism
     }
-  }, [slideList]);
+  }, [slideList, imageUrls]);
 
   useEffect(() => {
     if (slideChangRef) {
@@ -64,7 +65,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
     if (slideList.length === 1) {
       return;
     }
-    console.log('slide list', slideList);
+    // console.log('slide list', slideList);
 
     slideChangRef = setTimeout(() => {
       const nextIndex = activeSlideIndex + 1;
@@ -112,7 +113,7 @@ export const FeaturedImages = ({slideList, loading, error}) => {
           data={slideList}
           renderItem={({item}) => {
             return (
-              <Slide data={item} imageBaseUrl={BASE_URLS.banner_image_url} />
+              <Slide data={item} imageBaseUrl={imageUrls.banner_image_url} />
             );
           }}
           pagingEnabled={true}
@@ -152,7 +153,13 @@ export const FeaturedImages = ({slideList, loading, error}) => {
 };
 
 const Slide = ({data, imageBaseUrl}) => {
-  console.log('data,imageBAseurl', `${imageBaseUrl}/${data.photo}`);
+  // console.log('data,imageBAseurl', `${imageBaseUrl}/${data.photo}`);
+  
+  // Fallback image source
+  const fallbackSource = {
+    uri: 'https://via.placeholder.com/400x200/cccccc/666666?text=Image+Not+Available',
+  };
+
   return (
     <View
       style={{
@@ -161,17 +168,20 @@ const Slide = ({data, imageBaseUrl}) => {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <FastImage
+      <FastImageWithFallback
         source={{
           uri: `${imageBaseUrl}/${data.photo}`,
-
-          priority: FastImage.priority.high,
+          priority: 'high',
         }}
-        resizeMode={FastImage.resizeMode.cover}
+        fallbackSource={fallbackSource}
+        resizeMode="cover"
         style={[
           {width: windowWidth - 16, height: height},
           styles.containerBorder,
         ]}
+        showDebugLogs={true}
+        maxRetries={3}
+        retryDelay={2000}
       />
     </View>
   );

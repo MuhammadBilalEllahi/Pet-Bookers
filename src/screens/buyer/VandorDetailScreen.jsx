@@ -14,7 +14,7 @@ import {ProductCard} from '../../components/product/ProductCard';
 import {ThemedIcon} from '../../components/Icon';
 import {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {selectBaseUrls} from '../../store/configs';
+import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 import {calculateDiscountedPrice} from '../../utils/products';
 import {axiosBuyerClient} from '../../utils/axiosClient';
 import {ProductsList} from '../../components/buyer/ProductsList';
@@ -27,6 +27,8 @@ import {
 import {ChatRoutes} from '../../navigators/ChatNavigator';
 import {AppScreens} from '../../navigators/AppNavigator';
 import {useTheme} from '../../theme/ThemeContext';
+import FastImageWithFallback from '../../components/common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -249,10 +251,9 @@ export const VandorDetailScreen = ({route, navigation}) => {
             )
           : product.unit_price,
       oldPrice: product.discount > 0 ? product.unit_price : 0,
-      image:
-        baseUrls && baseUrls['product_thumbnail_url'] && product.thumbnail
-          ? `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`
-          : '',
+      image: product.thumbnail
+        ? `${BASE_URLS.product_thumbnail_url}/${product.thumbnail}`
+        : '',
     };
   });
 
@@ -284,25 +285,30 @@ export const VandorDetailScreen = ({route, navigation}) => {
         }}>
         {/* Banner */}
         <View style={styles(theme).bannerShadow}>
-          <Image
+          <FastImageWithFallback
+            priority={FastImage.priority.high}
+            resizeMode={FastImage.resizeMode.cover}
             source={{
               uri:
                 sellerInfo?.seller?.shop && sellerInfo.seller.shop.banner
-                  ? `https://petbookers.com.pk/storage/app/public/shop/banner/${sellerInfo.seller.shop.banner}`
+                  ? `${BASE_URLS.shop_banner_url}/${sellerInfo.seller.shop.banner}`
                   : undefined,
             }}
             style={styles(theme).banner}
             defaultSource={require('../../../assets/new/lion.png')}
+            fallbackSource={require('../../../assets/new/lion.png')}
           />
         </View>
         {/* Store Info Card */}
         <View style={styles(theme).storeInfoCard}>
           <View style={styles(theme).storeInfoRow}>
-            <Image
+            <FastImageWithFallback
+              priority={FastImage.priority.high}
+              resizeMode={FastImage.resizeMode.cover}
               source={{
                 uri:
                   sellerInfo?.seller?.shop && sellerInfo.seller.shop.image
-                    ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
+                    ? `${BASE_URLS.shop_image_url}/${sellerInfo.seller.shop.image}`
                     : undefined,
               }}
               style={styles(theme).avatar}

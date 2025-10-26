@@ -1,12 +1,14 @@
 import {useState} from 'react';
 import {Button, Divider, Layout, Text, useTheme} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
-import {FlatList, Image, ScrollView} from 'react-native';
+import {FlatList, ScrollView} from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
 import {ThemedIcon} from '../../components/Icon';
 import {Price} from '../../components/Price';
 import {ProductImagesSlider} from '../../components/product';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import FastImageWithFallback from '../../components/common/FastImageWithFallback';
+import FastImage from '@d11/react-native-fast-image';
 
 const featuredImagesDummy = Array.from({length: 3}).map((_, i) => {
   return {
@@ -180,7 +182,7 @@ export const ProductPreviewScreen = () => {
                         marginBottom: 4,
                       },
                     ]}>
-                    <Text category="s1">Review Name</Text>
+                    <Text category="s1">{t('common.reviewName')}</Text>
                     <AirbnbRating
                       count={5}
                       defaultRating={3.4}
@@ -216,8 +218,13 @@ export const ProductPreviewScreen = () => {
                     marginBottom: 8,
                   },
                 ]}>
-                <Image
+                <FastImageWithFallback
+                  priority={FastImage.priority.high}
+                  resizeMode={FastImage.resizeMode.cover}
                   source={{
+                    uri: 'https://randomuser.me/api/portraits/thumb/men/75.jpg',
+                  }}
+                  fallbackSource={{
                     uri: 'https://randomuser.me/api/portraits/thumb/men/75.jpg',
                   }}
                   style={{
@@ -237,7 +244,7 @@ export const ProductPreviewScreen = () => {
                 accessoryLeft={
                   <ThemedIcon name="message-square-outline" status="primary" />
                 }>
-                Chat
+                {t('common.chat')}
               </Button>
             </Layout>
             <Layout
@@ -253,13 +260,13 @@ export const ProductPreviewScreen = () => {
                 <Text category="h4" status="primary">
                   43
                 </Text>
-                <Text appearance="hint">Review</Text>
+                <Text appearance="hint">{t('common.review')}</Text>
               </Layout>
               <Layout style={{alignItems: 'center'}}>
                 <Text category="h4" status="primary">
                   12
                 </Text>
-                <Text appearance="hint">Products</Text>
+                <Text appearance="hint">{t('common.products')}</Text>
               </Layout>
             </Layout>
             <Text
@@ -269,7 +276,7 @@ export const ProductPreviewScreen = () => {
                 marginBottom: 4,
                 fontWeight: '700',
               }}>
-              From the same seller
+              {t('common.fromSameSeller')}
             </Text>
             <FlatList
               data={[1, 2, 3, 4]}
@@ -279,14 +286,18 @@ export const ProductPreviewScreen = () => {
                 <Layout
                   level="1"
                   style={{width: 130, marginHorizontal: 4, paddingBottom: 4}}>
-                  <Image
+                  <FastImageWithFallback
+                    priority={FastImage.priority.high}
+                    resizeMode={FastImage.resizeMode.cover}
                     source={{
+                      uri: 'https://petbookie.com/storage/app/public/product/thumbnail/2023-05-07-645829a70c659.png',
+                    }}
+                    fallbackSource={{
                       uri: 'https://petbookie.com/storage/app/public/product/thumbnail/2023-05-07-645829a70c659.png',
                     }}
                     style={{
                       width: 130,
                       height: 80,
-                      resizeMode: 'cover',
                     }}
                   />
                   <Text category="p1" style={{fontSize: 16, marginVertical: 8}}>

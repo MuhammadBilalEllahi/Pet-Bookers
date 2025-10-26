@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {flexeStyles} from '../../utils/globalStyles';
-import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../common/FastImageWithFallback';
 
 const {width: windowWidth} = Dimensions.get('window');
 const height = (windowWidth - 16) / 1.77;
@@ -119,12 +119,19 @@ const ProductImageSlide = ({data, index, onImagePress}) => {
       <TouchableOpacity
         onPress={() => onImagePress && onImagePress(index)}
         style={{width: windowWidth - 16, height: height}}>
-        <FastImage
+        <FastImageWithFallback
           source={{
             uri: data.image,
-            priority: FastImage.priority.high,
+            priority: 'high',
+          }}
+          fallbackSource={{
+            uri: 'https://via.placeholder.com/400x225/cccccc/666666?text=Product+Image',
           }}
           style={{width: windowWidth - 16, height: height}}
+          resizeMode="cover"
+          showDebugLogs={false}
+          maxRetries={2}
+          retryDelay={1500}
         />
       </TouchableOpacity>
     </View>

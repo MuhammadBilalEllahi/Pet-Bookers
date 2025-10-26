@@ -8,7 +8,6 @@ import {selectIfAnonymous, selectUserType} from '../../store/user';
 // Screens
 import {HomeMainScreen} from '../../screens/buyer/HomeMainScreen';
 
-
 import {VandorsListScreen} from '../../screens/buyer/VandorsListScreen';
 import {VandorDetailScreen} from '../../screens/buyer/VandorDetailScreen';
 import {NotificationsScreen} from '../../screens/NotificationsScreen';
@@ -16,42 +15,44 @@ import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
 import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
 import {SubCategoryProductsScreen} from '../../screens/buyer/categories/SubCategoryProductsScreen';
 import {ProductsSearchScreen} from '../../screens/buyer/ProductsSearchScreen';
+import {ProductDetailScreen} from '../../screens/buyer/product/ProductDetailScreen';
 import {AllProductsScreen} from '../../screens/buyer/AllProductsScreen';
-import {AuthRestrictedError} from '../../components/auth/AuthRestrictedError';
-import { ProductDetailScreen } from '../../screens/buyer/product/ProductDetailScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
 export const BuyerHomeStack = () => {
   const isAnonymous = useSelector(selectIfAnonymous);
-const userType = useSelector(selectUserType)
+  const userType = useSelector(selectUserType);
   return (
     <Navigator
       screenOptions={{
         gestureEnabled: false,
         header: props => <MainScreensHeader {...props} />,
-          contentStyle: {
-          backgroundColor: 'white'
-          
-        }
+        contentStyle: {
+          backgroundColor: 'white',
+        },
       }}
       initialRouteName="HomeMainScreen">
       <Screen
         name="HomeMainScreen"
         component={HomeMainScreen}
         options={{
-          header: props => <MainScreensHeader 
-          title={userType}
-          hideCart={false}
-          hideNotification={false}
-          {...props} />, // show notification only on home
-            contentStyle: {
-          backgroundColor: 'white'
-          
-        }
+          header: props => (
+            <MainScreensHeader
+              title={userType}
+              hideCart={false}
+              hideNotification={false}
+              {...props}
+            />
+          ), // show notification only on home
+          contentStyle: {
+            backgroundColor: 'white',
+          },
         }}
       />
-      <Screen name="ProductDetail" component={ProductDetailScreen}
+      <Screen
+        name="ProductDetail"
+        component={ProductDetailScreen}
         options={{
           header: props => (
             <MainScreensHeader
@@ -61,18 +62,16 @@ const userType = useSelector(selectUserType)
               hideNotification={true}
             />
           ),
-            contentStyle: {
-          backgroundColor: 'white'
-          
-        }
+          contentStyle: {
+            backgroundColor: 'white',
+          },
         }}
       />
       <Screen
         name="ProductsSearch"
         component={ProductsSearchScreen}
         options={{
-         headerShown: false,
-        
+          headerShown: false,
         }}
       />
       <Screen
@@ -80,7 +79,13 @@ const userType = useSelector(selectUserType)
         component={CategoriesListScreen}
         options={{
           title: 'CategoriesList',
-          header: props=>(<MainScreensHeader {...props }  activateGoBack={true} hideNotification={true} />)
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              activateGoBack={true}
+              hideNotification={true}
+            />
+          ),
         }}
       />
       <Screen
@@ -88,7 +93,13 @@ const userType = useSelector(selectUserType)
         component={SubCategoryProductsScreen}
         options={{
           title: 'SubCategoryProducts',
-          header: props=>(<MainScreensHeader {...props }  activateGoBack={true} hideNotification={true} />)
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              activateGoBack={true}
+              hideNotification={true}
+            />
+          ),
         }}
       />
       <Screen
@@ -96,7 +107,13 @@ const userType = useSelector(selectUserType)
         component={AllProductsScreen}
         options={{
           title: 'AllProducts',
-          header: props=>(<MainScreensHeader {...props }  activateGoBack={true} hideNotification={true} />)
+          header: props => (
+            <MainScreensHeader
+              {...props}
+              activateGoBack={true}
+              hideNotification={true}
+            />
+          ),
         }}
       />
       <Screen
@@ -133,21 +150,19 @@ const userType = useSelector(selectUserType)
         <Screen
           key="Notifications"
           name="Notifications"
-          
           options={{
             header: props => (
-            <MainScreensHeader
-              {...props}
-              hideSearch={false}
-              title="Notifications"
-              hideNotification={true}
-            />
-          ),
+              <MainScreensHeader
+                {...props}
+                hideSearch={false}
+                title="Notifications"
+                hideNotification={true}
+              />
+            ),
             title: 'Notifications',
-              contentStyle: {
-          backgroundColor: 'white'
-          
-        }
+            contentStyle: {
+              backgroundColor: 'white',
+            },
           }}>
           {props => (
             <AuthRestrictedError {...props} subTitle="messages.loginRequired" />
@@ -159,20 +174,19 @@ const userType = useSelector(selectUserType)
           component={NotificationsScreen}
           options={{
             header: props => (
-            <MainScreensHeader
-              {...props}
-              hideSearch={false}
-              hideCart={true}
-              hideWishlist={true}
-              hideNotification={true}
-              title="Notifications"
-            />
-          ),
+              <MainScreensHeader
+                {...props}
+                hideSearch={false}
+                hideCart={true}
+                hideWishlist={true}
+                hideNotification={true}
+                title="Notifications"
+              />
+            ),
             title: 'Notifications',
-              contentStyle: {
-          backgroundColor: 'white'
-          
-        }
+            contentStyle: {
+              backgroundColor: 'white',
+            },
           }}
         />
       )}

@@ -33,7 +33,7 @@ export const UpdatePasswordScreen = ({navigation}) => {
           },
         ]}>
         <Layout style={spacingStyles.p16} level="1">
-          <Text category="p1">Fill up all the fields to update password</Text>
+          <Text category="p1">{t('common.fillAllFieldsToUpdatePassword')}</Text>
           <Formik
             initialValues={{
               currentPassword: '',

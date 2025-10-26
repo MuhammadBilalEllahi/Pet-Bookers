@@ -1,18 +1,28 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Alert, ScrollView} from 'react-native';
-import {Layout, Text, Input, Button} from '@ui-kitten/components';
+import {
+  View,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  Modal,
+  TouchableOpacity,
+  FlatList,
+} from 'react-native';
+import {Layout, Text, Input, Button, Icon} from '@ui-kitten/components';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import {useSelector, useDispatch} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '../../theme/ThemeContext';
 import Toast from 'react-native-toast-message';
+import {COUNTRY_CODES} from '../../utils/constants';
 
 import {
   smartBuyerClient,
   handleAuthError,
   setAuthModalHandlers,
 } from '../../utils/authAxiosClient';
+import {axiosBuyerClient} from '../../utils/axiosClient';
 import {AppScreens} from '../../navigators/AppNavigator';
 import {
   selectCustomerInfo,
@@ -46,6 +56,12 @@ export const UpdateProfileScreen = ({navigation}) => {
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authPassword, setAuthPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState('+92');
+  const [countryModalVisible, setCountryModalVisible] = useState(false);
+  const [parsedPhone, setParsedPhone] = useState('');
 
   // Get state from Redux
   const customerInfo = useSelector(selectCustomerInfo);
@@ -59,6 +75,26 @@ export const UpdateProfileScreen = ({navigation}) => {
         navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
     });
   }, [navigation]);
+
+  // Parse phone number to extract country code when customer info is loaded
+  useEffect(() => {
+    if (customerInfo?.phone) {
+      const userPhone = customerInfo.phone;
+      // Try to find matching country code
+      const foundCountry = COUNTRY_CODES.find(code =>
+        userPhone.startsWith(code.code),
+      );
+      if (foundCountry) {
+        setCountryCode(foundCountry.code);
+        // Extract phone number without country code
+        setParsedPhone(userPhone.substring(foundCountry.code.length));
+      } else {
+        // Default to Pakistan code if no match
+        setCountryCode('+92');
+        setParsedPhone(userPhone);
+      }
+    }
+  }, [customerInfo]);
 
   // Check authentication and load profile on component mount
   useEffect(() => {
@@ -134,8 +170,9 @@ export const UpdateProfileScreen = ({navigation}) => {
       formData.append('f_name', values.f_name);
       formData.append('l_name', values.l_name);
       formData.append('email', values.email);
-      formData.append('phone', values.phone);
-      formData.append('_method', 'PUT');
+      const fullPhoneNumber = `${countryCode}${values.phone}`;
+      formData.append('phone', fullPhoneNumber);
+      // formData.append('_method', 'PUT');
 
       // console.log('Sending profile update data:', {
       //   f_name: values.f_name,
@@ -207,53 +244,106 @@ export const UpdateProfileScreen = ({navigation}) => {
       return;
     }
 
+    if (!customerInfo?.email) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Email not found',
+      });
+      return;
+    }
+
     Alert.alert(
       'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone.',
+      'Are you sure you want to delete your account? This action cannot be undone. You will be asked to verify your password.',
       [
         {text: 'Cancel', style: 'cancel'},
         {
-          text: 'Delete',
+          text: 'Continue',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-
-              const response = await smartBuyerClient.get(
-                `customer/account-delete/${customerInfo.id}`,
-              );
-              // console.log('Account deletion response:', response.data);
-
-              // Logout buyer after account deletion
-              dispatch(logoutBuyer());
-
-              Toast.show({
-                type: 'success',
-                text1: 'Account Deleted',
-                text2: 'Your account has been successfully deleted',
-              });
-
-              navigation.navigate('Login');
-            } catch (error) {
-              console.error('Error deleting account:', error);
-              handleAuthError(error, err => {
-                const errorMessage =
-                  err?.response?.data?.message ||
-                  err?.message ||
-                  'Failed to delete account';
-                Toast.show({
-                  type: 'error',
-                  text1: 'Deletion Failed',
-                  text2: errorMessage,
-                });
-              });
-            } finally {
-              setLoading(false);
-            }
+          onPress: () => {
+            // Show authentication modal to verify password
+            setShowAuthModal(true);
           },
         },
       ],
     );
+  };
+
+  const handleVerifyAndDelete = async () => {
+    if (!authPassword) {
+      Toast.show({
+        type: 'error',
+        text1: 'Password Required',
+        text2: 'Please enter your password to delete your account',
+      });
+      return;
+    }
+
+    try {
+      setAuthLoading(true);
+
+      // Step 1: Verify credentials by logging in
+      const formData = new FormData();
+      formData.append('email', customerInfo.email);
+      formData.append('password', authPassword);
+
+      const loginResponse = await axiosBuyerClient.post(
+        'auth/login',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      if (!loginResponse?.data?.token) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Step 2: If credentials are valid, proceed with account deletion
+      await smartBuyerClient.get(`customer/account-delete/${customerInfo.id}`);
+
+      // Close auth modal
+      setShowAuthModal(false);
+      setAuthPassword('');
+
+      // Logout buyer after account deletion
+      dispatch(logoutBuyer());
+
+      Toast.show({
+        type: 'success',
+        text1: 'Account Deleted',
+        text2: 'Your account has been successfully deleted',
+      });
+
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error verifying/delete account:', error);
+
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        Toast.show({
+          type: 'error',
+          text1: 'Authentication Failed',
+          text2: 'Incorrect password. Please try again.',
+        });
+      } else {
+        handleAuthError(error, err => {
+          const errorMessage =
+            err?.response?.data?.message ||
+            err?.message ||
+            'Failed to delete account';
+          Toast.show({
+            type: 'error',
+            text1: 'Deletion Failed',
+            text2: errorMessage,
+          });
+        });
+      }
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   if (!isBuyerAuthenticated) {
@@ -349,7 +439,7 @@ export const UpdateProfileScreen = ({navigation}) => {
             f_name: customerInfo.f_name || '',
             l_name: customerInfo.l_name || '',
             email: customerInfo.email || '',
-            phone: customerInfo.phone || '',
+            phone: parsedPhone || '',
           }}
           validationSchema={ProfileSchema}
           onSubmit={handleUpdateProfile}
@@ -452,14 +542,81 @@ export const UpdateProfileScreen = ({navigation}) => {
                     ]}>
                     Phone
                   </Text>
-                  <Input
-                    placeholder="Enter your phone number"
-                    value={values.phone}
-                    onChangeText={handleChange('phone')}
-                    onBlur={handleBlur('phone')}
-                    keyboardType="phone-pad"
-                    style={styles.input}
-                  />
+                  <View
+                    style={[
+                      styles.phoneRowImproved,
+                      {
+                        backgroundColor: isDark
+                          ? theme['color-shadcn-card']
+                          : theme['color-basic-100'],
+                        borderColor: isDark
+                          ? theme['color-shadcn-border']
+                          : theme['color-basic-400'],
+                      },
+                    ]}>
+                    <TouchableOpacity
+                      style={[
+                        styles.countryCodeTouchable,
+                        {
+                          backgroundColor: isDark
+                            ? theme['color-shadcn-secondary']
+                            : theme['color-basic-200'],
+                          borderRightColor: isDark
+                            ? theme['color-shadcn-border']
+                            : theme['color-basic-400'],
+                        },
+                      ]}
+                      onPress={() => setCountryModalVisible(true)}
+                      activeOpacity={0.7}>
+                      <Text
+                        style={[
+                          styles.countryCodeText,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-foreground']
+                              : theme['color-basic-900'],
+                          },
+                        ]}>
+                        {COUNTRY_CODES.find(c => c.code === countryCode)
+                          ?.label || '+92'}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.countryCodeDropdownIcon,
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-muted-foreground']
+                              : theme['color-basic-600'],
+                          },
+                        ]}>
+                        ▼
+                      </Text>
+                    </TouchableOpacity>
+                    <View style={{flex: 1}}>
+                      <Input
+                        placeholder="Enter your phone number"
+                        value={values.phone}
+                        onChangeText={handleChange('phone')}
+                        onBlur={handleBlur('phone')}
+                        keyboardType="phone-pad"
+                        style={[
+                          styles.phoneInputImproved,
+                          {
+                            backgroundColor: isDark
+                              ? theme['color-shadcn-card']
+                              : theme['color-basic-100'],
+                          },
+                        ]}
+                        textStyle={[
+                          {
+                            color: isDark
+                              ? theme['color-shadcn-foreground']
+                              : theme['color-basic-900'],
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
                   {touched.phone && errors.phone && (
                     <InputError error={errors.phone} />
                   )}
@@ -510,7 +667,251 @@ export const UpdateProfileScreen = ({navigation}) => {
         </View>
       </ScrollView>
 
-      {/* Buyer Authentication Modal */}
+      {/* Account Deletion Authentication Modal */}
+      <Modal
+        visible={showAuthModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          setShowAuthModal(false);
+          setAuthPassword('');
+        }}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => {
+            setShowAuthModal(false);
+            setAuthPassword('');
+          }}>
+          <View
+            style={[
+              styles.modalContainer,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
+            <View style={styles.modalHeader}>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                Verify Your Identity
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAuthModal(false);
+                  setAuthPassword('');
+                }}>
+                <Icon
+                  name="close"
+                  fill={
+                    isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600']
+                  }
+                  style={{width: 24, height: 24}}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text
+              style={[
+                styles.modalDescription,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600'],
+                },
+              ]}>
+              For security, please enter your password to confirm account
+              deletion. This action cannot be undone.
+            </Text>
+
+            <View style={styles.modalInputContainer}>
+              <Text
+                style={[
+                  styles.modalLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                Email
+              </Text>
+              <Input
+                value={customerInfo?.email || ''}
+                disabled={true}
+                style={[
+                  styles.modalInput,
+                  {
+                    backgroundColor: isDark
+                      ? theme['color-shadcn-secondary']
+                      : theme['color-basic-200'],
+                  },
+                ]}
+                textStyle={[
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-500'],
+                  },
+                ]}
+              />
+            </View>
+
+            <View style={styles.modalInputContainer}>
+              <Text
+                style={[
+                  styles.modalLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                Password
+              </Text>
+              <Input
+                placeholder="Enter your password"
+                value={authPassword}
+                onChangeText={setAuthPassword}
+                secureTextEntry={true}
+                style={[
+                  styles.modalInput,
+                  {
+                    backgroundColor: isDark
+                      ? theme['color-shadcn-card']
+                      : theme['color-basic-100'],
+                    borderColor: isDark
+                      ? theme['color-shadcn-border']
+                      : theme['color-basic-400'],
+                  },
+                ]}
+                textStyle={[
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}
+                accessoryLeft={
+                  <Icon
+                    name="lock"
+                    fill={
+                      isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600']
+                    }
+                    style={{width: 20, height: 20}}
+                  />
+                }
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Button
+                onPress={() => {
+                  setShowAuthModal(false);
+                  setAuthPassword('');
+                }}
+                disabled={authLoading}
+                style={[
+                  styles.modalCancelButton,
+                  {
+                    backgroundColor: isDark
+                      ? theme['color-shadcn-secondary']
+                      : theme['color-basic-200'],
+                    borderColor: isDark
+                      ? theme['color-shadcn-border']
+                      : theme['color-basic-400'],
+                  },
+                ]}
+                appearance="ghost">
+                Cancel
+              </Button>
+              <Button
+                onPress={handleVerifyAndDelete}
+                disabled={authLoading || !authPassword}
+                style={[
+                  styles.modalDeleteButton,
+                  {
+                    backgroundColor: theme['color-danger-500'],
+                  },
+                ]}
+                appearance="filled">
+                {authLoading ? 'Verifying...' : 'Delete Account'}
+              </Button>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Country Code Selection Modal */}
+      <Modal
+        visible={countryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCountryModalVisible(false)}>
+        <TouchableOpacity
+          style={[
+            styles.countryModalOverlay,
+            {
+              backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)',
+            },
+          ]}
+          activeOpacity={1}
+          onPressOut={() => setCountryModalVisible(false)}>
+          <View
+            style={[
+              styles.countryModal,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
+            <FlatList
+              data={COUNTRY_CODES}
+              keyExtractor={item => item.code}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.countryModalItem,
+                    {
+                      borderBottomColor: isDark
+                        ? theme['color-shadcn-border']
+                        : theme['color-basic-400'],
+                    },
+                  ]}
+                  onPress={() => {
+                    setCountryCode(item.code);
+                    setCountryModalVisible(false);
+                  }}>
+                  <Text
+                    style={[
+                      styles.countryModalItemText,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </Layout>
   );
 };
@@ -595,5 +996,116 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     borderRadius: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modalDescription: {
+    fontSize: 14,
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  modalInputContainer: {
+    marginBottom: 16,
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  modalInput: {
+    borderRadius: 8,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  modalCancelButton: {
+    flex: 1,
+    borderRadius: 8,
+  },
+  modalDeleteButton: {
+    flex: 1,
+    borderRadius: 8,
+  },
+  phoneRowImproved: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  countryCodeTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRightWidth: 1,
+    minWidth: 90,
+    justifyContent: 'center',
+  },
+  countryCodeText: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  countryCodeDropdownIcon: {
+    fontSize: 12,
+    marginLeft: 2,
+  },
+  phoneInputImproved: {
+    flex: 1,
+    marginVertical: 0,
+    marginLeft: 0,
+    borderWidth: 0,
+    paddingLeft: 2,
+  },
+  countryModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countryModal: {
+    borderRadius: 10,
+    width: 280,
+    maxHeight: 350,
+    paddingVertical: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  countryModalItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+  },
+  countryModalItemText: {
+    fontSize: 16,
   },
 });

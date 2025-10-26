@@ -4,6 +4,8 @@ import {Card, Layout, Text} from '@ui-kitten/components';
 import {useTranslation} from 'react-i18next';
 import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
 import {ThemedIcon} from '../../components/Icon';
+import FastImage from '@d11/react-native-fast-image';
+import FastImageWithFallback from '../../components/common/FastImageWithFallback';
 
 export const PaymentMethodScreen = ({navigation}) => {
   const {t} = useTranslation();
@@ -36,8 +38,13 @@ export const PaymentMethodScreen = ({navigation}) => {
               flexeStyles.itemsCenter,
               flexeStyles.contentBetween,
             ]}>
-            <Image
+            <FastImageWithFallback
+              priority={FastImage.priority.high}
+              resizeMode={FastImage.resizeMode.cover}
               source={require('../../../assets/easypaisa-logo.png')}
+              fallbackSource={{
+                uri: 'https://via.placeholder.com/50x50?text=No+Image',
+              }}
               style={styles.paymentTypeLogo}
             />
             <Text category="s1" style={flexeStyles.grow1}>
@@ -56,8 +63,13 @@ export const PaymentMethodScreen = ({navigation}) => {
               flexeStyles.itemsCenter,
               flexeStyles.contentBetween,
             ]}>
-            <Image
+            <FastImageWithFallback
+              priority={FastImage.priority.high}
+              resizeMode={FastImage.resizeMode.cover}
               source={require('../../../assets/jazzcash-logo.png')}
+              fallbackSource={{
+                uri: 'https://via.placeholder.com/50x50?text=No+Image',
+              }}
               style={styles.paymentTypeLogo}
             />
             <Text category="s1" style={flexeStyles.grow1}>
