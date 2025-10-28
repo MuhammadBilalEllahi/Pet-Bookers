@@ -1,21 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Alert, RefreshControl, Dimensions } from 'react-native';
-import { Button, Layout, Text, Card, Icon, List, ListItem } from '@ui-kitten/components';
-import { spacingStyles } from '../../utils/globalStyles';
-import { axiosBuyerClient } from '../../utils/axiosClient';
-import { useTheme } from '../../theme/ThemeContext';
-import { useTranslation } from 'react-i18next';
+import React, {useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  Alert,
+  RefreshControl,
+  Dimensions,
+} from 'react-native';
+import {
+  Button,
+  Layout,
+  Text,
+  Card,
+  Icon,
+  List,
+  ListItem,
+} from '@ui-kitten/components';
+import {spacingStyles} from '../../utils/globalStyles';
+import {axiosBuyerClient} from '../../utils/axiosClient';
+import {useTheme} from '../../theme/ThemeContext';
+import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
 
-const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
+const {width: windowWidth, height: windowHeight} = Dimensions.get('window');
 
-export const AddressListScreen = ({ navigation }) => {
+export const AddressListScreen = ({navigation}) => {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const { theme, isDark } = useTheme();
-  const { t } = useTranslation();
+  const {theme, isDark} = useTheme();
+  const {t} = useTranslation();
 
   useEffect(() => {
     loadAddresses();
@@ -25,14 +40,15 @@ export const AddressListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await axiosBuyerClient.get('customer/address/list');
-      console.log("ADDRESS LIST", response.data);
       setAddresses(response.data || []);
     } catch (error) {
       console.error('Load addresses error:', error);
       Toast.show({
         type: 'error',
         text1: t('addressListScreen.alerts.loadFailedTitle'),
-        text2: error.response?.data?.message || t('addressListScreen.alerts.loadFailedMessage'),
+        text2:
+          error.response?.data?.message ||
+          t('addressListScreen.alerts.loadFailedMessage'),
         position: 'top',
       });
     } finally {
@@ -46,7 +62,7 @@ export const AddressListScreen = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const handleDeleteAddress = (addressId) => {
+  const handleDeleteAddress = addressId => {
     Alert.alert(
       t('addressListScreen.alerts.deleteTitle'),
       t('addressListScreen.alerts.deleteMessage'),
@@ -60,24 +76,28 @@ export const AddressListScreen = ({ navigation }) => {
           style: 'destructive',
           onPress: () => confirmDeleteAddress(addressId),
         },
-      ]
+      ],
     );
   };
 
-  const confirmDeleteAddress = async (addressId) => {
+  const confirmDeleteAddress = async addressId => {
     try {
       setDeletingId(addressId);
-      
-        const submitData =
-     { 'address_id': addressId}
 
-      const response = await axiosBuyerClient.delete('customer/address/', submitData);
+      const submitData = {address_id: addressId};
+
+      const response = await axiosBuyerClient.delete(
+        'customer/address/',
+        submitData,
+      );
 
       if (response.data) {
         Toast.show({
           type: 'success',
           text1: t('addressListScreen.alerts.deleteSuccessTitle'),
-          text2: response.data.message || t('addressListScreen.alerts.deleteSuccessMessage'),
+          text2:
+            response.data.message ||
+            t('addressListScreen.alerts.deleteSuccessMessage'),
           position: 'top',
         });
 
@@ -89,7 +109,9 @@ export const AddressListScreen = ({ navigation }) => {
       Toast.show({
         type: 'error',
         text1: t('addressListScreen.alerts.deleteFailedTitle'),
-        text2: error.response?.data?.message || t('addressListScreen.alerts.deleteFailedMessage'),
+        text2:
+          error.response?.data?.message ||
+          t('addressListScreen.alerts.deleteFailedMessage'),
         position: 'top',
       });
     } finally {
@@ -99,20 +121,20 @@ export const AddressListScreen = ({ navigation }) => {
 
   const navigateToAddAddress = () => {
     navigation.navigate('AddAddress', {
-      onAddressAdded: loadAddresses
+      onAddressAdded: loadAddresses,
     });
   };
 
-  const navigateToEditAddress = (address) => {
+  const navigateToEditAddress = address => {
     navigation.navigate('EditAddress', {
       address,
-      onAddressUpdated: loadAddresses
+      onAddressUpdated: loadAddresses,
     });
   };
 
-  const renderAddressItem = ({ item }) => {
+  const renderAddressItem = ({item}) => {
     const isDeleting = deletingId === item.id;
-    
+
     return (
       <Layout
         style={[
@@ -126,8 +148,7 @@ export const AddressListScreen = ({ navigation }) => {
               : theme['color-basic-300'],
           },
         ]}
-        level="1"
-      >
+        level="1">
         <View style={styles.addressHeader}>
           <View style={styles.addressTypeContainer}>
             <View
@@ -138,10 +159,13 @@ export const AddressListScreen = ({ navigation }) => {
                     ? theme['color-shadcn-muted']
                     : theme['color-basic-200'],
                 },
-              ]}
-            >
-              <Icon 
-                name={item.address_type === 'home' ? 'home-outline' : 'briefcase-outline'} 
+              ]}>
+              <Icon
+                name={
+                  item.address_type === 'home'
+                    ? 'home-outline'
+                    : 'briefcase-outline'
+                }
                 style={[
                   styles.addressTypeIcon,
                   {
@@ -162,12 +186,10 @@ export const AddressListScreen = ({ navigation }) => {
                       ? theme['color-shadcn-foreground']
                       : theme['color-basic-900'],
                   },
-                ]}
-              >
-                {item.address_type === 'home' 
+                ]}>
+                {item.address_type === 'home'
                   ? t('addressListScreen.addressTypes.home')
-                  : t('addressListScreen.addressTypes.office')
-                }
+                  : t('addressListScreen.addressTypes.office')}
               </Text>
               {item.is_billing === '1' && (
                 <View style={styles.billingBadge}>
@@ -192,7 +214,7 @@ export const AddressListScreen = ({ navigation }) => {
                   marginRight: 8,
                 },
               ]}
-              accessoryLeft={(props) => (
+              accessoryLeft={props => (
                 <Icon
                   {...props}
                   name="edit-outline"
@@ -218,7 +240,7 @@ export const AddressListScreen = ({ navigation }) => {
                     : 'rgba(239, 68, 68, 0.05)',
                 },
               ]}
-              accessoryLeft={(props) => (
+              accessoryLeft={props => (
                 <Icon
                   {...props}
                   name="trash-2-outline"
@@ -232,7 +254,7 @@ export const AddressListScreen = ({ navigation }) => {
             />
           </View>
         </View>
-        
+
         <View style={styles.addressDetails}>
           <Text
             category="s1"
@@ -243,8 +265,7 @@ export const AddressListScreen = ({ navigation }) => {
                   ? theme['color-shadcn-foreground']
                   : theme['color-basic-900'],
               },
-            ]}
-          >
+            ]}>
             {item.contact_person_name}
           </Text>
           <Text
@@ -256,8 +277,7 @@ export const AddressListScreen = ({ navigation }) => {
                   ? theme['color-shadcn-muted-foreground']
                   : theme['color-basic-600'],
               },
-            ]}
-          >
+            ]}>
             {item.address}
           </Text>
           <Text
@@ -269,8 +289,7 @@ export const AddressListScreen = ({ navigation }) => {
                   ? theme['color-shadcn-muted-foreground']
                   : theme['color-basic-600'],
               },
-            ]}
-          >
+            ]}>
             {item.city}, {item.zip}, {item.country}
           </Text>
           <Text
@@ -282,8 +301,7 @@ export const AddressListScreen = ({ navigation }) => {
                   ? theme['color-shadcn-foreground']
                   : theme['color-basic-700'],
               },
-            ]}
-          >
+            ]}>
             {item.phone}
           </Text>
         </View>
@@ -301,8 +319,7 @@ export const AddressListScreen = ({ navigation }) => {
               ? theme['color-shadcn-muted']
               : theme['color-basic-200'],
           },
-        ]}
-      >
+        ]}>
         <Icon
           name="map-outline"
           style={[
@@ -324,8 +341,7 @@ export const AddressListScreen = ({ navigation }) => {
               ? theme['color-shadcn-foreground']
               : theme['color-basic-900'],
           },
-        ]}
-      >
+        ]}>
         {t('addressListScreen.emptyState.title')}
       </Text>
       <Text
@@ -337,8 +353,7 @@ export const AddressListScreen = ({ navigation }) => {
               ? theme['color-shadcn-muted-foreground']
               : theme['color-basic-600'],
           },
-        ]}
-      >
+        ]}>
         {t('addressListScreen.emptyState.message')}
       </Text>
       <Button
@@ -348,8 +363,7 @@ export const AddressListScreen = ({ navigation }) => {
             backgroundColor: theme['color-primary-500'],
           },
         ]}
-        onPress={navigateToAddAddress}
-      >
+        onPress={navigateToAddAddress}>
         {t('addressListScreen.emptyState.addButton')}
       </Button>
     </View>
@@ -366,8 +380,7 @@ export const AddressListScreen = ({ navigation }) => {
               ? theme['color-shadcn-background']
               : theme['color-basic-100'],
           },
-        ]}
-      >
+        ]}>
         <Text
           style={[
             styles.loadingText,
@@ -376,8 +389,7 @@ export const AddressListScreen = ({ navigation }) => {
                 ? theme['color-shadcn-foreground']
                 : theme['color-basic-900'],
             },
-          ]}
-        >
+          ]}>
           {t('addressListScreen.loading')}
         </Text>
       </Layout>
@@ -395,8 +407,7 @@ export const AddressListScreen = ({ navigation }) => {
               : theme['color-basic-100'],
           },
         ]}
-        level="1"
-      >
+        level="1">
         <Text
           category="h5"
           style={[
@@ -406,8 +417,7 @@ export const AddressListScreen = ({ navigation }) => {
                 ? theme['color-shadcn-foreground']
                 : theme['color-basic-900'],
             },
-          ]}
-        >
+          ]}>
           {t('addressListScreen.title')}
         </Text>
         <Text
@@ -419,8 +429,7 @@ export const AddressListScreen = ({ navigation }) => {
                 ? theme['color-shadcn-muted-foreground']
                 : theme['color-basic-600'],
             },
-          ]}
-        >
+          ]}>
           {t('addressListScreen.subtitle')}
         </Text>
       </Layout>
@@ -433,23 +442,21 @@ export const AddressListScreen = ({ navigation }) => {
             borderColor: theme['color-primary-500'],
           },
         ]}
-        accessoryLeft={(props) => (
+        accessoryLeft={props => (
           <Icon
             {...props}
             name="plus-outline"
-            style={{ tintColor: theme['color-basic-100'] }}
+            style={{tintColor: theme['color-basic-100']}}
           />
         )}
-        onPress={navigateToAddAddress}
-      >
+        onPress={navigateToAddAddress}>
         {evaProps => (
           <Text
             {...evaProps}
             style={[
               evaProps.style,
-              { color: theme['color-basic-100'], fontWeight: '600' },
-            ]}
-          >
+              {color: theme['color-basic-100'], fontWeight: '600'},
+            ]}>
             {t('addressListScreen.addNewAddress')}
           </Text>
         )}
@@ -468,8 +475,7 @@ export const AddressListScreen = ({ navigation }) => {
               ? theme['color-shadcn-background']
               : theme['color-basic-100'],
           },
-        ]}
-      >
+        ]}>
         {renderListHeader()}
         <EmptyState />
       </Layout>
@@ -486,8 +492,7 @@ export const AddressListScreen = ({ navigation }) => {
             ? theme['color-shadcn-background']
             : theme['color-basic-100'],
         },
-      ]}
-    >
+      ]}>
       <List
         data={addresses}
         renderItem={renderAddressItem}
@@ -503,10 +508,14 @@ export const AddressListScreen = ({ navigation }) => {
         contentContainerStyle={styles.listContainer}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']}
+            tintColor={
+              isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900']
+            }
           />
         }
         showsVerticalScrollIndicator={false}

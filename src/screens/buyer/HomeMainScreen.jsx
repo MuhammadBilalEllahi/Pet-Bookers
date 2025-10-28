@@ -72,7 +72,6 @@ export const HomeMainScreen = ({navigation}) => {
   const navigateToAllCategoriesScreen = () =>
     navigation.navigate('CategoriesList');
   const navigateToAllVandorsScreen = () => {
-    console.log('Navigating to VandorsList...');
     try {
       navigation.navigate('VandorsList');
     } catch (error) {

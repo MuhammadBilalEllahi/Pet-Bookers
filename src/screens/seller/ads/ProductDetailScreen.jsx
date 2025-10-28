@@ -156,7 +156,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
         id: `image_${index}`,
         image: `${BASE_URLS.product_image_url}/${image}`,
       });
-      console.log('image__', `${BASE_URLS.product_image_url}/${image}`);
     });
   }
 

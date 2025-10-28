@@ -139,9 +139,7 @@ export const ProductListCard = ({
       // Handle auth errors with proper modal display
       handleAuthError(error, err => {
         const errorMessage =
-          err?.response?.data?.message ||
-          err?.message ||
-          t('cart.addFailed');
+          err?.response?.data?.message || err?.message || t('cart.addFailed');
         Toast.show({
           type: 'error',
           text1: t('common.error'),
@@ -167,12 +165,12 @@ export const ProductListCard = ({
       ]}
       onPress={() => onProductDetail && onProductDetail(id, slug)}>
       {/* Image Container - Left Side */}
-      {console.log('\nimage------------------', image)}
       <View style={styles.imageContainer}>
-        <FastImage   onLoadStart={() => console.log('🟡 FastImage loading started')}
-  onLoad={() => console.log('✅ FastImage loaded successfully')}
-  onError={(error) => console.log('❌ FastImage load error:', error)}
-  onLoadEnd={() => console.log('⚪ FastImage load ended')}
+        <FastImage
+          onLoadStart={() => console.log('🟡 FastImage loading started')}
+          // onLoad={() => console.log('✅ FastImage loaded successfully')}
+          // onError={(error) => console.log('❌ FastImage load error:', error)}
+          // onLoadEnd={() => console.log('⚪ FastImage load ended')}
           source={{
             uri: image,
             priority: FastImage.priority.high,

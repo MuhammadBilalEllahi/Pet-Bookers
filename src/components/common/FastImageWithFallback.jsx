@@ -27,7 +27,7 @@ const FastImageWithFallback = ({
     setIsLoading(true);
     setHasError(false);
     if (showDebugLogs) {
-      console.log('🟡 FastImage loading started:', source?.uri);
+      // console.log('🟡 FastImage loading started:', source?.uri);
     }
     onLoadStart?.();
   }, [source?.uri, onLoadStart, showDebugLogs]);
@@ -36,7 +36,7 @@ const FastImageWithFallback = ({
     setIsLoading(false);
     setHasError(false);
     if (showDebugLogs) {
-      console.log('✅ FastImage loaded successfully:', source?.uri);
+      // console.log('✅ FastImage loaded successfully:', source?.uri);
     }
     onLoad?.();
   }, [source?.uri, onLoad, showDebugLogs]);
@@ -46,14 +46,14 @@ const FastImageWithFallback = ({
       setIsLoading(false);
 
       if (showDebugLogs) {
-        console.log('❌ FastImage load error:', source?.uri);
-        console.log('Error details:', error);
+        // console.log('❌ FastImage load error:', source?.uri);
+        // console.log('Error details:', error);
 
         // Extract HTTP status code if available
         const message = error.nativeEvent?.error || '';
         const match = message.match(/status code:\s*(\d+)/);
         if (match) {
-          console.log('HTTP Status Code:', match[1]);
+          // console.log('HTTP Status Code:', match[1]);
         }
       }
 
@@ -82,7 +82,7 @@ const FastImageWithFallback = ({
   const handleLoadEnd = useCallback(() => {
     setIsLoading(false);
     if (showDebugLogs) {
-      console.log('⚪ FastImage load ended:', source?.uri);
+      // console.log('⚪ FastImage load ended:', source?.uri);
     }
     onLoadEnd?.();
   }, [source?.uri, onLoadEnd, showDebugLogs]);

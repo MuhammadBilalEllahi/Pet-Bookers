@@ -94,11 +94,6 @@ export const ChatScreen = ({navigation}) => {
         'customer/chat/list/seller?limit=100&offset=0',
       );
 
-      console.log(
-        'Buyer chat response:',
-        JSON.stringify(response.data, null, 2),
-      );
-
       if (response.data && response.data.chat) {
         const formattedChats = response.data.chat.map(chat => {
           const isSentByUs = chat.sent_by_customer === 1;
@@ -186,11 +181,6 @@ export const ChatScreen = ({navigation}) => {
       setSellerLoading(true);
       const response = await smartSellerClient.get(
         'messages/list/customer?limit=100&offset=0',
-      );
-
-      console.log(
-        'Seller chat response:',
-        JSON.stringify(response.data, null, 2),
       );
 
       if (response.data && response.data.chat) {

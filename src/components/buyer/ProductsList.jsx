@@ -123,7 +123,6 @@ export const ProductsList = ({
           data={list}
           keyExtractor={item => item.id.toString()}
           renderItem={({item}) => {
-            console.log('item----', item);
             return (
               <ProductCard
                 {...item}

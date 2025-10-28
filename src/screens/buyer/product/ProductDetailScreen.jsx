@@ -642,7 +642,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
         `products/social-share-link/${product.slug}`,
       );
       const shareLink = response.data;
-      console.log('shareLink', shareLink);
+
       // console.log('product', product);
 
       const shareOptions = {
@@ -679,18 +679,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
             : '',
       }))
     : [];
-
-  console.log('productImages', productImages);
-  console.log('BASE_URLS.product_image_url', BASE_URLS.product_image_url);
-  console.log('image', productImages[0].image);
-  console.log(
-    'BASE_URLS.product_image_url && image',
-    BASE_URLS.product_image_url && productImages[0].image,
-  );
-  console.log(
-    '${BASE_URLS.product_image_url}/${image}',
-    `${BASE_URLS.product_image_url}/${productImages[0].image}`,
-  );
 
   // const parsedRelatedProducts = Array.isArray(relatedProducts)
   //   ? relatedProducts.map(item => ({

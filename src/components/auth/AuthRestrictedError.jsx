@@ -16,9 +16,6 @@ export const AuthRestrictedError = ({subTitle, isItSeller = false}) => {
   const {t, i18n} = useTranslation();
   const navigation = useNavigation();
 
-  console.log('isitSeller', isitSeller);
-  console.log('subtitle', subtitle);
-  console.log('i18n.language', i18n.language);
   const onNavigateToAuth = () => {
     // const { isItSeller= false} = route.params || {};
     navigation.navigate(AppScreens.AUTH, {isItSeller: isitSeller});

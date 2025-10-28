@@ -96,10 +96,6 @@ export const ProductCard = ({
       dispatch(addToWishlist({productId: id, productData}));
     }
   };
-  console.log(
-    '000000000000000',
-    `${BASE_URL}storage/app/public/${image?.split('/')?.pop() || ''}`,
-  );
 
   return (
     <TouchableOpacity

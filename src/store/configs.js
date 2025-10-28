@@ -101,7 +101,7 @@ export const selectBaseUrls = createSelector(
 // Selector to get image URLs with fallback
 export const selectImageUrls = createSelector(selectConfigsData, data => {
   const apiUrls = data.baseUrls;
-  console.log('API URLs', apiUrls);
+  // console.log('API URLs', apiUrls);
   // If API URLs are available and not empty, use them, otherwise use fallback
   // if (apiUrls && Object.keys(apiUrls).length > 0) {
   //   return {
