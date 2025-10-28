@@ -4,9 +4,11 @@ import {ThemedIcon} from '../Icon';
 import {flexeStyles} from '../../utils/globalStyles';
 import FastImageWithFallback from '../common/FastImageWithFallback';
 import FastImage from '@d11/react-native-fast-image';
+import {useTranslation} from 'react-i18next';
 
 export const ConversationItem = props => {
   const theme = useTheme();
+  const {t} = useTranslation();
   // Support both old and new data structures
   const {
     id,
@@ -53,7 +55,9 @@ export const ConversationItem = props => {
             {lastMessage}
           </Text>
           {adStatus === 'inactive' && (
-            <Text style={styles.adInactive}>Ad Inactive</Text>
+            <Text style={styles.adInactive}>
+              {t('conversationItem.adInactive')}
+            </Text>
           )}
         </View>
       </View>

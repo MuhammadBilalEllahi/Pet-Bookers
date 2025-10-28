@@ -95,12 +95,11 @@ export default function ShipingDetails({route}) {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Location Permission',
-            message:
-              'This app needs access to your location to autofill your address.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
+            title: t('shippingDetails.locationPermission.title'),
+            message: t('shippingDetails.locationPermission.message'),
+            buttonNeutral: t('shippingDetails.locationPermission.askMeLater'),
+            buttonNegative: t('shippingDetails.locationPermission.cancel'),
+            buttonPositive: t('shippingDetails.locationPermission.ok'),
           },
         );
 
@@ -110,8 +109,8 @@ export default function ShipingDetails({route}) {
         } else {
           setLocationPermission(false);
           Alert.alert(
-            'Permission Denied',
-            'Location permission is required to use GPS functionality',
+            t('shippingDetails.alerts.permissionDenied'),
+            t('shippingDetails.alerts.locationPermissionRequired'),
           );
           return false;
         }
@@ -159,8 +158,10 @@ export default function ShipingDetails({route}) {
         console.error('Location error:', error);
         setFetchingLocation(false);
         Alert.alert(
-          'Location Error',
-          `Failed to get current location: ${error.message}`,
+          t('shippingDetails.alerts.locationError'),
+          t('shippingDetails.alerts.failedToGetLocation', {
+            error: error.message,
+          }),
         );
       },
       {
@@ -221,15 +222,15 @@ export default function ShipingDetails({route}) {
         }));
 
         Alert.alert(
-          'Success',
-          'Address automatically filled from your current location!',
+          t('shippingDetails.alerts.success'),
+          t('shippingDetails.alerts.addressAutoFilled'),
         );
       }
     } catch (error) {
       console.error('Geocoding error:', error);
       Alert.alert(
-        'Geocoding Error',
-        'Could not get address from coordinates, but GPS coordinates have been saved.',
+        t('shippingDetails.alerts.geocodingError'),
+        t('shippingDetails.alerts.addressFromCoordsFailed'),
       );
     }
   };
@@ -258,7 +259,10 @@ export default function ShipingDetails({route}) {
       }
     } catch (error) {
       console.error('Error fetching addresses:', error);
-      Alert.alert('Error', 'Failed to fetch addresses');
+      Alert.alert(
+        t('shippingDetails.alerts.error'),
+        t('shippingDetails.alerts.failedToFetchAddresses'),
+      );
     } finally {
       setLoading(false);
     }
@@ -273,7 +277,10 @@ export default function ShipingDetails({route}) {
         !newAddress.address ||
         !newAddress.city
       ) {
-        Alert.alert('Error', 'Please fill in all required fields');
+        Alert.alert(
+          t('shippingDetails.alerts.error'),
+          t('shippingDetails.alerts.fillAllFields'),
+        );
         return;
       }
 
@@ -283,7 +290,10 @@ export default function ShipingDetails({route}) {
       );
       // console.log('Add Address Response:', response.data);
 
-      Alert.alert('Success', 'Address added successfully');
+      Alert.alert(
+        t('shippingDetails.alerts.success'),
+        t('shippingDetails.alerts.addressAddedSuccess'),
+      );
       setShowAddAddress(false);
       setNewAddress({
         contact_person_name: '',
@@ -303,8 +313,9 @@ export default function ShipingDetails({route}) {
     } catch (error) {
       console.error('Error adding address:', error);
       Alert.alert(
-        'Error',
-        error?.response?.data?.message || 'Failed to add address',
+        t('shippingDetails.alerts.error'),
+        error?.response?.data?.message ||
+          t('shippingDetails.alerts.failedToAddAddress'),
       );
     }
   };
@@ -368,11 +379,11 @@ export default function ShipingDetails({route}) {
       // console.log('COD Order response:', response.data);
 
       Alert.alert(
-        'Order Placed Successfully!',
-        'Your order has been placed. You will pay cash on delivery.',
+        t('shippingDetails.alerts.orderPlacedSuccess'),
+        t('shippingDetails.alerts.codOrderPlaced'),
         [
           {
-            text: 'OK',
+            text: t('shippingDetails.alerts.ok'),
             onPress: () => navigation.navigate(AppScreens.BUYER_HOME_MAIN),
           },
         ],
@@ -380,8 +391,9 @@ export default function ShipingDetails({route}) {
     } catch (error) {
       console.error('Error placing COD order:', error);
       Alert.alert(
-        'Error',
-        error?.response?.data?.message || 'Failed to place order',
+        t('shippingDetails.alerts.error'),
+        error?.response?.data?.message ||
+          t('shippingDetails.alerts.orderFailed'),
       );
     } finally {
       setPlacingOrder(false);
@@ -391,7 +403,10 @@ export default function ShipingDetails({route}) {
   // Place order for EasyPaisa using new mobile API
   const placeEasyPaisaOrder = async billingAddressId => {
     if (!easyPaisaNumber.trim()) {
-      Alert.alert('Error', 'Please enter your EasyPaisa account number');
+      Alert.alert(
+        t('shippingDetails.alerts.error'),
+        t('shippingDetails.alerts.enterEasyPaisa'),
+      );
       return;
     }
 
@@ -412,8 +427,9 @@ export default function ShipingDetails({route}) {
 
       if (initiateResponse.data.status !== 'success') {
         Alert.alert(
-          'Error',
-          initiateResponse.data.message || 'Failed to initiate payment',
+          t('shippingDetails.alerts.error'),
+          initiateResponse.data.message ||
+            t('shippingDetails.alerts.failedToInitiatePayment'),
         );
         return;
       }
@@ -423,13 +439,29 @@ export default function ShipingDetails({route}) {
       // Show confirmation dialog with payment details
       const confirmPayment = await new Promise(resolve => {
         Alert.alert(
-          'Confirm EasyPaisa Payment',
-          `Amount: Rs ${cartSummary.total.toLocaleString()}\nMobile: ${easyPaisaNumber}\nItems: ${
-            paymentData.cart_items_count
-          }\n\nProceed with payment?`,
+          t('shippingDetails.alerts.confirmPayment'),
+          t('common.amount') +
+            ': Rs ' +
+            cartSummary.total.toLocaleString() +
+            '\n' +
+            t('shippingDetails.alerts.mobile') +
+            ': ' +
+            easyPaisaNumber +
+            '\n' +
+            t('common.items') +
+            ': ' +
+            paymentData.cart_items_count +
+            '\n\n' +
+            t('shippingDetails.alerts.proceedPayment'),
           [
-            {text: 'Cancel', onPress: () => resolve(false)},
-            {text: 'Confirm Payment', onPress: () => resolve(true)},
+            {
+              text: t('shippingDetails.alerts.cancel'),
+              onPress: () => resolve(false),
+            },
+            {
+              text: t('shippingDetails.alerts.confirmPaymentButton'),
+              onPress: () => resolve(true),
+            },
           ],
         );
       });
@@ -456,15 +488,23 @@ export default function ShipingDetails({route}) {
         const orderData = completeResponse.data.data;
 
         Alert.alert(
-          'Payment Successful!',
-          `Your order has been placed successfully!\n\nOrder Group ID: ${
-            orderData.order_group_id
-          }\nTransaction ID: ${
-            orderData.transaction_id
-          }\nTotal Amount: Rs ${orderData.total_amount.toLocaleString()}`,
+          t('shippingDetails.alerts.paymentSuccessful'),
+          t('common.yourOrderPlaced') +
+            '\n\n' +
+            t('common.orderGroupId') +
+            ': ' +
+            orderData.order_group_id +
+            '\n' +
+            t('common.transactionId') +
+            ': ' +
+            orderData.transaction_id +
+            '\n' +
+            t('common.totalAmount') +
+            ': Rs ' +
+            orderData.total_amount.toLocaleString(),
           [
             {
-              text: 'OK',
+              text: t('shippingDetails.alerts.ok'),
               onPress: () => navigation.navigate(AppScreens.BUYER_HOME_MAIN),
             },
           ],
@@ -472,9 +512,9 @@ export default function ShipingDetails({route}) {
       } else {
         console.error('error', completeResponse.data.message);
         Alert.alert(
-          'Payment Failed',
+          t('shippingDetails.alerts.paymentFailed'),
           completeResponse.data.message ||
-            'Payment processing failed. Please try again.',
+            t('shippingDetails.alerts.paymentProcessingFailed'),
         );
       }
     } catch (error) {
@@ -504,7 +544,7 @@ export default function ShipingDetails({route}) {
       console.error('error', error?.response?.data?.errors);
       console.error('error', error?.response?.data?.payment_response);
       console.error('error', error?.response?.data?.payment_response);
-      Alert.alert('Payment Error', errorMessage);
+      Alert.alert(t('shippingDetails.alerts.paymentError'), errorMessage);
     } finally {
       setPlacingOrder(false);
     }
@@ -512,7 +552,10 @@ export default function ShipingDetails({route}) {
 
   const handleContinue = () => {
     if (addresses.length === 0) {
-      Alert.alert('Error', 'Please add a shipping address first');
+      Alert.alert(
+        t('shippingDetails.alerts.error'),
+        t('shippingDetails.alerts.addShippingAddressFirst'),
+      );
       return;
     }
 
@@ -522,13 +565,19 @@ export default function ShipingDetails({route}) {
         !billingAddress.phone ||
         !billingAddress.address
       ) {
-        Alert.alert('Error', 'Please fill in billing address details');
+        Alert.alert(
+          t('shippingDetails.alerts.error'),
+          t('shippingDetails.alerts.fillBillingDetails'),
+        );
         return;
       }
     }
 
     if (!checkoutData) {
-      Alert.alert('Error', 'No checkout data found. Please go back to cart.');
+      Alert.alert(
+        t('shippingDetails.alerts.error'),
+        t('shippingDetails.alerts.noCheckoutData'),
+      );
       return;
     }
 
@@ -537,7 +586,10 @@ export default function ShipingDetails({route}) {
       : billingAddress.id;
 
     if (!billingAddressId) {
-      Alert.alert('Error', 'Please select a valid billing address');
+      Alert.alert(
+        t('shippingDetails.alerts.error'),
+        t('shippingDetails.alerts.selectValidBillingAddress'),
+      );
       return;
     }
 

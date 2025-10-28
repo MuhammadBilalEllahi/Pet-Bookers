@@ -43,7 +43,7 @@ import {
   selectIsInWishlist,
 } from '../../../store/wishlist';
 import {calculateDiscountedPrice} from '../../../utils/products';
-import {BASE_URLS, selectBaseUrls} from '../../../store/configs';
+import {BASE_URLS} from '../../../store/configs';
 import {selectProductCategories} from '../../../store/productCategories';
 import {setActiveRoom} from '../../../store/chat';
 import {setBottomTabBarVisibility} from '../../../store/configs';
@@ -261,7 +261,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
-  const baseUrls = useSelector(selectBaseUrls);
   const {productId, slug = null} = route.params || {};
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -303,33 +302,32 @@ export const ProductDetailScreen = ({route, navigation}) => {
   const {sellerProducts, sellerProductsLoading} =
     useSelector(selectSellerProducts);
 
-  const parsedProducts = useCallback(
-    list => {
-      if (!Array.isArray(list)) return [];
-      return list.map(productItem => ({
-        id: productItem.id,
-        name: productItem.name,
-        image: productItem.thumbnail
-          ? `${BASE_URLS.product_thumbnail_url}/${productItem.thumbnail}`
-          : '',
-        price:
-          productItem.discount > 0
-            ? calculateDiscountedPrice(
-                productItem.unit_price,
-                productItem.discount,
-                productItem.discount_type,
-              )
-            : productItem.unit_price,
-        oldPrice: productItem.discount > 0 ? productItem.unit_price : 0,
-        isSoldOut: productItem.current_stock === 0,
-        discountType: productItem.discount_type,
-        discount: productItem.discount,
-        rating: 0,
-        slug: productItem?.slug || '',
-      }));
-    },
-    [baseUrls],
-  );
+  const parsedProducts = useCallback(list => {
+    if (!Array.isArray(list)) return [];
+    return list.map(productItem => ({
+      id: productItem.id,
+      name: productItem.name,
+      image: productItem.thumbnail
+        ? `${BASE_URLS.product_thumbnail_url}/${
+            productItem.thumbnail?.split('/')?.pop() || ''
+          }`
+        : '',
+      price:
+        productItem.discount > 0
+          ? calculateDiscountedPrice(
+              productItem.unit_price,
+              productItem.discount,
+              productItem.discount_type,
+            )
+          : productItem.unit_price,
+      oldPrice: productItem.discount > 0 ? productItem.unit_price : 0,
+      isSoldOut: productItem.current_stock === 0,
+      discountType: productItem.discount_type,
+      discount: productItem.discount,
+      rating: 0,
+      slug: productItem?.slug || '',
+    }));
+  }, []);
 
   useEffect(() => {
     console.debug('SELLER ID', product);
@@ -547,8 +545,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
         recipient: {
           name: getShopName(product),
           profile:
-            baseUrls && baseUrls['shop_image_url'] && getShopImage(product)
-              ? `${baseUrls['shop_image_url']}/${getShopImage(product)}`
+            BASE_URLS.shop_image_url && getShopImage(product)
+              ? `${BASE_URLS.shop_image_url}/${getShopImage(product)}`
               : '',
         },
       }),
@@ -558,24 +556,24 @@ export const ProductDetailScreen = ({route, navigation}) => {
     navigation.navigate(ChatRoutes.MESSAGES, {
       roomId: sellerId, // seller_id for buyer chat
       recipientProfile:
-        baseUrls && baseUrls['shop_image_url'] && getShopImage(product)
-          ? `${baseUrls['shop_image_url']}/${getShopImage(product)}`
+        BASE_URLS.shop_image_url && getShopImage(product)
+          ? `${BASE_URLS.shop_image_url}/${getShopImage(product)}`
           : '',
       recipientName: getShopName(product),
-      chatType: isSellerAuthenticated ? 'seller' : 'buyer', // Set chatType based on authentication status
+      chatType: 'buyer', // Always 'buyer' when messaging a seller from product detail
       // Add product information for initial message context
       productInfo: {
         id: product.id,
         name: product.name,
         price: product.unit_price,
         image:
-          baseUrls && baseUrls['product_thumbnail_url'] && product.thumbnail
-            ? `${baseUrls['product_thumbnail_url']}/${product.thumbnail}`
+          BASE_URLS.product_thumbnail_url && product.thumbnail
+            ? `${BASE_URLS.product_thumbnail_url}/${product.thumbnail}`
             : '',
         slug: product.slug,
         url:
-          baseUrls && baseUrls['product_url'] && product.slug
-            ? `${baseUrls['product_url']}/${product.slug}`
+          BASE_URLS.product_url && product.slug
+            ? `${BASE_URLS.product_url}/${product.slug}`
             : '',
         seller: {
           id: sellerId,
@@ -676,29 +674,41 @@ export const ProductDetailScreen = ({route, navigation}) => {
     ? product.images.map(image => ({
         id: image,
         image:
-          baseUrls && baseUrls['product_image_url'] && image
-            ? `${baseUrls['product_image_url']}/${image}`
+          BASE_URLS.product_image_url && image
+            ? `${BASE_URLS.product_image_url}/${image?.split('/')?.pop() || ''}`
             : '',
       }))
     : [];
 
-  const parsedRelatedProducts = Array.isArray(relatedProducts)
-    ? relatedProducts.map(item => ({
-        id: item.id,
-        name: item.name,
-        image:
-          baseUrls && baseUrls['product_thumbnail_url'] && item.thumbnail
-            ? `${baseUrls['product_thumbnail_url']}/${item.thumbnail}`
-            : '',
-        price: item.unit_price,
-        oldPrice: item.discount > 0 ? item.unit_price : 0,
-        isSoldOut: item.current_stock === 0,
-        discountType: item.discount_type,
-        discount: item.discount,
-        rating: item.average_review || 0,
-        slug: item.slug,
-      }))
-    : [];
+  console.log('productImages', productImages);
+  console.log('BASE_URLS.product_image_url', BASE_URLS.product_image_url);
+  console.log('image', productImages[0].image);
+  console.log(
+    'BASE_URLS.product_image_url && image',
+    BASE_URLS.product_image_url && productImages[0].image,
+  );
+  console.log(
+    '${BASE_URLS.product_image_url}/${image}',
+    `${BASE_URLS.product_image_url}/${productImages[0].image}`,
+  );
+
+  // const parsedRelatedProducts = Array.isArray(relatedProducts)
+  //   ? relatedProducts.map(item => ({
+  //       id: item.id,
+  //       name: item.name,
+  //       image:
+  //         BASE_URLS.product_thumbnail_url && item.thumbnail
+  //           ? `${BASE_URLS.product_thumbnail_url}/${item.thumbnail}`
+  //           : '',
+  //       price: item.unit_price,
+  //       oldPrice: item.discount > 0 ? item.unit_price : 0,
+  //       isSoldOut: item.current_stock === 0,
+  //       discountType: item.discount_type,
+  //       discount: item.discount,
+  //       rating: item.average_review || 0,
+  //       slug: item.slug,
+  //     }))
+  //   : [];
 
   // Get screen dimensions
   const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -1764,10 +1774,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
             <Image
               source={{
                 uri:
-                  baseUrls &&
-                  baseUrls['shop_image_url'] &&
-                  getShopImage(product)
-                    ? `${baseUrls['shop_image_url']}/${getShopImage(product)}`
+                  BASE_URLS.shop_image_url && getShopImage(product)
+                    ? `${BASE_URLS.shop_image_url}/${getShopImage(product)}`
                     : undefined,
               }}
               style={{

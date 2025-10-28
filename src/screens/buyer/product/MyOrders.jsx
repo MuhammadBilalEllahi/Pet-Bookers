@@ -78,7 +78,7 @@ const AddressInfo = ({address, isDark, theme, t}) => {
               : theme['color-basic-600'],
           },
         ]}>
-        Billing Address:
+        {t('myOrders.billingAddress')}:
       </Text>
       <Text
         style={[

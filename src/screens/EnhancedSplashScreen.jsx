@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import FastImage from '@d11/react-native-fast-image';
 import {useTheme} from '../theme/ThemeContext';
+import {useTranslation} from 'react-i18next';
 
 const {width, height} = Dimensions.get('window');
 
@@ -22,6 +23,7 @@ export const EnhancedSplashScreen = ({
   isAuthLoaded = false,
 }) => {
   const {isDark, theme} = useTheme();
+  const {t} = useTranslation();
 
   // Animation values
   const logoScale = useRef(new Animated.Value(1)).current; // Start exactly same size as Splash
@@ -162,7 +164,7 @@ export const EnhancedSplashScreen = ({
                   : theme['color-basic-900'],
               },
             ]}>
-            Your Pet, Our Security!
+            {t('enhancedSplashScreen.title')}
           </Text>
           <Text
             style={[
@@ -173,7 +175,7 @@ export const EnhancedSplashScreen = ({
                   : theme['color-basic-700'],
               },
             ]}>
-            The best marketplace for {'\n'} exotic pets
+            {t('enhancedSplashScreen.subtitle')}
           </Text>
         </Animated.View>
 

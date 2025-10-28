@@ -392,9 +392,41 @@
     "congratsTitle": "Congratulations!",
     "congratsMessage": "Your product has been successfully submitted, It will be verified and made online by admin",
     "viewAd": "View My Ad",
-    "addAnother": "Add Another Product"
+    "addAnother": "Add Another Product",
+    "imageRequired": "Please select at least one product image"
   },
   "profile": {
+    "updateProfile": {
+      "firstNamePlaceholder": "Enter your first name",
+      "lastNamePlaceholder": "Enter your last name",
+      "emailPlaceholder": "Enter your email",
+      "phonePlaceholder": "Enter your phone number",
+      "passwordPlaceholder": "Enter your password",
+      "validation": {
+        "firstNameMin": "First name must be at least 2 characters",
+        "firstNameRequired": "First name is required",
+        "lastNameMin": "Last name must be at least 2 characters",
+        "lastNameRequired": "Last name is required",
+        "emailInvalid": "Invalid email address",
+        "emailRequired": "Email is required",
+        "phoneNumeric": "Phone must be numeric",
+        "phoneMin": "Phone must be at least 10 digits",
+        "phoneRequired": "Phone is required"
+      },
+      "validationError": "Validation Error",
+      "fillAllFields": "Please fill in all required fields",
+      "validEmail": "Please enter a valid email address",
+      "validPhone": "Please enter a valid phone number (at least 10 digits)",
+      "updateSuccess": "Profile updated successfully!",
+      "updateFailed": "Update Failed",
+      "customerIdNotFound": "Customer ID not found",
+      "emailNotFound": "Email not found",
+      "passwordRequired": "Password Required",
+      "passwordRequiredMessage": "Please enter your password to delete your account",
+      "deleteAccount": "Delete Account",
+      "deleteAccountMessage": "Are you sure you want to delete your account? This action cannot be undone. You will be asked to verify your password.",
+      "verifying": "Verifying..."
+    },
     "buyerOptions": "Buyer Options",
     "buyerOptionsSubtitle": "Buyer options for seller",
     "errorLoadingProfile": "Error loading profile",
@@ -538,6 +570,9 @@
   "No reviews found": "No reviews found",
   "No product reviews yet": "No product reviews yet",
   "cart": {
+    "addedToCart": "Added to Cart",
+    "addedSuccess": "Product added to cart successfully!",
+    "addFailed": "Failed to add to cart",
     "title": "Shopping Cart",
     "empty": "Your cart is empty",
     "emptyDesc": "Add some products to get started",
@@ -630,6 +665,8 @@
     "clearSearch": "Clear Search"
   },
   "product": {
+    "cartAuth": "You are signed in as a seller. Please also sign in as a buyer to add items to cart.",
+    "addToCartAuth": "Please sign in as a buyer to add items to cart.",
     "overview": "Overview",
     "reviews": "Reviews",
     "review": "review",
@@ -1044,7 +1081,12 @@
     "with": "with",
     "pleaseEnterEasyPaisaAccountNumber": "Please enter easypaisa account number",
     "selectShippingAddress": "Select Shipping Address",
-    "rs": "Rs"
+    "rs": "Rs",
+    "amount": "Amount",
+    "yourOrderPlaced": "Your order has been placed successfully!",
+    "orderGroupId": "Order Group ID",
+    "transactionId": "Transaction ID",
+    "totalAmount": "Total Amount"
   },
   "chatScreen": {
     "tabs": {
@@ -1078,6 +1120,11 @@
       "sellerTitle": "Sign in as Seller",
       "buyerMessage": "Sign in as a buyer to view your conversations with sellers",
       "sellerMessage": "Sign in as a seller to view your conversations with customers"
+    },
+    "accountInfo": {
+      "title": "Logged in accounts",
+      "buyerAccount": "Buyer account",
+      "sellerAccount": "Seller account"
     }
   },
   "messagesScreen": {
@@ -1099,7 +1146,7 @@
     },
     "messages": {
       "loading": "Loading messages...",
-      "placeholder": "Message as {chatType}...",
+      "placeholder": "Type a message as {chatType}...",
       "sending": "Sending...",
       "send": "Send",
       "messageSent": "Message sent",
@@ -1108,6 +1155,9 @@
       "pleaseRetry": "Please try again",
       "failedToLoad": "Failed to load messages",
       "unknownError": "Unknown error"
+    },
+    "accountEmail": {
+      "yourMailIs": "Your email is"
     }
   },
   "notificationsScreen": {
@@ -1439,6 +1489,47 @@
     "goBack": "Go Back"
   },
   "shippingDetails": {
+    "alerts": {
+      "permissionDenied": "Permission Denied",
+      "locationPermissionRequired": "Location permission is required to use GPS functionality",
+      "locationError": "Location Error",
+      "failedToGetLocation": "Failed to get current location: {{error}}",
+      "success": "Success",
+      "addressAutoFilled": "Address automatically filled from your current location!",
+      "geocodingError": "Geocoding Error",
+      "addressFromCoordsFailed": "Could not get address from coordinates, but GPS coordinates have been saved.",
+      "error": "Error",
+      "failedToFetchAddresses": "Failed to fetch addresses",
+      "fillAllFields": "Please fill in all required fields",
+      "addressAddedSuccess": "Address added successfully",
+      "failedToAddAddress": "Failed to add address",
+      "orderPlacedSuccess": "Order Placed Successfully!",
+      "codOrderPlaced": "Your order has been placed. You will pay cash on delivery.",
+      "ok": "OK",
+      "orderFailed": "Failed to place order",
+      "enterEasyPaisa": "Please enter your EasyPaisa account number",
+      "failedToInitiatePayment": "Failed to initiate payment",
+      "confirmPayment": "Confirm EasyPaisa Payment",
+      "proceedPayment": "Proceed with payment?",
+      "cancel": "Cancel",
+      "confirmPaymentButton": "Confirm Payment",
+      "paymentSuccessful": "Payment Successful!",
+      "paymentFailed": "Payment Failed",
+      "paymentProcessingFailed": "Payment processing failed. Please try again.",
+      "paymentError": "Payment Error",
+      "addShippingAddressFirst": "Please add a shipping address first",
+      "fillBillingDetails": "Please fill in billing address details",
+      "noCheckoutData": "No checkout data found. Please go back to cart.",
+      "selectValidBillingAddress": "Please select a valid billing address",
+      "mobile": "Mobile"
+    },
+    "locationPermission": {
+      "title": "Location Permission",
+      "message": "This app needs access to your location to autofill your address.",
+      "askMeLater": "Ask Me Later",
+      "cancel": "Cancel",
+      "ok": "OK"
+    },
     "title": "Shipping Details",
     "chooseShippingAddress": "Choose Shipping Address",
     "noAddresses": "No addresses found. Please add a new address.",
@@ -1640,5 +1731,19 @@
     "refundRequestSubmittedSuccessfully": "Refund request submitted successfully",
     "failedToSubmitRefundRequest": "Failed to submit refund request"
   },
-  "noProductsFound": "No products found"
+  "noProductsFound": "No products found",
+  "enhancedSplashScreen": {
+    "title": "Your Pet, Our Security!",
+    "subtitle": "The best marketplace for exotic pets",
+    "loading": "Loading..."
+  },
+  "favoriteItemCard": {
+    "addToCart": "ADD TO CART"
+  },
+  "conversationItem": {
+    "adInactive": "Ad Inactive"
+  },
+  "myOrders": {
+    "billingAddress": "Billing Address"
+  }
 }

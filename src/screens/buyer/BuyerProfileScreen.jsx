@@ -207,12 +207,6 @@ export const BuyerProfileScreen = ({
       );
     }
   };
-  console.log(
-    'CUSTOMER INFO',
-    customerInfo,
-    '\n',
-    `${BASE_URLS.customer_image_url}/${customerInfo.image}`,
-  );
 
   return (
     <Layout
@@ -284,7 +278,9 @@ export const BuyerProfileScreen = ({
               <Avatar
                 source={{
                   uri: customerInfo?.image
-                    ? `${BASE_URLS.customer_image_url}/${customerInfo.image}`
+                    ? `${BASE_URLS.customer_image_url}/${
+                        customerInfo?.image || ''
+                      }`
                     : 'https://randomuser.me/api/portraits/men/1.jpg',
                 }}
                 style={{

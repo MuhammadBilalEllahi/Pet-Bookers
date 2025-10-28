@@ -22,6 +22,8 @@ import {useRoute} from '@react-navigation/native';
 import {
   selectIsBuyerAuthenticated,
   selectIsSellerAuthenticated,
+  selectCustomerInfo,
+  selectSellerInfo,
 } from '../store/user';
 import {
   smartBuyerClient,
@@ -42,6 +44,8 @@ export const MessagesScreen = ({navigation}) => {
   // Authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const customerInfo = useSelector(selectCustomerInfo);
+  const sellerInfo = useSelector(selectSellerInfo);
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -353,20 +357,49 @@ export const MessagesScreen = ({navigation}) => {
             style={[flexeStyles.row, flexeStyles.itemsCenter, {marginLeft: 4}]}>
             <Avatar source={{uri: recipientProfile}} style={styles.avatar} />
             <View style={{marginLeft: 12}}>
-              <Text
-                category="h6"
-                style={{
-                  color: isDark
-                    ? theme['color-shadcn-foreground']
-                    : theme['color-basic-900'],
-                  fontWeight: '600',
-                }}>
-                {recipientName || t('common.user')}
-              </Text>
+              <View
+                style={[
+                  flexeStyles.row,
+                  flexeStyles.itemsCenter,
+                  {alignItems: 'baseline'},
+                ]}>
+                <Text
+                  category="h6"
+                  style={{
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                    fontWeight: '600',
+                  }}>
+                  {recipientName || t('common.user')}
+                </Text>
+                {/* Chat type indicator */}
+                <View
+                  style={[
+                    styles.chatTypeIndicator,
+                    {
+                      backgroundColor: theme['background-basic-color-2'],
+                      borderColor: theme['border-basic-color-1'],
+                      borderWidth: 1,
+                    },
+                  ]}>
+                  <Text
+                    style={[
+                      styles.chatTypeText,
+                      {
+                        color: isDark ? 'white' : '#121212',
+                      },
+                    ]}>
+                    {chatType === 'buyer'
+                      ? t('messagesScreen.chatStatus.seller')
+                      : t('messagesScreen.chatStatus.buyer')}
+                  </Text>
+                </View>
+              </View>
               <View style={[flexeStyles.row, flexeStyles.itemsCenter]}>
                 <View
                   style={[
-                    styles.onlineIndicator,
+                    // styles.onlineIndicator,
                     {backgroundColor: theme['color-success-default']},
                   ]}
                 />
@@ -376,38 +409,77 @@ export const MessagesScreen = ({navigation}) => {
                     color: isDark
                       ? theme['color-shadcn-muted-foreground']
                       : theme['color-basic-600'],
-                    marginLeft: 4,
+                    marginLeft: 0,
                   }}>
-                  {chatType === 'buyer'
+                  {chatType === 'seller'
                     ? t('messagesScreen.chatStatus.youAreChattingAsSeller')
                     : t('messagesScreen.chatStatus.youAreChattingAsBuyer')}
                 </Text>
               </View>
             </View>
           </View>
-          {/* Chat type indicator */}
-          <View
-            style={[
-              styles.chatTypeIndicator,
-              {
-                backgroundColor: theme['background-basic-color-2'],
-                borderColor: theme['border-basic-color-1'],
-                borderWidth: 1,
-              },
-            ]}>
-            <Text
+        </Layout>
+
+        {/* Account Email Display - Show which account is sending messages */}
+        {((chatType === 'buyer' && customerInfo?.email) ||
+          (chatType === 'seller' && sellerInfo?.email)) && (
+          <View>
+            <View
               style={[
-                styles.chatTypeText,
+                styles.accountEmailContainer,
                 {
-                  color: isDark ? 'white' : '#121212',
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-card']
+                    : theme['color-basic-100'],
                 },
               ]}>
-              {chatType === 'buyer'
-                ? t('messagesScreen.chatStatus.seller')
-                : t('messagesScreen.chatStatus.buyer')}
-            </Text>
+              <View style={styles.accountEmailContent}>
+                <ThemedIcon
+                  name={
+                    chatType === 'buyer'
+                      ? 'shopping-bag-outline'
+                      : 'shopping-bag-outline'
+                  }
+                  style={[
+                    styles.accountEmailIcon,
+                    {
+                      fill:
+                        chatType === 'buyer'
+                          ? theme['color-primary-500']
+                          : theme['color-warning-500'],
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.accountEmailText,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                    },
+                  ]}
+                  numberOfLines={1}>
+                  {' '}
+                  {t('messagesScreen.accountEmail.yourMailIs')}
+                  {': '}
+                  {chatType === 'buyer' ? customerInfo.email : sellerInfo.email}
+                </Text>
+              </View>
+            </View>
+            {/* Divider */}
+            <View
+              style={[
+                styles.divider,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-400'],
+                },
+              ]}
+            />
           </View>
-        </Layout>
+        )}
 
         {/* Product Info Card - Show when coming from ProductDetailScreen */}
         {productInfo && (
@@ -537,7 +609,11 @@ export const MessagesScreen = ({navigation}) => {
           <Input
             value={newMessage}
             onChangeText={setNewMessage}
-            placeholder={t('messagesScreen.messages.placeholder', {chatType})}
+            placeholder={t('messagesScreen.messages.placeholder', {
+              chatType: chatType
+                ? chatType.charAt(0).toUpperCase() + chatType.slice(1)
+                : '',
+            })}
             style={[
               styles.input,
               {
@@ -610,13 +686,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   chatTypeIndicator: {
-    marginLeft: 'auto',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    marginLeft: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   chatTypeText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 'bold',
   },
   inputContainer: {
@@ -744,5 +820,27 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  accountEmailContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  accountEmailContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  accountEmailIcon: {
+    width: 16,
+    height: 16,
+    marginRight: 8,
+  },
+  accountEmailText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+  },
+  divider: {
+    height: 1,
+    marginHorizontal: 16,
   },
 });

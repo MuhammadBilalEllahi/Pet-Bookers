@@ -25,6 +25,7 @@ import {smartBuyerClient, handleAuthError} from '../../utils/authAxiosClient';
 import Toast from 'react-native-toast-message';
 import {ThemedIcon} from '../Icon';
 import FastImage from '@d11/react-native-fast-image';
+import {useTranslation} from 'react-i18next';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -45,6 +46,7 @@ export const ProductListCard = ({
 }) => {
   const dispatch = useDispatch();
   const {theme} = useTheme();
+  const {t} = useTranslation();
 
   // Cart state
   const [addingToCart, setAddingToCart] = useState(false);
@@ -65,11 +67,11 @@ export const ProductListCard = ({
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
       const message = isSellerAuthenticated
-        ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
-        : 'Please sign in as a buyer to add items to wishlist.';
+        ? t('product.wishlistAuth')
+        : t('product.addToWishlistAuth');
 
-      Alert.alert('Buyer Authentication Required', message, [
-        {text: 'OK', style: 'default'},
+      Alert.alert(t('product.buyerAuthRequired'), message, [
+        {text: t('common.ok'), style: 'default'},
       ]);
       return;
     }
@@ -99,11 +101,11 @@ export const ProductListCard = ({
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
       const message = isSellerAuthenticated
-        ? 'You are signed in as a seller. Please also sign in as a buyer to add items to cart.'
-        : 'Please sign in as a buyer to add items to cart.';
+        ? t('product.cartAuth')
+        : t('product.addToCartAuth');
 
-      Alert.alert('Buyer Authentication Required', message, [
-        {text: 'OK', style: 'default'},
+      Alert.alert(t('product.buyerAuthRequired'), message, [
+        {text: t('common.ok'), style: 'default'},
       ]);
       return;
     }
@@ -121,8 +123,8 @@ export const ProductListCard = ({
 
       Toast.show({
         type: 'success',
-        text1: 'Added to Cart',
-        text2: 'Product added to cart successfully!',
+        text1: t('cart.addedToCart'),
+        text2: t('cart.addedSuccess'),
       });
 
       // Reset added state after 2 seconds
@@ -139,10 +141,10 @@ export const ProductListCard = ({
         const errorMessage =
           err?.response?.data?.message ||
           err?.message ||
-          'Failed to add to cart';
+          t('cart.addFailed');
         Toast.show({
           type: 'error',
-          text1: 'Error',
+          text1: t('common.error'),
           text2: errorMessage,
         });
       });

@@ -1,0 +1,25 @@
+warning: in the working copy of 'src/components/buyer/CartItemCard.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/buyer/FavoriteItemCard.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/chat/ConversationItem.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/product/ProductCard.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/product/ProductListCard.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/locale/en.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/locale/ur.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/EnhancedSplashScreen.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/buyer/checkout/ShipingDetails.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/profile/AddAddressScreen.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/profile/EditAddressScreen.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/profile/UpdateProfileScreen.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/seller/add_product/AddProductScreen.jsx', LF will be replaced by CRLF the next time Git touches it
+ src/components/buyer/CartItemCard.jsx              |   2 [32m+[m
+ src/components/buyer/FavoriteItemCard.jsx          |   4 [32m+[m[31m-[m
+ src/components/chat/ConversationItem.jsx           |   6 [32m+[m[31m-[m
+ src/components/product/ProductCard.jsx             |  10 [32m+[m[31m-[m
+ src/components/product/ProductListCard.jsx         |  26 [32m++[m[31m--[m
+ src/locale/en.json                                 |  97 [32m+++++++++++++[m[31m-[m
+ src/locale/ur.json                                 |  96 [32m+++++++++++++[m[31m-[m
+ src/screens/EnhancedSplashScreen.jsx               |   6 [32m+[m[31m-[m
+ src/screens/buyer/checkout/ShipingDetails.jsx      | 146 [32m++++++++++++++[m[31m-------[m
+ src/screens/profile/UpdateProfileScreen.jsx        |  47 [32m++++[m[31m---[m
+ .../seller/add_product/AddProductScreen.jsx        |   2 [32m+[m[31m-[m
+ 11 files changed, 347 insertions(+), 95 deletions(-)

@@ -26,6 +26,8 @@ import {
 import {Alert} from 'react-native';
 import FastImageWithFallback from '../common/FastImageWithFallback';
 import FastImage from '@d11/react-native-fast-image';
+import {useTranslation} from 'react-i18next';
+import {BASE_URL} from '../../utils/constants';
 
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -46,6 +48,7 @@ export const ProductCard = ({
 }) => {
   const dispatch = useDispatch();
   const {theme} = useTheme();
+  const {t} = useTranslation();
   // console.log('image------------------', image);
 
   // Get wishlist status from Redux - ensure we're checking the correct product ID
@@ -66,11 +69,11 @@ export const ProductCard = ({
     // Check if user is authenticated as buyer
     if (!isBuyerAuthenticated) {
       const message = isSellerAuthenticated
-        ? 'You are signed in as a seller. Please also sign in as a buyer to manage your wishlist.'
-        : 'Please sign in as a buyer to add items to wishlist.';
+        ? t('product.wishlistAuth')
+        : t('product.addToWishlistAuth');
 
-      Alert.alert('Buyer Authentication Required', message, [
-        {text: 'OK', style: 'default'},
+      Alert.alert(t('product.buyerAuthRequired'), message, [
+        {text: t('common.ok'), style: 'default'},
       ]);
       return;
     }
@@ -93,6 +96,10 @@ export const ProductCard = ({
       dispatch(addToWishlist({productId: id, productData}));
     }
   };
+  console.log(
+    '000000000000000',
+    `${BASE_URL}storage/app/public/${image?.split('/')?.pop() || ''}`,
+  );
 
   return (
     <TouchableOpacity
@@ -112,7 +119,9 @@ export const ProductCard = ({
           }}
           resizeMode={FastImage.resizeMode.cover}
           fallbackSource={{
-            uri: 'https://via.placeholder.com/200x200/cccccc/666666?text=Product+Image',
+            uri: `${BASE_URL}storage/app/public/${
+              image?.split('/')?.pop() || ''
+            }`,
           }}
           style={styles.image}
           showDebugLogs={false}

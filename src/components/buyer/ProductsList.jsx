@@ -1,16 +1,22 @@
-import { FlatList, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { Layout, Spinner, Text } from '@ui-kitten/components';
-import { ThemedIcon } from '../Icon';
-import { useTheme } from '../../theme/ThemeContext';
-import { ProductCard } from '../product/ProductCard';
-import { flexeStyles, spacingStyles } from '../../utils/globalStyles';
-import { useCallback } from 'react';
-import { ProductCardShimmer } from '../ProductCardShimmer';
+import {
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Dimensions,
+} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {Layout, Spinner, Text} from '@ui-kitten/components';
+import {ThemedIcon} from '../Icon';
+import {useTheme} from '../../theme/ThemeContext';
+import {ProductCard} from '../product/ProductCard';
+import {flexeStyles, spacingStyles} from '../../utils/globalStyles';
+import {useCallback} from 'react';
+import {ProductCardShimmer} from '../ProductCardShimmer';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 
-const { width: windowWidth } = Dimensions.get('screen');
+const {width: windowWidth} = Dimensions.get('screen');
 
 // Define a smaller card width for the ProductCard
 const SMALL_CARD_WIDTH = windowWidth * 0.45; // Decrease card width for smaller image
@@ -29,9 +35,8 @@ export const ProductsList = ({
   productType,
   categoryId,
 }) => {
-  const { theme, isDark } = useTheme();
-  const { t, i18n } = useTranslation();
-  
+  const {theme, isDark} = useTheme();
+  const {t, i18n} = useTranslation();
 
   const renderFooter = useCallback(() => {
     if (!loading) return null;
@@ -51,26 +56,29 @@ export const ProductsList = ({
           flexeStyles.itemsCenter,
           flexeStyles.contentBetween,
         ]}>
-        <Text 
-          category="p1" 
+        <Text
+          category="p1"
           style={[
             styles.listTitle,
-            { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }
+            {
+              color: isDark
+                ? theme['color-shadcn-foreground']
+                : theme['color-basic-900'],
+            },
           ]}>
           {listTitle}
         </Text>
 
         {!(hideViewAllBtn || loading || loadingError || list.length === 0) && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[flexeStyles.row, flexeStyles.itemsCenter]}
             activeOpacity={0.7}
-            onPress={onViewAll}
-          >
-            <Text 
-              category="label" 
+            onPress={onViewAll}>
+            <Text
+              category="label"
               style={[
                 styles.listTitle,
-                { color: theme['color-shadcn-primary'] }
+                {color: theme['color-shadcn-primary']},
               ]}>
               {t('viewAll')}
             </Text>
@@ -81,7 +89,7 @@ export const ProductsList = ({
                   : 'arrow-ios-forward-outline'
               }
               fill={theme['color-shadcn-primary']}
-              style={{ marginLeft: 2 }}
+              style={{marginLeft: 2}}
             />
           </TouchableOpacity>
         )}
@@ -89,11 +97,20 @@ export const ProductsList = ({
       {loading ? (
         <View style={styles.shimmerContainer}>
           {[...Array(2)].map((_, idx) => (
-            <ProductCardShimmer 
+            <ProductCardShimmer
               key={idx}
-              shimmerColors={isDark ? 
-                [theme['color-shadcn-card'], theme['color-shadcn-secondary'], theme['color-shadcn-card']] :
-                [theme['color-basic-200'], theme['color-basic-300'], theme['color-basic-200']]
+              shimmerColors={
+                isDark
+                  ? [
+                      theme['color-shadcn-card'],
+                      theme['color-shadcn-secondary'],
+                      theme['color-shadcn-card'],
+                    ]
+                  : [
+                      theme['color-basic-200'],
+                      theme['color-basic-300'],
+                      theme['color-basic-200'],
+                    ]
               }
             />
           ))}
@@ -105,17 +122,17 @@ export const ProductsList = ({
           horizontal={true}
           data={list}
           keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) =>{
-            // console.log('item----', item);
+          renderItem={({item}) => {
+            console.log('item----', item);
             return (
-              <ProductCard 
-                {...item} 
-                onProductDetail={onProductDetail} 
+              <ProductCard
+                {...item}
+                onProductDetail={onProductDetail}
                 cardWidth={SMALL_CARD_WIDTH}
                 isDark={isDark}
                 theme={theme}
               />
-            )
+            );
           }}
           onEndReachedThreshold={0.5}
           onEndReached={() => {
@@ -124,7 +141,11 @@ export const ProductsList = ({
             }
           }}
           ListFooterComponent={renderFooter}
-          getItemLayout={(data, index) => ({ length: SMALL_CARD_WIDTH, offset: SMALL_CARD_WIDTH * index, index })}
+          getItemLayout={(data, index) => ({
+            length: SMALL_CARD_WIDTH,
+            offset: SMALL_CARD_WIDTH * index,
+            index,
+          })}
         />
       )}
     </View>
@@ -135,8 +156,8 @@ const styles = StyleSheet.create({
   listHeader: {
     paddingHorizontal: 10,
   },
-  listTitle: { 
-    textTransform: 'uppercase', 
+  listTitle: {
+    textTransform: 'uppercase',
     fontWeight: '700',
     fontSize: 15,
     letterSpacing: 0.5,

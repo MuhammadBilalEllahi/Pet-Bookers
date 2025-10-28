@@ -157,7 +157,7 @@ export const AddProductScreen = ({navigation}) => {
     if (images.length === 0) {
       Toast.show({
         type: 'error',
-        text1: 'Please select at least one product image',
+        text1: t('addProduct.imageRequired'),
       });
       return;
     }
@@ -1353,13 +1353,8 @@ export const AddProductScreen = ({navigation}) => {
                   <TouchableOpacity
                     style={styles.uploadTouchable}
                     onPress={() => handleImagePick('thumbnail')}>
-                    <FastImageWithFallback
-                      priority={FastImage.priority.high}
-                      resizeMode={FastImage.resizeMode.cover}
+                    <Image
                       source={require('../../../../assets/new/icons/upload-icon.png')}
-                      fallbackSource={{
-                        uri: 'https://via.placeholder.com/120x120?text=No+Image',
-                      }}
                       style={[
                         styles.uploadIcon,
                         {
@@ -1395,13 +1390,8 @@ export const AddProductScreen = ({navigation}) => {
                   </TouchableOpacity>
                   {thumbnail && (
                     <View style={styles.imagePreviewContainer}>
-                      <FastImageWithFallback
-                        priority={FastImage.priority.high}
-                        resizeMode={FastImage.resizeMode.cover}
+                      <Image
                         source={{uri: thumbnail.uri}}
-                        fallbackSource={{
-                          uri: 'https://via.placeholder.com/120x120?text=No+Image',
-                        }}
                         style={styles.previewImage}
                       />
                       <TouchableOpacity
@@ -1436,13 +1426,8 @@ export const AddProductScreen = ({navigation}) => {
                   <TouchableOpacity
                     style={styles.uploadTouchable}
                     onPress={() => handleImagePick('images')}>
-                    <FastImageWithFallback
-                      priority={FastImage.priority.high}
-                      resizeMode={FastImage.resizeMode.cover}
+                    <Image
                       source={require('../../../../assets/new/icons/upload-icon.png')}
-                      fallbackSource={{
-                        uri: 'https://via.placeholder.com/120x120?text=No+Image',
-                      }}
                       style={[
                         styles.uploadIcon,
                         {
@@ -1498,13 +1483,8 @@ export const AddProductScreen = ({navigation}) => {
                               : theme['color-basic-100'],
                           },
                         ]}>
-                        <FastImageWithFallback
-                          priority={FastImage.priority.high}
-                          resizeMode={FastImage.resizeMode.cover}
+                        <Image
                           source={{uri: img.uri}}
-                          fallbackSource={{
-                            uri: 'https://via.placeholder.com/120x120?text=No+Image',
-                          }}
                           style={[
                             styles.previewImage,
                             {

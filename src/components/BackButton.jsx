@@ -20,7 +20,9 @@ export const BackButton = ({onPress, fill, iconName}) => {
             ? 'arrow-forward-outline'
             : 'arrow-back-outline')
         }
-        fill={iconFill}
+        style={{
+          fill: iconFill,
+        }}
         iconStyle={{
           width: 30,
           height: 30,

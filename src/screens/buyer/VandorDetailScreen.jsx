@@ -192,7 +192,7 @@ export const VandorDetailScreen = ({route, navigation}) => {
         ? `${baseUrls['shop_image_url']}/${sellerInfo.seller.shop.image}`
         : '',
       recipientName: sellerInfo?.seller?.shop?.name,
-      chatType: isSellerAuthenticated ? 'seller' : 'buyer',
+      chatType: 'buyer', // Always 'buyer' when messaging a seller from vendor detail
       // Optionally add more context here
     });
   };

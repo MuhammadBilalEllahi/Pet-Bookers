@@ -138,7 +138,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
       </Layout>
     );
   }
-
   // Prepare product images array for carousel
   const productImages = [];
 
@@ -157,6 +156,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
         id: `image_${index}`,
         image: `${BASE_URLS.product_image_url}/${image}`,
       });
+      console.log('image__', `${BASE_URLS.product_image_url}/${image}`);
     });
   }
 

@@ -23,6 +23,8 @@ import {
   selectIsSellerAuthenticated,
   selectSellerId,
   selectCustomerId,
+  selectCustomerInfo,
+  selectSellerInfo,
 } from '../store/user';
 import {
   smartBuyerClient,
@@ -42,6 +44,8 @@ export const ChatScreen = ({navigation}) => {
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
   const currentSellerId = useSelector(selectSellerId);
   const currentCustomerId = useSelector(selectCustomerId);
+  const customerInfo = useSelector(selectCustomerInfo);
+  const sellerInfo = useSelector(selectSellerInfo);
 
   const [selectedTab, setSelectedTab] = useState(t('chatScreen.tabs.all'));
   const [selectedChip, setSelectedChip] = useState(t('chatScreen.chips.all'));
@@ -90,7 +94,10 @@ export const ChatScreen = ({navigation}) => {
         'customer/chat/list/seller?limit=100&offset=0',
       );
 
-      // console.log('Buyer chat response:', JSON.stringify(response.data, null, 2));
+      console.log(
+        'Buyer chat response:',
+        JSON.stringify(response.data, null, 2),
+      );
 
       if (response.data && response.data.chat) {
         const formattedChats = response.data.chat.map(chat => {
@@ -181,7 +188,10 @@ export const ChatScreen = ({navigation}) => {
         'messages/list/customer?limit=100&offset=0',
       );
 
-      // console.log('Seller chat response:', JSON.stringify(response.data, null, 2));
+      console.log(
+        'Seller chat response:',
+        JSON.stringify(response.data, null, 2),
+      );
 
       if (response.data && response.data.chat) {
         const formattedChats = response.data.chat.map(chat => {
@@ -438,6 +448,59 @@ export const ChatScreen = ({navigation}) => {
   );
 
   const isLoading = buyerLoading || sellerLoading;
+
+  // Render minimal account info based on selected tab
+  const renderAccountInfo = () => {
+    // Show buyer email when on Buying tab
+    if (
+      selectedTab === t('chatScreen.tabs.buying') &&
+      isBuyerAuthenticated &&
+      customerInfo?.email
+    ) {
+      return (
+        <View style={styles.minimalAccountInfo}>
+          <Text
+            style={[
+              styles.minimalAccountText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}
+            numberOfLines={1}>
+            {customerInfo.email}
+          </Text>
+        </View>
+      );
+    }
+
+    // Show seller email when on Selling tab
+    if (
+      selectedTab === t('chatScreen.tabs.selling') &&
+      isSellerAuthenticated &&
+      sellerInfo?.email
+    ) {
+      return (
+        <View style={styles.minimalAccountInfo}>
+          <Text
+            style={[
+              styles.minimalAccountText,
+              {
+                color: isDark
+                  ? theme['color-shadcn-muted-foreground']
+                  : theme['color-basic-600'],
+              },
+            ]}
+            numberOfLines={1}>
+            {sellerInfo.email}
+          </Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
 
   const renderEmptyState = () => {
     if (selectedTab === t('chatScreen.tabs.buying') && !isBuyerAuthenticated) {
@@ -713,7 +776,8 @@ export const ChatScreen = ({navigation}) => {
           </TouchableOpacity>
         ))}
       </View>
-
+      {/* Account Info - Show context-specific email above chips */}
+      {renderAccountInfo()}
       {/* Chat List */}
       <FlatList
         data={filteredChats}
@@ -878,5 +942,22 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  minimalAccountInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    marginTop: 0,
+    marginBottom: 2,
+  },
+  minimalAccountIcon: {
+    width: 6,
+    height: 6,
+    marginRight: 8,
+  },
+  minimalAccountText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
   },
 });

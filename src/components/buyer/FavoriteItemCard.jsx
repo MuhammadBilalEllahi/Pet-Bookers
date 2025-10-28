@@ -5,9 +5,11 @@ import {ThemedIcon} from '../Icon';
 import {Price} from '../Price';
 import FastImageWithFallback from '../common/FastImageWithFallback';
 import FastImage from '@d11/react-native-fast-image';
+import {useTranslation} from 'react-i18next';
 
 export const FavoriteItemCard = () => {
   const theme = useTheme();
+  const {t} = useTranslation();
 
   const renderHeartIcon = props => (
     <ThemedIcon {...props} name="close" fill={theme['color-primary-default']} />
@@ -48,7 +50,7 @@ export const FavoriteItemCard = () => {
             accessoryLeft={renderCartIcon}
             size="small"
             appearance="outline">
-            ADD TO CART
+            {t('favoriteItemCard.addToCart')}
           </Button>
         </Layout>
       </Layout>

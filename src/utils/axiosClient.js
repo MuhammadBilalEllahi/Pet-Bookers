@@ -5,6 +5,9 @@ import {
   getBuyerAuthToken,
   getSellerAuthToken,
 } from './localstorage';
+import {store} from '../store';
+import {logoutBuyer, logoutSeller} from '../store/user';
+import Toast from 'react-native-toast-message';
 
 // https://petbookers.com.pk/customer/auth/login
 
@@ -84,6 +87,35 @@ axiosBuyerClient.interceptors.response.use(
       message: error.message,
       config: error.config,
     });
+
+    // Handle 401 Unauthorized errors - Session expired
+    if (error.response?.status === 401) {
+      const errorData = error.response?.data;
+      const errorCode =
+        errorData && typeof errorData === 'object'
+          ? Object.keys(errorData)[0]
+          : null;
+
+      // Check if this is the specific "session token does not authorize you any more" error
+      if (
+        errorCode === 'auth-001' ||
+        (errorData &&
+          typeof errorData === 'object' &&
+          errorData[errorCode]?.includes('authorize'))
+      ) {
+        // Logout buyer and clear tokens
+        store.dispatch(logoutBuyer());
+
+        // Show toast notification
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please sign in again as a buyer.',
+          visibilityTime: 4000,
+        });
+      }
+    }
+
     return Promise.reject(error);
   },
 );
@@ -103,6 +135,35 @@ axiosSellerClient.interceptors.response.use(
       message: error.message,
       config: error.config,
     });
+
+    // Handle 401 Unauthorized errors - Session expired
+    if (error.response?.status === 401) {
+      const errorData = error.response?.data;
+      const errorCode =
+        errorData && typeof errorData === 'object'
+          ? Object.keys(errorData)[0]
+          : null;
+
+      // Check if this is the specific "session token does not authorize you any more" error
+      if (
+        errorCode === 'auth-001' ||
+        (errorData &&
+          typeof errorData === 'object' &&
+          errorData[errorCode]?.includes('authorize'))
+      ) {
+        // Logout seller and clear tokens
+        store.dispatch(logoutSeller());
+
+        // Show toast notification
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please sign in again as a seller.',
+          visibilityTime: 4000,
+        });
+      }
+    }
+
     return Promise.reject(error);
   },
 );

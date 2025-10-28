@@ -33,21 +33,22 @@ import {
 } from '../../store/user';
 import {InputError, SubmitButton} from '../../components/form';
 
-const ProfileSchema = Yup.object().shape({
-  f_name: Yup.string()
-    .min(2, 'First name must be at least 2 characters')
-    .required('First name is required'),
-  l_name: Yup.string()
-    .min(2, 'Last name must be at least 2 characters')
-    .required('Last name is required'),
-  email: Yup.string()
-    .email('Invalid email address')
-    .required('Email is required'),
-  phone: Yup.string()
-    .matches(/^\d+$/, 'Phone must be numeric')
-    .min(10, 'Phone must be at least 10 digits')
-    .required('Phone is required'),
-});
+const createProfileSchema = t =>
+  Yup.object().shape({
+    f_name: Yup.string()
+      .min(2, t('profile.updateProfile.validation.firstNameMin'))
+      .required(t('profile.updateProfile.validation.firstNameRequired')),
+    l_name: Yup.string()
+      .min(2, t('profile.updateProfile.validation.lastNameMin'))
+      .required(t('profile.updateProfile.validation.lastNameRequired')),
+    email: Yup.string()
+      .email(t('profile.updateProfile.validation.emailInvalid'))
+      .required(t('profile.updateProfile.validation.emailRequired')),
+    phone: Yup.string()
+      .matches(/^\d+$/, t('profile.updateProfile.validation.phoneNumeric'))
+      .min(10, t('profile.updateProfile.validation.phoneMin'))
+      .required(t('profile.updateProfile.validation.phoneRequired')),
+  });
 
 export const UpdateProfileScreen = ({navigation}) => {
   const {t} = useTranslation();
@@ -135,8 +136,8 @@ export const UpdateProfileScreen = ({navigation}) => {
     if (!values.f_name || !values.l_name || !values.email || !values.phone) {
       Toast.show({
         type: 'error',
-        text1: 'Validation Error',
-        text2: 'Please fill in all required fields',
+        text1: t('profile.updateProfile.validationError'),
+        text2: t('profile.updateProfile.fillAllFields'),
       });
       return;
     }
@@ -146,8 +147,8 @@ export const UpdateProfileScreen = ({navigation}) => {
     if (!emailRegex.test(values.email)) {
       Toast.show({
         type: 'error',
-        text1: 'Validation Error',
-        text2: 'Please enter a valid email address',
+        text1: t('profile.updateProfile.validationError'),
+        text2: t('profile.updateProfile.validEmail'),
       });
       return;
     }
@@ -156,8 +157,8 @@ export const UpdateProfileScreen = ({navigation}) => {
     if (!/^\d+$/.test(values.phone) || values.phone.length < 10) {
       Toast.show({
         type: 'error',
-        text1: 'Validation Error',
-        text2: 'Please enter a valid phone number (at least 10 digits)',
+        text1: t('profile.updateProfile.validationError'),
+        text2: t('profile.updateProfile.validPhone'),
       });
       return;
     }
@@ -202,8 +203,8 @@ export const UpdateProfileScreen = ({navigation}) => {
 
       Toast.show({
         type: 'success',
-        text1: 'Success',
-        text2: 'Profile updated successfully!',
+        text1: t('common.success'),
+        text2: t('profile.updateProfile.updateSuccess'),
       });
 
       // Navigate back after a short delay to show success state
@@ -223,7 +224,7 @@ export const UpdateProfileScreen = ({navigation}) => {
           'Failed to update profile';
         Toast.show({
           type: 'error',
-          text1: 'Update Failed',
+          text1: t('profile.updateProfile.updateFailed'),
           text2: errorMessage,
         });
       });
@@ -238,8 +239,8 @@ export const UpdateProfileScreen = ({navigation}) => {
     if (!customerInfo?.id) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Customer ID not found',
+        text1: t('common.error'),
+        text2: t('profile.updateProfile.customerIdNotFound'),
       });
       return;
     }
@@ -247,19 +248,19 @@ export const UpdateProfileScreen = ({navigation}) => {
     if (!customerInfo?.email) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Email not found',
+        text1: t('common.error'),
+        text2: t('profile.updateProfile.emailNotFound'),
       });
       return;
     }
 
     Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone. You will be asked to verify your password.',
+      t('profile.updateProfile.deleteAccount'),
+      t('profile.updateProfile.deleteAccountMessage'),
       [
-        {text: 'Cancel', style: 'cancel'},
+        {text: t('common.cancel'), style: 'cancel'},
         {
-          text: 'Continue',
+          text: t('common.continue'),
           style: 'destructive',
           onPress: () => {
             // Show authentication modal to verify password
@@ -274,8 +275,8 @@ export const UpdateProfileScreen = ({navigation}) => {
     if (!authPassword) {
       Toast.show({
         type: 'error',
-        text1: 'Password Required',
-        text2: 'Please enter your password to delete your account',
+        text1: t('profile.updateProfile.passwordRequired'),
+        text2: t('profile.updateProfile.passwordRequiredMessage'),
       });
       return;
     }
@@ -441,7 +442,7 @@ export const UpdateProfileScreen = ({navigation}) => {
             email: customerInfo.email || '',
             phone: parsedPhone || '',
           }}
-          validationSchema={ProfileSchema}
+          validationSchema={createProfileSchema(t)}
           onSubmit={handleUpdateProfile}
           enableReinitialize={true}>
           {({
@@ -469,7 +470,9 @@ export const UpdateProfileScreen = ({navigation}) => {
                     First Name
                   </Text>
                   <Input
-                    placeholder="Enter your first name"
+                    placeholder={t(
+                      'profile.updateProfile.firstNamePlaceholder',
+                    )}
                     value={values.f_name}
                     onChangeText={handleChange('f_name')}
                     onBlur={handleBlur('f_name')}
@@ -493,7 +496,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                     Last Name
                   </Text>
                   <Input
-                    placeholder="Enter your last name"
+                    placeholder={t('profile.updateProfile.lastNamePlaceholder')}
                     value={values.l_name}
                     onChangeText={handleChange('l_name')}
                     onBlur={handleBlur('l_name')}
@@ -517,7 +520,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                     Email
                   </Text>
                   <Input
-                    placeholder="Enter your email"
+                    placeholder={t('profile.updateProfile.emailPlaceholder')}
                     value={values.email}
                     onChangeText={handleChange('email')}
                     onBlur={handleBlur('email')}
@@ -594,7 +597,9 @@ export const UpdateProfileScreen = ({navigation}) => {
                     </TouchableOpacity>
                     <View style={{flex: 1}}>
                       <Input
-                        placeholder="Enter your phone number"
+                        placeholder={t(
+                          'profile.updateProfile.phonePlaceholder',
+                        )}
                         value={values.phone}
                         onChangeText={handleChange('phone')}
                         onBlur={handleBlur('phone')}
@@ -662,7 +667,7 @@ export const UpdateProfileScreen = ({navigation}) => {
               {backgroundColor: theme['color-danger-500']},
             ]}
             appearance="filled">
-            Delete Account
+            {t('profile.updateProfile.deleteAccount')}
           </Button>
         </View>
       </ScrollView>
@@ -780,7 +785,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                 Password
               </Text>
               <Input
-                placeholder="Enter your password"
+                placeholder={t('profile.updateProfile.passwordPlaceholder')}
                 value={authPassword}
                 onChangeText={setAuthPassword}
                 secureTextEntry={true}
@@ -847,7 +852,9 @@ export const UpdateProfileScreen = ({navigation}) => {
                   },
                 ]}
                 appearance="filled">
-                {authLoading ? 'Verifying...' : 'Delete Account'}
+                {authLoading
+                  ? t('profile.updateProfile.verifying')
+                  : t('profile.updateProfile.deleteAccount')}
               </Button>
             </View>
           </View>

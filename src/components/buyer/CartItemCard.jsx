@@ -4,9 +4,11 @@ import {flexeStyles} from '../../utils/globalStyles';
 import {ThemedIcon} from '../Icon';
 import {Price} from '../Price';
 import FastImage from '@d11/react-native-fast-image';
+import {useTranslation} from 'react-i18next';
 
 export const CartItemCard = () => {
   const theme = useTheme();
+  const {t} = useTranslation();
   return (
     <Layout style={[styles.card, flexeStyles.row]}>
       <FastImageWithFallback
