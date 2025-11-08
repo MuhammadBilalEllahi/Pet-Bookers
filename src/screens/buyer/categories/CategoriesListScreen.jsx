@@ -61,7 +61,8 @@ export const CategoriesListScreen = ({navigation, route}) => {
     <Layout style={{
       flex: 1, 
       backgroundColor: isDark ? theme['color-shadcn-background'] : theme['color-basic-100'], 
-      padding: 16
+      padding: 16,
+      paddingBottom: 60,
     }}>
       {selectedCategory === null ? (
         <>

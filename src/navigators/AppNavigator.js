@@ -19,6 +19,7 @@ import {MyCartScreen} from '../screens/buyer/checkout/MyCartScreen';
 import MyPostedAdsScreen from '../screens/seller/ads/MyPostedAdsScreen';
 import {ProductDetailScreen} from '../screens/seller/ads/ProductDetailScreen';
 import {ProductDetailScreen as ProductDetailScreenBuyer} from '../screens/buyer/product/ProductDetailScreen';
+import {ProductImagesGridScreen} from '../screens/buyer/product/ProductImagesGridScreen';
 import {MainScreensHeader} from '../components/buyer';
 import {EditProductScreen} from '../screens/seller/EditProductScreen';
 import {FarmDetailsEditScreen} from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
@@ -83,6 +84,7 @@ export const AppScreens = Object.freeze({
   FARM_DETAILS_EDIT: 'FarmDetailsEdit',
   MY_WISHLIST: 'MyWishlist',
   PRODUCT_DETAIL_BUYER: 'ProductDetailBuyer',
+  PRODUCT_IMAGES_GRID: 'ProductImagesGrid',
   ADDRESS_LIST: 'AddressList',
   ADD_ADDRESS: 'AddAddress',
   EDIT_ADDRESS: 'EditAddress',
@@ -521,6 +523,13 @@ export const AppNavigator = () => {
                 key="header-ProductDetailScreenBuyer"
               />
             ),
+          }}
+        />
+        <Screen
+          name={AppScreens.PRODUCT_IMAGES_GRID}
+          component={ProductImagesGridScreen}
+          options={{
+            headerShown: false,
           }}
         />
         <Screen

@@ -10,6 +10,7 @@ import {BASE_URLS} from '../../../store/configs';
 import {loadWishlist} from '../../../store/wishlist';
 import {useFocusEffect} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
+import { axiosBuyerClient } from '../../../utils/axiosClient';
 
 const smartBuyerClient = createSmartBuyerClient();
 
@@ -25,7 +26,7 @@ export const SubCategoryProductsScreen = ({route, navigation}) => {
     setLoading(true);
     try {
       // console.log("fetching products for subcategory", subcategory.id, categoryId);
-      const res = await smartBuyerClient.get(
+      const res = await axiosBuyerClient.get(
         `categories/${categoryId}/subcategories/${subcategory.id}/products`,
       );
       // console.log("subcategory products", JSON.stringify(res.data, null, 2));

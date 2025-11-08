@@ -17,15 +17,16 @@ import {
   TouchableOpacity,
   View,
   Share,
-  Modal,
-  Dimensions,
   Linking,
 } from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
 import {ProductsList} from '../../../components/buyer/ProductsList';
 import {ThemedIcon} from '../../../components/Icon';
 import {Price} from '../../../components/Price';
-import {ProductImagesSlider} from '../../../components/product';
+import {
+  ProductImagesSlider,
+  ProductActionButtons,
+} from '../../../components/product';
 import {flexeStyles, spacingStyles} from '../../../utils/globalStyles';
 import React, {useCallback, useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -264,8 +265,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
   const {productId, slug = null} = route.params || {};
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [showFullscreenCarousel, setShowFullscreenCarousel] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Get wishlist status from Redux
   const isInWishlist = useSelector(state =>
@@ -589,14 +588,18 @@ export const ProductDetailScreen = ({route, navigation}) => {
     // console.log("[navigateToSellerProfile]", sellerId);
   };
 
-  // Handle fullscreen image carousel
-  const openFullscreenCarousel = (index = 0) => {
-    setCurrentImageIndex(index);
-    setShowFullscreenCarousel(true);
-  };
-
-  const closeFullscreenCarousel = () => {
-    setShowFullscreenCarousel(false);
+  // Handle navigation to product images grid screen
+  const openProductImagesGrid = (index = 0) => {
+    navigation.navigate(AppScreens.PRODUCT_IMAGES_GRID, {
+      product,
+      productImages,
+      currentImageIndex: index,
+      onBuyNow: () => addToCart(product, () => navigation.navigate(AppScreens.CART)),
+      onAddToCart: () => addToCart(product),
+      onChat: handleChatWithSeller,
+      addingToCart,
+      addedToCart,
+    });
   };
 
   // Helper function to get category names from category_ids
@@ -698,137 +701,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
   //     }))
   //   : [];
 
-  // Get screen dimensions
-  const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
-
-  // Fullscreen Carousel Component
-  const FullscreenCarousel = () => {
-    const renderCarouselItem = ({item, index}) => (
-      <View
-        style={{
-          width: screenWidth,
-          height: screenHeight,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <Image
-          source={{uri: item.image}}
-          style={{
-            width: screenWidth,
-            height: screenWidth, // Square aspect ratio
-            resizeMode: 'contain',
-          }}
-        />
-      </View>
-    );
-
-    return (
-      <Modal
-        visible={showFullscreenCarousel}
-        transparent={false}
-        animationType="fade"
-        statusBarTranslucent={true}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'black',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          {/* Close Button */}
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 50,
-              right: 20,
-              zIndex: 1000,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              borderRadius: 20,
-              width: 40,
-              height: 40,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={closeFullscreenCarousel}>
-            <Icon name="close" fill="white" style={{width: 24, height: 24}} />
-          </TouchableOpacity>
-
-          {/* Image Counter */}
-          <View
-            style={{
-              position: 'absolute',
-              top: 50,
-              left: 20,
-              zIndex: 1000,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              borderRadius: 15,
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-            }}>
-            <Text style={{color: 'white', fontSize: 14, fontWeight: 'bold'}}>
-              {currentImageIndex + 1} / {productImages.length}
-            </Text>
-          </View>
-
-          {/* Carousel */}
-          <FlatList
-            data={productImages}
-            renderItem={renderCarouselItem}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            initialScrollIndex={currentImageIndex}
-            getItemLayout={(data, index) => ({
-              length: screenWidth,
-              offset: screenWidth * index,
-              index,
-            })}
-            onScrollToIndexFailed={() => {}}
-            onMomentumScrollEnd={event => {
-              const index = Math.round(
-                event.nativeEvent.contentOffset.x / screenWidth,
-              );
-              setCurrentImageIndex(index);
-            }}
-          />
-
-          {/* Navigation Dots */}
-          {productImages.length > 1 && (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 50,
-                left: 0,
-                right: 0,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              {productImages.map((_, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor:
-                      index === currentImageIndex
-                        ? 'white'
-                        : 'rgba(255,255,255,0.3)',
-                    marginHorizontal: 4,
-                  }}
-                  onPress={() => {
-                    setCurrentImageIndex(index);
-                    // Scroll to the selected image
-                  }}
-                />
-              ))}
-            </View>
-          )}
-        </View>
-      </Modal>
-    );
-  };
 
   return (
     <Layout
@@ -857,7 +729,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
         }}>
         <ProductImagesSlider
           slideList={productImages}
-          onImagePress={openFullscreenCarousel}
+          onImagePress={openProductImagesGrid}
         />
         <Layout
           level="1"
@@ -1026,111 +898,21 @@ export const ProductDetailScreen = ({route, navigation}) => {
             }}
           />
 
-          <Layout
+          <ProductActionButtons
+            product={product}
+            onBuyNow={() => addToCart(product, () => navigation.navigate(AppScreens.CART))}
+            onAddToCart={() => addToCart(product)}
+            onChat={handleChatWithSeller}
+            addingToCart={addingToCart}
+            addedToCart={addedToCart}
+            isDark={isDark}
+            theme={theme}
+            t={t}
             style={{
-              flexDirection: 'row',
               marginTop: 18,
               marginBottom: 8,
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              paddingHorizontal: 16,
-            }}>
-            <Button
-              onPress={() =>
-                addToCart(product, () => navigation.navigate(AppScreens.CART))
-              }
-              style={{
-                flex: 1,
-                backgroundColor: theme['color-shadcn-primary'],
-                borderRadius: 6,
-                marginRight: 8,
-                borderWidth: 0,
-                height: 45,
-                opacity: product.current_stock === 0 ? 0.5 : 1,
-              }}
-              textStyle={{
-                color: theme['color-shadcn-primary-foreground'],
-                fontWeight: 'bold',
-              }}
-              appearance="filled"
-              disabled={addingToCart || product.current_stock === 0}
-              accessoryLeft={
-                addingToCart
-                  ? () => (
-                      <ActivityIndicator
-                        size="small"
-                        color={theme['color-shadcn-primary-foreground']}
-                      />
-                    )
-                  : undefined
-              }>
-              {product.current_stock === 0
-                ? t('product.outOfStock')
-                : addingToCart
-                ? ''
-                : t('product.buyNow')}
-            </Button>
-
-            <Button
-              onPress={() => addToCart(product)}
-              style={{
-                flex: 1,
-                backgroundColor: theme['color-shadcn-primary'],
-                borderRadius: 6,
-                marginRight: 8,
-                borderWidth: 0,
-                height: 45,
-                opacity: product.current_stock === 0 ? 0.5 : 1,
-              }}
-              textStyle={{
-                color: theme['color-shadcn-primary-foreground'],
-                fontWeight: 'bold',
-              }}
-              appearance="filled"
-              disabled={addingToCart || product.current_stock === 0}
-              accessoryLeft={
-                addingToCart
-                  ? () => (
-                      <ActivityIndicator
-                        size="small"
-                        color={theme['color-shadcn-primary-foreground']}
-                      />
-                    )
-                  : undefined
-              }>
-              {product.current_stock === 0
-                ? t('product.outOfStock')
-                : addingToCart
-                ? ''
-                : addedToCart
-                ? t('product.addedToCart')
-                : t('product.addToCart')}
-            </Button>
-
-            <Button
-              onPress={handleChatWithSeller}
-              style={{
-                flex: 1,
-                backgroundColor: isDark
-                  ? theme['color-shadcn-card']
-                  : theme['color-basic-100'],
-                borderColor: isDark
-                  ? theme['color-shadcn-border']
-                  : theme['color-basic-400'],
-                borderWidth: 1,
-                borderRadius: 6,
-                height: 45,
-              }}
-              textStyle={{
-                color: isDark
-                  ? theme['color-shadcn-foreground']
-                  : theme['color-basic-900'],
-                fontWeight: 'bold',
-              }}
-              appearance="outline">
-              {t('product.chat')}
-            </Button>
-          </Layout>
+            }}
+          />
 
           <Layout
             style={{
@@ -1988,9 +1770,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
           </View>
         </Layout>
       </ScrollView>
-
-      {/* Fullscreen Image Carousel */}
-      <FullscreenCarousel />
     </Layout>
   );
 };

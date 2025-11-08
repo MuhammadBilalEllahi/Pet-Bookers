@@ -665,6 +665,8 @@
     "clearSearch": "Clear Search"
   },
   "product": {
+    "city": "City",
+    "state": "State",
     "cartAuth": "You are signed in as a seller. Please also sign in as a buyer to add items to cart.",
     "addToCartAuth": "Please sign in as a buyer to add items to cart.",
     "overview": "Overview",
