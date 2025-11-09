@@ -297,7 +297,7 @@ export default function SellerEarningsPage({navigation}) {
                 color: theme['color-shadcn-primary'],
               },
             ]}>
-            ${earnings.total_earn}
+            PKR {earnings.total_earn}
           </Text>
         </View>
 
@@ -320,7 +320,7 @@ export default function SellerEarningsPage({navigation}) {
                 color: theme['color-shadcn-success'],
               },
             ]}>
-            ${earnings.withdrawable_balance}
+            PKR {earnings.withdrawable_balance}
           </Text>
         </View>
       </View>
@@ -419,7 +419,7 @@ export default function SellerEarningsPage({navigation}) {
                           color: theme['color-shadcn-primary'],
                         },
                       ]}>
-                      ${order.deliveryman_charge}
+                      PKR {order.deliveryman_charge}
                     </Text>
                   </View>
                 </View>

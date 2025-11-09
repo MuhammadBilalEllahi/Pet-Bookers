@@ -367,7 +367,7 @@ export default function Order() {
               <Text style={[styles.amountValue, { 
                 color: theme['color-shadcn-primary']
               }]}>
-                ${order.order_amount}
+                PKR {order.order_amount}
               </Text>
             </View>
             
@@ -462,12 +462,12 @@ export default function Order() {
                       <Text style={[styles.productPrice, { 
                         color: theme['color-shadcn-primary']
                       }]}>
-                        ${item.price} x {item.qty}
+                        PKR {item.price} x {item.qty}
                       </Text>
                       <Text style={[styles.productTotal, { 
                         color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
                       }]}>
-                        Total: ${(item.price * item.qty).toFixed(2)}
+                        Total: PKR {(item.price * item.qty).toFixed(2)}
                       </Text>
                     </View>
                   </View>

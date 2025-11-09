@@ -17,6 +17,7 @@ import {
   selectIsInWishlist,
   selectWishlistLoading,
 } from '../../store/wishlist';
+import {incrementCartCount} from '../../store/cart';
 import {
   selectIsBuyerAuthenticated,
   selectIsSellerAuthenticated,
@@ -120,6 +121,9 @@ export const ProductListCard = ({
 
       setAddingToCart(false);
       setAddedToCart(true);
+
+      // Update Redux cart count
+      dispatch(incrementCartCount());
 
       Toast.show({
         type: 'success',

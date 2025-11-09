@@ -151,16 +151,134 @@ export const AddProductScreen = ({navigation}) => {
 
   const handleSubmit = values => {
     if (isSubmitting) return;
-    setIsSubmitting(true);
 
-    const formData = new FormData();
-    if (images.length === 0) {
+    // Validation: Check all required fields
+    if (categoryIndex === null || !values.category_id) {
       Toast.show({
         type: 'error',
-        text1: t('addProduct.imageRequired'),
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.categoryRequired', 'Please select a category'),
       });
       return;
     }
+
+    if (subcategoryIndex === null || !values.sub_category_id) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.subCategoryRequired', 'Please select a subcategory'),
+      });
+      return;
+    }
+
+    if (unitIndex === null || !values.unit) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.unitsRequired', 'Please select a unit'),
+      });
+      return;
+    }
+
+    if (!values.is_living || values.is_living.trim() === '') {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.isLivingRequired', 'Please select if product is living or non-living'),
+      });
+      return;
+    }
+
+    // Validate name and description based on active language tab
+    // English is required by default, Urdu is required when Urdu tab is active
+    if (langTab === 'ur') {
+      // When Urdu tab is active, Urdu fields are required
+      if (!values.name_ur || values.name_ur.trim() === '') {
+        Toast.show({
+          type: 'error',
+          text1: t('addProduct.validationError', 'Validation Error'),
+          text2: t('addProduct.nameURRequired', 'Please enter product name in Urdu'),
+        });
+        return;
+      }
+
+      if (!values.description_ur || values.description_ur.trim() === '') {
+        Toast.show({
+          type: 'error',
+          text1: t('addProduct.validationError', 'Validation Error'),
+          text2: t('addProduct.descriptionURRequired', 'Please enter product description in Urdu'),
+        });
+        return;
+      }
+    } else {
+      // When English tab is active (default), English fields are required
+      if (!values.name_en || values.name_en.trim() === '') {
+        Toast.show({
+          type: 'error',
+          text1: t('addProduct.validationError', 'Validation Error'),
+          text2: t('addProduct.nameENRequired', 'Please enter product name in English'),
+        });
+        return;
+      }
+
+      if (!values.description_en || values.description_en.trim() === '') {
+        Toast.show({
+          type: 'error',
+          text1: t('addProduct.validationError', 'Validation Error'),
+          text2: t('addProduct.descriptionENRequired', 'Please enter product description in English'),
+        });
+        return;
+      }
+    }
+
+    if (!values.unit_price || values.unit_price.trim() === '' || parseFloat(values.unit_price) <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.priceRequired', 'Please enter a valid product price'),
+      });
+      return;
+    }
+
+    if (!values.current_stock || values.current_stock.trim() === '' || parseInt(values.current_stock) <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.totalQuantityRequired', 'Please enter total quantity'),
+      });
+      return;
+    }
+
+    if (!values.min_order_qty || values.min_order_qty.trim() === '' || parseInt(values.min_order_qty) <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.minOrderQuantityRequired', 'Please enter minimum order quantity'),
+      });
+      return;
+    }
+
+    if (!thumbnail) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.thumbnailRequired', 'Please upload a thumbnail image'),
+      });
+      return;
+    }
+
+    if (images.length === 0) {
+      Toast.show({
+        type: 'error',
+        text1: t('addProduct.validationError', 'Validation Error'),
+        text2: t('addProduct.imagesRequired', 'Please upload at least one product image'),
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const formData = new FormData();
 
     formData.append('product_type', 'physical'); // or 'digital'
     formData.append('discount_type', 'flat'); // or 'percent'

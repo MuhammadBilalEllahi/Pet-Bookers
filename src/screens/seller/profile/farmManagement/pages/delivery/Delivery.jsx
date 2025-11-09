@@ -758,7 +758,7 @@ export default function Delivery() {
               </Text>
               
               <Input
-                label="Amount ($)"
+                label="Amount (PKR)"
                 placeholder="Enter amount to collect"
                 value={cashForm.amount}
                 onChangeText={(text) => {
@@ -891,7 +891,7 @@ export default function Delivery() {
                       <Text style={[styles.detailValue, { 
                         color: theme['color-shadcn-primary']
                       }]}>
-                        ${selectedDeliveryMan.wallet.cash_in_hand || 0}
+                        PKR {selectedDeliveryMan.wallet.cash_in_hand || 0}
                       </Text>
                     </View>
                   )}

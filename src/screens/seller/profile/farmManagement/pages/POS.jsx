@@ -393,7 +393,7 @@ export const POS = ({ navigation }) => {
                         <Text style={[styles.productPrice, { 
                           color: theme['color-shadcn-primary']
                         }]}>
-                          ${product.unit_price}
+                          PKR {product.unit_price}
                         </Text>
                         <Text style={[styles.productStock, { 
                           color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
@@ -508,7 +508,7 @@ export const POS = ({ navigation }) => {
                           <Text style={[styles.cartItemPrice, { 
                             color: theme['color-shadcn-primary']
                           }]}>
-                            ${item.price}
+                            PKR {item.price}
                           </Text>
                         </View>
                         <TouchableOpacity
@@ -563,7 +563,7 @@ export const POS = ({ navigation }) => {
                   }]}>Subtotal:</Text>
                   <Text style={[styles.summaryValue, { 
                     color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900']
-                  }]}>${calculateSubtotal().toFixed(2)}</Text>
+                  }]}>PKR {calculateSubtotal().toFixed(2)}</Text>
                 </View>
                 
                 <View style={styles.summaryRow}>
@@ -572,7 +572,7 @@ export const POS = ({ navigation }) => {
                   }]}>Discount:</Text>
                   <Text style={[styles.summaryValue, { 
                     color: theme['color-danger-500']
-                  }]}>-${calculateDiscount().toFixed(2)}</Text>
+                  }]}>-PKR {calculateDiscount().toFixed(2)}</Text>
                 </View>
                 
                 <Divider style={{ marginVertical: 8, backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
@@ -586,7 +586,7 @@ export const POS = ({ navigation }) => {
                     color: theme['color-shadcn-primary'],
                     fontWeight: 'bold',
                     fontSize: 18
-                  }]}>${calculateTotal().toFixed(2)}</Text>
+                  }]}>PKR {calculateTotal().toFixed(2)}</Text>
                 </View>
               </View>
 

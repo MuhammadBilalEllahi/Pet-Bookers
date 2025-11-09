@@ -481,7 +481,7 @@ export const CouponHandling = ({navigation}) => {
                           {color: theme['color-shadcn-primary']},
                         ]}>
                         {coupon.discount}
-                        {coupon.discount_type === 'percentage' ? '%' : '$'}
+                        {coupon.discount_type === 'percentage' ? '%' : 'PKR'}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
@@ -505,7 +505,7 @@ export const CouponHandling = ({navigation}) => {
                               : theme['color-basic-900'],
                           },
                         ]}>
-                        ${coupon.max_discount}
+                        PKR {coupon.max_discount}
                       </Text>
                     </View>
                   </>
@@ -532,7 +532,7 @@ export const CouponHandling = ({navigation}) => {
                           : theme['color-basic-900'],
                       },
                     ]}>
-                    ${coupon.min_purchase}
+                        PKR {coupon.min_purchase}
                   </Text>
                 </View>
 
@@ -1224,7 +1224,7 @@ export const CouponHandling = ({navigation}) => {
                       },
                     ]}>
                     {checkResult.coupon_discount_amount
-                      ? `Valid! Discount: $${checkResult.coupon_discount_amount}`
+                      ? `Valid! Discount: PKR ${checkResult.coupon_discount_amount}`
                       : checkResult.message || 'Invalid coupon'}
                   </Text>
                 </Card>

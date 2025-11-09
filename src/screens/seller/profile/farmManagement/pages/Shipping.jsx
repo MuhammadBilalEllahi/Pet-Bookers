@@ -335,7 +335,7 @@ export default function Shipping() {
                     
                     <View style={styles.categoryCostInputs}>
                       <Input
-                        label="Cost ($)"
+                        label="Cost (PKR)"
                         placeholder="Enter cost"
                         value={categoryCost.cost ? categoryCost.cost.toString() : ''}
                         onChangeText={(text) => {

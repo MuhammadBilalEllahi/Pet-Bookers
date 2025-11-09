@@ -9,6 +9,10 @@ import {BuyerMainRoutes} from '../../navigators/buyer/BuyerMainNavigator';
 import {AppScreens} from '../../navigators/AppNavigator';
 import {useTheme} from '../../theme/ThemeContext';
 import {SearchDropdown} from '../search/SearchDropdown';
+import {useSelector, useDispatch} from 'react-redux';
+import {selectWishlistCount} from '../../store/wishlist';
+import {selectCartCount, loadCartCount} from '../../store/cart';
+import {useFocusEffect} from '@react-navigation/native';
 
 export const MainScreensHeader = ({
   navigation,
@@ -24,6 +28,9 @@ export const MainScreensHeader = ({
   const state = navigation.getState();
   const activeLocationName = state.routeNames[state.index];
   const {theme, isDark} = useTheme();
+  const dispatch = useDispatch();
+  const wishlistCount = useSelector(selectWishlistCount);
+  const cartCount = useSelector(selectCartCount);
 
   // Animated placeholder text
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
@@ -58,6 +65,17 @@ export const MainScreensHeader = ({
   const onGoBack = () => {
     navigation.goBack();
   };
+
+  // Load cart count when component mounts and when screen comes into focus
+  useEffect(() => {
+    dispatch(loadCartCount());
+  }, [dispatch]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(loadCartCount());
+    }, [dispatch]),
+  );
 
   // Animated placeholder effect
   useEffect(() => {
@@ -246,35 +264,66 @@ export const MainScreensHeader = ({
             {renderAnimatedPlaceholder()}
           </View>
           {!hideWishlist && (
-            <Button
-              appearance="ghost"
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: isDark ? '#3f3f46' : '#e4e4e7',
-                backgroundColor: isDark ? '#27272a' : '#ffffff',
-                marginRight: 8,
-              }}
-              accessoryLeft={wishlistIcon}
-              onPress={navigateToWishlist}
-            />
+            <View style={{position: 'relative', marginRight: 8}}>
+              <Button
+                appearance="ghost"
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: isDark ? '#3f3f46' : '#e4e4e7',
+                  backgroundColor: isDark ? '#27272a' : '#ffffff',
+                }}
+                accessoryLeft={wishlistIcon}
+                onPress={navigateToWishlist}
+              />
+              {wishlistCount > 0 && (
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      backgroundColor:  theme['color-shadcn-primary'] || '#FF512F',
+                      borderColor: isDark ? '#121212' : '#ffffff',
+                    },
+                  ]}>
+                  <Text style={styles.badgeText}>
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           )}
           {!hideCart && (
-            <Button
-              appearance="ghost"
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: isDark ? '#3f3f46' : '#e4e4e7',
-                backgroundColor: isDark ? '#27272a' : '#ffffff',
-              }}
-              accessoryLeft={cartIcon}
-              onPress={() => navigation.navigate(AppScreens.CART)}
-            />
+            <View style={{position: 'relative'}}>
+              <Button
+                appearance="ghost"
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: isDark ? '#3f3f46' : '#e4e4e7',
+                  backgroundColor: isDark ? '#27272a' : '#ffffff',
+                }}
+                accessoryLeft={cartIcon}
+                onPress={() => navigation.navigate(AppScreens.CART)}
+              />
+              {cartCount > 0 && (
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      backgroundColor:  theme['color-shadcn-primary'] || '#FF512F',
+                      borderColor: isDark ? '#121212' : '#ffffff',
+                    },
+                  ]}>
+                  <Text style={styles.badgeText}>
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           )}
         </View>
       )}
@@ -329,5 +378,22 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 8,
     flexShrink: 1,
+  },
+  badge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    minWidth: 18,
+    height: 20,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    borderWidth: 0,
+  },
+  badgeText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

@@ -6,6 +6,7 @@ import {
   addToWishlist,
   removeFromWishlist,
   selectIsInWishlist,
+  selectWishlistLoading,
 } from '../../store/wishlist';
 import {
   selectIsBuyerAuthenticated,
@@ -16,6 +17,7 @@ import {useTranslation} from 'react-i18next';
 import {useTheme as useUIKittenTheme} from '@ui-kitten/components';
 import {useTheme} from '../../theme/ThemeContext';
 import {AppScreens} from '../../navigators/AppNavigator';
+import {WishlistButtonShimmer} from './WishlistButtonShimmer';
 
 export const WishlistButton = ({product, navigation, size = 'small'}) => {
   const {t} = useTranslation();
@@ -26,6 +28,7 @@ export const WishlistButton = ({product, navigation, size = 'small'}) => {
   const isInWishlist = useSelector(state =>
     selectIsInWishlist(state, product?.id),
   );
+  const wishlistLoading = useSelector(selectWishlistLoading);
 
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
@@ -58,6 +61,11 @@ export const WishlistButton = ({product, navigation, size = 'small'}) => {
       );
     }
   };
+
+  // Show shimmer while loading or if product is not available
+  if (wishlistLoading || !product?.id) {
+    return <WishlistButtonShimmer size={size} />;
+  }
 
   return (
     <Button

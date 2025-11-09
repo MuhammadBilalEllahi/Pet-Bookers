@@ -848,7 +848,9 @@
     "productVideo": "Product Video",
     "tags": "Tags",
     "categories": "Categories",
-    "boosted": "BOOSTED"
+    "boosted": "BOOSTED",
+    "shopUnavailable": "Shop Unavailable",
+    "shopUnavailableMessage": "This shop has either been abandoned or closed. The seller information is no longer available"
   },
   "order": {
     "groupTotal": "Group Total:",

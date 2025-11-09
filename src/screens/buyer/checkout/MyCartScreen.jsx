@@ -39,6 +39,7 @@ import {
   selectIsInWishlist,
   selectWishlistLoading,
 } from '../../../store/wishlist';
+import {setCartCount} from '../../../store/cart';
 import {useDispatch} from 'react-redux';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -684,9 +685,12 @@ export const MyCartScreen = () => {
       setLoading(true);
       const response = await axiosBuyerClient.get('cart');
       // console.log('Cart Response:', JSON.stringify(response.data, null, 2));
-      setCartData(response.data || []);
+      const cartItems = response.data || [];
+      setCartData(cartItems);
+      // Update Redux cart count
+      dispatch(setCartCount(cartItems.length));
       // Fetch shipping cost after cart data is loaded
-      if (response.data && response.data.length > 0) {
+      if (cartItems.length > 0) {
         await getShippingCost();
       } else {
         setShippingCost(0);
@@ -698,6 +702,8 @@ export const MyCartScreen = () => {
       }
       setCartData([]);
       setShippingCost(0);
+      // Update Redux cart count to 0 on error
+      dispatch(setCartCount(0));
     } finally {
       setLoading(false);
     }
@@ -761,7 +767,11 @@ export const MyCartScreen = () => {
       // console.log('Remove response:', response.data);
 
       // Remove item from local state
-      setCartData(prevData => prevData.filter(item => item.id !== cartItemId));
+      const updatedCart = cartData.filter(item => item.id !== cartItemId);
+      setCartData(updatedCart);
+      
+      // Update Redux cart count
+      dispatch(setCartCount(updatedCart.length));
 
       // Refresh shipping cost after removing item
       await getShippingCost();
@@ -799,13 +809,15 @@ export const MyCartScreen = () => {
       // console.log('Update response:', response.data);
 
       // Update local state
-      setCartData(prevData =>
-        prevData.map(cartItem =>
+      const updatedCart = cartData.map(cartItem =>
           cartItem.id === cartItemId
             ? {...cartItem, quantity: newQuantity}
             : cartItem,
-        ),
       );
+      setCartData(updatedCart);
+      
+      // Cart count remains the same when updating quantity, but ensure it's synced
+      dispatch(setCartCount(updatedCart.length));
     } catch (error) {
       console.error('Error updating quantity:', error);
       Alert.alert(t('common.error'), t('cart.updateQuantityFailed'));
@@ -863,9 +875,11 @@ export const MyCartScreen = () => {
 
       if (response.data.status === 1) {
         // Remove all items from this farm from local state
-        setCartData(prevData =>
-          prevData.filter(item => item.seller_id !== sellerId),
-        );
+        const updatedCart = cartData.filter(item => item.seller_id !== sellerId);
+        setCartData(updatedCart);
+        
+        // Update Redux cart count
+        dispatch(setCartCount(updatedCart.length));
         Alert.alert(
           t('common.success'),
           t('cart.removeFarmSuccess', {farmName}),

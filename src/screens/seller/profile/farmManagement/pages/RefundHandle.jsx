@@ -343,7 +343,7 @@ export const RefundHandle = ({navigation}) => {
                           fontWeight: 'bold',
                         },
                       ]}>
-                      {t('common.refundAmount')}: ${refund.amount}
+                      {t('common.refundAmount')}: PKR {refund.amount}
                     </Text>
                   </View>
                 </View>
@@ -537,7 +537,7 @@ export const RefundHandle = ({navigation}) => {
                               : theme['color-basic-900'],
                           },
                         ]}>
-                        ${refundDetails.product_price || 0}
+                          PKR {refundDetails.product_price || 0}
                       </Text>
                     </View>
 
@@ -586,7 +586,7 @@ export const RefundHandle = ({navigation}) => {
                             fontWeight: 'bold',
                           },
                         ]}>
-                        ${refundDetails.refund_amount || 0}
+                          PKR {refundDetails.refund_amount || 0}
                       </Text>
                     </View>
 

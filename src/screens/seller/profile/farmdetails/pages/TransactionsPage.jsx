@@ -108,7 +108,7 @@ export default function TransactionsPage({ navigation }) {
     try {
       // Validation
       if (!withdrawForm.amount || parseFloat(withdrawForm.amount) < 1) {
-        Alert.alert(t('transactionsPage.alerts.errorTitle'), 'Amount must be at least $1');
+        Alert.alert(t('transactionsPage.alerts.errorTitle'), 'Amount must be at least PKR 1');
         return;
       }
       
@@ -185,7 +185,7 @@ export default function TransactionsPage({ navigation }) {
   };
 
   const formatAmount = (amount) => {
-    return `$${parseFloat(amount).toFixed(2)}`;
+    return `PKR ${parseFloat(amount).toFixed(2)}`;
   };
 
   // Always render as a page

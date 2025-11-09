@@ -37,16 +37,18 @@ const ProductDetailShimmer = () => {
             LinearGradient={LinearGradient}
             shimmerColors={shimmerColors}
           />
-          <ShimmerPlaceholder
-            style={{ width: 24, height: 24, borderRadius: 12 }}
-            LinearGradient={LinearGradient}
-            shimmerColors={shimmerColors}
-          />
-          <ShimmerPlaceholder
-            style={{ width: 24, height: 24, borderRadius: 12 }}
-            LinearGradient={LinearGradient}
-            shimmerColors={shimmerColors}
-          />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <ShimmerPlaceholder
+              style={{ width: 24, height: 24, borderRadius: 12 }}
+              LinearGradient={LinearGradient}
+              shimmerColors={shimmerColors}
+            />
+            <ShimmerPlaceholder
+              style={{ width: 24, height: 24, borderRadius: 12 }}
+              LinearGradient={LinearGradient}
+              shimmerColors={shimmerColors}
+            />
+          </View>
         </View>
 
         {/* Price */}
@@ -105,58 +107,6 @@ const ProductDetailShimmer = () => {
           </View>
         ))}
 
-        {/* Shop Display */}
-        <View style={{ 
-          flexDirection: 'row', 
-          paddingLeft: 50, 
-          marginTop: 20, 
-          alignItems: 'center',
-          backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'],
-          borderRadius: 12,
-          padding: 16,
-          borderWidth: 1,
-          borderColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'],
-        }}>
-          <ShimmerPlaceholder
-            style={{ width: 60, height: 60, borderRadius: 100, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-            shimmerColors={shimmerColors}
-          />
-
-          <View style={{ flexDirection: 'column', marginLeft: 20 }}>
-            <ShimmerPlaceholder
-              style={{ width: 200, height: 16, borderRadius: 4, marginBottom: 10 }}
-              LinearGradient={LinearGradient}
-              shimmerColors={shimmerColors}
-            />
-            <ShimmerPlaceholder
-              style={{ width: 150, height: 16, borderRadius: 4, marginBottom: 10 }}
-              LinearGradient={LinearGradient}
-              shimmerColors={shimmerColors}
-            />
-          </View>
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 16 }}>
-          <ShimmerPlaceholder
-            style={{ width: 160, height: 120, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-            shimmerColors={shimmerColors}
-          />
-          <ShimmerPlaceholder
-            style={{ width: 160, height: 120, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-            shimmerColors={shimmerColors}
-          />
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginBottom: 80 }}>
-          <ShimmerPlaceholder
-            style={{ width: '90%', height: 30, borderRadius: 4, marginBottom: 10 }}
-            LinearGradient={LinearGradient}
-            shimmerColors={shimmerColors}
-          />
-        </View>
       </ScrollView>
     </Layout>
   );

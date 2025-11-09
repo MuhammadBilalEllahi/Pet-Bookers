@@ -8,6 +8,7 @@ import productCategoriesReducer from './productCategories';
 import chatReducer from './chat';
 import sellerDetailsReducer from './sellerDetails';
 import wishlistReducer from './wishlist';
+import cartReducer from './cart';
 import notificationsReducer from './notifications';
 
 const rootReducer = combineReducers({
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   chat: chatReducer,
   sellerDetails: sellerDetailsReducer,
   wishlist: wishlistReducer,
+  cart: cartReducer,
   notifications: notificationsReducer,
 });
 

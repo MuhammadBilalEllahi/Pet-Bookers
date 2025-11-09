@@ -760,7 +760,7 @@ export default function Delivery({ navigation }) {
               </Text>
               
               <Input
-                label="Amount ($)"
+                label="Amount (PKR)"
                 placeholder="Enter amount to collect"
                 value={cashForm.amount}
                 onChangeText={(text) => {

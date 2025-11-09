@@ -145,7 +145,7 @@ export default function OrdersPage({ navigation, route }) {
                       <Text style={[styles.orderAmount, { 
                         color: theme['color-shadcn-primary']
                       }]}>
-                        ${order.order_amount}
+                      PKR {order.order_amount}
                       </Text>
                     </View>
                     <View style={styles.orderStatus}>
@@ -208,7 +208,7 @@ export default function OrdersPage({ navigation, route }) {
                       <Text style={[styles.detailValue, { 
                         color: theme['color-shadcn-primary']
                       }]}>
-                        ${order.deliveryman_charge}
+                      PKR {order.deliveryman_charge}
                       </Text>
                     </View>
                   </View>

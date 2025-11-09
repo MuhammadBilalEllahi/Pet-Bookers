@@ -16,34 +16,26 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
-  Share,
   Linking,
 } from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
-import {ProductsList} from '../../../components/buyer/ProductsList';
-import {ThemedIcon} from '../../../components/Icon';
 import {Price} from '../../../components/Price';
+import {calculateDiscountedPrice} from '../../../utils/products';
+import {axiosBuyerClient} from '../../../utils/axiosClient';
 import {
   ProductImagesSlider,
   ProductActionButtons,
+  SellerInfoCard,
+  RelatedProducts,
+  SellerProducts,
+  WishlistButton,
+  ShareButton,
 } from '../../../components/product';
 import {flexeStyles, spacingStyles} from '../../../utils/globalStyles';
-import React, {useCallback, useEffect, useState} from 'react';
-import LinearGradient from 'react-native-linear-gradient';
-import {axiosBuyerClient} from '../../../utils/axiosClient';
-import {useDispatch, useSelector} from 'react-redux';
-import {useFocusEffect} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {useSelector, useDispatch} from 'react-redux';
+import {setCartCount, incrementCartCount} from '../../../store/cart';
 
-import {
-  loadSellerProducts,
-  selectSellerProducts,
-} from '../../../store/sellerDetails';
-import {
-  addToWishlist,
-  removeFromWishlist,
-  selectIsInWishlist,
-} from '../../../store/wishlist';
-import {calculateDiscountedPrice} from '../../../utils/products';
 import {BASE_URLS} from '../../../store/configs';
 import {selectProductCategories} from '../../../store/productCategories';
 import {setActiveRoom} from '../../../store/chat';
@@ -93,39 +85,6 @@ import {AppScreens} from '../../../navigators/AppNavigator';
  */
 
 /**
- * Safely access nested seller properties with fallback to shop properties
- * @param {Product} product - The product object
- * @param {string} propertyPath - Dot-separated property path (e.g., 'shop.name')
- * @param {*} fallback - Default value if property doesn't exist
- * @returns {*} The property value or fallback
- */
-const getSellerProperty = (product, propertyPath, fallback = '') => {
-  if (!product) return fallback;
-
-  // Handle nested property paths like 'shop.name', 'shop.image', etc.
-  const pathParts = propertyPath.split('.');
-  let current = product.seller;
-
-  // If seller is null, try shop as fallback
-  if (!current) {
-    current = product.shop;
-  }
-
-  if (!current) return fallback;
-
-  // Navigate through the property path
-  for (const part of pathParts) {
-    if (current && typeof current === 'object' && part in current) {
-      current = current[part];
-    } else {
-      return fallback;
-    }
-  }
-
-  return current || fallback;
-};
-
-/**
  * Get seller ID with fallback to user_id
  * @param {Product} product - The product object
  * @returns {number|null} Seller ID or null if not available
@@ -140,7 +99,11 @@ const getSellerId = product => {
  * @returns {string} Farm name or 'Unknown Farm'
  */
 const getShopName = product => {
-  return getSellerProperty(product, 'shop.name', 'Unknown Farm');
+  return (
+    product?.seller?.shop?.name ||
+    product?.shop?.name ||
+    'Unknown Farm'
+  );
 };
 
 /**
@@ -149,108 +112,11 @@ const getShopName = product => {
  * @returns {string} Farm image path or empty string
  */
 const getShopImage = product => {
-  return getSellerProperty(product, 'shop.image', '');
-};
-
-/**
- * Get farm products count with fallback
- * @param {Product} product - The product object
- * @returns {number} Number of products or 0
- */
-const getShopProductsCount = product => {
-  return getSellerProperty(product, 'shop.products_count', 0);
-};
-
-/**
- * Get seller address with fallback
- * @param {Product} product - The product object
- * @returns {string} Seller address or 'Address not available'
- */
-const getSellerAddress = product => {
-  return getSellerProperty(product, 'shop.address', 'Address not available');
-};
-
-/**
- * Get seller city with fallback
- * @param {Product} product - The product object
- * @returns {string} Seller city or 'City not available'
- */
-const getSellerCity = product => {
-  return getSellerProperty(product, 'city', 'City not available');
-};
-
-/**
- * Get seller state with fallback
- * @param {Product} product - The product object
- * @returns {string} Seller state or 'State not available'
- */
-const getSellerState = product => {
-  return getSellerProperty(product, 'state', 'State not available');
-};
-
-/**
- * Validate if seller data is available and properly structured
- * @param {Product} product - The product object
- * @returns {boolean} True if seller data is available
- */
-const hasSellerData = product => {
-  return !!(product?.seller || product?.shop);
-};
-
-/**
- * Get a safe seller object that handles null cases
- * @param {Product} product - The product object
- * @returns {Object} Safe seller object with fallbacks
- */
-const getSafeSellerData = product => {
-  if (!product) {
-    return {
-      id: null,
-      shop: {
-        name: 'Unknown Shop',
-        image: '',
-        address: 'Address not available',
-        products_count: 0,
-      },
-      city: 'City not available',
-      state: 'State not available',
-    };
-  }
-
-  return {
-    id: getSellerId(product),
-    shop: {
-      name: getShopName(product),
-      image: getShopImage(product),
-      address: getSellerAddress(product),
-      products_count: getShopProductsCount(product),
-    },
-    city: getSellerCity(product),
-    state: getSellerState(product),
-  };
-};
-
-/**
- * Test function to validate type safety implementation
- * This can be used for debugging or testing the seller data handling
- * @param {Product} product - The product object to test
- * @returns {Object} Test results
- */
-const testSellerTypeSafety = product => {
-  const results = {
-    hasSellerData: hasSellerData(product),
-    sellerId: getSellerId(product),
-    shopName: getShopName(product),
-    shopImage: getShopImage(product),
-    shopProductsCount: getShopProductsCount(product),
-    sellerAddress: getSellerAddress(product),
-    sellerCity: getSellerCity(product),
-    sellerState: getSellerState(product),
-    safeSellerData: getSafeSellerData(product),
-  };
-
-  // console.log('Seller Type Safety Test Results:', results);
-  return results;
+  return (
+    product?.seller?.shop?.image ||
+    product?.shop?.image ||
+    ''
+  );
 };
 
 export const ProductDetailScreen = ({route, navigation}) => {
@@ -260,16 +126,10 @@ export const ProductDetailScreen = ({route, navigation}) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loadingRelated, setLoadingRelated] = useState(false);
   const {productId, slug = null} = route.params || {};
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
-
-  // Get wishlist status from Redux
-  const isInWishlist = useSelector(state =>
-    selectIsInWishlist(state, product?.id),
-  );
+  const dispatch = useDispatch();
 
   // Get authentication states
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
@@ -292,51 +152,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
     navigation.navigate('ProductDetail', {productId: productId, slug: slug});
   };
 
-  const navigateToVandorDetail = vandorId => {
-    // console.log("[navigateToVandorDetail]", vandorId);
-    navigation.navigate(AppScreens.VANDOR_DETAIL, {sellerId: vandorId});
-  };
 
-  const dispatch = useDispatch();
-  const {sellerProducts, sellerProductsLoading} =
-    useSelector(selectSellerProducts);
-
-  const parsedProducts = useCallback(list => {
-    if (!Array.isArray(list)) return [];
-    return list.map(productItem => ({
-      id: productItem.id,
-      name: productItem.name,
-      image: productItem.thumbnail
-        ? `${BASE_URLS.product_thumbnail_url}/${
-            productItem.thumbnail?.split('/')?.pop() || ''
-          }`
-        : '',
-      price:
-        productItem.discount > 0
-          ? calculateDiscountedPrice(
-              productItem.unit_price,
-              productItem.discount,
-              productItem.discount_type,
-            )
-          : productItem.unit_price,
-      oldPrice: productItem.discount > 0 ? productItem.unit_price : 0,
-      isSoldOut: productItem.current_stock === 0,
-      discountType: productItem.discount_type,
-      discount: productItem.discount,
-      rating: 0,
-      slug: productItem?.slug || '',
-    }));
-  }, []);
-
-  useEffect(() => {
-    console.debug('SELLER ID', product);
-    const sellerId = getSellerId(product);
-    if (sellerId) {
-      dispatch(loadSellerProducts({sellerId, limit: 10, offset: 0}));
-    } else {
-      console.warn('No seller ID found for product:', product?.id);
-    }
-  }, [getSellerId(product)]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -364,41 +180,11 @@ export const ProductDetailScreen = ({route, navigation}) => {
     fetchProduct();
   }, [slug]);
 
-  useEffect(() => {
-    const fetchRelatedProducts = async () => {
-      if (!product?.id) return;
-
-      try {
-        setLoadingRelated(true);
-        const response = await axiosBuyerClient.get(
-          `products/related-products/${product.id}`,
-        );
-        // console.log("[fetchRelatedProducts]", JSON.stringify(response, null, 10));
-        setRelatedProducts(response.data);
-      } catch (error) {
-        console.error(
-          'Error fetching related products [fetchRelatedProducts]:',
-          error || error?.message || error?.response?.data?.message,
-        );
-      } finally {
-        setLoadingRelated(false);
-      }
-    };
-
-    fetchRelatedProducts();
-  }, [product?.id]);
 
   if (loading || !product) {
     return <ProductDetailShimmer />;
   }
 
-  // Validate seller data and log warnings for debugging
-  if (!hasSellerData(product)) {
-    console.warn('Product has no seller data:', product?.id, product);
-  } else {
-    // Test type safety implementation (can be removed in production)
-    testSellerTypeSafety(product);
-  }
 
   const addToCart = async (product, onSuccess) => {
     // Check if user is authenticated as buyer
@@ -438,6 +224,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
         text2: 'Product added to cart successfully!',
       });
 
+      // Update Redux cart count
+      dispatch(incrementCartCount());
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -469,35 +258,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
     // console.log("[addToCart]", product);
   };
 
-  // Handle wishlist toggle with authentication check
-  const handleWishlistToggle = () => {
-    if (!isBuyerAuthenticated) {
-      const message = isSellerAuthenticated
-        ? t('product.wishlistAuth')
-        : t('product.addToWishlistAuth');
-
-      Alert.alert(t('product.buyerAuthRequired'), message, [
-        {text: t('common.cancel'), style: 'cancel'},
-        {
-          text: t('product.signInAsBuyer'),
-          onPress: () =>
-            navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
-        },
-      ]);
-      return;
-    }
-
-    if (isInWishlist) {
-      dispatch(removeFromWishlist({productId: product.id}));
-    } else {
-      dispatch(
-        addToWishlist({
-          productId: product.id,
-          productData: product,
-        }),
-      );
-    }
-  };
 
   // Handle chat with seller
   const handleChatWithSeller = () => {
@@ -632,44 +392,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
     return match && match[2].length === 11 ? match[2] : null;
   };
 
-  // Handle social share
-  const handleShare = async () => {
-    try {
-      if (!product?.slug) {
-        Alert.alert(t('common.error'), t('product.shareInfoNotAvailable'));
-        return;
-      }
-
-      // Call the social-share-link API to get the shareable link
-      const response = await axiosBuyerClient.get(
-        `products/social-share-link/${product.slug}`,
-      );
-      const shareLink = response.data;
-
-      // console.log('product', product);
-
-      const shareOptions = {
-        title: t('product.shareTitle', {productName: product.name}),
-        message: product.is_living
-          ? t('product.shareMessagePet', {
-              productName: product.name,
-              price: product.unit_price.toLocaleString(),
-              link: shareLink,
-            })
-          : t('product.shareMessage', {
-              productName: product.name,
-              price: product.unit_price.toLocaleString(),
-              link: shareLink,
-            }),
-        url: shareLink,
-      };
-
-      await Share.share(shareOptions);
-    } catch (error) {
-      console.error('Error sharing product:', error);
-      Alert.alert(t('common.error'), t('product.shareError'));
-    }
-  };
 
   // console.log('Rendering shimmer', ProductDetailShimmer);
 
@@ -809,29 +531,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
                     : theme['color-basic-100'],
                 },
               ]}>
-              <Button
-                accessoryLeft={
-                  <ThemedIcon
-                    name={isInWishlist ? 'heart' : 'heart-outline'}
-                    fill={
-                      isInWishlist
-                        ? uiKittenTheme['color-danger-default']
-                        : isDark
-                        ? theme['color-shadcn-muted-foreground']
-                        : theme['color-basic-600']
-                    }
-                  />
-                }
-                size="small"
-                appearance="ghost"
-                onPress={handleWishlistToggle}
-              />
-              <Button
-                accessoryLeft={<ThemedIcon name="share" />}
-                size="small"
-                appearance="ghost"
-                onPress={handleShare}
-              />
+              <WishlistButton product={product} navigation={navigation} />
+              <ShareButton product={product} />
             </Layout>
           </Layout>
 
@@ -1371,7 +1072,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           : theme['color-basic-900'],
                         fontSize: 14,
                       }}>
-                      {getSellerAddress(product)}
+                      {product?.seller?.shop?.address ||
+                        product?.shop?.address ||
+                        t('product.addressNotAvailable')}
                     </Text>
                   </Layout>
                   <Layout style={{flexDirection: 'row', marginBottom: 8}}>
@@ -1394,8 +1097,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           : theme['color-basic-900'],
                         fontSize: 14,
                       }}>
-                      {getSellerCity(product)
-                        ? t(getSellerCity(product))
+                      {product?.seller?.city || product?.city
+                        ? t(product?.seller?.city || product?.city)
                         : t('product.cityNotAvailable')}
                     </Text>
                   </Layout>
@@ -1419,8 +1122,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
                           : theme['color-basic-900'],
                         fontSize: 14,
                       }}>
-                      {getSellerState(product)
-                        ? t(getSellerState(product))
+                      {product?.seller?.state || product?.state
+                        ? t(product?.seller?.state || product?.state)
                         : t('product.stateNotAvailable')}
                     </Text>
                   </Layout>
@@ -1514,260 +1217,25 @@ export const ProductDetailScreen = ({route, navigation}) => {
         </Layout>
 
         {/* SELLER INFO CARD */}
-        <View
-          style={{
-            backgroundColor: isDark
-              ? theme['color-shadcn-card']
-              : theme['color-basic-100'],
-            borderRadius: 12,
-            marginHorizontal: 0,
-            marginBottom: 16,
-            marginTop: 4,
-            paddingVertical: 16,
-            paddingHorizontal: 20,
-            shadowColor: '#000',
-            shadowOpacity: 0.04,
-            shadowRadius: 6,
-            shadowOffset: {width: 0, height: 2},
-            elevation: 1,
-            borderWidth: 1,
-            borderColor: isDark
-              ? theme['color-shadcn-border']
-              : theme['color-basic-400'],
-          }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 8,
-            }}>
-            <Image
-              source={{
-                uri:
-                  BASE_URLS.shop_image_url && getShopImage(product)
-                    ? `${BASE_URLS.shop_image_url}/${getShopImage(product)}`
-                    : undefined,
-              }}
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                marginRight: 10,
-                backgroundColor: isDark
-                  ? theme['color-shadcn-secondary']
-                  : theme['color-basic-200'],
-              }}
-            />
-            <View style={{flex: 1}}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 2,
-                }}>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 17,
-                    color: isDark
-                      ? theme['color-shadcn-foreground']
-                      : theme['color-basic-900'],
-                    flex: 1,
-                  }}>
-                  {getShopName(product)}
-                </Text>
-                {product.seller?.shop?.vacation_status === 1 && (
-                  <View
-                    style={{
-                      backgroundColor: '#FFA500',
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                      borderRadius: 8,
-                      marginLeft: 8,
-                    }}>
-                    <Text
-                      style={{
-                        color: 'white',
-                        fontSize: 10,
-                        fontWeight: 'bold',
-                      }}>
-                      VACATION
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 2,
-                }}>
-                <Text
-                  style={{
-                    color: isDark
-                      ? theme['color-shadcn-muted-foreground']
-                      : theme['color-basic-600'],
-                    fontSize: 13,
-                    marginRight: 2,
-                  }}>
-                  {t('product.sellerInfo')}
-                </Text>
-                <Icon
-                  name="info"
-                  width={14}
-                  height={14}
-                  fill={
-                    isDark
-                      ? theme['color-shadcn-muted-foreground']
-                      : theme['color-basic-600']
-                  }
-                />
-              </View>
-            </View>
-          </View>
-          <Divider
-            style={{
-              marginVertical: 8,
-              backgroundColor: isDark
-                ? theme['color-shadcn-border']
-                : theme['color-basic-400'],
-            }}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginBottom: 12,
-            }}>
-            <View
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                backgroundColor: isDark
-                  ? theme['color-shadcn-secondary']
-                  : theme['color-basic-200'],
-                borderRadius: 10,
-                marginRight: 6,
-                paddingVertical: 12,
-              }}>
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  fontSize: 28,
-                  color: isDark
-                    ? theme['color-shadcn-foreground']
-                    : theme['color-basic-900'],
-                }}>
-                {getShopProductsCount(product)}
-              </Text>
-              <Text
-                style={{
-                  color: isDark
-                    ? theme['color-shadcn-muted-foreground']
-                    : theme['color-basic-600'],
-                  fontSize: 15,
-                  fontWeight: '500',
-                }}>
-                {t('product.products')}
-              </Text>
-            </View>
-            <View
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                backgroundColor: isDark
-                  ? theme['color-shadcn-secondary']
-                  : theme['color-basic-200'],
-                borderRadius: 10,
-                marginLeft: 6,
-                paddingVertical: 12,
-              }}>
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  fontSize: 28,
-                  color: isDark
-                    ? theme['color-shadcn-foreground']
-                    : theme['color-basic-900'],
-                }}>
-                {product.reviews_count || product?.shop?.reviews_count || 0}
-              </Text>
-              <Text
-                style={{
-                  color: isDark
-                    ? theme['color-shadcn-muted-foreground']
-                    : theme['color-basic-600'],
-                  fontSize: 15,
-                  fontWeight: '500',
-                }}>
-                {t('product.reviews')}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={{marginTop: 2, borderRadius: 8, overflow: 'hidden'}}>
-            <LinearGradient
-              colors={[
-                theme['color-shadcn-primary'],
-                theme['color-primary-400'],
-              ]}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              style={{
-                paddingVertical: 12,
-                alignItems: 'center',
-                borderRadius: 8,
-              }}>
-              <Text
-                onPress={() => {
-                  navigateToVandorDetail(getSellerId(product));
-                }}
-                style={{
-                  color: theme['color-shadcn-primary-foreground'],
-                  fontWeight: 'bold',
-                  fontSize: 18,
-                }}>
-                {t('product.visitStore')}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+        <SellerInfoCard product={product} navigation={navigation} />
 
         <Layout level="1" style={[spacingStyles.px16, spacingStyles.py8]}>
-          <View style={{marginTop: 20, marginBottom: 80}}>
-            <ProductsList
-              listTitle={t('product.relatedProducts')}
-              loading={sellerProductsLoading}
-              list={parsedProducts(
-                relatedProducts.filter(p => p.id !== product.id),
-              )}
+          <RelatedProducts
+            productId={product.id}
               onProductDetail={navigateToProductDetail}
-              onViewAll={() =>
-                navigation.navigate('AllProductsScreen', {
-                  productType: 'related',
-                  title: 'Related Products',
-                  // Optionally pass a list of related product IDs or a filter
-                })
-              }
-            />
-
-            <ProductsList
-              listTitle={t('product.fromSeller')}
-              loading={sellerProductsLoading}
-              list={parsedProducts(
-                sellerProducts.products.filter(p => p.id !== product.id),
-              )}
-              onProductPress={navigateToProductDetail}
+            navigation={navigation}
+          />
+          <SellerProducts
+            productId={product.id}
+            sellerId={product?.seller?.id || product?.user_id}
+            shopName={
+              product?.seller?.shop?.name ||
+              product?.shop?.name ||
+              'From Seller'
+            }
               onProductDetail={navigateToProductDetail}
-              onViewAll={() =>
-                navigation.navigate('AllProductsScreen', {
-                  productType: 'seller',
-                  sellerId: getSellerId(product),
-                  title: getShopName(product) || 'From Seller',
-                })
-              }
+            navigation={navigation}
             />
-          </View>
         </Layout>
       </ScrollView>
     </Layout>

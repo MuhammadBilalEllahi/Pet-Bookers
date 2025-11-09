@@ -252,7 +252,7 @@ export default function ShippingMethod() {
                   <Text style={[styles.methodCost, { 
                     color: theme['color-shadcn-primary']
                   }]}>
-                    Cost: ${method.cost}
+                    Cost: PKR {method.cost}
                   </Text>
                 </View>
                 
@@ -358,7 +358,7 @@ export default function ShippingMethod() {
               />
               
               <Input
-                label="Cost ($)"
+                label="Cost (PKR)"
                 placeholder="Enter shipping cost (whole numbers only)"
                 value={addForm.cost}
                 onChangeText={(text) => {
@@ -430,7 +430,7 @@ export default function ShippingMethod() {
               />
               
               <Input
-                label="Cost ($)"
+                label="Cost (PKR)"
                 placeholder="Enter shipping cost (whole numbers only)"
                 value={editForm.cost}
                 onChangeText={(text) => {
