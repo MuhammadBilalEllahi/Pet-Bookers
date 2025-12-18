@@ -128,6 +128,7 @@ export default function LuckyDrawListScreen() {
   const navigation = useNavigation();
   const {theme, isDark} = useTheme();
   const [participationStatus, setParticipationStatus] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     dispatch(loadLuckyDraws());
@@ -169,6 +170,17 @@ export default function LuckyDrawListScreen() {
     }
 
     setParticipationStatus(statusMap);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await dispatch(loadLuckyDraws());
+    } catch (error) {
+      console.error('Error refreshing lucky draws:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const displayLuckyDraws = Array.isArray(luckyDraws)
@@ -222,6 +234,8 @@ export default function LuckyDrawListScreen() {
         data={displayLuckyDraws}
         contentContainerStyle={{paddingBottom: 80}}
         keyExtractor={item => item.id?.toString() || item.title}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({item}) => (
           <Card
             style={[

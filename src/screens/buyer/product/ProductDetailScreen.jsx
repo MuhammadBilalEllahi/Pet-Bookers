@@ -1,59 +1,55 @@
 import {
-  Button,
   Divider,
   Icon,
   Layout,
   Text,
   useTheme as useUIKittenTheme,
 } from '@ui-kitten/components';
-import {useTheme} from '../../../theme/ThemeContext';
+import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
-  ActivityIndicator,
   Alert,
-  FlatList,
   Image,
+  Linking,
   ScrollView,
   TouchableOpacity,
   View,
-  Linking,
 } from 'react-native';
 import {AirbnbRating} from 'react-native-ratings';
+import {useDispatch, useSelector} from 'react-redux';
 import {Price} from '../../../components/Price';
-import {calculateDiscountedPrice} from '../../../utils/products';
-import {axiosBuyerClient} from '../../../utils/axiosClient';
 import {
-  ProductImagesSlider,
   ProductActionButtons,
-  SellerInfoCard,
+  ProductImagesSlider,
   RelatedProducts,
+  SellerInfoCard,
   SellerProducts,
-  WishlistButton,
   ShareButton,
+  WishlistButton,
 } from '../../../components/product';
+import {incrementCartCount} from '../../../store/cart';
+import {useTheme} from '../../../theme/ThemeContext';
+import {axiosBuyerClient} from '../../../utils/axiosClient';
 import {flexeStyles, spacingStyles} from '../../../utils/globalStyles';
-import React, {useEffect, useState} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
-import {setCartCount, incrementCartCount} from '../../../store/cart';
+import {calculateDiscountedPrice} from '../../../utils/products';
 
-import {BASE_URLS} from '../../../store/configs';
-import {selectProductCategories} from '../../../store/productCategories';
+import Toast from 'react-native-toast-message';
+import {AppScreens} from '../../../navigators/AppNavigator';
+import {ChatRoutes} from '../../../navigators/ChatNavigator';
 import {setActiveRoom} from '../../../store/chat';
-import {setBottomTabBarVisibility} from '../../../store/configs';
+import {BASE_URLS, setBottomTabBarVisibility} from '../../../store/configs';
+import {selectProductCategories} from '../../../store/productCategories';
 import {
+  selectCustomerInfo,
   selectIsBuyerAuthenticated,
   selectIsSellerAuthenticated,
-  selectCustomerInfo,
 } from '../../../store/user';
-import ProductDetailShimmer from './components/ProductDetailShimmer';
 import {
-  smartBuyerClient,
   handleAuthError,
   setAuthModalHandlers,
+  smartBuyerClient,
 } from '../../../utils/authAxiosClient';
-import Toast from 'react-native-toast-message';
-import {ChatRoutes} from '../../../navigators/ChatNavigator';
-import {AppScreens} from '../../../navigators/AppNavigator';
+import ProductDetailShimmer from './components/ProductDetailShimmer';
 
 /**
  * Type definitions for better type safety
@@ -99,11 +95,7 @@ const getSellerId = product => {
  * @returns {string} Farm name or 'Unknown Farm'
  */
 const getShopName = product => {
-  return (
-    product?.seller?.shop?.name ||
-    product?.shop?.name ||
-    'Unknown Farm'
-  );
+  return product?.seller?.shop?.name || product?.shop?.name || 'Unknown Farm';
 };
 
 /**
@@ -112,11 +104,7 @@ const getShopName = product => {
  * @returns {string} Farm image path or empty string
  */
 const getShopImage = product => {
-  return (
-    product?.seller?.shop?.image ||
-    product?.shop?.image ||
-    ''
-  );
+  return product?.seller?.shop?.image || product?.shop?.image || '';
 };
 
 export const ProductDetailScreen = ({route, navigation}) => {
@@ -152,8 +140,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
     navigation.navigate('ProductDetail', {productId: productId, slug: slug});
   };
 
-
-
   useEffect(() => {
     const fetchProduct = async () => {
       if (!slug) {
@@ -180,11 +166,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
     fetchProduct();
   }, [slug]);
 
-
   if (loading || !product) {
     return <ProductDetailShimmer />;
   }
-
 
   const addToCart = async (product, onSuccess) => {
     // Check if user is authenticated as buyer
@@ -207,14 +191,24 @@ export const ProductDetailScreen = ({route, navigation}) => {
 
     try {
       setAddingToCart(true);
-      // console.log("[addToCart data]======", product, "-------------------->", product.id);
+      console.log(
+        '[addToCart data]======',
+        product,
+        '-------------------->',
+        product.id,
+      );
 
       const response = await smartBuyerClient.post('cart/add', {
         id: product.id,
         quantity: 1,
       });
 
-      // console.log('Product added to cart:', response, "-=================================?>", response.data);
+      console.log(
+        'Product added to cart:',
+        response,
+        '-=================================?>',
+        response.data,
+      );
       setAddingToCart(false);
       setAddedToCart(true);
 
@@ -257,7 +251,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
     }
     // console.log("[addToCart]", product);
   };
-
 
   // Handle chat with seller
   const handleChatWithSeller = () => {
@@ -354,7 +347,8 @@ export const ProductDetailScreen = ({route, navigation}) => {
       product,
       productImages,
       currentImageIndex: index,
-      onBuyNow: () => addToCart(product, () => navigation.navigate(AppScreens.CART)),
+      onBuyNow: () =>
+        addToCart(product, () => navigation.navigate(AppScreens.CART)),
       onAddToCart: () => addToCart(product),
       onChat: handleChatWithSeller,
       addingToCart,
@@ -392,7 +386,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
     return match && match[2].length === 11 ? match[2] : null;
   };
 
-
   // console.log('Rendering shimmer', ProductDetailShimmer);
 
   const productImages = Array.isArray(product.images)
@@ -422,7 +415,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
   //       slug: item.slug,
   //     }))
   //   : [];
-
 
   return (
     <Layout
@@ -601,7 +593,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
 
           <ProductActionButtons
             product={product}
-            onBuyNow={() => addToCart(product, () => navigation.navigate(AppScreens.CART))}
+            onBuyNow={() =>
+              addToCart(product, () => navigation.navigate(AppScreens.CART))
+            }
             onAddToCart={() => addToCart(product)}
             onChat={handleChatWithSeller}
             addingToCart={addingToCart}
@@ -1222,7 +1216,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
         <Layout level="1" style={[spacingStyles.px16, spacingStyles.py8]}>
           <RelatedProducts
             productId={product.id}
-              onProductDetail={navigateToProductDetail}
+            onProductDetail={navigateToProductDetail}
             navigation={navigation}
           />
           <SellerProducts
@@ -1233,9 +1227,9 @@ export const ProductDetailScreen = ({route, navigation}) => {
               product?.shop?.name ||
               'From Seller'
             }
-              onProductDetail={navigateToProductDetail}
+            onProductDetail={navigateToProductDetail}
             navigation={navigation}
-            />
+          />
         </Layout>
       </ScrollView>
     </Layout>

@@ -1,14 +1,15 @@
+import {useFocusEffect} from '@react-navigation/native';
 import {Layout, Text} from '@ui-kitten/components';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {ScrollView, View, TouchableOpacity} from 'react-native';
+import {RefreshControl, ScrollView, TouchableOpacity, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {FeaturedImages} from '../../components/buyer';
 import {ProductsList} from '../../components/buyer/ProductsList';
-import {HorizontalItemsList} from '../../components/listing';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {useTheme} from '../../theme/ThemeContext';
-import {ProductCardShimmer} from '../../components/ProductCardShimmer';
 import {ThemedIcon} from '../../components/Icon';
+import {HorizontalItemsList} from '../../components/listing';
+import {ProductCardShimmer} from '../../components/ProductCardShimmer';
+import {AppScreens} from '../../navigators/AppNavigator';
 import {
   loadFeaturedProducts,
   loadHomeBanners,
@@ -21,22 +22,20 @@ import {
   selectPopularProducts,
   selectSellers,
 } from '../../store/buyersHome';
-import {loadWishlist} from '../../store/wishlist';
+import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 import {
   loadProductCategories,
   loadProductsByCategory,
   selectProductCategories,
 } from '../../store/productCategories';
-import {BASE_URLS, selectBaseUrls} from '../../store/configs';
+import {loadWishlist} from '../../store/wishlist';
+import {useTheme} from '../../theme/ThemeContext';
 import {calculateDiscountedPrice} from '../../utils/products';
-import {AppScreens} from '../../navigators/AppNavigator';
-import {Image} from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
 
 export const HomeMainScreen = ({navigation}) => {
   const {t} = useTranslation();
   const dispatch = useDispatch();
-  const {isDark} = useTheme();
+  const {isDark, theme} = useTheme();
 
   const baseUrls = useSelector(selectBaseUrls);
   const {homeBanners, homeBannersLoading, homeBannersError} =
@@ -53,8 +52,8 @@ export const HomeMainScreen = ({navigation}) => {
   const {popularProducts, popularProductsLoading, popularProductsError} =
     useSelector(selectPopularProducts);
 
-    const hasInitialLoad = useRef(false);
-
+  const hasInitialLoad = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const navigateToProductDetail = (productId, slug) => {
     // console.log("[navigateToProductDetail]", productId, slug);
@@ -286,15 +285,15 @@ export const HomeMainScreen = ({navigation}) => {
       // Only load on first mount, not on every focus
       if (!hasInitialLoad.current) {
         hasInitialLoad.current = true;
+
+        dispatch(loadWishlist());
         dispatch(loadHomeBanners({bannerType: 'all'}));
         dispatch(loadProductCategories());
         dispatch(loadFeaturedProducts({limit: 10}));
         dispatch(loadSellers());
-        dispatch(loadWishlist());
       }
-    }, [dispatch])
+    }, [dispatch]),
   );
-  
 
   //   useEffect(() => {
   //     console.debug("STARTING EFFECT ", categories)
@@ -365,63 +364,65 @@ export const HomeMainScreen = ({navigation}) => {
   //   }
   // }, [categories]);
 
-  
-// Fix the categories useEffect to prevent unnecessary reloads
-useEffect(() => {
-  // Only run if categories exist and we haven't loaded them yet
-  if (categories.length > 0 && Object.keys(categorizedProducts).length === 0) {
-    const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
+  // Fix the categories useEffect to prevent unnecessary reloads
+  useEffect(() => {
+    // Only run if categories exist and we haven't loaded them yet
+    if (
+      categories.length > 0 &&
+      Object.keys(categorizedProducts).length === 0
+    ) {
+      const sortedCategories = [...categories].sort((a, b) => a.id - b.id);
 
-    const loadAll = async () => {
-      setCategoryLoaders(prev => {
-        const loaders = {};
-        sortedCategories.forEach(cat => (loaders[cat.name] = true));
-        return {...prev, ...loaders};
-      });
-
-      try {
-        const results = await Promise.all(
-          sortedCategories.map(cat =>
-            dispatch(loadProductsByCategory({categoryId: cat.id, limit: 10}))
-              .then(response => ({
-                name: cat.name,
-                products: parsedProducts(response?.payload?.products || []),
-                total_size: response?.payload?.total_size || 0,
-              }))
-              .catch(error => ({
-                name: cat.name,
-                error: error?.message || 'Failed to load category',
-              })),
-          ),
-        );
-
-        const newData = {};
-        const errors = {};
-        const loaders = {};
-        const totals = {};
-
-        results.forEach(result => {
-          if (result.error) {
-            errors[result.name] = result.error;
-          } else {
-            newData[result.name] = result.products;
-            totals[result.name] = result.total_size;
-          }
-          loaders[result.name] = false;
+      const loadAll = async () => {
+        setCategoryLoaders(prev => {
+          const loaders = {};
+          sortedCategories.forEach(cat => (loaders[cat.name] = true));
+          return {...prev, ...loaders};
         });
 
-        setCategorizedProducts(newData);
-        setCategoryErrors(errors);
-        setCategoryLoaders(loaders);
-        setCategoryTotals(totals);
-      } catch (err) {
-        console.error('Error loading categories:', err);
-      }
-    };
+        try {
+          const results = await Promise.all(
+            sortedCategories.map(cat =>
+              dispatch(loadProductsByCategory({categoryId: cat.id, limit: 10}))
+                .then(response => ({
+                  name: cat.name,
+                  products: parsedProducts(response?.payload?.products || []),
+                  total_size: response?.payload?.total_size || 0,
+                }))
+                .catch(error => ({
+                  name: cat.name,
+                  error: error?.message || 'Failed to load category',
+                })),
+            ),
+          );
 
-    loadAll();
-  }
-}, [categories.length]); // Only depend on length, not the entire array
+          const newData = {};
+          const errors = {};
+          const loaders = {};
+          const totals = {};
+
+          results.forEach(result => {
+            if (result.error) {
+              errors[result.name] = result.error;
+            } else {
+              newData[result.name] = result.products;
+              totals[result.name] = result.total_size;
+            }
+            loaders[result.name] = false;
+          });
+
+          setCategorizedProducts(newData);
+          setCategoryErrors(errors);
+          setCategoryLoaders(loaders);
+          setCategoryTotals(totals);
+        } catch (err) {
+          console.error('Error loading categories:', err);
+        }
+      };
+
+      loadAll();
+    }
+  }, [categories.length]); // Only depend on length, not the entire array
 
   const parsedSellers = useMemo(() => {
     if (!Array.isArray(sellers)) return [];
@@ -433,11 +434,39 @@ useEffect(() => {
     }));
   }, [baseUrls, sellers]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        dispatch(loadWishlist()),
+        dispatch(loadHomeBanners({bannerType: 'all'})),
+        dispatch(loadProductCategories()),
+        dispatch(loadFeaturedProducts({limit: 10})),
+        dispatch(loadSellers()),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing home screen:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [dispatch]);
+
   return (
     <Layout level="3" style={{flex: 1}}>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme['color-primary-500']]}
+            tintColor={theme['color-primary-500']}
+            progressBackgroundColor={
+              isDark ? theme['color-shadcn-card'] : theme['color-basic-100']
+            }
+          />
+        }
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'flex-start',

@@ -16,6 +16,7 @@ import {flexeStyles} from '../../utils/globalStyles';
 import {useTheme} from '../../theme/ThemeContext';
 import {BASE_URLS, selectBaseUrls} from '../../store/configs';
 import FastImage from '@d11/react-native-fast-image';
+import {WishlistButton} from '../product/WishlistButton';
 import FastImageWithFallback from '../common/FastImageWithFallback';
 const {width: windowWidth} = Dimensions.get('screen');
 
@@ -123,10 +124,13 @@ export const WishlistItemCard = ({
               },
             ]}>
             {product.name ||
-              product.slug
-                ?.replace(/-/g, ' ')
-                ?.replace(/\b\w/g, l => l.toUpperCase()) ||
-              'Product Name'}
+              (product.slug
+                ? product.slug
+                    .split('-')
+                    .slice(0, -1) // Remove the last segment (random ID)
+                    .join(' ')
+                    .replace(/\b\w/g, l => l.toUpperCase())
+                : 'Product Name')}
           </Text>
 
           {product.brand && (
@@ -211,14 +215,16 @@ export const WishlistItemCard = ({
       </TouchableOpacity>
 
       <View style={styles.actionContainer}>
-        <Button
+      <WishlistButton product={product}  />
+
+        {/* <Button
           appearance="ghost"
           accessoryLeft={renderRemoveIcon}
           onPress={handleRemove}
           disabled={isRemoving}
           style={styles.removeButton}>
           {isRemoving ? t('common.loading') : ''}
-        </Button>
+        </Button> */}
       </View>
     </Layout>
   );

@@ -1,22 +1,21 @@
-import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import React from 'react';
 import {useSelector} from 'react-redux';
 import {MainScreensHeader} from '../../components/buyer';
-import {ScreenHeaderSecondary} from '../../components/ScreenHeaderSecondary';
 import {selectIfAnonymous, selectUserType} from '../../store/user';
 
 // Screens
 import {HomeMainScreen} from '../../screens/buyer/HomeMainScreen';
 
-import {VandorsListScreen} from '../../screens/buyer/VandorsListScreen';
-import {VandorDetailScreen} from '../../screens/buyer/VandorDetailScreen';
-import {NotificationsScreen} from '../../screens/NotificationsScreen';
 import {AppSettingsScreen} from '../../screens/AppSettingsScreen';
+import {AllProductsScreen} from '../../screens/buyer/AllProductsScreen';
 import {CategoriesListScreen} from '../../screens/buyer/categories/CategoriesListScreen';
 import {SubCategoryProductsScreen} from '../../screens/buyer/categories/SubCategoryProductsScreen';
-import {ProductsSearchScreen} from '../../screens/buyer/ProductsSearchScreen';
 import {ProductDetailScreen} from '../../screens/buyer/product/ProductDetailScreen';
-import {AllProductsScreen} from '../../screens/buyer/AllProductsScreen';
+import {ProductsSearchScreen} from '../../screens/buyer/ProductsSearchScreen';
+import {VandorDetailScreen} from '../../screens/buyer/VandorDetailScreen';
+import {VandorsListScreen} from '../../screens/buyer/VandorsListScreen';
+import {NotificationsScreen} from '../../screens/NotificationsScreen';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 

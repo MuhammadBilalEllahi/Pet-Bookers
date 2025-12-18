@@ -46,7 +46,7 @@ export const FALLBACK_BASE_URLS = {
   digital_product_url: `${BASE_URL}storage/app/public/product/digital-product`,
   notification_image_url: `${BASE_URL}storage/app/public/notification`,
   product_image_url: `${BASE_URL}storage/app/public/product`,
-  product_thumbnail_url: `${BASE_URL}storage/app/product/thumbnail`,
+  product_thumbnail_url: `${BASE_URL}storage/app/public/product/thumbnail`,
   review_image_url: `${BASE_URL}storage/app/public`,
   seller_image_url: `${BASE_URL}storage/app/public/seller`,
   shop_image_url: `${BASE_URL}storage/app/public/shop`,

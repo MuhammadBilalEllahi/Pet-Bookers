@@ -421,7 +421,8 @@ export const UpdateProfileScreen = ({navigation}) => {
         },
       ]}>
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={styles.scrollContent}>
         <Text
           style={[
@@ -432,7 +433,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                 : theme['color-basic-900'],
             },
           ]}>
-          Update Profile
+          {t('pagesTitles.UpdateProfile')}
         </Text>
 
         <Formik
@@ -467,7 +468,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                           : theme['color-basic-900'],
                       },
                     ]}>
-                    First Name
+                    {t('firstname')}
                   </Text>
                   <Input
                     placeholder={t(
@@ -493,7 +494,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                           : theme['color-basic-900'],
                       },
                     ]}>
-                    Last Name
+                    {t('lastname')}
                   </Text>
                   <Input
                     placeholder={t('profile.updateProfile.lastNamePlaceholder')}
@@ -517,7 +518,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                           : theme['color-basic-900'],
                       },
                     ]}>
-                    Email
+                    {t('email')}
                   </Text>
                   <Input
                     placeholder={t('profile.updateProfile.emailPlaceholder')}
@@ -543,7 +544,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                           : theme['color-basic-900'],
                       },
                     ]}>
-                    Phone
+                    {t('phone')}
                   </Text>
                   <View
                     style={[
@@ -638,12 +639,16 @@ export const UpdateProfileScreen = ({navigation}) => {
                         styles.successText,
                         {color: theme['color-success-600']},
                       ]}>
-                      ✅ Profile updated successfully!
+                      ✅ {t('profile.updateSuccess')}
                     </Text>
                   </View>
                 ) : (
                   <SubmitButton
-                    btnText={isSubmitting ? 'Updating...' : 'Update Profile'}
+                    btnText={
+                      isSubmitting
+                        ? `${t('editAddressScreen.updating')}`
+                        : t('pagesTitles.UpdateProfile')
+                    }
                     onPress={handleSubmit}
                     disabled={loading || isSubmitting}
                     style={styles.updateButton}
@@ -657,7 +662,7 @@ export const UpdateProfileScreen = ({navigation}) => {
         <View style={styles.dangerZone}>
           <Text
             style={[styles.dangerTitle, {color: theme['color-danger-500']}]}>
-            Danger Zone
+            {t('pagesTitles.DangerZone')}
           </Text>
           <Button
             onPress={handleDeleteAccount}
@@ -994,6 +999,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#ff4757',
     paddingTop: 24,
     marginTop: 16,
+    marginBottom: 80,
   },
   dangerTitle: {
     fontSize: 18,
@@ -1114,5 +1120,8 @@ const styles = StyleSheet.create({
   },
   countryModalItemText: {
     fontSize: 16,
+  },
+  scrollView: {
+    flex: 1,
   },
 });

@@ -1,16 +1,20 @@
+import {useFocusEffect} from '@react-navigation/native';
+import {Icon, Text} from '@ui-kitten/components';
 import React, {useEffect, useState} from 'react';
-import {FlatList, View, ActivityIndicator} from 'react-native';
-import {Text, Icon} from '@ui-kitten/components';
-import {useTheme} from '../../../theme/ThemeContext';
-import {createSmartBuyerClient} from '../../../utils/authAxiosClient';
-import {ProductCard} from '../../../components/product/ProductCard';
-import {TouchableOpacity} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {
+  ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useDispatch} from 'react-redux';
+import {ProductCard} from '../../../components/product/ProductCard';
 import {BASE_URLS} from '../../../store/configs';
 import {loadWishlist} from '../../../store/wishlist';
-import {useFocusEffect} from '@react-navigation/native';
-import {useTranslation} from 'react-i18next';
-import { axiosBuyerClient } from '../../../utils/axiosClient';
+import {useTheme} from '../../../theme/ThemeContext';
+import {createSmartBuyerClient} from '../../../utils/authAxiosClient';
+import {axiosBuyerClient} from '../../../utils/axiosClient';
 
 const smartBuyerClient = createSmartBuyerClient();
 

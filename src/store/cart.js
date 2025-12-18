@@ -15,16 +15,20 @@ export const loadCartCount = () => async (dispatch, getState) => {
       dispatch(setCartCount(0));
       return;
     }
+
     dispatch(setCartLoading(true));
     const {data} = await smartBuyerClient.get('cart');
     // Cart data is an array, so count is the length
+    // console.log('loadCartCount data', data);
     const count = Array.isArray(data) ? data.length : 0;
     dispatch(setCartCount(count));
   } catch (error) {
     console.error('[loadCartCount] error:', error);
     handleAuthError(error, err => {
       const errorMessage =
-        err?.response?.data?.message || err?.message || 'Failed to load cart count';
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to load cart count';
       dispatch(setCartError(errorMessage));
       dispatch(setCartCount(0));
     });
@@ -87,4 +91,3 @@ export const selectCartError = createSelector(selectCartData, cartData => {
 });
 
 export default slice.reducer;
-

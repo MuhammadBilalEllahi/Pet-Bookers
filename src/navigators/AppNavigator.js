@@ -1,66 +1,63 @@
-import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import React, {useEffect} from 'react';
+import {useDispatch} from 'react-redux';
 import {loadAppConfigs} from '../store/configs';
 
 // Navigators
+import {MainScreensHeader} from '../components/buyer';
+import {AppSettingsScreen} from '../screens/AppSettingsScreen';
 import {AuthLoaderScreen} from '../screens/AuthLoaderScreen';
+import {MessagesScreen} from '../screens/MessagesScreen';
 import {SplashScreen} from '../screens/SplashScreen';
-import {AuthNavigator} from './AuthNavigator';
-import {BuyerMainNavigator, BuyerMainRoutes} from './buyer/BuyerMainNavigator';
-import {SellerMainNavigator} from './seller/SellerMainNavigator';
+import {ForgotPasswordScreen} from '../screens/auth/ForgotPassword';
 import {LoginScreen} from '../screens/auth/Login';
 import {RegisterScreen} from '../screens/auth/Register';
-import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
-import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
-import PaymentPage from '../screens/buyer/checkout/PaymentPage';
+import {ResetPasswordScreen} from '../screens/auth/ResetPassword';
+import {AllProductsScreen} from '../screens/buyer/AllProductsScreen';
+import {BuyerProfileScreen} from '../screens/buyer/BuyerProfileScreen';
+import {ProductsSearchScreen} from '../screens/buyer/ProductsSearchScreen';
+import {SellerOptionsScreen} from '../screens/buyer/SellerOptionsScreen';
+import {VandorDetailScreen} from '../screens/buyer/VandorDetailScreen';
 import {MyCartScreen} from '../screens/buyer/checkout/MyCartScreen';
-import MyPostedAdsScreen from '../screens/seller/ads/MyPostedAdsScreen';
-import {ProductDetailScreen} from '../screens/seller/ads/ProductDetailScreen';
+import PaymentPage from '../screens/buyer/checkout/PaymentPage';
+import ShipingDetails from '../screens/buyer/checkout/ShipingDetails';
+import LuckyDrawInstance from '../screens/buyer/luckydraw/LuckyDrawInstance';
+import {MyOrderList} from '../screens/buyer/product/MyOrders';
+import {MyWishlistScreen} from '../screens/buyer/product/MyWishlistScreen';
 import {ProductDetailScreen as ProductDetailScreenBuyer} from '../screens/buyer/product/ProductDetailScreen';
 import {ProductImagesGridScreen} from '../screens/buyer/product/ProductImagesGridScreen';
-import {MainScreensHeader} from '../components/buyer';
-import {EditProductScreen} from '../screens/seller/EditProductScreen';
-import {FarmDetailsEditScreen} from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
-import {SellerPostedProductsStack} from './seller/SellerPostedProductsStack';
-import {MyWishlistScreen} from '../screens/buyer/product/MyWishlistScreen';
-import {MyOrderList, MyOrders} from '../screens/buyer/product/MyOrders';
-import {AddressListScreen} from '../screens/profile/AddressListScreen';
-import {AddAddressScreen} from '../screens/profile/AddAddressScreen';
-import {EditAddressScreen} from '../screens/profile/EditAddressScreen';
-import {ChatNavigator, ChatRoutes} from './ChatNavigator';
-import {MessagesScreen} from '../screens/MessagesScreen';
-import {SellerInfoScreen} from '../screens/seller/profile/farmdetails/SellerInfoScreen';
-import {VandorDetailScreen} from '../screens/buyer/VandorDetailScreen';
 import {RefundScreen} from '../screens/buyer/product/RefundScreen';
+import {AddAddressScreen} from '../screens/profile/AddAddressScreen';
+import {AddressListScreen} from '../screens/profile/AddressListScreen';
+import {EditAddressScreen} from '../screens/profile/EditAddressScreen';
+import {EditProductScreen} from '../screens/seller/EditProductScreen';
 import {AddProductScreen} from '../screens/seller/add_product/AddProductScreen';
-import {AllProductsScreen} from '../screens/buyer/AllProductsScreen';
-import {ProductsSearchScreen} from '../screens/buyer/ProductsSearchScreen';
-import {NotificationsScreen} from '../screens/NotificationsScreen';
-import {RefundHandle} from '../screens/seller/profile/farmManagement/pages/RefundHandle';
+import {SellerProfileScreen} from '../screens/seller/profile/SellerProfileScreen';
+import BuyerOptionInSellerPRofile from '../screens/seller/profile/buyerOptionsInSellerProfile/BuyerOptionInSellerPRofile';
 import {FarmManagement} from '../screens/seller/profile/farmManagement/FarmManagement';
 import CouponHandling from '../screens/seller/profile/farmManagement/pages/CouponHandling';
-import POS from '../screens/seller/profile/farmManagement/pages/POS';
 import Order from '../screens/seller/profile/farmManagement/pages/Order';
-import ShippingMethod from '../screens/seller/profile/farmManagement/pages/ShippingMethod';
+import POS from '../screens/seller/profile/farmManagement/pages/POS';
+import {RefundHandle} from '../screens/seller/profile/farmManagement/pages/RefundHandle';
 import Shipping from '../screens/seller/profile/farmManagement/pages/Shipping';
+import ShippingMethod from '../screens/seller/profile/farmManagement/pages/ShippingMethod';
 import Delivery from '../screens/seller/profile/farmManagement/pages/delivery/Delivery';
+import {FarmDetailsEditScreen} from '../screens/seller/profile/farmdetails/FarmDetailsEditScreen';
+import {SellerInfoScreen} from '../screens/seller/profile/farmdetails/SellerInfoScreen';
 import SellerEarningsPage from '../screens/seller/profile/farmdetails/pages/EarningsPage';
 import SellerOrdersPage from '../screens/seller/profile/farmdetails/pages/OrdersPage';
 import SellerReviewsPage from '../screens/seller/profile/farmdetails/pages/ReviewsPage';
-import SellerTransactionsPage from '../screens/seller/profile/farmdetails/pages/TransactionsPage';
 import SellerShopSettingsPage from '../screens/seller/profile/farmdetails/pages/ShopSettingsModal';
-import {BuyerProfileScreen} from '../screens/buyer/BuyerProfileScreen';
-import {SellerProfileScreen} from '../screens/seller/profile/SellerProfileScreen';
-import BuyerOptionInSellerPRofile from '../screens/seller/profile/buyerOptionsInSellerProfile/BuyerOptionInSellerPRofile';
-import {SellerOptionsScreen} from '../screens/buyer/SellerOptionsScreen';
-import {AppSettingsScreen} from '../screens/AppSettingsScreen';
-import {ResetPasswordScreen} from '../screens/auth/ResetPassword';
-import {ForgotPasswordScreen} from '../screens/auth/ForgotPassword';
-import {SupportTicketsScreen} from '../screens/support/SupportTicketsScreen';
+import SellerTransactionsPage from '../screens/seller/profile/farmdetails/pages/TransactionsPage';
 import {CreateSupportTicketScreen} from '../screens/support/CreateSupportTicketScreen';
 import {SupportTicketDetailScreen} from '../screens/support/SupportTicketDetailScreen';
+import {SupportTicketsScreen} from '../screens/support/SupportTicketsScreen';
+import {AuthNavigator} from './AuthNavigator';
+import {ChatNavigator, ChatRoutes} from './ChatNavigator';
+import {BuyerMainNavigator, BuyerMainRoutes} from './buyer/BuyerMainNavigator';
+import {SellerMainNavigator} from './seller/SellerMainNavigator';
+import {SellerPostedProductsStack} from './seller/SellerPostedProductsStack';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -309,7 +306,7 @@ export const AppNavigator = () => {
             ),
           }}
         />
-        {/* <Screen name={AppScreens.NOTIFICATIONS} component={NotificationsScreen} 
+        {/* <Screen name={AppScreens.NOTIFICATIONS} component={NotificationsScreen}
         options={{
           headerShown: true,
           header: props => (
@@ -504,6 +501,7 @@ export const AppNavigator = () => {
               <MainScreensHeader
                 activateGoBack={true}
                 {...props}
+                hideCart={false}
                 hideSearch={true}
                 key="header-ProductDetailScreen"
               />

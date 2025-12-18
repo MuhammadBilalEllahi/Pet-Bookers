@@ -11,18 +11,19 @@ import {axiosBuyerClient} from '../../utils/axiosClient';
 import Toast from 'react-native-toast-message';
 import {useRoute} from '@react-navigation/native';
 
-const createResetPasswordSchema = (t) => Yup.object().shape({
-  password: Yup.string()
-    .required(t('validation.newPasswordRequired'))
-    .min(8, t('validation.passwordMinLength'))
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      t('validation.passwordStrengthRequirements')
-    ),
-  confirm_password: Yup.string()
-    .required(t('validation.confirmPasswordRequired'))
-    .oneOf([Yup.ref('password'), null], t('validation.passwordsMustMatch')),
-});
+const createResetPasswordSchema = t =>
+  Yup.object().shape({
+    password: Yup.string()
+      .required(t('validation.newPasswordRequired'))
+      .min(8, t('validation.passwordMinLength'))
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        t('validation.passwordStrengthRequirements'),
+      ),
+    confirm_password: Yup.string()
+      .required(t('validation.confirmPasswordRequired'))
+      .oneOf([Yup.ref('password'), null], t('validation.passwordsMustMatch')),
+  });
 
 export const ResetPasswordScreen = ({navigation}) => {
   const {t} = useTranslation();
@@ -36,24 +37,31 @@ export const ResetPasswordScreen = ({navigation}) => {
   const submitForm = async values => {
     try {
       setIsBtnDisable(true);
-      
+
       const formData = new FormData();
       formData.append('identity', identity);
       formData.append('otp', otp);
       formData.append('password', values.password);
       formData.append('confirm_password', values.confirm_password);
-      
-      const response = await axiosBuyerClient.post('auth/reset-password', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      console.log('formdat', formData);
+
+      const response = await axiosBuyerClient.put(
+        'auth/reset-password',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+      );
 
       if (response.data) {
         Toast.show({
           type: 'success',
           text1: t('registration.passwordResetSuccessful'),
-          text2: response.data.message || t('registration.passwordChangedSuccessfully'),
+          text2:
+            response.data.message ||
+            t('registration.passwordChangedSuccessfully'),
           position: 'top',
         });
 
@@ -61,12 +69,20 @@ export const ResetPasswordScreen = ({navigation}) => {
         navigation.navigate('Login', {
           email: identity.includes('@') ? identity : '',
           password: '',
-          isItSeller: false
+          isItSeller: false,
         });
       }
     } catch (error) {
-      console.error('Reset password error:', error);
-      
+      console.error(
+        'Reset password error:',
+        error,
+        error?.response,
+        'error?.response',
+        error?.response.data.errors,
+        '\nerror?.data?.data,',
+        error?.data?.data,
+      );
+
       let errorMessage = t('registration.passwordResetFailed');
       if (error.response?.data?.errors) {
         errorMessage = error.response.data.errors[0].message || errorMessage;
@@ -85,16 +101,19 @@ export const ResetPasswordScreen = ({navigation}) => {
     }
   };
 
-  const renderPasswordIcon = (isVisible, setVisible) => (props) => (
-    <Icon
-      {...props}
-      name={isVisible ? 'eye-off' : 'eye'}
-      onPress={() => setVisible(!isVisible)}
-    />
-  );
+  const renderPasswordIcon = (isVisible, setVisible) => props =>
+    (
+      <Icon
+        {...props}
+        name={isVisible ? 'eye-off' : 'eye'}
+        onPress={() => setVisible(!isVisible)}
+      />
+    );
 
   return (
-    <AuthContainer title="resetPassword" subTitle="enterNewPassword">
+    <AuthContainer
+      title={t('auth.resetPassword')}
+      subTitle={t('auth.enterNewPassword')}>
       <Formik
         initialValues={{
           password: '',
@@ -114,7 +133,7 @@ export const ResetPasswordScreen = ({navigation}) => {
             <Text category="p2" style={styles.description}>
               {t('auth.enterNewPasswordFor')} {identity}
             </Text>
-            
+
             <Input
               label={t('auth.newPassword')}
               placeholder={t('auth.enterNewPassword')}
@@ -123,11 +142,13 @@ export const ResetPasswordScreen = ({navigation}) => {
               onChangeText={handleChange('password')}
               onBlur={handleBlur('password')}
               value={values.password}
-              caption={touched.password && <InputError errorText={errors.password} />}
+              caption={
+                touched.password && <InputError errorText={errors.password} />
+              }
               status={errors.password && touched.password ? 'danger' : 'basic'}
               accessoryRight={renderPasswordIcon(showPassword, setShowPassword)}
             />
-            
+
             <Input
               label={t('auth.confirmNewPassword')}
               placeholder={t('auth.confirmNewPassword')}
@@ -136,21 +157,32 @@ export const ResetPasswordScreen = ({navigation}) => {
               onChangeText={handleChange('confirm_password')}
               onBlur={handleBlur('confirm_password')}
               value={values.confirm_password}
-              caption={touched.confirm_password && <InputError errorText={errors.confirm_password} />}
-              status={errors.confirm_password && touched.confirm_password ? 'danger' : 'basic'}
-              accessoryRight={renderPasswordIcon(showConfirmPassword, setShowConfirmPassword)}
+              caption={
+                touched.confirm_password && (
+                  <InputError errorText={errors.confirm_password} />
+                )
+              }
+              status={
+                errors.confirm_password && touched.confirm_password
+                  ? 'danger'
+                  : 'basic'
+              }
+              accessoryRight={renderPasswordIcon(
+                showConfirmPassword,
+                setShowConfirmPassword,
+              )}
             />
 
             <Text category="p2" style={styles.requirements}>
               {t('auth.passwordRequirements')}:
             </Text>
             <Text category="c1" style={styles.requirementsList}>
-              • {t('auth.atLeast8Characters')}{'\n'}
-              • {t('auth.oneUppercaseLetter')}{'\n'}
-              • {t('auth.oneLowercaseLetter')}{'\n'}
-              • {t('auth.oneNumber')}
+              • {t('auth.atLeast8Characters')}
+              {'\n'}• {t('auth.oneUppercaseLetter')}
+              {'\n'}• {t('auth.oneLowercaseLetter')}
+              {'\n'}• {t('auth.oneNumber')}
             </Text>
-            
+
             <SubmitButton
               btnText={t('auth.resetPassword')}
               disabled={isBtnDisable}
@@ -159,7 +191,7 @@ export const ResetPasswordScreen = ({navigation}) => {
           </Layout>
         )}
       </Formik>
-      
+
       <Layout style={[flexeStyles.row, flexeStyles.contentBetween]}>
         <Text category="p1">{t('auth.backToLogin')}</Text>
         <Text
@@ -200,4 +232,4 @@ const styles = StyleSheet.create({
   externalLink: {
     marginLeft: 5,
   },
-}); 
+});

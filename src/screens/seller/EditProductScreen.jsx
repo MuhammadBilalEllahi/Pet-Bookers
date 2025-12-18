@@ -173,19 +173,19 @@ export const EditProductScreen = ({route, navigation}) => {
     }
   };
 
-  const updateStatus = async status => {
-    try {
-      await axiosSellerClient.put('products/status-update', {
-        id: productId,
-        status: status,
-      });
-      setProduct(prev => ({...prev, status}));
-      Alert.alert(t('common.success'), t('editProduct.statusSuccess'));
-    } catch (error) {
-      console.error('Error updating status:', error);
-      Alert.alert(t('common.error'), t('editProduct.statusError'));
-    }
-  };
+  // const updateStatus = async status => {
+  //   try {
+  //     await axiosSellerClient.put('products/status-update', {
+  //       id: productId,
+  //       status: status,
+  //     });
+  //     setProduct(prev => ({...prev, status}));
+  //     Alert.alert(t('common.success'), t('editProduct.statusSuccess'));
+  //   } catch (error) {
+  //     console.error('Error updating status:', error);
+  //     Alert.alert(t('common.error'), t('editProduct.statusError'));
+  //   }
+  // };
 
   const updateQuantity = async quantity => {
     try {
@@ -455,9 +455,10 @@ export const EditProductScreen = ({route, navigation}) => {
               ]}>
               {t('editProduct.status')}
             </Text>
+            {/* <Text>{product?.status === 1 ? '':''}</Text> */}
             <Toggle
               checked={product.status === 1}
-              onChange={checked => updateStatus(checked ? 1 : 0)}
+              // onChange={checked => updateStatus(checked ? 1 : 0)}
               style={styles.toggle}
             />
           </View>

@@ -40,7 +40,8 @@
     "Checkout": "Checkout",
     "FeaturedSuccessfully": "Featured Successfully",
     "Chat": "Chat",
-    "Success": "Success"
+    "Success": "Success",
+    "DangerZone": "Danger Zone"
   },
   "welcome": "Welcome",
   "createaccount": "Create Account",
@@ -866,6 +867,7 @@
     "noProductsFound": "No products found"
   },
   "auth": {
+    "resetPassword": "Reset Password",
     "signInAsBuyer": "Sign in as Buyer",
     "signInToBuyer": "Sign In as Buyer",
     "pleaseSignInAsBuyer": "Please sign in as a buyer to add items to cart and make purchases.",

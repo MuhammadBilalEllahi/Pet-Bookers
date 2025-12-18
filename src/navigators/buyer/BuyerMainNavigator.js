@@ -1,39 +1,33 @@
-import React from 'react';
-import {StyleSheet, View, Image} from 'react-native';
-import {useTranslation} from 'react-i18next';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {useSelector} from 'react-redux';
 import {
   BottomNavigation,
   BottomNavigationTab,
   Text,
 } from '@ui-kitten/components';
-import {useTheme} from '../../theme/ThemeContext';
-import {ThemedIcon} from '../../components/Icon';
-import {selectShowBottomTabBar} from '../../store/configs';
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import {Image, StyleSheet, View} from 'react-native';
+import {useSelector} from 'react-redux';
 import {MainScreensHeader} from '../../components/buyer';
+import {selectShowBottomTabBar} from '../../store/configs';
 import {
   selectIfAnonymous,
-  selectIsSeller,
-  selectUserType,
-  selectIsSellerAuthenticated,
-  selectIsBuyerAuthenticated,
   selectIsAnyAuthenticated,
+  selectIsBuyerAuthenticated,
+  selectIsSeller,
+  selectIsSellerAuthenticated,
 } from '../../store/user';
+import {useTheme} from '../../theme/ThemeContext';
 
 // Screens and Navigation Stacks
-import {BuyerHomeStack} from './BuyerHomeStack';
 import {ChatNavigator} from '../ChatNavigator';
-import {MyWishlistScreen} from '../../screens/buyer/product/MyWishlistScreen';
+import {BuyerHomeStack} from './BuyerHomeStack';
 import {BuyerProfileStack} from './BuyerProfileStack';
 
 import {AuthRestrictedError} from '../../components/auth/AuthRestrictedError';
 import LuckyDrawListScreen from '../../screens/buyer/luckydraw/LuckyDrawListScreen';
-import MyCartScreen from '../../screens/buyer/checkout/MyCartScreen';
-import {ThemeProvider} from '../../theme/ThemeContext';
 import {SellerTabRoutes} from '../seller/SellerMainNavigator';
 import {SellerNewProductStack} from '../seller/SellerNewProductStack';
-import {CommonActions} from '@react-navigation/native';
 
 // Import the custom icons for all tabs
 const homeIcon = require('../../../assets/new/bottom_nav/home.png');
@@ -197,21 +191,37 @@ const BottomTabBar = ({navigation, state, isAnonymous}) => {
   const showBottomTabBar = useSelector(selectShowBottomTabBar);
   const isRTL = i18n.dir() === 'rtl';
 
+  // const handleTabPress = index => {
+  //   const rtlIndex = isRTL ? state.routes.length - 1 - index : index;
+  //   const routeName = state.routeNames[rtlIndex];
+  //   const stackKey = state.routes[rtlIndex].key;
+  //   navigation.navigate({
+  //     name: routeName,
+  //     key: stackKey,
+  //     merge: true,
+  //   });
+  //   navigation.dispatch(
+  //     CommonActions.reset({
+  //       index: 0,
+  //       routes: [{name: routeName}],
+  //     }),
+  //   );
+  // };
+
   const handleTabPress = index => {
     const rtlIndex = isRTL ? state.routes.length - 1 - index : index;
-    const routeName = state.routeNames[rtlIndex];
-    const stackKey = state.routes[rtlIndex].key;
-    navigation.navigate({
-      name: routeName,
-      key: stackKey,
-      merge: true,
+    const route = state.routes[rtlIndex];
+    const isFocused = state.index === rtlIndex;
+
+    const event = navigation.emit({
+      type: 'tabPress',
+      target: route.key,
+      canPreventDefault: true,
     });
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{name: routeName}],
-      }),
-    );
+
+    if (!isFocused && !event.defaultPrevented) {
+      navigation.navigate(route.name);
+    }
   };
 
   return (
