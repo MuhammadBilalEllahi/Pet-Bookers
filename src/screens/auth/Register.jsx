@@ -21,7 +21,7 @@ import i18next from 'i18next';
 import {useRoute} from '@react-navigation/native';
 import {axiosBuyerClient, axiosSellerClient} from '../../utils/axiosClient';
 import {useDispatch} from 'react-redux';
-import {setAuthToken, setUserType, UserType} from '../../store/user';
+import {setAuthToken, setUserType, UserType, handleUserLogin, handleBuyerLogin} from '../../store/user';
 import {AppScreens} from '../../navigators/AppNavigator';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
@@ -202,12 +202,19 @@ export const RegisterScreen = ({navigation}) => {
       console.debug('Register Success Response->', response);
       console.debug('\nRegister Success Response', response.data);
 
-      if (response.data.token) {
-        // console.log("IN TOKEN")
-        dispatch(setUserType(isItSeller ? UserType.SELLER : UserType.BUYER));
+      if (response.data.token && !isItSeller) {
+        console.log("IN TOKEN")
+        dispatch(setUserType( UserType.BUYER));
         dispatch(setAuthToken(response.data.token));
+        // dispatch(handleUserLogin(response.data.token, UserType.BUYER));
+        // dispatch(handleBuyerLogin(response.data.token));
         navigateToPage(
-          isItSeller ? AppScreens.SELLER_HOME_MAIN : AppScreens.BUYER_HOME_MAIN,
+           AppScreens.LOGIN,
+           {
+            isItSeller: false,
+            email: values.email.trim(),
+            password: values.password,
+           }
         );
       } else {
         // For sellers, show approval dialog instead of navigating to login

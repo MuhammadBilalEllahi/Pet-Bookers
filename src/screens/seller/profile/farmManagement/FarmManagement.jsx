@@ -351,6 +351,7 @@ export const FarmManagement = ({navigation}) => {
           />
 
           <ProfileActionButton
+            disabled={true}
             title={t('farmManagement.actions.shipping.title')}
             subtitle={t('farmManagement.actions.shipping.subtitle')}
             iconName="paper-plane-outline"

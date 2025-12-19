@@ -64,12 +64,12 @@ export const AppSettingsScreen = ({navigation}) => {
             onPress={() => navigation.navigate(AppScreens.FORGOT_PASSWORD)}
           />
           <Divider />
-          <ProfileActionButton
+          {/* <ProfileActionButton
             title={t('farmManagement.actions.changePassword.title')}
             subtitle={t('farmManagement.actions.changePassword.subtitle')}
             iconName="lock-outline"
             onPress={() => navigation.navigate(AppScreens.RESET_PASSWORD)}
-          />
+          /> */}
         </Layout>
 
         <Layout level="1" style={[ {marginVertical: 4}]}>

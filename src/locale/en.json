@@ -66,7 +66,7 @@
   "alreadyHaveAnAccount": "Already Have An Account",
   "fillUpTheFormToCreateAnAccount": "Fill up the form to create an account",
   "selectOption": "Select Option",
-  "countryCodeNote": "* Country Code must like for BD 880",
+  "countryCodeNote": "* Country Code must like for BD  92",
   "Punjab": "Punjab",
   "Sindh": "Sindh",
   "KPK": "KPK",
@@ -426,7 +426,14 @@
       "passwordRequiredMessage": "Please enter your password to delete your account",
       "deleteAccount": "Delete Account",
       "deleteAccountMessage": "Are you sure you want to delete your account? This action cannot be undone. You will be asked to verify your password.",
-      "verifying": "Verifying..."
+      "verifying": "Verifying...",
+      "accountDeleted": "Account Deleted",
+      "accountDeletedMessage": "Your account has been successfully deleted",
+      "authenticationFailed": "Authentication Failed",
+      "incorrectPassword": "Incorrect password. Please try again.",
+      "deleteAccountFailed": "Failed to delete account",
+      "deletionFailed": "Deletion Failed",
+      "signInToUpdate": "Please sign in to update your profile"
     },
     "buyerOptions": "Buyer Options",
     "buyerOptionsSubtitle": "Buyer options for seller",
@@ -601,6 +608,7 @@
     "chooseShippingMethod": "Choose Shipping Method",
     "farmSubtotal": "Farm Subtotal",
     "farmShipping": "Farm Shipping",
+    "srNumber": "Sr#",
     "features": {
       "freeDelivery": "3 Days Free Delivery",
       "originalProducts": "100% Original Products",
@@ -856,7 +864,8 @@
   "order": {
     "groupTotal": "Group Total:",
     "orderGroup": "Order Group:",
-    "orderNumber": "Order #"
+    "orderNumber": "Order #",
+    "refunds": "Refunds"
   },
   "allProducts": {
     "searchResults": "Search Results",
@@ -903,11 +912,14 @@
     "loadingChats": "Loading chats..."
   },
   "common": {
+    "english": "English",
+    "urdu": "Urdu",
     "item": "Item",
     "items": "Items",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
+    "notAvailable": "N/A",
     "removed": "Removed",
     "cancel": "Cancel",
     "continue": "Continue",
@@ -1173,7 +1185,8 @@
   "luckyDrawListScreen": {
     "title": "Lucky Draw",
     "applyNow": "Apply Now",
-    "noLuckyDraws": "No lucky draws available at the moment."
+    "noLuckyDraws": "No lucky draws available at the moment.",
+    "sellerViewOnly": "Sellers can view but only participate if logged in as buyer"
   },
   "luckyDrawInstance": {
     "title": "Lucky Draw",
@@ -1200,7 +1213,9 @@
       "submitError": "Failed to submit. Please try again.",
       "dataPreFilled": "Your profile data has been filled automatically. You can edit any field if needed.",
       "selectCity": "Select City",
-      "searchCityPlaceholder": "Search city..."
+      "searchCityPlaceholder": "Search city...",
+      "sellerViewOnly": "Sellers can view but only participate if logged in as buyer",
+      "sellerViewOnlyMessage": "You are currently logged in as a seller. To participate in lucky draws, please log in as a buyer."
     }
   },
   "farmManagement": {
@@ -1735,7 +1750,14 @@
     "failedToPickImages": "Failed to pick images",
     "pleaseEnterRefundReason": "Please enter a refund reason",
     "refundRequestSubmittedSuccessfully": "Refund request submitted successfully",
-    "failedToSubmitRefundRequest": "Failed to submit refund request"
+    "failedToSubmitRefundRequest": "Failed to submit refund request",
+    "cannotRefund": "Only delivered orders can be refunded",
+    "failedToGetRefundDetails": "Failed to get refund details",
+    "noRefundsFound": "No refunds found.",
+    "delivery": "Delivery",
+    "yourReason": "Your Reason:",
+    "qty": "Qty",
+    "price": "Price"
   },
   "noProductsFound": "No products found",
   "enhancedSplashScreen": {
@@ -1750,6 +1772,18 @@
     "adInactive": "Ad Inactive"
   },
   "myOrders": {
-    "billingAddress": "Billing Address"
+    "billingAddress": "Billing Address",
+    "cannotReview": "Only delivered orders can be reviewed",
+    "alreadyReviewedOrder": "You have already reviewed this order",
+    "alreadyReviewed": "Already Reviewed",
+    "alreadyReviewedSeller": "You have already reviewed this seller",
+    "cannotReviewSeller": "You cannot review this seller at this time",
+    "enterReviewComment": "Please enter a review comment",
+    "sellerReviewSubmitted": "Seller review submitted successfully",
+    "failedSubmitSellerReview": "Failed to submit seller review",
+    "reviewSubmitted": "Review submitted successfully",
+    "failedSubmitReview": "Failed to submit review",
+    "digitalDownloadStarted": "Digital product download started.",
+    "searchPlaceholder": "Search orders or refunds..."
   }
 }

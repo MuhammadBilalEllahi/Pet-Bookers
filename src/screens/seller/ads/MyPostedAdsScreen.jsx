@@ -73,8 +73,8 @@ const MyPostedAdsScreen = ({navigation}) => {
         if (err.type !== 'SELLER_NOT_AUTHENTICATED') {
           Toast.show({
             type: 'error',
-            text1: 'Error',
-            text2: 'Failed to load products',
+            text1: t('common.error'),
+            text2: t('vendor.failedToLoadProducts'),
           });
         }
       });
@@ -132,12 +132,12 @@ const MyPostedAdsScreen = ({navigation}) => {
       // Show different message based on auth state
       if (isBuyerAuthenticated) {
         Alert.alert(
-          'Seller Authentication Required',
-          'You are currently signed in as a buyer. To manage your products, please also sign in as a seller.',
+          t('auth.sellerAuthRequired'),
+          t('profile.sellerAuthRequired'),
           [
-            {text: 'Cancel', style: 'cancel'},
+            {text: t('buttons.cancel'), style: 'cancel'},
             {
-              text: 'Sign in as Seller',
+              text: t('auth.signInAsSeller'),
               onPress: () => {
                 // For now, navigate to login with seller mode
                 navigation.navigate('Login', {isItSeller: true});
@@ -147,12 +147,12 @@ const MyPostedAdsScreen = ({navigation}) => {
         );
       } else {
         Alert.alert(
-          'Authentication Required',
-          'Please sign in as a seller to view your posted ads.',
+          t('chatScreen.authRequired.title'),
+          t('profile.sellerAuthRequired'),
           [
-            {text: 'Cancel', style: 'cancel'},
+            {text: t('buttons.cancel'), style: 'cancel'},
             {
-              text: 'Sign in as Seller',
+              text: t('auth.signInAsSeller'),
               onPress: () => {
                 navigation.navigate('Login', {isItSeller: true});
               },
@@ -190,7 +190,7 @@ const MyPostedAdsScreen = ({navigation}) => {
         <Button
           onPress={() => navigation.navigate('Login', {isItSeller: true})}
           style={styles.authButton}>
-          Sign in as Seller
+          {t('auth.signInAsSeller')}
         </Button>
       </View>
     );
@@ -243,13 +243,13 @@ const MyPostedAdsScreen = ({navigation}) => {
                 : theme['color-basic-900'],
             },
           ]}>
-          My Posted Ads ({products.length})
+          {t('myAds.header')} ({products.length})
         </Text>
         <Button
           onPress={handleAddProduct}
           style={styles.addButton}
           size="small">
-          Add Product
+          {t('pagesTitles.AddProduct')}
         </Button>
       </View>
 
@@ -267,7 +267,7 @@ const MyPostedAdsScreen = ({navigation}) => {
             You haven't posted any ads yet
           </Text>
           <Button onPress={handleAddProduct} style={styles.addFirstButton}>
-            Add Your First Product
+            {t('addProduct.submitAd')}
           </Button>
         </View>
       ) : (
@@ -380,7 +380,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                               fontSize: 10,
                               fontWeight: 'bold',
                             }}>
-                            {item.status === 1 ? 'Active' : 'Inactive'}
+                            {item.status === 1 ? t('productDetails.active') : t('productDetails.inactive')}
                           </Text>
                         </View>
 
@@ -401,7 +401,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                                 fontSize: 10,
                                 fontWeight: 'bold',
                               }}>
-                              Featured
+                              {t('featured')}
                             </Text>
                           </View>
                         )}
@@ -428,12 +428,12 @@ const MyPostedAdsScreen = ({navigation}) => {
                                 fontSize: 10,
                                 fontWeight: 'bold',
                               }}>
-                              Status:{' '}
+                              {t('common.status')}:{' '}
                               {item.request_status === 1
-                                ? 'Approved'
+                                ? t('common.approved')
                                 : item.request_status === 0
-                                ? 'Pending'
-                                : 'Denied'}
+                                ? t('common.pending')
+                                : t('common.rejected')}
                             </Text>
                           </View>
                         )}
@@ -472,7 +472,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                           fontWeight: '600',
                           marginBottom: 2,
                         }}>
-                        Denial Reason:
+                        {t('common.rejectionNote')}:
                       </Text>
                       <Text
                         style={{
@@ -497,7 +497,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                           fontWeight: '600',
                           marginBottom: 4,
                         }}>
-                        Categories:
+                        {t('product.categories')}:
                       </Text>
                       <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
                         {categoryNames.map((categoryName, index) => (
@@ -537,7 +537,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                           fontWeight: '600',
                           marginBottom: 4,
                         }}>
-                        Description:
+                        {t('productDetails.description')}:
                       </Text>
                       <Text
                         style={{
@@ -569,7 +569,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                             : theme['color-basic-600'],
                           fontSize: 12,
                         }}>
-                        Stock: {item.current_stock} {item.unit}
+                        {t('productDetails.stock')}: {item.current_stock} {item.unit}
                       </Text>
                       <Text
                         style={{
@@ -578,7 +578,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                             : theme['color-basic-600'],
                           fontSize: 12,
                         }}>
-                        Min Order: {item.minimum_order_qty} {item.unit}
+                        {t('productDetails.minOrder')}: {item.minimum_order_qty} {item.unit}
                       </Text>
                       <Text
                         style={{
@@ -587,7 +587,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                             : theme['color-basic-600'],
                           fontSize: 12,
                         }}>
-                        Type: {item.product_type || 'Physical'}
+                        {t('product.productType')}: {item.product_type || 'Physical'}
                       </Text>
                       {item.is_living === 1 && (
                         <Text
@@ -596,7 +596,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                             fontSize: 12,
                             fontWeight: '600',
                           }}>
-                          Living Product
+                          {t('addProduct.living')}
                         </Text>
                       )}
                     </View>
@@ -608,7 +608,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                             : theme['color-basic-600'],
                           fontSize: 12,
                         }}>
-                        Reviews: {item.reviews_count || 0}
+                        {t('product.reviews')}: {item.reviews_count || 0}
                       </Text>
                       <Text
                         style={{
@@ -617,9 +617,9 @@ const MyPostedAdsScreen = ({navigation}) => {
                             : theme['color-basic-600'],
                           fontSize: 12,
                         }}>
-                        Shipping:{' '}
+                        {t('product.freeShipping')}:{' '}
                         {item.free_shipping
-                          ? 'Free'
+                          ? t('product.free')
                           : `Rs ${item.shipping_cost || 0}`}
                       </Text>
                       <Text
@@ -629,7 +629,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                             : theme['color-basic-600'],
                           fontSize: 12,
                         }}>
-                        Published: {item.published === 1 ? 'Yes' : 'No'}
+                        {t('product.published')}: {item.published === 1 ? t('product.yes') : t('product.no')}
                       </Text>
                       {item.code && (
                         <Text
@@ -639,7 +639,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                               : theme['color-basic-600'],
                             fontSize: 12,
                           }}>
-                          Code: {item.code}
+                          {t('editProduct.code')}: {item.code}
                         </Text>
                       )}
                     </View>
@@ -664,7 +664,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                           : theme['color-basic-600'],
                         fontSize: 11,
                       }}>
-                      Created:{' '}
+                      {t('myAds.createdOn')}:{' '}
                       {item.created_at
                         ? new Date(item.created_at).toLocaleDateString()
                         : 'N/A'}
@@ -676,7 +676,7 @@ const MyPostedAdsScreen = ({navigation}) => {
                           : theme['color-basic-600'],
                         fontSize: 11,
                       }}>
-                      Updated:{' '}
+                      {t('product.updated')}:{' '}
                       {item.updated_at
                         ? new Date(item.updated_at).toLocaleDateString()
                         : 'N/A'}

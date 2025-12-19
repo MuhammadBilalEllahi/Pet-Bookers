@@ -1294,7 +1294,7 @@ export const MyCartScreen = () => {
                   : theme['color-basic-900'],
               },
             ]}>
-            Sr#
+            {t('cart.srNumber')}
           </Text>
           <Text
             style={[
@@ -1575,7 +1575,7 @@ export const MyCartScreen = () => {
           ]}
           value={
             filteredPaymentMethods[selectedShipping.row]?.title ||
-            'Choose Shipping Method'
+            t('cart.chooseShippingMethod')
           }
           selectedIndex={selectedShipping}
           onSelect={index => setSelectedShipping(index)}
@@ -1943,7 +1943,7 @@ export const MyCartScreen = () => {
                     : theme['color-basic-900'],
                 },
               ]}>
-              3 Days Free Delivery
+              {t('cart.features.freeDelivery')}
             </Text>
           </View>
           <View style={styles.feature}>
@@ -1965,7 +1965,7 @@ export const MyCartScreen = () => {
                     : theme['color-basic-900'],
                 },
               ]}>
-              100% Original Products
+              {t('cart.features.originalProducts')}
             </Text>
           </View>
           <View style={styles.feature}>
@@ -1987,7 +1987,7 @@ export const MyCartScreen = () => {
                     : theme['color-basic-900'],
                 },
               ]}>
-              Money Back Guarantee
+              {t('cart.features.moneyBack')}
             </Text>
           </View>
           <View style={styles.feature}>
@@ -2009,7 +2009,7 @@ export const MyCartScreen = () => {
                     : theme['color-basic-900'],
                 },
               ]}>
-              Safe Payments
+              {t('cart.features.safePayments')}
             </Text>
           </View>
         </View>

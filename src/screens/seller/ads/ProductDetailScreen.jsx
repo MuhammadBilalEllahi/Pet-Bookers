@@ -15,6 +15,7 @@ import {useTheme} from '../../../theme/ThemeContext';
 import {useTranslation} from 'react-i18next';
 import {axiosSellerClient} from '../../../utils/axiosClient';
 import {MainScreensHeader} from '../../../components/buyer';
+import {ProductImagesSlider} from '../../../components/product';
 import {BASE_URLS} from '../../../store/configs';
 
 const {width: windowWidth} = Dimensions.get('screen');
@@ -138,7 +139,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
       </Layout>
     );
   }
-  // Prepare product images array for carousel
+  // Prepare product images array for ProductImagesSlider
   const productImages = [];
 
   // Add thumbnail first if it exists
@@ -304,76 +305,10 @@ export const ProductDetailScreen = ({route, navigation}) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}>
         {/* Product Images */}
-        <View style={styles.imageSection}>
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                color: isDark
-                  ? theme['color-shadcn-foreground']
-                  : theme['color-basic-900'],
-              },
-            ]}>
-            Product Images
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.imageScroll}>
-            {/* Thumbnail Image */}
-            {product.thumbnail && (
-              <TouchableOpacity
-                key="thumbnail"
-                onPress={() => openFullscreenCarousel(0)}
-                activeOpacity={0.8}>
-                <Image
-                  source={{
-                    uri: `${BASE_URLS.product_thumbnail_url}/${product.thumbnail}`,
-                  }}
-                  style={styles.productImage}
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
-            )}
-
-            {/* Additional Product Images */}
-            {product.images &&
-              product.images.map((image, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() =>
-                    openFullscreenCarousel(
-                      product.thumbnail ? index + 1 : index,
-                    )
-                  }
-                  activeOpacity={0.8}>
-                  <Image
-                    source={{uri: `${BASE_URLS.product_image_url}/${image}`}}
-                    style={styles.productImage}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              ))}
-
-            {/* Fallback if no images */}
-            {!product.thumbnail &&
-              (!product.images || product.images.length === 0) && (
-                <View style={styles.noImageContainer}>
-                  <Text
-                    style={[
-                      styles.noImageText,
-                      {
-                        color: isDark
-                          ? theme['color-shadcn-muted-foreground']
-                          : theme['color-basic-600'],
-                      },
-                    ]}>
-                    No Images Available
-                  </Text>
-                </View>
-              )}
-          </ScrollView>
-        </View>
+        <ProductImagesSlider
+          slideList={productImages}
+          onImagePress={openFullscreenCarousel}
+        />
 
         {/* Product Info */}
         <View style={styles.infoContainer}>
@@ -671,27 +606,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 32,
-  },
-  imageSection: {
-    marginBottom: 16,
-  },
-  imageScroll: {
-    maxHeight: 300,
-  },
-  productImage: {
-    width: windowWidth,
-    height: 300,
-  },
-  noImageContainer: {
-    width: windowWidth,
-    height: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.05)',
-  },
-  noImageText: {
-    fontSize: 16,
-    fontStyle: 'italic',
   },
   infoContainer: {
     padding: 16,

@@ -64,7 +64,7 @@
   "city": "شہر",
   "alreadyHaveAnAccount": "پہلے سے اکاؤنٹ موجود ہے؟",
   "selectOption": "آپشن منتخب کریں",
-  "countryCodeNote": "ملک کا کوڈ اس طرح ہونا چاہیے جیسے کہ بنگلہ دیش کے لیے 880",
+  "countryCodeNote": "ملک کا کوڈ اس طرح ہونا چاہیے جیسے کہ بنگلہ دیش کے لیے _ 92",
   "Punjab": "پنجاب",
   "Sindh": "سندھ",
   "KPK": "خیبر پختونخوا",
@@ -425,7 +425,14 @@
       "passwordRequiredMessage": "اکاؤنٹ حذف کرنے کے لیے برائے مہربانی اپنا پاس ورڈ درج کریں",
       "deleteAccount": "اکاؤنٹ حذف کریں",
       "deleteAccountMessage": "کیا آپ واقعی اپنا اکاؤنٹ حذف کرنا چاہتے ہیں؟ یہ کارروائی واپس نہیں ہو سکتی۔ آپ سے اپنا پاس ورڈ تصدیق کے لیے پوچھا جائے گا۔",
-      "verifying": "تصدیق ہو رہی ہے..."
+      "verifying": "تصدیق ہو رہی ہے...",
+      "accountDeleted": "اکاؤنٹ حذف ہو گیا",
+      "accountDeletedMessage": "آپ کا اکاؤنٹ کامیابی سے حذف ہو گیا",
+      "authenticationFailed": "تصدیق ناکام",
+      "incorrectPassword": "غلط پاس ورڈ۔ براہ کرم دوبارہ کوشش کریں۔",
+      "deleteAccountFailed": "اکاؤنٹ حذف کرنے میں ناکام",
+      "deletionFailed": "حذف ناکام",
+      "signInToUpdate": "براہ کرم اپنا پروفائل اپ ڈیٹ کرنے کے لیے سائن ان کریں"
     },
     "buyerOptions": "خریداری کے خیالات",
     "buyerOptionsSubtitle": "فروخت کنندہ کے لیے خریداری کے خیالات",
@@ -600,6 +607,7 @@
     "chooseShippingMethod": "ترسیل کا طریقہ منتخب کریں",
     "farmSubtotal": "فارم کا ذیلی کل",
     "farmShipping": "فارم کی ترسیل",
+    "srNumber": "Sr#",
     "features": {
       "freeDelivery": "3 دن مفت ڈیلیوری",
       "originalProducts": "100% اصل مصنوعات",
@@ -855,7 +863,8 @@
   "order": {
     "groupTotal": "گروپ کل:",
     "orderGroup": "آرڈر گروپ:",
-    "orderNumber": "آرڈر #"
+    "orderNumber": "آرڈر #",
+    "refunds": "ریفنڈز"
   },
   "allProducts": {
     "searchResults": "تلاش کے نتائج",
@@ -1460,7 +1469,14 @@
     "failedToPickImages": "تصاویر منتخب کرنے میں ناکام",
     "pleaseEnterRefundReason": "براہ کرم واپسی کی وجہ درج کریں",
     "refundRequestSubmittedSuccessfully": "واپسی کی درخواست کامیابی سے جمع ہو گئی",
-    "failedToSubmitRefundRequest": "واپسی کی درخواست جمع کرنے میں ناکام"
+    "failedToSubmitRefundRequest": "واپسی کی درخواست جمع کرنے میں ناکام",
+    "cannotRefund": "صرف ڈیلیور شدہ آرڈرز کی رقم واپس کی جا سکتی ہے",
+    "failedToGetRefundDetails": "واپسی کی تفصیلات حاصل کرنے میں ناکام",
+    "noRefundsFound": "کوئی واپسی نہیں ملی۔",
+    "delivery": "ڈیلیوری",
+    "yourReason": "آپ کی وجہ:",
+    "qty": "مقدار",
+    "price": "قیمت"
   },
   "noProductsFound": "کوئی مصنوعات نہیں ملی",
   "enhancedSplashScreen": {
@@ -1558,11 +1574,15 @@
     "adInactive": "اشتہار غیر فعال"
   },
   "common": {
+    
+    "english": "انگریزی",
+    "urdu": "اردو",
     "item": "آئٹم",
     "items": "آئٹمز",
     "loading": "لوڈ ہو رہا ہے...",
     "error": "خرابی",
     "success": "کامیابی",
+    "notAvailable": "دستیاب نہیں",
     "removed": "ہٹا دیا گیا",
     "cancel": "منسوخ کریں",
     "continue": "جاری رکھیں",
@@ -1750,6 +1770,18 @@
     "totalAmount": "کل رقم"
   },
   "myOrders": {
-    "billingAddress": "بلنگ پتہ"
+    "billingAddress": "بلنگ پتہ",
+    "cannotReview": "صرف ڈیلیور شدہ آرڈرز کا جائزہ لیا جا سکتا ہے",
+    "alreadyReviewedOrder": "آپ نے پہلے ہی اس آرڈر کا جائزہ لیا ہے",
+    "alreadyReviewed": "پہلے سے جائزہ لیا گیا",
+    "alreadyReviewedSeller": "آپ نے پہلے ہی اس بیچنے والے کا جائزہ لیا ہے",
+    "cannotReviewSeller": "آپ اس وقت اس بیچنے والے کا جائزہ نہیں لے سکتے",
+    "enterReviewComment": "براہ کرم جائزہ تبصرہ درج کریں",
+    "sellerReviewSubmitted": "بیچنے والے کا جائزہ کامیابی سے جمع کرایا گیا",
+    "failedSubmitSellerReview": "بیچنے والے کا جائزہ جمع کرنے میں ناکام",
+    "reviewSubmitted": "جائزہ کامیابی سے جمع کرایا گیا",
+    "failedSubmitReview": "جائزہ جمع کرنے میں ناکام",
+    "digitalDownloadStarted": "ڈیجیٹل پروڈکٹ ڈاؤن لوڈ شروع ہو گیا۔",
+    "searchPlaceholder": "آرڈرز یا ریفنڈز تلاش کریں..."
   }
 }

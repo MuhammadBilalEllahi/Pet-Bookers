@@ -149,10 +149,10 @@ export const ProductDetailScreen = ({route, navigation}) => {
       try {
         setLoading(true);
         const response = await axiosBuyerClient.get(`products/details/${slug}`);
-        // console.log(
-        //   '[fetchProductDetails]',
-        //   JSON.stringify(response.data, null, 10),
-        // );
+        console.log(
+          '[fetchProductDetails]',
+          JSON.stringify(response.data, null, 10),
+        );
         setProduct(response.data);
       } catch (error) {
         console.error(
@@ -1145,7 +1145,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                     ? theme['color-shadcn-foreground']
                     : theme['color-basic-900'],
                 }}>
-                {t('product.reviews')} ({product.reviews_count})
+                {t('product.reviews')} ({product.seller.total_reviews})
               </Text>
               {product.reviews.length > 0 ? (
                 <Layout style={{marginTop: 8}}>

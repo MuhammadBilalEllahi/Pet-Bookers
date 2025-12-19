@@ -130,7 +130,7 @@ export const AuthContainer = ({title, subTitle, children}) => {
                   },
                 ]}
                 onPress={() => onLanguageChange('en')}>
-                English
+                {t('common.english')}
               </Text>
               <Text
                 category="p2"
@@ -144,7 +144,7 @@ export const AuthContainer = ({title, subTitle, children}) => {
                   },
                 ]}
                 onPress={() => onLanguageChange('ur')}>
-                اردو
+                {t('common.urdu')}
               </Text>
             </Layout>
           </Layout>

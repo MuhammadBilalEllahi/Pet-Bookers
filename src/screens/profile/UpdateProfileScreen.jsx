@@ -108,16 +108,16 @@ export const UpdateProfileScreen = ({navigation}) => {
       // Show different message based on auth state
       if (isSellerAuthenticated) {
         Alert.alert(
-          'Buyer Authentication Required',
-          'You are currently signed in as a seller. To update your buyer profile, please also sign in as a buyer.',
+          t('product.buyerAuthRequired'),
+          t('profile.buyerAuthRequired'),
           [
             {
-              text: 'Cancel',
+              text: t('buttons.cancel'),
               style: 'cancel',
               onPress: () => navigation.goBack(),
             },
             {
-              text: 'Sign in as Buyer',
+              text: t('auth.signInAsBuyer'),
               onPress: () =>
                 navigation.navigate(AppScreens.LOGIN, {isItSeller: false}),
             },
@@ -221,7 +221,7 @@ export const UpdateProfileScreen = ({navigation}) => {
           err?.response?.data?.message ||
           err?.response?.data?.error ||
           err?.message ||
-          'Failed to update profile';
+          t('profile.updateProfile.updateFailed');
         Toast.show({
           type: 'error',
           text1: t('profile.updateProfile.updateFailed'),
@@ -315,8 +315,8 @@ export const UpdateProfileScreen = ({navigation}) => {
 
       Toast.show({
         type: 'success',
-        text1: 'Account Deleted',
-        text2: 'Your account has been successfully deleted',
+        text1: t('profile.updateProfile.accountDeleted'),
+        text2: t('profile.updateProfile.accountDeletedMessage'),
       });
 
       navigation.navigate('Login');
@@ -334,10 +334,10 @@ export const UpdateProfileScreen = ({navigation}) => {
           const errorMessage =
             err?.response?.data?.message ||
             err?.message ||
-            'Failed to delete account';
+            t('profile.updateProfile.deleteAccountFailed');
           Toast.show({
             type: 'error',
-            text1: 'Deletion Failed',
+            text1: t('profile.updateProfile.deletionFailed'),
             text2: errorMessage,
           });
         });
@@ -369,8 +369,8 @@ export const UpdateProfileScreen = ({navigation}) => {
               },
             ]}>
             {isSellerAuthenticated
-              ? 'Please sign in as a buyer to update your profile'
-              : 'Please sign in to update your profile'}
+              ? t('profile.buyerAuthRequired')
+              : t('profile.updateProfile.signInToUpdate')}
           </Text>
           <Button
             onPress={() =>
@@ -639,7 +639,7 @@ export const UpdateProfileScreen = ({navigation}) => {
                         styles.successText,
                         {color: theme['color-success-600']},
                       ]}>
-                      ✅ {t('profile.updateSuccess')}
+                        ✅ {t('profile.updateProfile.updateSuccess')}
                     </Text>
                   </View>
                 ) : (

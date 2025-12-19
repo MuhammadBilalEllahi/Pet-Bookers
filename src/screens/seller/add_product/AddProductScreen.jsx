@@ -982,7 +982,7 @@ export const AddProductScreen = ({navigation}) => {
                               },
                             ],
                       ]}>
-                      English
+                      {t('common.english')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -1018,7 +1018,7 @@ export const AddProductScreen = ({navigation}) => {
                               },
                             ],
                       ]}>
-                      Urdu
+                      {t('common.urdu')}
                     </Text>
                   </TouchableOpacity>
                 </View>

@@ -20,6 +20,7 @@ import {useTheme} from '../../../theme/ThemeContext';
 import {
   selectCustomerInfo,
   selectIsBuyerAuthenticated,
+  selectIsSellerAuthenticated,
 } from '../../../store/user';
 import {BASE_URLS} from '../../../store/configs';
 import {Dimensions} from 'react-native';
@@ -266,6 +267,7 @@ export default function LuckyDrawInstance() {
   // Get user data from Redux store
   const customerInfo = useSelector(selectCustomerInfo);
   const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
 
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
@@ -645,8 +647,46 @@ export default function LuckyDrawInstance() {
 
         {/* Form */}
         <View style={styles.form}>
+          {/* Seller View Only Message */}
+          {isSellerAuthenticated && (
+            <View
+              style={[
+                styles.infoMessage,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-warning-100']
+                    : theme['color-warning-200'],
+                  borderColor: isDark
+                    ? theme['color-warning-300']
+                    : theme['color-warning-400'],
+                },
+              ]}>
+              <Icon
+                name="info"
+                style={styles.infoIcon}
+                fill={
+                  isDark
+                    ? theme['color-warning-700']
+                    : theme['color-warning-800']
+                }
+              />
+              <Text
+                style={[
+                  styles.infoText,
+                  {
+                    color: isDark
+                      ? theme['color-warning-700']
+                      : theme['color-warning-800'],
+                  },
+                ]}>
+                {t('luckyDrawInstance.form.sellerViewOnlyMessage') ||
+                  'You are currently logged in as a seller. To participate in lucky draws, please log in as a buyer.'}
+              </Text>
+            </View>
+          )}
+
           {/* Info message for user data pre-population */}
-          {isBuyerAuthenticated && customerInfo && (
+          {isBuyerAuthenticated && customerInfo && !isSellerAuthenticated && (
             <View
               style={[
                 styles.infoMessage,
@@ -907,18 +947,26 @@ export default function LuckyDrawInstance() {
           <TouchableOpacity
             style={[
               styles.gradientButton,
-              participationStatus?.alreadyParticipated && styles.disabledButton,
+              (participationStatus?.alreadyParticipated ||
+                isSellerAuthenticated) &&
+                styles.disabledButton,
             ]}
             onPress={handleSubmit}
             disabled={
               submitting ||
               participationStatus?.alreadyParticipated ||
-              checkingParticipation
+              checkingParticipation ||
+              isSellerAuthenticated
             }
-            activeOpacity={participationStatus?.alreadyParticipated ? 1 : 0.8}>
+            activeOpacity={
+              participationStatus?.alreadyParticipated || isSellerAuthenticated
+                ? 1
+                : 0.8
+            }>
             <LinearGradient
               colors={
-                participationStatus?.alreadyParticipated
+                participationStatus?.alreadyParticipated ||
+                isSellerAuthenticated
                   ? [theme['color-basic-400'], theme['color-basic-500']]
                   : [theme['color-shadcn-primary'], theme['color-primary-400']]
               }
@@ -927,7 +975,8 @@ export default function LuckyDrawInstance() {
               <Text
                 style={[
                   styles.buttonText,
-                  participationStatus?.alreadyParticipated &&
+                  (participationStatus?.alreadyParticipated ||
+                    isSellerAuthenticated) &&
                     styles.disabledButtonText,
                 ]}>
                 {checkingParticipation
@@ -937,6 +986,9 @@ export default function LuckyDrawInstance() {
                   : participationStatus?.alreadyParticipated
                   ? t('luckyDrawInstance.form.alreadyParticipated') ||
                     'Already Participated'
+                  : isSellerAuthenticated
+                  ? t('luckyDrawInstance.form.sellerViewOnly') ||
+                    'Sellers can view but only participate if logged in as buyer'
                   : t('luckyDrawInstance.form.submit')}
               </Text>
             </LinearGradient>

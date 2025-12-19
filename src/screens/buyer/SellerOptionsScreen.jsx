@@ -83,13 +83,13 @@ export const SellerOptionsScreen = ({ navigation }) => {
           />
           
           <Divider style={{ backgroundColor: isDark ? theme['color-shadcn-border'] : theme['color-basic-400'] }} />
-          
+{/*           
           <ProfileActionButton
             title={t('profile.farmDetails')}
             subtitle={t('profile.farmDetailsSubtitle')}
             iconName="edit-outline"
             onPress={navigateToFarmDetails}
-          />
+          /> */}
         </Layout>
       </ScrollView>
     </Layout>

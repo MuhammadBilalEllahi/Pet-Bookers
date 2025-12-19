@@ -41,12 +41,7 @@ const getSellerProperty = (sellerData, propertyPath, fallback = '') => {
  * @returns {number|null} Seller ID or null if not available
  */
 const getSellerId = (product, sellerInfo) => {
-  return (
-    sellerInfo?.id ||
-    product?.seller?.id ||
-    product?.user_id ||
-    null
-  );
+  return sellerInfo?.id || product?.seller?.id || product?.user_id || null;
 };
 
 /**
@@ -77,10 +72,12 @@ const getShopImage = (product, sellerInfo) => {
  * Get shop products count with fallback
  */
 const getShopProductsCount = (product, sellerInfo) => {
+  console.log('sellerInfo', selectSellerInfo);
+  console.log('product', product);
   return (
-    getSellerProperty(sellerInfo, 'shop.products_count', 0) ||
-    getSellerProperty(product, 'shop.products_count', 0) ||
-    getSellerProperty(product, 'seller.shop.products_count', 0) ||
+    getSellerProperty(product, 'seller.total_products', 0) ||
+    getSellerProperty(product, 'total_products', 0) ||
+    getSellerProperty(sellerInfo, 'shop.total_products', 0) ||
     0
   );
 };
@@ -90,10 +87,10 @@ const getShopProductsCount = (product, sellerInfo) => {
  */
 const getReviewsCount = (product, sellerInfo) => {
   return (
-    sellerInfo?.shop?.reviews_count ||
-    product?.reviews_count ||
-    product?.shop?.reviews_count ||
-    product?.seller?.shop?.reviews_count ||
+    sellerInfo?.shop?.total_reviews ||
+    product?.total_reviews ||
+    product?.shop?.total_reviews ||
+    product?.seller?.shop?.total_reviews ||
     0
   );
 };
@@ -102,15 +99,13 @@ export const SellerInfoCard = ({product, navigation}) => {
   const {theme, isDark} = useTheme();
   const {t} = useTranslation();
   const dispatch = useDispatch();
-  const {sellerInfo, sellerInfoLoading, sellerInfoError} = useSelector(selectSellerInfo);
+  const {sellerInfo, sellerInfoLoading, sellerInfoError} =
+    useSelector(selectSellerInfo);
   const [sellerId, setSellerId] = useState(null);
 
   // Get seller ID from product
   useEffect(() => {
-    const id =
-      product?.seller?.id ||
-      product?.user_id ||
-      null;
+    const id = product?.seller?.id || product?.user_id || null;
     setSellerId(id);
   }, [product]);
 
@@ -132,11 +127,9 @@ export const SellerInfoCard = ({product, navigation}) => {
 
   // Show message if seller info is not available (error or empty response)
   // Check if there's an error, or if sellerInfo is null/empty, or if there's no shop data anywhere
-  const hasNoShopData = 
-    !sellerInfo?.shop && 
-    !product?.seller?.shop && 
-    !product?.shop;
-  
+  const hasNoShopData =
+    !sellerInfo?.shop && !product?.seller?.shop && !product?.shop;
+
   if (sellerInfoError || !sellerInfo || hasNoShopData) {
     return (
       <View
@@ -196,7 +189,8 @@ export const SellerInfoCard = ({product, navigation}) => {
   const productsCount = getShopProductsCount(product, sellerInfo);
   const reviewsCount = getReviewsCount(product, sellerInfo);
   const currentSellerId = getSellerId(product, sellerInfo);
-  const vacationStatus = sellerInfo?.shop?.vacation_status || product?.seller?.shop?.vacation_status;
+  const vacationStatus =
+    sellerInfo?.shop?.vacation_status || product?.seller?.shop?.vacation_status;
 
   const navigateToVandorDetail = vandorId => {
     if (vandorId) {
@@ -359,10 +353,7 @@ export const SellerInfoCard = ({product, navigation}) => {
         style={styles.visitStoreButton}
         onPress={() => navigateToVandorDetail(currentSellerId)}>
         <LinearGradient
-          colors={[
-            theme['color-shadcn-primary'],
-            theme['color-primary-400'],
-          ]}
+          colors={[theme['color-shadcn-primary'], theme['color-primary-400']]}
           start={{x: 0, y: 0}}
           end={{x: 1, y: 0}}
           style={styles.gradient}>
@@ -494,4 +485,3 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
-

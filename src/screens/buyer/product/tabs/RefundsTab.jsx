@@ -4,16 +4,17 @@ import { Spinner, Text, Card, Divider, Icon } from '@ui-kitten/components';
 // Add imports for axios client and dependencies
 import { createSmartBuyerClient } from '../../../../utils/authAxiosClient';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const smartBuyerClient = createSmartBuyerClient();
 
 
-export const getRefundDetails = async (params) => {
+export const getRefundDetails = async (params, t) => {
   try {
     const response = await smartBuyerClient.get('customer/order/refund-details');
     return response.data;
   } catch (error) {
-    Alert.alert('Error', 'Failed to get refund details');
+    Alert.alert(t('common.error'), t('refund.failedToGetRefundDetails'));
     return null;
   }
 };
@@ -29,7 +30,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const StatusBadge = ({ status }) => (
+const StatusBadge = ({ status, t }) => (
   <View style={{
     backgroundColor: getStatusColor(status),
     borderRadius: 12,
@@ -40,7 +41,7 @@ const StatusBadge = ({ status }) => (
     marginBottom: 2,
   }}>
     <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-      {status || 'N/A'}
+      {status || t('common.notAvailable')}
     </Text>
   </View>
 );
@@ -69,16 +70,19 @@ const ShimmerCard = () => (
 );
 
 const RefundsTab = ({ refundsLoading, filteredRefunds, baseUrls }) => {
+  const { t } = useTranslation();
+  
   // Sort refunds: those with status 'N/A' at the end
   const sortedRefunds = React.useMemo(() => {
     return [...filteredRefunds].sort((a, b) => {
-      const statusA = (a.refund?.refund_request?.[0]?.status || 'N/A').toLowerCase();
-      const statusB = (b.refund?.refund_request?.[0]?.status || 'N/A').toLowerCase();
-      if (statusA === 'n/a' && statusB !== 'n/a') return 1;
-      if (statusA !== 'n/a' && statusB === 'n/a') return -1;
+      const statusA = (a.refund?.refund_request?.[0]?.status || t('common.notAvailable')).toLowerCase();
+      const statusB = (b.refund?.refund_request?.[0]?.status || t('common.notAvailable')).toLowerCase();
+      const notAvailable = t('common.notAvailable').toLowerCase();
+      if (statusA === notAvailable && statusB !== notAvailable) return 1;
+      if (statusA !== notAvailable && statusB === notAvailable) return -1;
       return 0;
     });
-  }, [filteredRefunds]);
+  }, [filteredRefunds, t]);
 
   if (refundsLoading) {
     return (
@@ -95,7 +99,7 @@ const RefundsTab = ({ refundsLoading, filteredRefunds, baseUrls }) => {
       {sortedRefunds.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', marginTop: 48 }}>
           <Icon name="file-text-outline" width={48} height={48} fill="#B0B0B0" style={{ marginBottom: 8 }} />
-          <Text appearance="hint" style={{ textAlign: 'center', fontSize: 16 }}>No refunds found.</Text>
+          <Text appearance="hint" style={{ textAlign: 'center', fontSize: 16 }}>{t('refund.noRefundsFound')}</Text>
         </View>
       ) : (
         sortedRefunds.map((refund, idx) => {
@@ -106,8 +110,8 @@ const RefundsTab = ({ refundsLoading, filteredRefunds, baseUrls }) => {
           }
           product = product || {};
           const orderDetails = refund.order_details || {};
-          const refundStatus = refund.status || 'N/A';
-          const deliveryStatus = orderDetails.delivery_status || 'N/A';
+          const refundStatus = refund.status || t('common.notAvailable');
+          const deliveryStatus = orderDetails.delivery_status || t('common.notAvailable');
           const qty = orderDetails.qty || 1;
           const price = orderDetails.price || refund.amount || 0;
           const refundReason = refund.refund_reason || '';
@@ -159,38 +163,38 @@ const RefundsTab = ({ refundsLoading, filteredRefunds, baseUrls }) => {
                 </View>
                 <View style={{ flex: 1, marginLeft: 14 }}>
                   <Text category="s1" style={{ fontWeight: 'bold', marginBottom: 2 }}>
-                    {product.name || 'Product'}
+                    {product.name || t('refund.productName')}
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                    <StatusBadge status={refundStatus} />
+                    <StatusBadge status={refundStatus} t={t} />
                     <Text category="c1" style={{ marginLeft: 8 }}>
-                      Delivery: {deliveryStatus}
+                      {t('refund.delivery')}: {deliveryStatus}
                     </Text>
                   </View>
                   <Text category="c1" appearance="hint" style={{ marginBottom: 2 }}>
-                    Qty: {qty} | Price: PKR {price}
+                    {t('refund.qty')}: {qty} | {t('refund.price')}: PKR {price}
                   </Text>
                   <Text category="c1" appearance="hint" style={{ marginBottom: 2 }}>
-                    Order #{refund.order_id}
+                    {t('order.orderNumber')} {refund.order_id}
                   </Text>
                   {refundDate && (
                     <Text category="c1" appearance="hint" style={{ marginBottom: 2 }}>
-                      Requested: {refundDate}
+                      {t('common.requested')}: {refundDate}
                     </Text>
                   )}
                   {refundReason ? (
                     <Text category="c1" appearance="hint" style={{ marginTop: 2 }}>
-                      <Text style={{ fontWeight: 'bold' }}>Your Reason:</Text> {refundReason}
+                      <Text style={{ fontWeight: 'bold' }}>{t('refund.yourReason')}</Text> {refundReason}
                     </Text>
                   ) : null}
                   {approvedNote ? (
                     <Text category="c1" style={{ color: '#4BB543', marginTop: 2 }}>
-                      <Text style={{ fontWeight: 'bold' }}>Approved Note:</Text> {approvedNote}
+                      <Text style={{ fontWeight: 'bold' }}>{t('common.approvalNote')}:</Text> {approvedNote}
                     </Text>
                   ) : null}
                   {rejectedNote ? (
                     <Text category="c1" style={{ color: '#FF4C4C', marginTop: 2 }}>
-                      <Text style={{ fontWeight: 'bold' }}>Rejected Note:</Text> {rejectedNote}
+                      <Text style={{ fontWeight: 'bold' }}>{t('common.rejectionNote')}:</Text> {rejectedNote}
                     </Text>
                   ) : null}
                 </View>

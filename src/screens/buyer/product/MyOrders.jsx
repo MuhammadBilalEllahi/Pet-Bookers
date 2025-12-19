@@ -278,7 +278,7 @@ const ProductDetails = ({product, isDark, theme, t}) => {
                 : theme['color-basic-900'],
             },
           ]}>
-          {product.product_details?.name || 'Product Name'}
+          {product.product_details?.name || t('refund.productName')}
         </Text>
         <Text
           category="c1"
@@ -420,7 +420,7 @@ export const MyOrders = ({navigation}) => {
       Toast.show({
         type: 'info',
         text1: `Already ${t('product.reviewed', 'Reviewed')}`,
-        text2: 'You have already reviewed this order',
+        text2: t('myOrders.alreadyReviewedOrder'),
       });
       return;
     }
@@ -461,8 +461,8 @@ export const MyOrders = ({navigation}) => {
     if (reviewedSellers.has(sellerId)) {
       Toast.show({
         type: 'info',
-        text1: 'Already Reviewed',
-        text2: 'You have already reviewed this seller',
+        text1: t('myOrders.alreadyReviewed'),
+        text2: t('myOrders.alreadyReviewedSeller'),
       });
       return;
     }
@@ -471,8 +471,8 @@ export const MyOrders = ({navigation}) => {
     if (!canReview) {
       Toast.show({
         type: 'error',
-        text1: 'Cannot Review',
-        text2: 'You cannot review this seller at this time',
+        text1: t('common.error'),
+        text2: t('myOrders.cannotReviewSeller'),
       });
       return;
     }
@@ -490,8 +490,8 @@ export const MyOrders = ({navigation}) => {
     if (!sellerReviewText.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Please enter a review comment',
+        text1: t('common.error'),
+        text2: t('myOrders.enterReviewComment'),
       });
       return;
     }
@@ -509,8 +509,8 @@ export const MyOrders = ({navigation}) => {
       if (response) {
         Toast.show({
           type: 'success',
-          text1: 'Success',
-          text2: 'Seller review submitted successfully',
+          text1: t('common.success'),
+          text2: t('myOrders.sellerReviewSubmitted'),
         });
         // Mark seller as reviewed
         setReviewedSellers(
@@ -523,8 +523,8 @@ export const MyOrders = ({navigation}) => {
       console.error('Error submitting seller review:', error);
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to submit seller review',
+        text1: t('common.error'),
+        text2: t('myOrders.failedSubmitSellerReview'),
       });
     }
   };
@@ -533,8 +533,8 @@ export const MyOrders = ({navigation}) => {
     if (!reviewText.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Please enter a review comment',
+        text1: t('common.error'),
+        text2: t('myOrders.enterReviewComment'),
       });
       return;
     }
@@ -567,8 +567,8 @@ export const MyOrders = ({navigation}) => {
       // console.log("error", error);
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to submit review',
+        text1: t('common.error'),
+        text2: t('myOrders.failedSubmitReview'),
       });
     }
   };
@@ -577,8 +577,8 @@ export const MyOrders = ({navigation}) => {
     if (order.order_status !== 'delivered') {
       Toast.show({
         type: 'error',
-        text1: 'Cannot Refund',
-        text2: 'Only delivered orders can be refunded',
+        text1: t('common.error'),
+        text2: t('refund.cannotRefund'),
       });
       return;
     }
@@ -732,7 +732,7 @@ export const MyOrders = ({navigation}) => {
                         : theme['color-basic-600'],
                     },
                   ]}>
-                  {t('Payment')}: {order.payment_method}
+                  {t('shippingDetails.payment')}: {order.payment_method}
                 </Text>
                 <Text
                   style={[
@@ -743,7 +743,7 @@ export const MyOrders = ({navigation}) => {
                         : theme['color-basic-600'],
                     },
                   ]}>
-                  {t('Status')}: {order.payment_status}
+                  {t('common.status')}: {order.payment_status}
                 </Text>
                 <Text
                   style={[
@@ -864,8 +864,8 @@ export const MyOrders = ({navigation}) => {
                   );
                   Toast.show({
                     type: 'success',
-                    text1: 'Download',
-                    text2: 'Digital product download started.',
+                    text1: t('common.download'),
+                    text2: t('myOrders.digitalDownloadStarted'),
                   });
                 }}>
                 <Text style={{color: '#ffffff'}}>{t('common.download')}</Text>
@@ -1014,7 +1014,7 @@ export const MyOrders = ({navigation}) => {
                           : theme['color-basic-600'],
                       },
                     ]}>
-                    {t('Payment')}: {order.payment_method}
+                    {t('shippingDetails.payment')}: {order.payment_method}
                   </Text>
                   <Text
                     style={[
@@ -1025,7 +1025,7 @@ export const MyOrders = ({navigation}) => {
                           : theme['color-basic-600'],
                       },
                     ]}>
-                    {t('Status')}: {order.payment_status}
+                    {t('common.status')}: {order.payment_status}
                   </Text>
                   <Text
                     style={[
@@ -1202,7 +1202,7 @@ export const MyOrders = ({navigation}) => {
           : theme['color-basic-100'],
       }}>
       <Input
-        placeholder={t('search.searchProducts', 'Search orders or refunds...')}
+        placeholder={t('myOrders.searchPlaceholder')}
         value={searchQuery}
         onChangeText={setSearchQuery}
         accessoryLeft={
@@ -1236,7 +1236,7 @@ export const MyOrders = ({navigation}) => {
   return (
     <Layout
       style={{
-        flex: 1,
+        flex: 1, 
         backgroundColor: isDark
           ? theme['color-shadcn-background']
           : theme['color-basic-100'],
@@ -1247,7 +1247,7 @@ export const MyOrders = ({navigation}) => {
         onSelect={setSelectedTab}
         style={{flex: 1}}>
         <Tab
-          title={t('tabs.orders', 'Orders')}
+          title={t('tabs.orders')}
           style={{
             backgroundColor: isDark
               ? theme['color-shadcn-background']
@@ -1261,7 +1261,7 @@ export const MyOrders = ({navigation}) => {
           />
         </Tab>
         <Tab
-          title={t('order.refunds', 'Refunds')}
+          title={t('order.refunds')}
           style={{
             backgroundColor: isDark
               ? theme['color-shadcn-background']
@@ -1392,18 +1392,18 @@ export const OrderDetails = ({route, navigation}) => {
             },
           ]}
         />
-        {renderField(t('Address'), addressData.address)}
-        {renderField(t('Address Type'), addressData.address_type)}
-        {renderField(t('City'), addressData.city)}
-        {renderField(t('Contact Person'), addressData.contact_person_name)}
-        {renderField(t('Country'), addressData.country)}
-        {renderField(t('Phone'), addressData.phone)}
-        {renderField(t('State'), addressData.state)}
-        {renderField(t('ZIP'), addressData.zip)}
+        {renderField(t('shippingDetails.address'), addressData.address)}
+        {renderField(t('addAddressScreen.addressTypeLabel'), addressData.address_type)}
+        {renderField(t('product.city'), addressData.city)}
+        {renderField(t('shippingDetails.contactPersonName'), addressData.contact_person_name)}
+        {renderField(t('addAddressScreen.countryLabel'), addressData.country)}
+        {renderField(t('phone'), addressData.phone)}
+        {renderField(t('state'), addressData.state)}
+        {renderField(t('shippingDetails.zipCode'), addressData.zip)}
         {addressData.latitude &&
-          renderField(t('Latitude'), addressData.latitude)}
+          renderField(t('shippingDetails.latitude'), addressData.latitude)}
         {addressData.longitude &&
-          renderField(t('Longitude'), addressData.longitude)}
+          renderField(t('shippingDetails.longitude'), addressData.longitude)}
       </Card>
     );
   };
