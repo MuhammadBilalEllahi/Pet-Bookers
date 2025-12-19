@@ -4,21 +4,18 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image,
-  Dimensions,
   Alert,
-  Modal,
-  FlatList,
 } from 'react-native';
 import {Layout, Text, Button, Icon, Spinner} from '@ui-kitten/components';
 import {useTheme} from '../../../theme/ThemeContext';
 import {useTranslation} from 'react-i18next';
 import {axiosSellerClient} from '../../../utils/axiosClient';
 import {MainScreensHeader} from '../../../components/buyer';
-import {ProductImagesSlider} from '../../../components/product';
+import {
+  ProductImagesSlider,
+  FullscreenImageCarousel,
+} from '../../../components/product';
 import {BASE_URLS} from '../../../store/configs';
-
-const {width: windowWidth} = Dimensions.get('screen');
 
 export const ProductDetailScreen = ({route, navigation}) => {
   const {productId} = route.params;
@@ -160,136 +157,6 @@ export const ProductDetailScreen = ({route, navigation}) => {
     });
   }
 
-  // Get screen dimensions for fullscreen carousel
-  const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
-
-  // Fullscreen Carousel Component
-  const FullscreenCarousel = () => {
-    const renderCarouselItem = ({item, index}) => (
-      <View
-        style={{
-          width: screenWidth,
-          height: screenHeight,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <Image
-          source={{uri: item.image}}
-          style={{
-            width: screenWidth,
-            height: screenWidth, // Square aspect ratio
-            resizeMode: 'contain',
-          }}
-        />
-      </View>
-    );
-
-    return (
-      <Modal
-        visible={showFullscreenCarousel}
-        transparent={false}
-        animationType="fade"
-        statusBarTranslucent={true}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'black',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          {/* Close Button */}
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 50,
-              right: 20,
-              zIndex: 1000,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              borderRadius: 20,
-              width: 40,
-              height: 40,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={closeFullscreenCarousel}>
-            <Icon name="close" fill="white" style={{width: 24, height: 24}} />
-          </TouchableOpacity>
-
-          {/* Image Counter */}
-          <View
-            style={{
-              position: 'absolute',
-              top: 50,
-              left: 20,
-              zIndex: 1000,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              borderRadius: 15,
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-            }}>
-            <Text style={{color: 'white', fontSize: 14, fontWeight: 'bold'}}>
-              {currentImageIndex + 1} / {productImages.length}
-            </Text>
-          </View>
-
-          {/* Carousel */}
-          <FlatList
-            data={productImages}
-            renderItem={renderCarouselItem}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            initialScrollIndex={currentImageIndex}
-            getItemLayout={(data, index) => ({
-              length: screenWidth,
-              offset: screenWidth * index,
-              index,
-            })}
-            onScrollToIndexFailed={() => {}}
-            onMomentumScrollEnd={event => {
-              const index = Math.round(
-                event.nativeEvent.contentOffset.x / screenWidth,
-              );
-              setCurrentImageIndex(index);
-            }}
-          />
-
-          {/* Navigation Dots */}
-          {productImages.length > 1 && (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 50,
-                left: 0,
-                right: 0,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              {productImages.map((_, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor:
-                      index === currentImageIndex
-                        ? 'white'
-                        : 'rgba(255,255,255,0.3)',
-                    marginHorizontal: 4,
-                  }}
-                  onPress={() => {
-                    setCurrentImageIndex(index);
-                  }}
-                />
-              ))}
-            </View>
-          )}
-        </View>
-      </Modal>
-    );
-  };
 
   return (
     <Layout
@@ -413,87 +280,87 @@ export const ProductDetailScreen = ({route, navigation}) => {
                 theme={theme}
               />
               <SpecItem
-                label="Purchase Price"
+                label={t('editProduct.purchasePrice')}
                 value={`Rs ${
-                  product.purchase_price?.toLocaleString() || 'N/A'
+                  product.purchase_price?.toLocaleString() || t('common.notAvailable')
                 }`}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Min Qty"
-                value={`${product.min_qty || 'N/A'} ${product.unit}`}
+                label={t('editProduct.minQty')}
+                value={`${product.min_qty || t('common.notAvailable')} ${product.unit}`}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Product Type"
-                value={product.product_type || 'Physical'}
+                label={t('product.productType')}
+                value={product.product_type || t('editProduct.physical')}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Refundable"
-                value={product.refundable === 1 ? 'Yes' : 'No'}
+                label={t('product.refundable')}
+                value={product.refundable === 1 ? t('product.yes') : t('product.no')}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Free Shipping"
-                value={product.free_shipping === 1 ? 'Yes' : 'No'}
+                label={t('product.freeShipping')}
+                value={product.free_shipping === 1 ? t('product.yes') : t('product.no')}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Published"
-                value={product.published === 1 ? 'Yes' : 'No'}
+                label={t('product.published')}
+                value={product.published === 1 ? t('product.yes') : t('product.no')}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Request Status"
+                label={t('editProduct.requestStatus')}
                 value={
                   product.request_status === 1
-                    ? 'Approved'
+                    ? t('common.approved')
                     : product.request_status === 0
-                    ? 'Pending'
-                    : 'Denied'
+                    ? t('common.pending')
+                    : t('common.rejected')
                 }
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Reviews Count"
+                label={t('editProduct.reviewsCount')}
                 value={product.reviews_count || 0}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Featured Status"
+                label={t('editProduct.featuredStatus')}
                 value={
-                  product.featured_status === 1 ? 'Featured' : 'Not Featured'
+                  product.featured_status === 1 ? t('featured') : t('editProduct.notFeatured')
                 }
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Discount"
+                label={t('editProduct.discount')}
                 value={`${product.discount || 0}%`}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Tax"
+                label={t('editProduct.tax')}
                 value={`${product.tax || 0}%`}
                 isDark={isDark}
                 theme={theme}
               />
               <SpecItem
-                label="Shipping Cost"
+                label={t('editProduct.shippingCost')}
                 value={
                   product.shipping_cost > 0
                     ? `Rs ${product.shipping_cost}`
-                    : 'Free'
+                    : t('product.free')
                 }
                 isDark={isDark}
                 theme={theme}
@@ -505,7 +372,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
                 theme={theme}
               />
               <SpecItem
-                label="Updated"
+                label={t('editProduct.updated')}
                 value={new Date(product.updated_at).toLocaleDateString()}
                 isDark={isDark}
                 theme={theme}
@@ -522,7 +389,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
               />
               {product.denied_note && (
                 <SpecItem
-                  label="Denied Note"
+                  label={t('editProduct.deniedNote')}
                   value={product.denied_note}
                   isDark={isDark}
                   theme={theme}
@@ -545,7 +412,7 @@ export const ProductDetailScreen = ({route, navigation}) => {
             <Button
               style={[
                 styles.deleteButton,
-                {backgroundColor: theme['color-danger-default']},
+                {backgroundColor: isDark ? theme['color-danger-default'] : theme['color-danger-primary']},
               ]}
               onPress={handleDelete}>
               {t('productDetails.delete')}
@@ -555,7 +422,13 @@ export const ProductDetailScreen = ({route, navigation}) => {
       </ScrollView>
 
       {/* Fullscreen Image Carousel */}
-      <FullscreenCarousel />
+      <FullscreenImageCarousel
+        visible={showFullscreenCarousel}
+        images={productImages}
+        initialIndex={currentImageIndex}
+        onClose={closeFullscreenCarousel}
+        onImageIndexChange={setCurrentImageIndex}
+      />
     </Layout>
   );
 };

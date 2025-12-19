@@ -563,7 +563,23 @@
     "uploadThumbnail": "Upload Thumbnail",
     "images": "Product Images",
     "status": "Status",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "productNameRequired": "Product name is required",
+    "validPriceRequired": "Valid price is required",
+    "purchasePrice": "Purchase Price",
+    "minQty": "Min Qty",
+    "tags": "Tags",
+    "addTags": "Add tags (comma separated)",
+    "add": "Add",
+    "productInformation": "Product Information",
+    "physical": "Physical",
+    "requestStatus": "Request Status:",
+    "reviewsCount": "Reviews Count:",
+    "created": "Created:",
+    "updated": "Updated:",
+    "deniedNote": "Denied Note:",
+    "featuredStatus": "Featured Status",
+    "notFeatured": "Not Featured"
   },
   "Transactions": "Transactions",
   "Request Withdrawal": "Request Withdrawal",
@@ -588,7 +604,7 @@
     "continueShopping": "Continue Shopping",
     "checkout": "Checkout",
     "removeItem": "Remove Item",
-    "removeConfirm": "Are you sure you want to remove \"{productName}\" from your cart?",
+    "removeConfirm": "Are you sure you want to remove \"{{productName}}\" from your cart?",
     "removeFarmProducts": "Remove All Farm Products",
     "removeFarmConfirm": "Are you sure you want to remove all {itemsCount} product(s) from \"{farmName}\"?",
     "removeAll": "Remove All",
@@ -615,7 +631,7 @@
       "moneyBack": "Money Back Guarantee",
       "safePayments": "Safe Payments"
     },
-    "couponApplied": "Coupon \"{code}\" applied! You saved Rs {amount}",
+    "couponApplied": "Coupon \"{{code}}\" applied! You saved Rs {{amount}}",
     "invalidCoupon": "Invalid coupon code",
     "applyCouponFailed": "Failed to apply coupon",
     "removeItemFailed": "Failed to remove item from cart",
@@ -623,13 +639,13 @@
     "cartEmpty": "Cart Empty",
     "addItemsFirst": "Please add items to cart before checkout",
     "selectShippingFirst": "Please select a shipping method first",
-    "removeFarmSuccess": "All products from {farmName} have been removed from your cart",
+    "removeFarmSuccess": "All products from {{farmName}} have been removed from your cart",
     "removeFarmFailed": "Failed to remove farm products",
     "authRequired": "Please sign in to view your cart",
     "buyerAuthRequired": "Please sign in as a buyer to view your cart",
     "sellerToBuyerAuth": "You are signed in as a seller. Please also sign in as a buyer to view your cart",
-    "minQuantityError": "Minimum order quantity is {minQuantity}",
-    "maxQuantityError": "Only {maxQuantity} items available in stock",
+    "minQuantityError": "Minimum order quantity is {{minQuantity}}",
+    "maxQuantityError": "Only {{maxQuantity}} items available in stock",
     "physicalProductsEasypaisaOnly": "Cart contains physical products. Only EasyPaisa payment is available."
   },
   "wishlist": {
@@ -1148,7 +1164,7 @@
   "messagesScreen": {
     "authRequired": {
       "title": "Authentication Required",
-      "message": "Please sign in as {chatType} to continue this conversation.",
+      "message": "Please sign in as \"{{chatType}}\" to continue this conversation.",
       "goBack": "Go Back"
     },
     "chatStatus": {
@@ -1164,7 +1180,7 @@
     },
     "messages": {
       "loading": "Loading messages...",
-      "placeholder": "Type a message as {chatType}...",
+      "placeholder": "Type a message as \"{{chatType}}\"...",
       "sending": "Sending...",
       "send": "Send",
       "messageSent": "Message sent",

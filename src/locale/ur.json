@@ -562,7 +562,23 @@
     "uploadThumbnail": "تھمب نیل اپلوڈ کریں",
     "images": "مصنوع کی تصاویر",
     "status": "حالت",
-    "saving": "محفوظ کر رہے ہیں..."
+    "saving": "محفوظ کر رہے ہیں...",
+    "productNameRequired": "مصنوع کا نام درکار ہے",
+    "validPriceRequired": "درست قیمت درکار ہے",
+    "purchasePrice": "خریداری کی قیمت",
+    "minQty": "کم از کم مقدار",
+    "tags": "ٹیگز",
+    "addTags": "ٹیگز شامل کریں (کوما سے الگ)",
+    "add": "شامل کریں",
+    "productInformation": "مصنوع کی معلومات",
+    "physical": "فزیکل",
+    "requestStatus": "درخواست کی حالت:",
+    "reviewsCount": "جائزے کی تعداد:",
+    "created": "بنایا گیا:",
+    "updated": "اپ ڈیٹ کیا گیا:",
+    "deniedNote": "مسترد نوٹ:",
+    "featuredStatus": "فیچرڈ حالت",
+    "notFeatured": "فیچرڈ نہیں"
   },
   "Transactions": "ٹرانزیکشنز",
   "Request Withdrawal": "رقم نکالنے کی درخواست",
@@ -587,9 +603,9 @@
     "continueShopping": "خریداری جاری رکھیں",
     "checkout": "چیک آؤٹ",
     "removeItem": "آئٹم ہٹائیں",
-    "removeConfirm": "کیا آپ واقعی \"{productName}\" کو اپنی ٹوکری سے ہٹانا چاہتے ہیں؟",
+    "removeConfirm": "کیا آپ واقعی \"{{productName}}\" کو اپنی ٹوکری سے ہٹانا چاہتے ہیں؟",
     "removeFarmProducts": "تمام فارم کی مصنوعات ہٹائیں",
-    "removeFarmConfirm": "کیا آپ واقعی \"{farmName}\" سے تمام {itemsCount} مصنوع(ات) ہٹانا چاہتے ہیں؟",
+    "removeFarmConfirm": "کیا آپ واقعی \"{{farmName}}\" سے تمام {{itemsCount}} مصنوع(ات) ہٹانا چاہتے ہیں؟",
     "removeAll": "سب ہٹائیں",
     "farmLabel": "فارم:",
     "productDetails": "مصنوع کی تفصیلات",
@@ -622,13 +638,13 @@
     "cartEmpty": "ٹوکری خالی",
     "addItemsFirst": "چیک آؤٹ سے پہلے ٹوکری میں آئٹمز شامل کریں",
     "selectShippingFirst": "پہلے ترسیل کا طریقہ منتخب کریں",
-    "removeFarmSuccess": "{farmName} سے تمام مصنوعات آپ کی ٹوکری سے ہٹا دی گئی ہیں",
+    "removeFarmSuccess": "{{farmName}} سے تمام مصنوعات آپ کی ٹوکری سے ہٹا دی گئی ہیں",
     "removeFarmFailed": "فارم کی مصنوعات ہٹانے میں ناکام",
     "authRequired": "اپنی ٹوکری دیکھنے کے لیے سائن ان کریں",
     "buyerAuthRequired": "اپنی ٹوکری دیکھنے کے لیے خریدار کے طور پر سائن ان کریں",
     "sellerToBuyerAuth": "آپ بائع کے طور پر سائن ان ہیں۔ اپنی ٹوکری دیکھنے کے لیے خریدار کے طور پر بھی سائن ان کریں",
-    "minQuantityError": "کم سے کم آرڈر کی مقدار {minQuantity} ہے",
-    "maxQuantityError": "صرف {maxQuantity} آئٹمز اسٹاک میں دستیاب ہیں",
+    "minQuantityError": "کم سے کم آرڈر کی مقدار {{minQuantity}} ہے",
+    "maxQuantityError": "صرف {{maxQuantity}} آئٹمز اسٹاک میں دستیاب ہیں",
     "physicalProductsEasypaisaOnly": "ٹوکری میں فزیکل پروڈکٹس ہیں۔ صرف ایزی پیسہ ادائیگی دستیاب ہے۔"
   },
   "wishlist": {
@@ -953,7 +969,7 @@
   "messagesScreen": {
     "authRequired": {
       "title": "تصدیق درکار",
-      "message": "اس گفتگو کو جاری رکھنے کے لیے {chatType} کے طور پر سائن ان کریں۔",
+      "message": "اس گفتگو کو جاری رکھنے کے لیے \"{{chatType}}\" کے طور پر سائن ان کریں۔",
       "goBack": "واپس جائیں"
     },
     "chatStatus": {
@@ -969,7 +985,7 @@
     },
     "messages": {
       "loading": "پیغامات لوڈ ہو رہے ہیں...",
-      "placeholder": "{chatType} کے طور پر پیغام ٹائپ کریں...",
+      "placeholder": "\"{{chatType}}\" کے طور پر پیغام ٹائپ کریں...",
       "sending": "بھیجا جا رہا ہے...",
       "send": "بھیجیں",
       "messageSent": "پیغام بھیج دیا گیا",

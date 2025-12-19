@@ -32,6 +32,7 @@ import {selectBaseUrls} from '../../store/configs';
 import {useSelector} from 'react-redux';
 import FastImageWithFallback from '../../components/common/FastImageWithFallback';
 import FastImage from '@d11/react-native-fast-image';
+import {BASE_URLS} from '../../store/configs';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -123,8 +124,8 @@ export const EditProductScreen = ({route, navigation}) => {
         if (productData.thumbnail) {
           setThumbnail({
             uri: `${
-              baseUrls?.product_thumbnail_url || BASE_URL
-            }/uploads/products/thumbnail/${productData.thumbnail}`,
+               BASE_URLS.product_thumbnail_url
+            }/${productData.thumbnail}`,
             fileName: productData.thumbnail,
             type: 'image/jpeg',
           });
@@ -133,8 +134,8 @@ export const EditProductScreen = ({route, navigation}) => {
         if (productData.images && productData.images.length > 0) {
           const imageObjects = productData.images.map(image => ({
             uri: `${
-              baseUrls?.product_image_url || BASE_URL
-            }/uploads/products/images/${image}`,
+              BASE_URLS.product_image_url
+            }/${image}`,
             fileName: image,
             type: 'image/jpeg',
           }));
@@ -333,12 +334,12 @@ export const EditProductScreen = ({route, navigation}) => {
 
       // Validate required fields
       if (!product.name || !product.name.trim()) {
-        Alert.alert(t('common.error'), 'Product name is required');
+        Alert.alert(t('common.error'), t('editProduct.productNameRequired'));
         return;
       }
 
       if (!product.unit_price || isNaN(parseFloat(product.unit_price))) {
-        Alert.alert(t('common.error'), 'Valid price is required');
+        Alert.alert(t('common.error'), t('editProduct.validPriceRequired'));
         return;
       }
 
@@ -583,6 +584,7 @@ export const EditProductScreen = ({route, navigation}) => {
             <Input
               label={t('editProduct.code')}
               value={product.code}
+              disabled={true}
               onChangeText={text => setProduct({...product, code: text})}
               style={[styles.input, styles.halfInput]}
               textStyle={{
@@ -640,7 +642,7 @@ export const EditProductScreen = ({route, navigation}) => {
           {/* Additional Product Information */}
           <View style={styles.rowContainer}>
             <Input
-              label="Purchase Price"
+              label={t('editProduct.purchasePrice')}
               value={product.purchase_price?.toString() || ''}
               onChangeText={text =>
                 setProduct({...product, purchase_price: text})
@@ -655,7 +657,7 @@ export const EditProductScreen = ({route, navigation}) => {
             />
 
             <Input
-              label="Min Qty"
+              label={t('editProduct.minQty')}
               value={product.min_qty?.toString() || ''}
               onChangeText={text => setProduct({...product, min_qty: text})}
               keyboardType="numeric"
@@ -679,7 +681,7 @@ export const EditProductScreen = ({route, navigation}) => {
                     : theme['color-basic-900'],
                 },
               ]}>
-              Tags
+              {t('editProduct.tags')}
             </Text>
             <View style={styles.tagsInputContainer}>
               <TextInput
@@ -694,7 +696,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-300'],
                   },
                 ]}
-                placeholder="Add tags (comma separated)"
+                placeholder={t('editProduct.addTags')}
                 placeholderTextColor={
                   isDark
                     ? theme['color-shadcn-muted-foreground']
@@ -709,7 +711,7 @@ export const EditProductScreen = ({route, navigation}) => {
                 size="small"
                 onPress={handleAddTag}
                 style={styles.addTagButton}>
-                Add
+                {t('editProduct.add')}
               </Button>
             </View>
             <ScrollView
@@ -767,7 +769,7 @@ export const EditProductScreen = ({route, navigation}) => {
                     : theme['color-basic-900'],
                 },
               ]}>
-              Product Information
+              {t('editProduct.productInformation')}
             </Text>
             <View style={styles.infoRow}>
               <Text
@@ -779,7 +781,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Product Type:
+                {t('product.productType')}
               </Text>
               <Text
                 style={[
@@ -790,7 +792,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-900'],
                   },
                 ]}>
-                {product.product_type || 'Physical'}
+                {product.product_type || t('editProduct.physical')}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -803,7 +805,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Refundable:
+                {t('product.refundable')}
               </Text>
               <Text
                 style={[
@@ -814,7 +816,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-900'],
                   },
                 ]}>
-                {product.refundable === 1 ? 'Yes' : 'No'}
+                {product.refundable === 1 ? t('product.yes') : t('product.no')}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -827,7 +829,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Free Shipping:
+                {t('product.freeShipping')}
               </Text>
               <Text
                 style={[
@@ -838,7 +840,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-900'],
                   },
                 ]}>
-                {product.free_shipping === 1 ? 'Yes' : 'No'}
+                {product.free_shipping === 1 ? t('product.yes') : t('product.no')}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -851,7 +853,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Published:
+                {t('product.published')}
               </Text>
               <Text
                 style={[
@@ -862,7 +864,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-900'],
                   },
                 ]}>
-                {product.published === 1 ? 'Yes' : 'No'}
+                {product.published === 1 ? t('product.yes') : t('product.no')}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -875,7 +877,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Request Status:
+                {t('editProduct.requestStatus')}
               </Text>
               <Text
                 style={[
@@ -887,10 +889,10 @@ export const EditProductScreen = ({route, navigation}) => {
                   },
                 ]}>
                 {product.request_status === 1
-                  ? 'Approved'
+                  ? t('common.approved')
                   : product.request_status === 0
-                  ? 'Pending'
-                  : 'Denied'}
+                  ? t('common.pending')
+                  : t('common.rejected')}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -903,7 +905,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Reviews Count:
+                {t('editProduct.reviewsCount')}
               </Text>
               <Text
                 style={[
@@ -927,7 +929,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Created:
+                {t('editProduct.created')}
               </Text>
               <Text
                 style={[
@@ -940,7 +942,7 @@ export const EditProductScreen = ({route, navigation}) => {
                 ]}>
                 {product.created_at
                   ? new Date(product.created_at).toLocaleDateString()
-                  : 'N/A'}
+                  : t('common.notAvailable')}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -953,7 +955,7 @@ export const EditProductScreen = ({route, navigation}) => {
                       : theme['color-basic-600'],
                   },
                 ]}>
-                Updated:
+                {t('editProduct.updated')}
               </Text>
               <Text
                 style={[
@@ -966,7 +968,7 @@ export const EditProductScreen = ({route, navigation}) => {
                 ]}>
                 {product.updated_at
                   ? new Date(product.updated_at).toLocaleDateString()
-                  : 'N/A'}
+                  : t('common.notAvailable')}
               </Text>
             </View>
             {product.denied_note && (
@@ -980,7 +982,7 @@ export const EditProductScreen = ({route, navigation}) => {
                         : theme['color-basic-600'],
                     },
                   ]}>
-                  Denied Note:
+                  {t('editProduct.deniedNote')}
                 </Text>
                 <Text
                   style={[
@@ -1006,6 +1008,7 @@ export const EditProductScreen = ({route, navigation}) => {
               ]}>
               {t('editProduct.thumbnail')}
             </Text>
+            {console.log('thumbnail', `${BASE_URLS.product_thumbnail_url} \n${thumbnail.uri}`)}
             <TouchableOpacity
               onPress={() => pickImage('thumbnail')}
               style={styles.imageUploadButton}>
@@ -1013,7 +1016,7 @@ export const EditProductScreen = ({route, navigation}) => {
                 <FastImageWithFallback
                   priority={FastImage.priority.high}
                   resizeMode={FastImage.resizeMode.cover}
-                  source={{uri: thumbnail.uri || thumbnail}}
+                  source={{uri: `${thumbnail.uri}` || thumbnail}}
                   fallbackSource={{
                     uri: 'https://via.placeholder.com/120x120?text=No+Image',
                   }}

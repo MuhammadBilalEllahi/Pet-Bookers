@@ -118,6 +118,7 @@ export const ProductListCard = ({
         id: id,
         quantity: 1,
       });
+      console.log('cart.addedToCart', t('cart.addedToCart'));
 
       setAddingToCart(false);
       setAddedToCart(true);
