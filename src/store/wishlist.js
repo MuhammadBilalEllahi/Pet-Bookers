@@ -16,10 +16,17 @@ export const loadWishlist = () => async (dispatch, getState) => {
     }
     dispatch(setWishlistLoading(true));
     const {data} = await smartBuyerClient.get('customer/wish-list/');
-    // console.log('[loadWishlist] success:', data);
+    console.log('[loadWishlist] success:', data);
     dispatch(setWishlist(data || []));
   } catch (error) {
-    // console.error('[loadWishlist] error:', error);
+    console.error(
+      '[loadWishlist] error:',
+      error,
+      error?.response,
+      error?.response?.message,
+      error?.data,
+      error?.message,
+    );
     handleAuthError(error, err => {
       const errorMessage =
         err?.response?.data?.message ||
@@ -35,13 +42,15 @@ export const addToWishlist =
   async dispatch => {
     try {
       dispatch(setWishlistLoading(true));
-      // console.log('[addToWishlist] Adding product:', {productId, productData});
+      console.log('product id', productId);
+      console.log('profuct data', productData);
+      console.log('[addToWishlist] Adding product:', {productId, productData});
 
       const response = await smartBuyerClient.post('customer/wish-list/add', {
         product_id: productId,
       });
 
-      // console.log('[addToWishlist] success:', response.data);
+      console.log('[addToWishlist] success:', response.data);
 
       // Add to local state only on successful response
       dispatch(

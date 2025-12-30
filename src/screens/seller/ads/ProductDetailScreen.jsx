@@ -412,10 +412,10 @@ export const ProductDetailScreen = ({route, navigation}) => {
             <Button
               style={[
                 styles.deleteButton,
-                {backgroundColor: isDark ? theme['color-danger-default'] : theme['color-danger-primary']},
+                // {backgroundColor: isDark ? theme['color-danger-default'] : theme['color-danger-primary']},
               ]}
               onPress={handleDelete}>
-              {t('productDetails.delete')}
+              <Text style={{color: isDark? '#FFFFFF' : '#000000'}}>{t('productDetails.delete')}</Text>
             </Button>
           </View>
         </View>

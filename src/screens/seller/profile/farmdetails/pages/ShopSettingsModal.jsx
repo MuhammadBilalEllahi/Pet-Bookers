@@ -32,6 +32,7 @@ import {
 import {ThemedIcon} from '../../../../../components/Icon';
 import {ImagePicker} from '../../../../../components/form';
 import {launchImageLibrary} from 'react-native-image-picker';
+import {BASE_URLS} from '../../../../../store/configs';
 
 export default function ShopSettingsPage({navigation}) {
   const {theme, isDark} = useTheme();
@@ -69,6 +70,7 @@ export default function ShopSettingsPage({navigation}) {
     newPassword: '',
     confirmPassword: '',
   });
+  const [responseCatch, setResponseCatch] = useState({});
 
   useEffect(() => {
     fetchData();
@@ -103,6 +105,12 @@ export default function ShopSettingsPage({navigation}) {
         });
         setTemporaryClose(!!shopResponse.data.temporary_close);
       }
+      console.log('sellerResponse', sellerResponse.data);
+
+      // console.log(
+      //   '`${BASE_URLS.seller_image_url}/${shopInfo.image.uri}`',
+      //   `${BASE_URLS.seller_image_url}/${shopInfo.image?.uri}`,
+      // );
 
       if (sellerResponse.data) {
         setSellerInfo({
@@ -122,9 +130,10 @@ export default function ShopSettingsPage({navigation}) {
               }
             : null,
         });
+        setResponseCatch(sellerResponse.data);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching datai:', error);
       Alert.alert(
         t('shopSettingsPage.alerts.errorTitle'),
         t('shopSettingsPage.alerts.fetchError'),
@@ -197,67 +206,67 @@ export default function ShopSettingsPage({navigation}) {
     }
   };
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
+  // const handleSave = async () => {
+  //   try {
+  //     setSaving(true);
 
-      // Update shop info
-      const shopFormData = new FormData();
-      shopFormData.append('name', shopInfo.name);
-      shopFormData.append('address', shopInfo.address);
-      shopFormData.append('contact', shopInfo.contact);
-      if (shopInfo.image && shopInfo.image.uri) {
-        shopFormData.append('image', {
-          uri:
-            Platform.OS === 'ios'
-              ? shopInfo.image.uri.replace('file://', '')
-              : shopInfo.image.uri,
-          type: shopInfo.image.type,
-          name: shopInfo.image.name,
-        });
-      }
+  //     // Update shop info
+  //     const shopFormData = new FormData();
+  //     shopFormData.append('name', shopInfo.name);
+  //     shopFormData.append('address', shopInfo.address);
+  //     shopFormData.append('contact', shopInfo.contact);
+  //     if (shopInfo.image && shopInfo.image.uri) {
+  //       shopFormData.append('image', {
+  //         uri:
+  //           Platform.OS === 'ios'
+  //             ? shopInfo.image.uri.replace('file://', '')
+  //             : shopInfo.image.uri,
+  //         type: shopInfo.image.type,
+  //         name: shopInfo.image.name,
+  //       });
+  //     }
 
-      // Update seller info
-      const sellerFormData = new FormData();
-      sellerFormData.append('f_name', sellerInfo.f_name);
-      sellerFormData.append('l_name', sellerInfo.l_name);
-      sellerFormData.append('phone', sellerInfo.phone);
-      sellerFormData.append('email', sellerInfo.email);
-      sellerFormData.append('bank_name', sellerInfo.bank_name);
-      sellerFormData.append('branch', sellerInfo.branch);
-      sellerFormData.append('account_no', sellerInfo.account_no);
-      sellerFormData.append('holder_name', sellerInfo.holder_name);
-      if (sellerInfo.image && sellerInfo.image.uri) {
-        sellerFormData.append('image', {
-          uri:
-            Platform.OS === 'ios'
-              ? sellerInfo.image.uri.replace('file://', '')
-              : sellerInfo.image.uri,
-          type: sellerInfo.image.type,
-          name: sellerInfo.image.name,
-        });
-      }
+  //     // Update seller info
+  //     const sellerFormData = new FormData();
+  //     sellerFormData.append('f_name', sellerInfo.f_name);
+  //     sellerFormData.append('l_name', sellerInfo.l_name);
+  //     sellerFormData.append('phone', sellerInfo.phone);
+  //     sellerFormData.append('email', sellerInfo.email);
+  //     sellerFormData.append('bank_name', sellerInfo.bank_name);
+  //     sellerFormData.append('branch', sellerInfo.branch);
+  //     sellerFormData.append('account_no', sellerInfo.account_no);
+  //     sellerFormData.append('holder_name', sellerInfo.holder_name);
+  //     if (sellerInfo.image && sellerInfo.image.uri) {
+  //       sellerFormData.append('image', {
+  //         uri:
+  //           Platform.OS === 'ios'
+  //             ? sellerInfo.image.uri.replace('file://', '')
+  //             : sellerInfo.image.uri,
+  //         type: sellerInfo.image.type,
+  //         name: sellerInfo.image.name,
+  //       });
+  //     }
 
-      await Promise.all([
-        updateShopInfo(shopFormData),
-        updateSellerInfo(sellerFormData),
-      ]);
+  //     await Promise.all([
+  //       updateShopInfo(shopFormData),
+  //       updateSellerInfo(sellerFormData),
+  //     ]);
 
-      Alert.alert(
-        t('shopSettingsPage.alerts.successTitle'),
-        t('shopSettingsPage.alerts.settingsSuccess'),
-      );
-      setIsEditMode(false);
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      Alert.alert(
-        t('shopSettingsPage.alerts.errorTitle'),
-        t('shopSettingsPage.alerts.settingsError'),
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
+  //     Alert.alert(
+  //       t('shopSettingsPage.alerts.successTitle'),
+  //       t('shopSettingsPage.alerts.settingsSuccess'),
+  //     );
+  //     setIsEditMode(false);
+  //   } catch (error) {
+  //     console.error('Error updating settings:', error);
+  //     Alert.alert(
+  //       t('shopSettingsPage.alerts.errorTitle'),
+  //       t('shopSettingsPage.alerts.settingsError'),
+  //     );
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
   // Separate handlers for shop and seller update
   // const handleShopSave = async () => {
@@ -290,9 +299,17 @@ export default function ShopSettingsPage({navigation}) {
       const shopFormData = new FormData();
 
       // Append all fields with proper encoding
-      shopFormData.append('name', shopInfo.name);
-      shopFormData.append('address', shopInfo.address);
-      shopFormData.append('contact', shopInfo.contact);
+
+      if (shopInfo.name) {
+        shopFormData.append('name', shopInfo.name);
+      }
+
+      if (shopInfo.address) {
+        shopFormData.append('address', shopInfo.address);
+      }
+      if (shopInfo.contact) {
+        shopFormData.append('contact', shopInfo.contact);
+      }
 
       if (shopInfo.image && shopInfo.uri) {
         shopFormData.append('image', {
@@ -326,51 +343,152 @@ export default function ShopSettingsPage({navigation}) {
       setSaving(false);
     }
   };
-
   const handleSellerSave = async () => {
     try {
       setSaving(true);
       const sellerFormData = new FormData();
-      sellerFormData.append('f_name', sellerInfo.f_name);
-      sellerFormData.append('l_name', sellerInfo.l_name);
-      sellerFormData.append('phone', sellerInfo.phone);
-      sellerFormData.append('email', sellerInfo.email);
-      sellerFormData.append('bank_name', sellerInfo.bank_name);
-      sellerFormData.append('branch', sellerInfo.branch);
-      sellerFormData.append('account_no', sellerInfo.account_no);
-      sellerFormData.append('holder_name', sellerInfo.holder_name);
-      if (sellerInfo.image && sellerInfo.image.uri) {
+
+      if (sellerInfo.f_name !== responseCatch.f_name)
+        sellerFormData.append('f_name', sellerInfo.f_name);
+
+      if (sellerInfo.l_name !== responseCatch.l_name)
+        sellerFormData.append('l_name', sellerInfo.l_name);
+
+      if (sellerInfo.phone !== responseCatch.phone)
+        sellerFormData.append('phone', sellerInfo.phone);
+
+      if (sellerInfo.email !== responseCatch.email)
+        sellerFormData.append('email', sellerInfo.email);
+
+      if (sellerInfo.bank_name !== responseCatch.bank_name)
+        sellerFormData.append('bank_name', sellerInfo.bank_name);
+
+      if (sellerInfo.branch !== responseCatch.branch)
+        sellerFormData.append('branch', sellerInfo.branch);
+
+      if (sellerInfo.account_no !== responseCatch.account_no)
+        sellerFormData.append('account_no', sellerInfo.account_no);
+
+      if (sellerInfo.holder_name !== responseCatch.holder_name)
+        sellerFormData.append('holder_name', sellerInfo.holder_name);
+
+      const isLocalImage =
+        sellerInfo.image?.uri &&
+        (sellerInfo.image.uri.startsWith('file://') ||
+          sellerInfo.image.uri.startsWith('content://'));
+
+      if (isLocalImage) {
         sellerFormData.append('image', {
           uri:
             Platform.OS === 'ios'
               ? sellerInfo.image.uri.replace('file://', '')
               : sellerInfo.image.uri,
-          type: sellerInfo.image.type,
-          name: sellerInfo.image.name,
+          type: sellerInfo.image.type || 'image/jpeg',
+          name: sellerInfo.image.name || 'profile.jpg',
         });
       }
-      await updateSellerInfo(sellerFormData);
-      Alert.alert(
-        t('shopSettingsPage.alerts.successTitle'),
-        t('shopSettingsPage.alerts.sellerInfoSuccess'),
-      );
+      console.log('DATA SeNT', sellerInfo);
+      // return;
+
+      const response = await updateSellerInfo(sellerFormData);
+      console.log('RESPONSE FROM SELLER UPDAT', response);
+
+      Alert.alert('Success', 'Seller updated successfully');
       setIsEditMode(false);
     } catch (error) {
-      console.error(
-        'Error updating seller info:',
-        error?.data ||
-          error.response ||
-          error?.message ||
-          error?.response?.data,
-      );
-      Alert.alert(
-        t('shopSettingsPage.alerts.errorTitle'),
-        t('shopSettingsPage.alerts.sellerInfoError'),
-      );
+      console.error('Seller update failed:', error);
+      Alert.alert('Error', 'Failed to update seller info');
     } finally {
       setSaving(false);
     }
   };
+
+  // const handleSellerSave = async () => {
+  //   try {
+  //     setSaving(true);
+  //     const sellerFormData = new FormData();
+  //     console.log('sellerInfo', JSON.stringify(sellerInfo, null, 2));
+  //     console.log('responseCatch?', JSON.stringify(responseCatch, null, 2));
+
+  //     if (sellerInfo.f_name !== '' || sellerInfo !== responseCatch.f_name) {
+  //       sellerFormData.append('f_name', sellerInfo.f_name);
+  //     }
+  //     if (sellerInfo.l_name !== '' || sellerInfo !== responseCatch.l_name) {
+  //       sellerFormData.append('l_name', sellerInfo.l_name);
+  //     }
+  //     if (sellerInfo.phone !== '' || sellerInfo !== responseCatch.phone) {
+  //       sellerFormData.append('phone', sellerInfo.phone);
+  //     }
+  //     if (sellerInfo.email !== '' || sellerInfo !== responseCatch.email) {
+  //       sellerFormData.append('email', sellerInfo.email);
+  //     }
+  //     if (
+  //       sellerInfo.bank_name !== '' ||
+  //       sellerInfo !== responseCatch.bank_name
+  //     ) {
+  //       sellerFormData.append('bank_name', sellerInfo.bank_name);
+  //     }
+  //     if (sellerInfo.branch !== '' || sellerInfo !== responseCatch.branch) {
+  //       sellerFormData.append('branch', sellerInfo.branch);
+  //     }
+  //     if (
+  //       sellerInfo.account_no !== '' ||
+  //       sellerInfo !== responseCatch.account_no
+  //     ) {
+  //       sellerFormData.append('account_no', sellerInfo.account_no);
+  //     }
+  //     if (
+  //       sellerInfo.holder_name !== '' ||
+  //       sellerInfo !== responseCatch.holder_name
+  //     ) {
+  //       sellerFormData.append('holder_name', sellerInfo.holder_name);
+  //     }
+  //     if (
+  //       sellerInfo.image &&
+  //       sellerInfo.image.uri &&
+  //       sellerInfo.image !== responseCatch.image
+  //     ) {
+  //       sellerFormData.append('image', {
+  //         uri:
+  //           Platform.OS === 'ios'
+  //             ? sellerInfo.image.uri.replace('file://', '')
+  //             : sellerInfo.image.uri,
+  //         type: sellerInfo.image.type,
+  //         name: sellerInfo.image.name,
+  //       });
+  //     }
+  //     await updateSellerInfo(sellerFormData);
+  //     Alert.alert(
+  //       t('shopSettingsPage.alerts.successTitle'),
+  //       t('shopSettingsPage.alerts.sellerInfoSuccess'),
+  //     );
+  //     setIsEditMode(false);
+  //     console.log('SHOPSETTING response', response);
+  //   } catch (error) {
+  //     console.error(
+  //       'ERROR',
+  //       error,
+  //       error?.data,
+  //       error?.data?.message,
+  //       error?.response,
+  //       error?.response?.message,
+  //       error?.response?.data,
+  //     );
+  //     console.error(
+  //       'Error updating seller info:',
+  //       error?.data ||
+  //         error.response ||
+  //         error?.message ||
+  //         error?.response?.data,
+  //     );
+  //     Alert.alert(
+  //       t('shopSettingsPage.alerts.errorTitle'),
+  //       t('shopSettingsPage.alerts.sellerInfoError'),
+  //     );
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
   const handleVacationSave = async () => {
     try {
@@ -787,7 +905,11 @@ export default function ShopSettingsPage({navigation}) {
                     'shopSettingsPage.sections.shopInformation.chooseShopImage',
                   )}
                   onPress={handleShopImagePick}
-                  imageUri={shopInfo.image ? shopInfo.image.uri : null}
+                  imageUri={
+                    shopInfo.image
+                      ? `${BASE_URLS.seller_image_url}/${shopInfo.image.uri}`
+                      : null
+                  }
                 />
               ) : (
                 <View style={styles.staticImageContainer}>
@@ -795,7 +917,9 @@ export default function ShopSettingsPage({navigation}) {
                     <ThemedIcon
                       name="image-outline"
                       iconStyle={{width: 60, height: 60, opacity: 0.5}}
-                      source={{uri: shopInfo.image.uri}}
+                      source={{
+                        uri: `${BASE_URLS.seller_image_url}/${shopInfo.image.uri}`,
+                      }}
                     />
                   ) : (
                     <ThemedIcon

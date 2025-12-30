@@ -152,8 +152,16 @@ export const EditProductScreen = ({route, navigation}) => {
         }
       }
     } catch (error) {
+      const errorMessage = parseErrorMessage(error);
       console.error('Error fetching product details:', error);
-      Alert.alert(t('common.error'), t('common.somethingWentWrong'));
+      console.error('Detailed Error Information:');
+      console.error(errorMessage);
+      Alert.alert(
+        t('common.error'),
+        errorMessage.length > 200 
+          ? `${errorMessage.substring(0, 200)}...` 
+          : errorMessage || t('common.somethingWentWrong'),
+      );
     } finally {
       setLoading(false);
     }
@@ -169,8 +177,16 @@ export const EditProductScreen = ({route, navigation}) => {
         Linking.openURL(response.data);
       }
     } catch (error) {
+      const errorMessage = parseErrorMessage(error);
       console.error('Error generating barcode:', error);
-      Alert.alert(t('common.error'), t('editProduct.barcodeError'));
+      console.error('Detailed Error Information:');
+      console.error(errorMessage);
+      Alert.alert(
+        t('common.error'),
+        errorMessage.length > 200 
+          ? `${errorMessage.substring(0, 200)}...` 
+          : errorMessage || t('editProduct.barcodeError'),
+      );
     }
   };
 
@@ -197,8 +213,16 @@ export const EditProductScreen = ({route, navigation}) => {
       setProduct(prev => ({...prev, current_stock: quantity.toString()}));
       Alert.alert(t('common.success'), t('editProduct.quantitySuccess'));
     } catch (error) {
+      const errorMessage = parseErrorMessage(error);
       console.error('Error updating quantity:', error);
-      Alert.alert(t('common.error'), t('editProduct.quantityError'));
+      console.error('Detailed Error Information:');
+      console.error(errorMessage);
+      Alert.alert(
+        t('common.error'),
+        errorMessage.length > 200 
+          ? `${errorMessage.substring(0, 200)}...` 
+          : errorMessage || t('editProduct.quantityError'),
+      );
     }
   };
 
@@ -297,11 +321,158 @@ export const EditProductScreen = ({route, navigation}) => {
     setTags(tags.filter((_, i) => i !== index));
   };
 
+  // Helper function to parse error messages for better debugging
+  const parseErrorMessage = error => {
+    if (!error) return 'Unknown error occurred';
+
+    // Try to extract detailed error information
+    const errorData = error.response?.data || error.data || {};
+    const errorMessage = error.message || '';
+    const status = error.response?.status || error.status;
+    const statusText = error.response?.statusText || error.statusText;
+
+    // Build detailed error message
+    let details = [];
+
+    // Status information
+    if (status) {
+      details.push(`Status: ${status} ${statusText || ''}`.trim());
+    }
+
+    // Main error message
+    if (errorData.message) {
+      details.push(`Message: ${errorData.message}`);
+    } else if (errorMessage) {
+      details.push(`Error: ${errorMessage}`);
+    }
+
+    // Validation errors (Laravel style)
+    if (errorData.errors && typeof errorData.errors === 'object') {
+      // Check if it's an array of error objects
+      if (Array.isArray(errorData.errors)) {
+        const errorMessages = errorData.errors.map((err, index) => {
+          if (typeof err === 'object') {
+            // Try to extract message from error object
+            return err.message || err.error || err.msg || JSON.stringify(err);
+          }
+          return err.toString();
+        });
+        if (errorMessages.length > 0) {
+          details.push(`Validation Errors:\n${errorMessages.join('\n')}`);
+        }
+      } else {
+        // Object with field names as keys
+        const validationErrors = Object.entries(errorData.errors)
+          .map(([field, messages]) => {
+            const msgArray = Array.isArray(messages) ? messages : [messages];
+            return `${field}: ${msgArray.join(', ')}`;
+          })
+          .join('\n');
+        if (validationErrors) {
+          details.push(`Validation Errors:\n${validationErrors}`);
+        }
+      }
+    }
+
+    // Additional error data
+    if (errorData.error) {
+      details.push(`Error: ${errorData.error}`);
+    }
+
+    // Request URL
+    if (error.config?.url) {
+      details.push(`URL: ${error.config.baseURL || ''}${error.config.url}`);
+    }
+
+    // Request method
+    if (error.config?.method) {
+      details.push(`Method: ${error.config.method.toUpperCase()}`);
+    }
+
+    return details.length > 0 ? details.join('\n\n') : 'Server error occurred';
+  };
+
+  // const handleSave = async () => {
+  //   try {
+  //     setSaving(true);
+
+  //     // Upload thumbnail if changed (only if it's a new image)
+  //     let thumbnailName = product.thumbnail;
+  //     if (
+  //       thumbnail &&
+  //       typeof thumbnail === 'object' &&
+  //       thumbnail.uri &&
+  //       !thumbnail.fileName
+  //     ) {
+  //       thumbnailName = await uploadImage(thumbnail, 'thumbnail');
+  //     } else if (
+  //       thumbnail &&
+  //       typeof thumbnail === 'object' &&
+  //       thumbnail.fileName
+  //     ) {
+  //       // If it's an existing image, just use the filename
+  //       thumbnailName = thumbnail.fileName;
+  //     }
+
+  //     // Upload new images if any (only new ones, not existing ones)
+  //     const newImages = selectedImages.filter(
+  //       img => typeof img === 'object' && img.uri && !img.fileName,
+  //     );
+  //     const uploadedImages = await Promise.all(
+  //       newImages.map(img => uploadImage(img, 'product')),
+  //     );
+
+  //     // Get existing image filenames
+  //     const existingImages = selectedImages
+  //       .filter(img => typeof img === 'object' && img.fileName)
+  //       .map(img => img.fileName);
+
+  //     // Validate required fields
+  //     if (!product.name || !product.name.trim()) {
+  //       Alert.alert(t('common.error'), t('editProduct.productNameRequired'));
+  //       return;
+  //     }
+
+  //     if (!product.unit_price || isNaN(parseFloat(product.unit_price))) {
+  //       Alert.alert(t('common.error'), t('editProduct.validPriceRequired'));
+  //       return;
+  //     }
+
+  //     const updatedProduct = {
+  //       ...product,
+  //       thumbnail: thumbnailName,
+  //       images: [...existingImages, ...uploadedImages],
+  //       unit_price: parseFloat(product.unit_price),
+  //       current_stock: parseInt(product.current_stock) || 0,
+  //       minimum_order_qty: parseInt(product.minimum_order_qty) || 1,
+  //       discount: parseFloat(product.discount) || 0,
+  //       shipping_cost: parseFloat(product.shipping_cost) || 0,
+  //       tax: parseFloat(product.tax) || 0,
+  //       purchase_price: parseFloat(product.purchase_price) || 0,
+  //       min_qty: parseInt(product.min_qty) || 1,
+  //       tags: tags.join(','),
+  //     };
+
+  //     // console.log('Sending product data:', updatedProduct);
+  //     await axiosSellerClient.put(
+  //       `products/update/${productId}`,
+  //       updatedProduct,
+  //     );
+  //     Alert.alert(t('common.success'), t('editProduct.success'));
+  //     navigation.goBack();
+  //   } catch (error) {
+  //     console.error('Error updating product:', error);
+  //     console.error('Error details:', error.response?.data);
+  //     Alert.alert(t('common.error'), t('editProduct.error'));
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
   const handleSave = async () => {
     try {
       setSaving(true);
-
-      // Upload thumbnail if changed (only if it's a new image)
+  
+      // Upload thumbnail if changed
       let thumbnailName = product.thumbnail;
       if (
         thumbnail &&
@@ -315,65 +486,338 @@ export const EditProductScreen = ({route, navigation}) => {
         typeof thumbnail === 'object' &&
         thumbnail.fileName
       ) {
-        // If it's an existing image, just use the filename
         thumbnailName = thumbnail.fileName;
       }
-
-      // Upload new images if any (only new ones, not existing ones)
+  
+      // Upload new images
       const newImages = selectedImages.filter(
         img => typeof img === 'object' && img.uri && !img.fileName,
       );
       const uploadedImages = await Promise.all(
         newImages.map(img => uploadImage(img, 'product')),
       );
-
+  
       // Get existing image filenames
       const existingImages = selectedImages
         .filter(img => typeof img === 'object' && img.fileName)
         .map(img => img.fileName);
-
+  
       // Validate required fields
       if (!product.name || !product.name.trim()) {
         Alert.alert(t('common.error'), t('editProduct.productNameRequired'));
+        setSaving(false);
         return;
       }
-
+  
       if (!product.unit_price || isNaN(parseFloat(product.unit_price))) {
         Alert.alert(t('common.error'), t('editProduct.validPriceRequired'));
+        setSaving(false);
         return;
       }
 
+      // Log original product data for debugging
+      console.log('Original product data:', JSON.stringify({
+        category_ids: product.category_ids,
+        category_id: product.category_id,
+        sub_category_id: product.sub_category_id,
+        sub_sub_category_id: product.sub_sub_category_id,
+        colors: product.colors,
+        tags: product.tags,
+      }, null, 2));
+
+      // Handle colors - preserve original format
+      let colorsValue = [];
+      if (Array.isArray(product.colors)) {
+        colorsValue = product.colors;
+      } else if (typeof product.colors === 'string') {
+        // If it was originally a string, keep it as string (API might expect JSON string)
+        if (product.colors.trim() === '' || product.colors === '[]') {
+          colorsValue = []; // Empty array
+        } else {
+          try {
+            const parsed = JSON.parse(product.colors);
+            colorsValue = Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            console.warn('Error parsing colors:', e);
+            colorsValue = [];
+          }
+        }
+      }
+
+      // Helper function to only include non-empty values
+      const includeIfValue = (obj, key, value) => {
+        if (value !== null && value !== undefined && value !== '') {
+          obj[key] = value;
+        }
+      };
+  
+      // Build payload with ONLY editable fields (exclude read-only fields)
       const updatedProduct = {
-        ...product,
-        thumbnail: thumbnailName,
-        images: [...existingImages, ...uploadedImages],
+        // Basic information (required)
+        name: product.name.trim(),
+        details: product.details || '',
+        
+        // Pricing
         unit_price: parseFloat(product.unit_price),
+        purchase_price: parseFloat(product.purchase_price) || 0,
+        discount: parseFloat(product.discount) || 0,
+        discount_type: product.discount_type || 'flat',
+        tax: parseFloat(product.tax) || 0,
+        tax_model: product.tax_model || 'exclude',
+        shipping_cost: parseFloat(product.shipping_cost) || 0,
+        
+        // Stock
         current_stock: parseInt(product.current_stock) || 0,
         minimum_order_qty: parseInt(product.minimum_order_qty) || 1,
-        discount: parseFloat(product.discount) || 0,
-        shipping_cost: parseFloat(product.shipping_cost) || 0,
-        tax: parseFloat(product.tax) || 0,
-        purchase_price: parseFloat(product.purchase_price) || 0,
         min_qty: parseInt(product.min_qty) || 1,
-        tags: tags.join(','),
+        multiply_qty: product.multiply_qty || '0',
+        
+        // Product type
+        product_type: product.product_type || 'physical',
+        unit: product.unit || '',
+        
+        // Images
+        thumbnail: thumbnailName || '',
+        images: [...existingImages, ...uploadedImages],
+        
+        // Colors - send as array (API should handle it)
+        colors: colorsValue,
+        
+        // Variants
+        variant_product: product.variant_product || 0,
+        attributes: product.attributes || [],
+        choice_options: product.choice_options || [],
+        variation: product.variation || [],
+        
+        // Status
+        status: product.status ?? 0,
+        featured_status: product.featured_status ?? 0,
+        published: product.published ?? 0,
+        refundable: product.refundable ?? 1,
+        free_shipping: product.free_shipping ?? 0,
       };
 
-      // console.log('Sending product data:', updatedProduct);
-      await axiosSellerClient.put(
+      // Preserve category_ids if it exists in original format (array of objects)
+      if (product.category_ids && Array.isArray(product.category_ids) && product.category_ids.length > 0) {
+        updatedProduct.category_ids = product.category_ids;
+      } else {
+        // Otherwise use individual category fields
+        includeIfValue(updatedProduct, 'category_id', product.category_id);
+        includeIfValue(updatedProduct, 'sub_category_id', product.sub_category_id);
+        includeIfValue(updatedProduct, 'sub_sub_category_id', product.sub_sub_category_id);
+      }
+      
+      includeIfValue(updatedProduct, 'brand_id', product.brand_id);
+      includeIfValue(updatedProduct, 'tax_type', product.tax_type);
+      includeIfValue(updatedProduct, 'code', product.code);
+      includeIfValue(updatedProduct, 'video_provider', product.video_provider);
+      includeIfValue(updatedProduct, 'video_url', product.video_url);
+      includeIfValue(updatedProduct, 'meta_title', product.meta_title);
+      includeIfValue(updatedProduct, 'meta_description', product.meta_description);
+      includeIfValue(updatedProduct, 'meta_image', product.meta_image);
+      
+      // Tags - add as array for FormData handling
+      if (tags.length > 0) {
+        updatedProduct.tags = tags;
+      }
+
+      // Clean up payload - remove empty strings and null values for optional fields
+      // Keep required fields and arrays even if empty
+      Object.keys(updatedProduct).forEach(key => {
+        const value = updatedProduct[key];
+        
+        // Remove empty strings, null, or undefined for optional fields only
+        if (value === '' || value === null || value === undefined) {
+          // Keep required fields that might legitimately be empty strings
+          const fieldsToKeep = ['details', 'unit']; // These can be empty strings
+          if (!fieldsToKeep.includes(key)) {
+            delete updatedProduct[key];
+          }
+        }
+        
+        // Keep all arrays - API might need them even if empty
+        // Arrays are kept as-is
+      });
+
+      // Convert to FormData format (like AddProductScreen)
+      const formData = new FormData();
+      
+      // Language data (required - API expects lang[] array)
+      formData.append('lang[]', 'en');
+      // Add other languages if needed
+      
+      // Basic fields - use array format for name and description (like Postman)
+      formData.append('name[]', updatedProduct.name);
+      if (updatedProduct.details) {
+        formData.append('description[]', updatedProduct.details);
+      }
+      
+      // Pricing
+      formData.append('unit_price', updatedProduct.unit_price.toString());
+      formData.append('purchase_price', updatedProduct.purchase_price.toString());
+      formData.append('discount', updatedProduct.discount.toString());
+      formData.append('discount_type', updatedProduct.discount_type);
+      formData.append('tax', updatedProduct.tax.toString());
+      if (updatedProduct.tax_type) {
+        formData.append('tax_type', updatedProduct.tax_type);
+      }
+      formData.append('tax_model', updatedProduct.tax_model);
+      formData.append('shipping_cost', updatedProduct.shipping_cost.toString());
+      
+      // Stock
+      formData.append('current_stock', updatedProduct.current_stock.toString());
+      formData.append('minimum_order_qty', updatedProduct.minimum_order_qty.toString());
+      formData.append('min_qty', updatedProduct.min_qty.toString());
+      formData.append('multiply_qty', updatedProduct.multiply_qty.toString());
+      
+      // Product type
+      formData.append('product_type', updatedProduct.product_type);
+      formData.append('unit', updatedProduct.unit);
+      
+      // Images - send as filenames (already uploaded)
+      if (updatedProduct.thumbnail) {
+        formData.append('thumbnail', updatedProduct.thumbnail);
+      }
+      if (updatedProduct.images && Array.isArray(updatedProduct.images)) {
+        updatedProduct.images.forEach((image) => {
+          formData.append('images[]', image);
+        });
+      }
+      
+      // Colors - send as empty JSON string if empty array
+      if (updatedProduct.colors && Array.isArray(updatedProduct.colors) && updatedProduct.colors.length > 0) {
+        updatedProduct.colors.forEach((color, index) => {
+          formData.append(`colors[${index}]`, color);
+        });
+      } else {
+        formData.append('colors', '[]');
+      }
+      
+      // Variants
+      formData.append('variant_product', updatedProduct.variant_product.toString());
+      
+      // Attributes, choice_options, variation - send as empty JSON string if empty
+      if (updatedProduct.attributes && Array.isArray(updatedProduct.attributes) && updatedProduct.attributes.length > 0) {
+        updatedProduct.attributes.forEach((attr, index) => {
+          formData.append(`attributes[${index}]`, JSON.stringify(attr));
+        });
+      } else {
+        formData.append('attributes', '[]');
+      }
+      
+      if (updatedProduct.choice_options && Array.isArray(updatedProduct.choice_options) && updatedProduct.choice_options.length > 0) {
+        updatedProduct.choice_options.forEach((option, index) => {
+          formData.append(`choice_options[${index}]`, JSON.stringify(option));
+        });
+      } else {
+        formData.append('choice_options', '[]');
+      }
+      
+      if (updatedProduct.variation && Array.isArray(updatedProduct.variation) && updatedProduct.variation.length > 0) {
+        updatedProduct.variation.forEach((variation, index) => {
+          formData.append(`variation[${index}]`, JSON.stringify(variation));
+        });
+      } else {
+        formData.append('variation', '[]');
+      }
+      
+      // Status
+      formData.append('status', updatedProduct.status.toString());
+      formData.append('featured_status', updatedProduct.featured_status.toString());
+      formData.append('published', updatedProduct.published.toString());
+      formData.append('refundable', updatedProduct.refundable.toString());
+      formData.append('free_shipping', updatedProduct.free_shipping.toString());
+      
+      // Category - extract category_id from category_ids array if needed
+      // Postman shows category_id as single value, not category_ids array
+      let categoryIdToSend = null;
+      
+      if (updatedProduct.category_ids && Array.isArray(updatedProduct.category_ids) && updatedProduct.category_ids.length > 0) {
+        // Extract first category ID from the array
+        const firstCategory = updatedProduct.category_ids[0];
+        categoryIdToSend = typeof firstCategory === 'object' && firstCategory.id 
+          ? firstCategory.id 
+          : (typeof firstCategory === 'string' || typeof firstCategory === 'number' ? firstCategory : null);
+      } else if (updatedProduct.category_id) {
+        categoryIdToSend = updatedProduct.category_id;
+      }
+      
+      if (categoryIdToSend) {
+        formData.append('category_id', categoryIdToSend.toString());
+      }
+      
+      if (updatedProduct.sub_category_id) {
+        formData.append('sub_category_id', updatedProduct.sub_category_id.toString());
+      }
+      if (updatedProduct.sub_sub_category_id) {
+        formData.append('sub_sub_category_id', updatedProduct.sub_sub_category_id.toString());
+      }
+      
+      // Optional fields
+      if (updatedProduct.brand_id) {
+        formData.append('brand_id', updatedProduct.brand_id.toString());
+      }
+      if (updatedProduct.code) {
+        formData.append('code', updatedProduct.code);
+      }
+      if (updatedProduct.video_provider) {
+        formData.append('video_provider', updatedProduct.video_provider);
+      }
+      if (updatedProduct.video_url) {
+        formData.append('video_url', updatedProduct.video_url);
+      }
+      if (updatedProduct.meta_title) {
+        formData.append('meta_title', updatedProduct.meta_title);
+      }
+      if (updatedProduct.meta_description) {
+        formData.append('meta_description', updatedProduct.meta_description);
+      }
+      if (updatedProduct.meta_image) {
+        formData.append('meta_image', updatedProduct.meta_image);
+      }
+      
+      // Tags - send as array format
+      if (updatedProduct.tags && Array.isArray(updatedProduct.tags) && updatedProduct.tags.length > 0) {
+        updatedProduct.tags.forEach((tag, index) => {
+          formData.append(`tags[${index}]`, tag);
+        });
+      }
+      
+      console.log('Sending product data as FormData');
+      console.log('FormData fields count:', Object.keys(updatedProduct).length);
+      console.log('Has images:', updatedProduct.images?.length || 0);
+      console.log('Has category_ids:', updatedProduct.category_ids?.length || 0);
+  
+      // Send as FormData with multipart/form-data
+      await axiosSellerClient.post(
         `products/update/${productId}`,
-        updatedProduct,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
       );
       Alert.alert(t('common.success'), t('editProduct.success'));
       navigation.goBack();
     } catch (error) {
+      const errorMessage = parseErrorMessage(error);
       console.error('Error updating product:', error);
-      console.error('Error details:', error.response?.data);
-      Alert.alert(t('common.error'), t('editProduct.error'));
+      console.error('Detailed Error Information:');
+      console.error(errorMessage);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
+      
+      // Show detailed error to user
+      Alert.alert(
+        t('common.error'),
+        errorMessage.length > 200 
+          ? `${errorMessage.substring(0, 200)}...` 
+          : errorMessage,
+      );
     } finally {
       setSaving(false);
     }
   };
-
   const handleDelete = async () => {
     Alert.alert(
       t('productDetails.confirmDelete'),
@@ -395,8 +839,18 @@ export const EditProductScreen = ({route, navigation}) => {
               );
               navigation.goBack();
             } catch (error) {
+              const errorMessage = parseErrorMessage(error);
               console.error('Error deleting product:', error);
-              Alert.alert(t('common.error'), t('productDetails.deleteError'));
+              console.error('Detailed Error Information:');
+              console.error(errorMessage);
+              console.error('Full error object:', JSON.stringify(error, null, 2));
+              
+              Alert.alert(
+                t('common.error'),
+                errorMessage.length > 200 
+                  ? `${errorMessage.substring(0, 200)}...` 
+                  : errorMessage || t('productDetails.deleteError'),
+              );
             }
           },
         },
@@ -569,6 +1023,7 @@ export const EditProductScreen = ({route, navigation}) => {
             <Input
               label={t('editProduct.unit')}
               value={product.unit}
+              disabled={true}
               onChangeText={text => setProduct({...product, unit: text})}
               style={[styles.input, styles.halfInput]}
               textStyle={{
@@ -584,7 +1039,7 @@ export const EditProductScreen = ({route, navigation}) => {
             <Input
               label={t('editProduct.code')}
               value={product.code}
-              disabled={true}
+              // disabled={true}
               onChangeText={text => setProduct({...product, code: text})}
               style={[styles.input, styles.halfInput]}
               textStyle={{

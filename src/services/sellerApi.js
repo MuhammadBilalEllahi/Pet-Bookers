@@ -18,10 +18,31 @@ export const getSellerInfo = () => {
 };
 
 export const updateSellerInfo = formData => {
-  return axiosSellerClient.post('/seller-update', formData, {
+  return axiosSellerClient.post('seller-update', formData, {
     headers: {'Content-Type': 'multipart/form-data'},
   });
 };
+
+// export const updateSellerInfo = formData => {
+//   console.log('formData', formData);
+//   try {
+//     const response = axiosSellerClient.post('/seller-update', formData, {
+//       headers: {'Content-Type': 'multipart/form-data'},
+//     });
+//     console.log('response', response);
+//   } catch (error) {
+//     console.error(
+//       'ERROR',
+//       error,
+//       error?.data,
+//       error?.data?.message,
+//       error?.response,
+//       error?.response?.message,
+//       error?.response?.data,
+//     );
+//   }
+//   return;
+// };
 
 // Update only seller bank details
 export const updateSellerBankDetails = bankDetails => {

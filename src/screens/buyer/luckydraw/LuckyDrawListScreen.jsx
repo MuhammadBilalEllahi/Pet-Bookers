@@ -332,8 +332,8 @@ export default function LuckyDrawListScreen() {
                           : theme['color-warning-800'],
                       },
                     ]}>
-                    ℹ️ {t('luckyDrawListScreen.sellerViewOnly') ||
-                      'Sellers can view but only participate if logged in as buyer'}
+                    ℹ️ {t('luckyDrawListScreen.sellerViewOnly') 
+                     }
                   </Text>
                 </View>
               )}

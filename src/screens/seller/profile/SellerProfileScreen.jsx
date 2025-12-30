@@ -104,6 +104,7 @@ export const SellerProfileScreen = ({
       onProfileSwitch(newProfileType);
     }
   };
+  console.log('SellerDAta', JSON.stringify(sellerData, null, 2));
 
   const renderSignInButton = accountType => (
     <Button
@@ -264,19 +265,19 @@ export const SellerProfileScreen = ({
                   }}>
                   {sellerData.name || 'Loading...'}
                 </Text>
-                {console.log("sellerData", sellerData)}
-                  {sellerData?.shop_email && (
-                    <Text
-                      style={{
-                        color: isDark
-                          ? theme['color-shadcn-muted-foreground']
-                          : theme['color-basic-600'],
-                        fontSize: 12,
-                        marginTop: 2,
-                      }}>
-                      {sellerData?.shop_email}
-                    </Text>
-                  )}
+                {console.log('sellerData', sellerData)}
+                {sellerData?.shop_email && (
+                  <Text
+                    style={{
+                      color: isDark
+                        ? theme['color-shadcn-muted-foreground']
+                        : theme['color-basic-600'],
+                      fontSize: 12,
+                      marginTop: 2,
+                    }}>
+                    {sellerData?.shop_email}
+                  </Text>
+                )}
 
                 {/* Profile Toggler - only shows when both profiles are authenticated */}
                 <View style={{marginTop: 8}}>
