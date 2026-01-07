@@ -28,11 +28,14 @@ import {
   setShopVacation,
   setShopTemporaryClose,
   updateSellerBankDetails,
+  updateSellerPassword,
 } from '../../../../../services/sellerApi';
 import {ThemedIcon} from '../../../../../components/Icon';
 import {ImagePicker} from '../../../../../components/form';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {BASE_URLS} from '../../../../../store/configs';
+import { useDispatch } from 'react-redux';
+import { handleSellerLogin, handleUserLogin, UserType } from '../../../../../store/user';
 
 export default function ShopSettingsPage({navigation}) {
   const {theme, isDark} = useTheme();
@@ -75,6 +78,8 @@ export default function ShopSettingsPage({navigation}) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const dispatch = useDispatch();
 
   const fetchData = async () => {
     try {
@@ -598,8 +603,9 @@ export default function ShopSettingsPage({navigation}) {
       };
 
       // You'll need to implement this API call in your sellerApi.js
-      // await updateSellerPassword(passwordPayload);
-
+     const res= await updateSellerPassword(passwordPayload);
+     console.log('RES FROM PASSWORD UPDATE', res);
+     console.log('RES FROM PASSWORD UPDATE', res?.data);
       Alert.alert(
         t('shopSettingsPage.alerts.successTitle'),
         'Password updated successfully',
@@ -612,12 +618,18 @@ export default function ShopSettingsPage({navigation}) {
         confirmPassword: '',
       });
 
+      if (res?.data?.token) {
+        dispatch(handleSellerLogin(res.data.token));
+        dispatch(handleUserLogin(res.data.token, UserType.SELLER));
+      }
+
       setIsEditMode(false);
+      
     } catch (error) {
-      console.error('Error updating password:', error);
+      console.error('Error updating password:', error?.response?.data?.message);
       Alert.alert(
         t('shopSettingsPage.alerts.errorTitle'),
-        'Failed to update password',
+        error?.response?.data?.message || 'Failed to update password',
       );
     } finally {
       setSaving(false);

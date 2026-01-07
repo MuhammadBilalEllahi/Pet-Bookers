@@ -11,6 +11,7 @@ import {
   PermissionsAndroid,
   ActivityIndicator,
   TextInput,
+  Modal,
 } from 'react-native';
 import {
   Layout,
@@ -29,10 +30,14 @@ import {MainScreensHeader} from '../../components/buyer';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {BASE_URL} from '../../utils/constants';
 import {selectBaseUrls} from '../../store/configs';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import FastImageWithFallback from '../../components/common/FastImageWithFallback';
 import FastImage from '@d11/react-native-fast-image';
 import {BASE_URLS} from '../../store/configs';
+import {
+  loadProductCategories,
+  selectProductCategories,
+} from '../../store/productCategories';
 
 const requestGalleryPermission = async () => {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -89,14 +94,120 @@ export const EditProductScreen = ({route, navigation}) => {
     featured_status: 0,
   });
   const [selectedImages, setSelectedImages] = useState([]);
+  // Track existing product images that user removed, to delete them after a successful update
+  const [removedImages, setRemovedImages] = useState([]);
   const [thumbnail, setThumbnail] = useState(null);
   const [barcodeUrl, setBarcodeUrl] = useState(null);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
+  
+  // Category and unit selection states
+  const [categoryIndex, setCategoryIndex] = useState(null);
+  const [subcategoryIndex, setSubcategoryIndex] = useState(null);
+  const [unitIndex, setUnitIndex] = useState(null);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [subcategoryModalVisible, setSubcategoryModalVisible] = useState(false);
+  const [unitModalVisible, setUnitModalVisible] = useState(false);
+  
+  // Redux for categories
+  const dispatch = useDispatch();
+  const {categories, categoriesLoading} = useSelector(selectProductCategories);
+  
+  // Unit options
+  const units = [
+    t('addProduct.units'),
+    t('addProduct.kg'),
+    t('addProduct.ltr'),
+    t('addProduct.pc'),
+  ];
+  
+  const categoryOptions = categories.map(cat => cat.name);
+  const selectedCategory = categories[categoryIndex?.row];
+  const subcategoryOptions =
+    selectedCategory?.childes?.map(sub => sub.name) || [];
 
   useEffect(() => {
+    dispatch(loadProductCategories());
     fetchProductDetails();
-  }, [productId]);
+  }, [productId, dispatch]);
+
+  // Set category/subcategory/unit indices when categories and product data are loaded
+  useEffect(() => {
+    // Only set indices if categories are loaded
+    if (categories.length === 0) {
+      return;
+    }
+
+    // Find category index - use category_id (already extracted from category_ids by position in fetchProductDetails)
+    let categoryIdToMatch = null;
+    
+    // Use category_id from product (already extracted from category_ids array based on position)
+    if (product.category_id) {
+      categoryIdToMatch = product.category_id;
+    }
+
+    // Only set if we have a category ID and index is not already set
+    if (categoryIdToMatch && (categoryIndex === null || categoryIndex.row === undefined)) {
+      const catIdx = categories.findIndex(
+        cat => {
+          const catId = typeof cat.id === 'string' ? parseInt(cat.id) : cat.id;
+          const matchId = typeof categoryIdToMatch === 'string' ? parseInt(categoryIdToMatch) : categoryIdToMatch;
+          return catId === matchId || cat.id === categoryIdToMatch || cat.id.toString() === categoryIdToMatch.toString();
+        }
+      );
+      
+      if (catIdx !== -1) {
+        console.log('Setting category index:', catIdx, 'for category ID:', categoryIdToMatch);
+        setCategoryIndex({row: catIdx});
+      } else {
+        console.log('Category not found. Looking for:', categoryIdToMatch, 'Available categories:', categories.map(c => ({id: c.id, name: c.name})));
+      }
+    }
+    
+    // Find unit index
+    if (product.unit && (unitIndex === null || unitIndex.row === undefined)) {
+      const unitIdx = units.findIndex(
+        unit => {
+          const unitLower = unit.toLowerCase().trim();
+          const productUnitLower = product.unit.toLowerCase().trim();
+          return unitLower === productUnitLower || unit === product.unit || unit.trim() === product.unit.trim();
+        }
+      );
+      if (unitIdx !== -1) {
+        console.log('Setting unit index:', unitIdx, 'for unit:', product.unit);
+        setUnitIndex({row: unitIdx});
+      } else {
+        console.log('Unit not found. Looking for:', product.unit, 'Available units:', units);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories.length, product.category_id, product.unit, product.category_ids, categoryIndex]);
+
+  // Set subcategory when category is selected and product has subcategory
+  useEffect(() => {
+    if (categoryIndex !== null && 
+        categoryIndex.row !== undefined && 
+        categories[categoryIndex.row] && 
+        product.sub_category_id && 
+        (subcategoryIndex === null || subcategoryIndex.row === undefined)) {
+      const selectedCat = categories[categoryIndex.row];
+      if (selectedCat?.childes) {
+        const subCatIdx = selectedCat.childes.findIndex(
+          sub => {
+            const subId = typeof sub.id === 'string' ? parseInt(sub.id) : sub.id;
+            const matchSubId = typeof product.sub_category_id === 'string' 
+              ? parseInt(product.sub_category_id) 
+              : product.sub_category_id;
+            return subId === matchSubId || sub.id === product.sub_category_id;
+          }
+        );
+        if (subCatIdx !== -1) {
+          setSubcategoryIndex({row: subCatIdx});
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryIndex, categories.length, product.sub_category_id]);
 
   const fetchProductDetails = async () => {
     try {
@@ -107,8 +218,50 @@ export const EditProductScreen = ({route, navigation}) => {
       // console.log("product detail response", response.data);
       if (response.data) {
         const productData = response.data;
+        
+        // Extract category_id and sub_category_id from category_ids array based on position
+        // position 1 = main category (category_id)
+        // position 2 = sub category (sub_category_id)
+        // position 3 = sub sub category (sub_sub_category_id) - not needed
+        let categoryId = productData.category_id;
+        let subCategoryId = productData.sub_category_id;
+        let subSubCategoryId = productData.sub_sub_category_id;
+        
+        if (productData.category_ids && Array.isArray(productData.category_ids) && productData.category_ids.length > 0) {
+          // Find category by position
+          const categoryPosition1 = productData.category_ids.find(cat => 
+            cat.position === 1 || cat.position === '1'
+          );
+          const categoryPosition2 = productData.category_ids.find(cat => 
+            cat.position === 2 || cat.position === '2'
+          );
+          const categoryPosition3 = productData.category_ids.find(cat => 
+            cat.position === 3 || cat.position === '3'
+          );
+          
+          // Extract IDs
+          if (categoryPosition1) {
+            categoryId = typeof categoryPosition1 === 'object' && categoryPosition1.id 
+              ? categoryPosition1.id 
+              : categoryPosition1;
+          }
+          if (categoryPosition2) {
+            subCategoryId = typeof categoryPosition2 === 'object' && categoryPosition2.id 
+              ? categoryPosition2.id 
+              : categoryPosition2;
+          }
+          if (categoryPosition3) {
+            subSubCategoryId = typeof categoryPosition3 === 'object' && categoryPosition3.id 
+              ? categoryPosition3.id 
+              : categoryPosition3;
+          }
+        }
+        
         setProduct({
           ...productData,
+          category_id: categoryId || productData.category_id || '',
+          sub_category_id: subCategoryId || productData.sub_category_id || '',
+          sub_sub_category_id: subSubCategoryId || productData.sub_sub_category_id || '',
           unit_price: productData.unit_price?.toString() || '',
           current_stock: productData.current_stock?.toString() || '',
           minimum_order_qty: productData.minimum_order_qty?.toString() || '',
@@ -119,6 +272,7 @@ export const EditProductScreen = ({route, navigation}) => {
           min_qty: productData.min_qty?.toString() || '',
           multiply_qty: productData.multiply_qty?.toString() || '',
         });
+        console.log("the resposne", productData)
 
         // Fix image handling - use proper image objects like in AddProductScreen
         if (productData.thumbnail) {
@@ -150,6 +304,9 @@ export const EditProductScreen = ({route, navigation}) => {
             setTags(productData.tags.split(',').filter(tag => tag.trim()));
           }
         }
+        
+        // Set category/subcategory/unit indices will be set after categories load
+        // This is handled in a separate useEffect below
       }
     } catch (error) {
       const errorMessage = parseErrorMessage(error);
@@ -240,7 +397,8 @@ export const EditProductScreen = ({route, navigation}) => {
       if (field === 'thumbnail') {
         setThumbnail(result.assets[0]);
       } else {
-        setSelectedImages(result.assets);
+        // Append new images to existing list instead of replacing
+        setSelectedImages(prev => [...prev, ...result.assets]);
       }
     }
   };
@@ -267,7 +425,13 @@ export const EditProductScreen = ({route, navigation}) => {
         if (type === 'thumbnail') {
           setThumbnail(result.assets[0]);
         } else {
-          setSelectedImages(result.assets);
+          // Append new images to existing list instead of replacing
+          // Also check total limit (max 5 images total)
+          setSelectedImages(prev => {
+            const newImages = [...prev, ...result.assets];
+            // Limit to maximum 5 images
+            return newImages.slice(0, 5);
+          });
         }
       }
     } catch (error) {
@@ -392,6 +556,101 @@ export const EditProductScreen = ({route, navigation}) => {
     return details.length > 0 ? details.join('\n\n') : 'Server error occurred';
   };
 
+  // Render modal for category/subcategory/unit selection
+  const renderModal = (
+    visible,
+    setVisible,
+    title,
+    options,
+    selectedIndex,
+    onSelect,
+  ) => {
+    return (
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setVisible(false)}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark
+                  ? theme['color-shadcn-card']
+                  : theme['color-basic-100'],
+              },
+            ]}>
+            <View style={styles.modalHeader}>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {title}
+              </Text>
+              <TouchableOpacity onPress={() => setVisible(false)}>
+                <Icon
+                  name="close"
+                  fill={
+                    isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600']
+                  }
+                  style={{width: 24, height: 24}}
+                />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalOptions}>
+              {options.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.modalOption,
+                    selectedIndex === index && {
+                      backgroundColor: isDark
+                        ? theme['color-shadcn-secondary']
+                        : theme['color-basic-200'],
+                    },
+                  ]}
+                  onPress={() => {
+                    onSelect(index);
+                    setVisible(false);
+                  }}>
+                  <Text
+                    style={[
+                      styles.modalOptionText,
+                      {
+                        color: isDark
+                          ? theme['color-shadcn-foreground']
+                          : theme['color-basic-900'],
+                      },
+                    ]}>
+                    {option}
+                  </Text>
+                  {selectedIndex === index && (
+                    <Icon
+                      name="checkmark"
+                      fill={theme['color-shadcn-primary']}
+                      style={{width: 20, height: 20}}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
   // const handleSave = async () => {
   //   try {
   //     setSaving(true);
@@ -472,35 +731,8 @@ export const EditProductScreen = ({route, navigation}) => {
     try {
       setSaving(true);
   
-      // Upload thumbnail if changed
-      let thumbnailName = product.thumbnail;
-      if (
-        thumbnail &&
-        typeof thumbnail === 'object' &&
-        thumbnail.uri &&
-        !thumbnail.fileName
-      ) {
-        thumbnailName = await uploadImage(thumbnail, 'thumbnail');
-      } else if (
-        thumbnail &&
-        typeof thumbnail === 'object' &&
-        thumbnail.fileName
-      ) {
-        thumbnailName = thumbnail.fileName;
-      }
-  
-      // Upload new images
-      const newImages = selectedImages.filter(
-        img => typeof img === 'object' && img.uri && !img.fileName,
-      );
-      const uploadedImages = await Promise.all(
-        newImages.map(img => uploadImage(img, 'product')),
-      );
-  
-      // Get existing image filenames
-      const existingImages = selectedImages
-        .filter(img => typeof img === 'object' && img.fileName)
-        .map(img => img.fileName);
+      // Determine thumbnail - keep existing or use new one
+      // We'll send it directly in FormData, no pre-upload needed
   
       // Validate required fields
       if (!product.name || !product.name.trim()) {
@@ -516,14 +748,7 @@ export const EditProductScreen = ({route, navigation}) => {
       }
 
       // Log original product data for debugging
-      console.log('Original product data:', JSON.stringify({
-        category_ids: product.category_ids,
-        category_id: product.category_id,
-        sub_category_id: product.sub_category_id,
-        sub_sub_category_id: product.sub_sub_category_id,
-        colors: product.colors,
-        tags: product.tags,
-      }, null, 2));
+      console.log('Original product data:', JSON.stringify({product}, null, 2));
 
       // Handle colors - preserve original format
       let colorsValue = [];
@@ -576,9 +801,8 @@ export const EditProductScreen = ({route, navigation}) => {
         product_type: product.product_type || 'physical',
         unit: product.unit || '',
         
-        // Images
-        thumbnail: thumbnailName || '',
-        images: [...existingImages, ...uploadedImages],
+        // Images - we'll handle these directly in FormData
+        // Don't set thumbnail/images here, we'll handle them directly in FormData section
         
         // Colors - send as array (API should handle it)
         colors: colorsValue,
@@ -597,14 +821,28 @@ export const EditProductScreen = ({route, navigation}) => {
         free_shipping: product.free_shipping ?? 0,
       };
 
-      // Preserve category_ids if it exists in original format (array of objects)
-      if (product.category_ids && Array.isArray(product.category_ids) && product.category_ids.length > 0) {
-        updatedProduct.category_ids = product.category_ids;
+      // Use selected category/subcategory from modal selection or existing values
+      // Always send as simple fields: category_id, sub_category_id (not category_ids array)
+      if (categoryIndex !== null && categories[categoryIndex.row]) {
+        updatedProduct.category_id = categories[categoryIndex.row].id;
+        
+        // Set subcategory if selected
+        if (subcategoryIndex !== null && selectedCategory?.childes) {
+          updatedProduct.sub_category_id = selectedCategory.childes[subcategoryIndex.row].id;
+        } else {
+          // Keep existing subcategory if no new selection
+          includeIfValue(updatedProduct, 'sub_category_id', product.sub_category_id);
+        }
       } else {
-        // Otherwise use individual category fields
+        // Use existing values from product (already extracted from category_ids in fetchProductDetails)
         includeIfValue(updatedProduct, 'category_id', product.category_id);
         includeIfValue(updatedProduct, 'sub_category_id', product.sub_category_id);
-        includeIfValue(updatedProduct, 'sub_sub_category_id', product.sub_sub_category_id);
+        // sub_sub_category_id not needed per requirements
+      }
+      
+      // Use selected unit from modal selection
+      if (unitIndex !== null && units[unitIndex.row]) {
+        updatedProduct.unit = units[unitIndex.row];
       }
       
       includeIfValue(updatedProduct, 'brand_id', product.brand_id);
@@ -674,13 +912,80 @@ export const EditProductScreen = ({route, navigation}) => {
       formData.append('product_type', updatedProduct.product_type);
       formData.append('unit', updatedProduct.unit);
       
-      // Images - send as filenames (already uploaded)
-      if (updatedProduct.thumbnail) {
-        formData.append('thumbnail', updatedProduct.thumbnail);
+      // Images / thumbnail: match backend ProductController@update expectations
+      // Backend logic:
+      //   - Keeps existing $product->images from DB
+      //   - Appends ONLY real uploaded files from $request->file('images')
+      //   - Updates thumbnail ONLY when $request->file('thumbnail') exists
+      // So: we only send NEW local files, never existing filenames.
+
+      // Handle thumbnail (only send if user picked a NEW local image)
+      if (thumbnail && typeof thumbnail === 'object' && thumbnail.uri) {
+        const isLocalThumb =
+          thumbnail.uri.startsWith('file://') ||
+          thumbnail.uri.startsWith('content://') ||
+          thumbnail.uri.includes('rn_image_picker_lib_temp');
+
+        if (isLocalThumb) {
+          const thumbUri =
+            Platform.OS === 'android'
+              ? thumbnail.uri
+              : thumbnail.uri.replace('file://', '');
+
+          const thumbName =
+            thumbnail.fileName && !thumbnail.fileName.includes('rn_image_picker_lib_temp')
+              ? thumbnail.fileName
+              : thumbnail.uri.split('/').pop() || `thumbnail_${Date.now()}.jpg`;
+
+          console.log('Sending NEW thumbnail file to backend:', {
+            uri: thumbUri,
+            name: thumbName,
+            type: thumbnail.type || 'image/jpeg',
+          });
+
+          formData.append('thumbnail', {
+            uri: thumbUri,
+            name: thumbName,
+            type: thumbnail.type || 'image/jpeg',
+          });
+        }
+        // If not local (existing remote thumbnail), do NOT send anything.
+        // Backend will keep current thumbnail from DB.
       }
-      if (updatedProduct.images && Array.isArray(updatedProduct.images)) {
-        updatedProduct.images.forEach((image) => {
-          formData.append('images[]', image);
+
+      // Handle product images (only send NEW local images as files)
+      if (selectedImages && Array.isArray(selectedImages) && selectedImages.length > 0) {
+        selectedImages.forEach((imageObj, index) => {
+          if (!imageObj || typeof imageObj !== 'object' || !imageObj.uri) {
+            return;
+          }
+
+          const isLocalFile =
+            imageObj.uri.startsWith('file://') ||
+            imageObj.uri.startsWith('content://') ||
+            imageObj.uri.includes('rn_image_picker_lib_temp') ||
+            (imageObj.fileName && imageObj.fileName.includes('rn_image_picker_lib_temp'));
+
+          if (!isLocalFile) {
+            // Existing server image – DO NOT send. Backend already has it in $product->images.
+            return;
+          }
+
+          const imageUri =
+            Platform.OS === 'android'
+              ? imageObj.uri
+              : imageObj.uri.replace('file://', '');
+
+          const imageName =
+            imageObj.fileName && !imageObj.fileName.includes('rn_image_picker_lib_temp')
+              ? imageObj.fileName
+              : imageObj.uri.split('/').pop() || `image_${Date.now()}_${index}.jpg`;
+
+          formData.append('images[]', {
+            uri: imageUri,
+            name: imageName,
+            type: imageObj.type || 'image/jpeg',
+          });
         });
       }
       
@@ -728,27 +1033,17 @@ export const EditProductScreen = ({route, navigation}) => {
       formData.append('refundable', updatedProduct.refundable.toString());
       formData.append('free_shipping', updatedProduct.free_shipping.toString());
       
-      // Category - extract category_id from category_ids array if needed
-      // Postman shows category_id as single value, not category_ids array
-      let categoryIdToSend = null;
-      
-      if (updatedProduct.category_ids && Array.isArray(updatedProduct.category_ids) && updatedProduct.category_ids.length > 0) {
-        // Extract first category ID from the array
-        const firstCategory = updatedProduct.category_ids[0];
-        categoryIdToSend = typeof firstCategory === 'object' && firstCategory.id 
-          ? firstCategory.id 
-          : (typeof firstCategory === 'string' || typeof firstCategory === 'number' ? firstCategory : null);
-      } else if (updatedProduct.category_id) {
-        categoryIdToSend = updatedProduct.category_id;
-      }
-      
-      if (categoryIdToSend) {
-        formData.append('category_id', categoryIdToSend.toString());
+      // Category - send as simple fields (category_id, sub_category_id)
+      // Not sending category_ids array format
+      if (updatedProduct.category_id) {
+        formData.append('category_id', updatedProduct.category_id.toString());
       }
       
       if (updatedProduct.sub_category_id) {
         formData.append('sub_category_id', updatedProduct.sub_category_id.toString());
       }
+      
+      // sub_sub_category_id not needed per requirements, but include if exists
       if (updatedProduct.sub_sub_category_id) {
         formData.append('sub_sub_category_id', updatedProduct.sub_sub_category_id.toString());
       }
@@ -757,8 +1052,18 @@ export const EditProductScreen = ({route, navigation}) => {
       if (updatedProduct.brand_id) {
         formData.append('brand_id', updatedProduct.brand_id.toString());
       }
+      // Code field - only send if it's numeric and at least 6 digits
+      // If code is not numeric, don't send it (API will use existing code)
       if (updatedProduct.code) {
-        formData.append('code', updatedProduct.code);
+        const codeStr = updatedProduct.code.toString().trim();
+        // Check if code is numeric and has at least 6 digits
+        if (!isNaN(codeStr) && codeStr.length >= 6) {
+          formData.append('code', codeStr);
+        } else {
+          // Code is not valid numeric - don't send it
+          // API will keep the existing code or generate a new one
+          console.warn('Skipping invalid code:', codeStr, '- must be numeric and at least 6 digits');
+        }
       }
       if (updatedProduct.video_provider) {
         formData.append('video_provider', updatedProduct.video_provider);
@@ -786,10 +1091,14 @@ export const EditProductScreen = ({route, navigation}) => {
       console.log('Sending product data as FormData');
       console.log('FormData fields count:', Object.keys(updatedProduct).length);
       console.log('Has images:', updatedProduct.images?.length || 0);
-      console.log('Has category_ids:', updatedProduct.category_ids?.length || 0);
-  
+      console.log('Category ID:', updatedProduct.category_id);
+      console.log('Sub Category ID:', updatedProduct.sub_category_id);
+
+
+      console.log('formdata', formData);
+
       // Send as FormData with multipart/form-data
-      await axiosSellerClient.post(
+      const response = await axiosSellerClient.post(
         `products/update/${productId}`,
         formData,
         {
@@ -798,6 +1107,41 @@ export const EditProductScreen = ({route, navigation}) => {
           },
         },
       );
+
+      console.log('Update response:', response.data);
+
+      // After successful update, delete any images the user removed.
+      // Backend web route example:
+      // https://petbookers.com.pk/seller/product/remove-image?id={id}&name={imageName}
+      if (removedImages.length > 0) {
+        console.log('Images marked for deletion:', removedImages);
+        try {
+          await Promise.all(
+            removedImages.map(async imageName => {
+              try {
+                // API equivalent of seller/product/remove-image
+                await axiosSellerClient.get('products/remove-image', {
+                  params: {
+                    id: productId,
+                    name: imageName,
+                  },
+                });
+                console.log('Requested delete for image:', imageName);
+              } catch (imgErr) {
+                console.error(
+                  'Failed to delete image on backend:',
+                  imageName,
+                  imgErr,
+                );
+              }
+            }),
+          );
+        } finally {
+          // Clear removed images list regardless of individual delete failures
+          setRemovedImages([]);
+        }
+      }
+
       Alert.alert(t('common.success'), t('editProduct.success'));
       navigation.goBack();
     } catch (error) {
@@ -972,6 +1316,132 @@ export const EditProductScreen = ({route, navigation}) => {
             style={styles.input}
           />
 
+          {/* Category Selection */}
+          <View style={styles.fieldGroup}>
+            <Text
+              style={[
+                styles.fieldLabel,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                },
+              ]}>
+              {t('addProduct.category')}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.select,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-card']
+                    : theme['color-basic-100'],
+                  borderColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-400'],
+                },
+              ]}
+              onPress={() => setCategoryModalVisible(true)}>
+              <Text
+                style={[
+                  styles.selectText,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {categoryIndex !== null && categoryOptions[categoryIndex.row]
+                  ? categoryOptions[categoryIndex.row]
+                  : product.category_id && categories.length > 0
+                  ? (() => {
+                      const foundCat = categories.find(c => {
+                        const catId = typeof c.id === 'string' ? parseInt(c.id) : c.id;
+                        const prodCatId = typeof product.category_id === 'string' 
+                          ? parseInt(product.category_id) 
+                          : product.category_id;
+                        return catId === prodCatId || c.id === product.category_id;
+                      });
+                      return foundCat?.name || t('addProduct.categoryPlaceholder');
+                    })()
+                  : t('addProduct.categoryPlaceholder')}
+              </Text>
+              <Icon
+                name="chevron-down"
+                fill={
+                  isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600']
+                }
+                style={{width: 20, height: 20}}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Sub Category Selection */}
+          <View style={styles.fieldGroup}>
+            <Text
+              style={[
+                styles.fieldLabel,
+                {
+                  color: isDark
+                    ? theme['color-shadcn-foreground']
+                    : theme['color-basic-900'],
+                },
+              ]}>
+              {t('addProduct.subCategory')}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.select,
+                {
+                  backgroundColor: isDark
+                    ? theme['color-shadcn-card']
+                    : theme['color-basic-100'],
+                  borderColor: isDark
+                    ? theme['color-shadcn-border']
+                    : theme['color-basic-400'],
+                  opacity: selectedCategory ? 1 : 0.5,
+                },
+              ]}
+              onPress={() => setSubcategoryModalVisible(true)}
+              disabled={!selectedCategory}>
+              <Text
+                style={[
+                  styles.selectText,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                  },
+                ]}>
+                {subcategoryIndex !== null && subcategoryOptions[subcategoryIndex.row]
+                  ? subcategoryOptions[subcategoryIndex.row]
+                  : product.sub_category_id && selectedCategory?.childes
+                  ? (() => {
+                      const foundSubCat = selectedCategory.childes.find(c => {
+                        const subCatId = typeof c.id === 'string' ? parseInt(c.id) : c.id;
+                        const prodSubCatId = typeof product.sub_category_id === 'string' 
+                          ? parseInt(product.sub_category_id) 
+                          : product.sub_category_id;
+                        return subCatId === prodSubCatId || c.id === product.sub_category_id;
+                      });
+                      return foundSubCat?.name || t('addProduct.subCategoryPlaceholder');
+                    })()
+                  : t('addProduct.subCategoryPlaceholder')}
+              </Text>
+              <Icon
+                name="chevron-down"
+                fill={
+                  isDark
+                    ? theme['color-shadcn-muted-foreground']
+                    : theme['color-basic-600']
+                }
+                style={{width: 20, height: 20}}
+              />
+            </TouchableOpacity>
+          </View>
+
           {/* Price and Stock */}
           <View style={styles.rowContainer}>
             <Input
@@ -1020,18 +1490,57 @@ export const EditProductScreen = ({route, navigation}) => {
               }}
             />
 
-            <Input
-              label={t('editProduct.unit')}
-              value={product.unit}
-              disabled={true}
-              onChangeText={text => setProduct({...product, unit: text})}
-              style={[styles.input, styles.halfInput]}
-              textStyle={{
-                color: isDark
-                  ? theme['color-shadcn-foreground']
-                  : theme['color-basic-900'],
-              }}
-            />
+            {/* Unit Selection */}
+            <View style={styles.halfInput}>
+              <Text
+                style={[
+                  styles.fieldLabel,
+                  {
+                    color: isDark
+                      ? theme['color-shadcn-foreground']
+                      : theme['color-basic-900'],
+                    marginBottom: 6,
+                  },
+                ]}>
+                {t('editProduct.unit')}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.select,
+                  {
+                    backgroundColor: isDark
+                      ? theme['color-shadcn-card']
+                      : theme['color-basic-100'],
+                    borderColor: isDark
+                      ? theme['color-shadcn-border']
+                      : theme['color-basic-400'],
+                  },
+                ]}
+                onPress={() => setUnitModalVisible(true)}>
+                <Text
+                  style={[
+                    styles.selectText,
+                    {
+                      color: isDark
+                        ? theme['color-shadcn-foreground']
+                        : theme['color-basic-900'],
+                    },
+                  ]}>
+                  {unitIndex !== null
+                    ? units[unitIndex.row]
+                    : product.unit || t('addProduct.unitsPlaceholder')}
+                </Text>
+                <Icon
+                  name="chevron-down"
+                  fill={
+                    isDark
+                      ? theme['color-shadcn-muted-foreground']
+                      : theme['color-basic-600']
+                  }
+                  style={{width: 20, height: 20}}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Code and Tax */}
@@ -1514,11 +2023,27 @@ export const EditProductScreen = ({route, navigation}) => {
                   />
                   <TouchableOpacity
                     style={styles.removeImageButton}
-                    onPress={() =>
-                      setSelectedImages(
-                        selectedImages.filter((_, i) => i !== index),
-                      )
-                    }>
+                    onPress={() => {
+                      setSelectedImages(prev => {
+                        const img = prev[index];
+
+                        // If this is an existing server image (has fileName and uri is not local),
+                        // remember its filename so we can delete it from backend after update.
+                        if (
+                          img &&
+                          typeof img === 'object' &&
+                          img.fileName &&
+                          img.uri &&
+                          !img.uri.startsWith('file://') &&
+                          !img.uri.startsWith('content://') &&
+                          !img.uri.includes('rn_image_picker_lib_temp')
+                        ) {
+                          setRemovedImages(old => [...old, img.fileName]);
+                        }
+
+                        return prev.filter((_, i) => i !== index);
+                      });
+                    }}>
                     <Text style={styles.removeImageText}>×</Text>
                   </TouchableOpacity>
                 </View>
@@ -1554,6 +2079,56 @@ export const EditProductScreen = ({route, navigation}) => {
           </Button>
         </View>
       </ScrollView>
+
+      {/* Category/Subcategory/Unit Selection Modals */}
+      {renderModal(
+        categoryModalVisible,
+        setCategoryModalVisible,
+        t('addProduct.category'),
+        categoryOptions,
+        categoryIndex?.row,
+        index => {
+          setCategoryIndex({row: index});
+          setSubcategoryIndex(null); // Reset subcategory when category changes
+          setProduct(prev => ({
+            ...prev,
+            category_id: categories[index].id,
+            sub_category_id: '', // Clear subcategory when category changes
+          }));
+        },
+      )}
+
+      {renderModal(
+        subcategoryModalVisible,
+        setSubcategoryModalVisible,
+        t('addProduct.subCategory'),
+        subcategoryOptions,
+        subcategoryIndex?.row,
+        index => {
+          setSubcategoryIndex({row: index});
+          if (selectedCategory?.childes) {
+            setProduct(prev => ({
+              ...prev,
+              sub_category_id: selectedCategory.childes[index].id,
+            }));
+          }
+        },
+      )}
+
+      {renderModal(
+        unitModalVisible,
+        setUnitModalVisible,
+        t('addProduct.units'),
+        units,
+        unitIndex?.row,
+        index => {
+          setUnitIndex({row: index});
+          setProduct(prev => ({
+            ...prev,
+            unit: units[index],
+          }));
+        },
+      )}
     </Layout>
   );
 };
@@ -1743,5 +2318,70 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 14,
+  },
+  fieldGroup: {
+    marginBottom: 18,
+  },
+  fieldLabel: {
+    fontSize: 11,
+    marginBottom: 6,
+    fontWeight: '500',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  select: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderRadius: 4,
+    minHeight: 48,
+  },
+  selectText: {
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '100%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    maxHeight: '80%',
+    position: 'absolute',
+    bottom: 0,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalOptions: {
+    padding: 16,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  modalOptionText: {
+    fontSize: 16,
   },
 });

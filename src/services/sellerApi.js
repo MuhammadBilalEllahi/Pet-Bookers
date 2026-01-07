@@ -46,7 +46,11 @@ export const updateSellerInfo = formData => {
 
 // Update only seller bank details
 export const updateSellerBankDetails = bankDetails => {
-  return axiosSellerClient.put('/seller-update', bankDetails);
+  return axiosSellerClient.post('/seller-update', bankDetails);
+};
+
+export const updateSellerPassword = passwordDetails => {
+  return axiosSellerClient.post('/seller-update', passwordDetails);
 };
 
 // Delivery Men Management
