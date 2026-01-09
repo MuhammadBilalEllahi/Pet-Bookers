@@ -235,9 +235,44 @@ export const MessagesScreen = ({navigation}) => {
   };
 
   const handleSendPress = () => {
-    if (newMessage.trim() && !isSending && isAuthenticated) {
-      sendMessage();
+    if (!newMessage.trim() || isSending || !isAuthenticated) {
+      return;
     }
+
+    // Email regex - detects standard email formats and obfuscated attempts
+    // Catches: user@domain.com, user@_gmail_._com_, user@_domain.com, user@domain_tld, etc.
+    // Pattern: username@domain_separator_tld (catches any @ followed by text with separator and TLD-like pattern)
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9._-]*[A-Za-z0-9]+[A-Za-z0-9._-]*[._][A-Za-z0-9._-]*[A-Za-z]{2,}[A-Za-z0-9._-]*\b/gi;
+    
+    // Phone regex - catches formats like: 0321900, 0.3.2.1.9.0.0, 0\3\2\1, 0-3-2-1, 0311155382\0, etc.
+    // Pattern 1: Standard formats (123-456-7890, +1 123 456 7890)
+    // Pattern 2: Obfuscated with repeated separators (0.3.2.1.9.0.0, 0\3\2\1\9\0\0)
+    // Pattern 3: 7+ digits with separator followed by digits/characters (0311155382\0, 0311155382.0, 0311155382-0)
+    // Pattern 4: 10+ consecutive digits
+    const phoneRegex = /(\+?\d{1,3}[-.\s\\\/]?)?\(?\d{3}\)?[-.\s\\\/]?\d{3}[-.\s\\\/]?\d{4}|\b\d{1,4}([-.\s\\\/])\d{1,4}\1\d{1,4}(\1\d{1,4}){0,3}\b|\b\d{7,}[-.\s\\\/][^\w]{0,2}[\d]*|\b\d{10,}\b/gi;
+
+    const hasEmail = emailRegex.test(newMessage);
+    const hasPhone = phoneRegex.test(newMessage);
+
+    if (hasEmail || hasPhone) {
+      let message = '';
+      if (hasEmail && hasPhone) {
+        message = t('messagesScreen.messages.emailPhoneNotAllowed') || 'Email addresses and phone numbers are not allowed in messages';
+      } else if (hasEmail) {
+        message = t('messagesScreen.messages.emailNotAllowed') || 'Email addresses are not allowed in messages';
+      } else {
+        message = t('messagesScreen.messages.phoneNotAllowed') || 'Phone numbers are not allowed in messages';
+      }
+
+      Alert.alert(
+        t('common.error') || 'Error',
+        message,
+        [{ text: t('common.ok') || 'OK' }]
+      );
+      return;
+    }
+
+    sendMessage();
   };
 
   const renderSendIcon = props => (

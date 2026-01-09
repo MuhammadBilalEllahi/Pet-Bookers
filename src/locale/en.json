@@ -1191,7 +1191,10 @@
       "failedToSend": "Failed to send message",
       "pleaseRetry": "Please try again",
       "failedToLoad": "Failed to load messages",
-      "unknownError": "Unknown error"
+      "unknownError": "Unknown error",
+      "emailNotAllowed": "Email addresses are not allowed in messages",
+      "phoneNotAllowed": "Phone numbers are not allowed in messages",
+      "emailPhoneNotAllowed": "Email addresses and phone numbers are not allowed in messages"
     },
     "accountEmail": {
       "yourMailIs": "Your email is"

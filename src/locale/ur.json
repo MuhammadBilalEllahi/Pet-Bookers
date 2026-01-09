@@ -993,7 +993,10 @@
       "failedToSend": "پیغام بھیجنے میں ناکام",
       "pleaseRetry": "براہ کرم دوبارہ کوشش کریں",
       "failedToLoad": "پیغامات لوڈ کرنے میں ناکام",
-      "unknownError": "نامعلوم خرابی"
+      "unknownError": "نامعلوم خرابی",
+      "emailNotAllowed": "پیغامات میں ای میل پتے کی اجازت نہیں ہے",
+      "phoneNotAllowed": "پیغامات میں فون نمبرز کی اجازت نہیں ہے",
+      "emailPhoneNotAllowed": "پیغامات میں ای میل پتے اور فون نمبرز کی اجازت نہیں ہے"
     },
     "accountEmail": {
       "yourMailIs": "آپ کا ای میل ہے"
