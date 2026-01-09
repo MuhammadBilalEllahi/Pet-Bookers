@@ -1523,9 +1523,8 @@ export const MyCartScreen = () => {
 
         {/* Render cart boxes grouped by farm */}
         {cartGroups.map((group, index) => renderFarmCartBox(group, index))}
-
         {/* Show payment method restriction notice for physical products */}
-        {cartData.some(item => item.is_living === 1) && (
+        {cartData.some(item => item.is_living === 1 || item.is_living === null) && (
           <View
             style={[
               styles.paymentNotice,

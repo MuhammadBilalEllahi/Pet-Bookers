@@ -1593,7 +1593,8 @@
     "adInactive": "اشتہار غیر فعال"
   },
   "common": {
-    
+    "back": "واپس جائیں",
+    "failedToFetchReviews": "تبصرے لوڈ کرنۺ میں ناکام",
     "english": "انگریزی",
     "urdu": "اردو",
     "item": "آئٹم",

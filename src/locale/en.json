@@ -928,6 +928,9 @@
     "loadingChats": "Loading chats..."
   },
   "common": {
+
+    "back": "Back",
+    "failedToFetchReviews": "Failed to fetch reviews",
     "english": "English",
     "urdu": "Urdu",
     "item": "Item",

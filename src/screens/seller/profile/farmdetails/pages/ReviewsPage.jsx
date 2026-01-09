@@ -50,7 +50,7 @@ export default function ReviewsPage({ navigation }) {
       setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      Alert.alert('Error', 'Failed to fetch reviews');
+      Alert.alert(t('common.error'), t('common.failedToFetchReviews'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -83,10 +83,10 @@ export default function ReviewsPage({ navigation }) {
     <Layout style={[ {height: '100%', backgroundColor: isDark ? theme['color-shadcn-card'] : theme['color-basic-100'] }]}> 
       <View style={styles.modalHeader}>
         <Button appearance="ghost" size="small" onPress={() => navigation.goBack()}>
-          ← Back
+          ← {t('common.back')}
         </Button>
         <Text style={[styles.modalTitle, { color: isDark ? theme['color-shadcn-foreground'] : theme['color-basic-900'] }]}> 
-          Product Reviews ({totalReviews})
+          {t('Product Reviews')} ({totalReviews})
         </Text>
       </View>
 
@@ -138,10 +138,10 @@ export default function ReviewsPage({ navigation }) {
             <ThemedIcon name="star-outline" iconStyle={{ width: 48, height: 48 }} />
             <Text style={[styles.emptyText, { 
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}> No reviews found </Text>
+            }]}> {t('No reviews found')} </Text>
             <Text style={[styles.emptySubtext, { 
               color: isDark ? theme['color-shadcn-muted-foreground'] : theme['color-basic-600']
-            }]}> No product reviews yet </Text>
+            }]}> {t('No product reviews yet')} </Text>
           </View>
         )}
         {loading && reviews.length > 0 && (
