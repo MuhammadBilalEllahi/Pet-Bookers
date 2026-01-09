@@ -6,7 +6,8 @@ import {View, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {axiosBuyerClient} from '../../../utils/axiosClient';
 import {selectLuckyDraws, loadLuckyDraws} from '../../../store/buyersHome';
-import {selectIsSellerAuthenticated} from '../../../store/user';
+import {selectIsSellerAuthenticated, selectIsBuyerAuthenticated} from '../../../store/user';
+import {AppScreens} from '../../../navigators/AppNavigator';
 import LinearGradient from 'react-native-linear-gradient';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import {useTheme} from '../../../theme/ThemeContext';
@@ -131,19 +132,30 @@ export default function LuckyDrawListScreen() {
   const [participationStatus, setParticipationStatus] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const isSellerAuthenticated = useSelector(selectIsSellerAuthenticated);
+  const isBuyerAuthenticated = useSelector(selectIsBuyerAuthenticated);
+  
+  // Only show seller-only message if seller is authenticated but buyer is not
+  const isSellerOnly = isSellerAuthenticated && !isBuyerAuthenticated;
+  // Check if no user is authenticated (neither buyer nor seller)
+  const isNoUserAuthenticated = !isBuyerAuthenticated && !isSellerAuthenticated;
 
   useEffect(() => {
     dispatch(loadLuckyDraws());
   }, [dispatch]);
 
-  // Check participation status for each lucky draw
+  // Check participation status for each lucky draw - only if buyer is authenticated
   useEffect(() => {
-    if (displayLuckyDraws.length > 0) {
+    if (displayLuckyDraws.length > 0 && isBuyerAuthenticated) {
       checkParticipationStatus();
     }
-  }, [displayLuckyDraws]);
+  }, [displayLuckyDraws, isBuyerAuthenticated]);
 
   const checkParticipationStatus = async () => {
+    // Only check participation if buyer is authenticated
+    if (!isBuyerAuthenticated) {
+      return;
+    }
+
     const statusMap = {};
 
     for (const luckyDraw of displayLuckyDraws) {
@@ -309,8 +321,8 @@ export default function LuckyDrawListScreen() {
                 ]}>
                 {item.description}
               </Text>
-              {/* Seller View Only Message */}
-              {isSellerAuthenticated && (
+              {/* Seller View Only Message - Only show if seller is authenticated but buyer is not */}
+              {isSellerOnly && (
                 <View
                   style={[
                     styles.participationStatus,
@@ -387,31 +399,33 @@ export default function LuckyDrawListScreen() {
                 style={[
                   styles.gradientButton,
                   (participationStatus[item.id]?.alreadyParticipated ||
-                    isSellerAuthenticated) &&
+                    isSellerOnly) &&
                     styles.disabledButton,
                 ]}
                 onPress={() => {
-                  if (
+                  if (isNoUserAuthenticated) {
+                    navigation.navigate(AppScreens.LOGIN, {isItSeller: false});
+                  } else if (
                     !participationStatus[item.id]?.alreadyParticipated &&
-                    !isSellerAuthenticated
+                    !isSellerOnly
                   ) {
                     navigation.navigate('LuckyDrawInstance', {luckyDraw: item});
                   }
                 }}
                 activeOpacity={
                   participationStatus[item.id]?.alreadyParticipated ||
-                  isSellerAuthenticated
+                  isSellerOnly
                     ? 1
                     : 0.8
                 }
                 disabled={
                   participationStatus[item.id]?.alreadyParticipated ||
-                  isSellerAuthenticated
+                  isSellerOnly
                 }>
                 <LinearGradient
                   colors={
                     participationStatus[item.id]?.alreadyParticipated ||
-                    isSellerAuthenticated
+                    isSellerOnly
                       ? [theme['color-basic-400'], theme['color-basic-500']]
                       : [
                           theme['color-shadcn-primary'],
@@ -425,17 +439,15 @@ export default function LuckyDrawListScreen() {
                     style={[
                       styles.buttonText,
                       (participationStatus[item.id]?.alreadyParticipated ||
-                        isSellerAuthenticated) &&
+                        isSellerOnly) &&
                         styles.disabledButtonText,
                     ]}>
-                    {
-                      isSellerAuthenticated ? t('luckyDrawListScreen.sellerViewOnly') :
-                    participationStatus[item.id]?.alreadyParticipated
+                    {participationStatus[item.id]?.alreadyParticipated
                       ? t('luckyDrawInstance.form.alreadyParticipated') ||
                         'Already Participated'
-                      : isSellerAuthenticated
-                      ? t('luckyDrawListScreen.sellerViewOnly') ||
-                        'Sellers can view but only participate if logged in as buyer'
+                      : isNoUserAuthenticated
+                      ? t('luckyDrawListScreen.signInAsBuyer') ||
+                        'Sign in as Buyer'
                       : t('luckyDrawListScreen.applyNow')}
                   </Text>
                 </LinearGradient>

@@ -72,7 +72,7 @@ export const MessagesScreen = ({navigation}) => {
             text: t('messagesScreen.authRequired.goBack'),
             onPress: () => navigation.goBack(),
           },
-        ],
+        ]
       );
       return;
     }

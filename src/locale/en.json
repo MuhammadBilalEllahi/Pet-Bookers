@@ -1208,7 +1208,8 @@
     "title": "Lucky Draw",
     "applyNow": "Apply Now",
     "noLuckyDraws": "No lucky draws available at the moment.",
-    "sellerViewOnly": "Sellers can view but only participate if logged in as buyer"
+    "sellerViewOnly": "Sellers can view but only participate if logged in as buyer",
+    "signInAsBuyer": "Sign in as Buyer"
   },
   "luckyDrawInstance": {
     "title": "Lucky Draw",
